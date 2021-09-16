@@ -1,0 +1,1 @@
+bedrockservice start

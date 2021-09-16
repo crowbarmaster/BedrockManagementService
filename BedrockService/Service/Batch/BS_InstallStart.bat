@@ -1,0 +1,2 @@
+bedrockservice install
+bedrockservice start

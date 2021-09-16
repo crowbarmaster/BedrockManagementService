@@ -1,0 +1,2 @@
+bedrockservice stop
+bedrockservice uninstall
