@@ -281,7 +281,7 @@ namespace BedrockService.Service
             {
                 if (Directory.Exists(server.ServerPath.Value))
                     DeleteFilesRecursively(new DirectoryInfo(server.ServerPath.Value));
-                ZipFile.ExtractToDirectory($@"{Program.ServiceDirectory}\Server\MCSFiles\Update.zip", server.ServerPath.Value);
+                ZipFile.ExtractToDirectory($@"{Program.ServiceDirectory}\Server\MCSFiles\Update_{server.ServerVersion}.zip", server.ServerPath.Value);
                 if (server.ServerExeName.Value != "bedrock_server.exe")
                     File.Copy(server.ServerPath.Value + "\\bedrock_server.exe", server.ServerPath.Value + "\\" + server.ServerExeName.Value);
             }
@@ -310,7 +310,7 @@ namespace BedrockService.Service
                 if (!Updater.CheckUpdates().Result)
                 {
                     InstanceProvider.GetServiceLogger().AppendLine("Checking for updates at init failed.");
-                    if(!File.Exists($@"{Program.ServiceDirectory}\Server\MCSFiles\Update.zip"))
+                    if(File.Exists($@"{Program.ServiceDirectory}\Server\MCSFiles\bedrock_ver.ini") && !File.Exists($@"{Program.ServiceDirectory}\Server\MCSFiles\Update_{File.ReadAllText($@"{Program.ServiceDirectory}\Server\MCSFiles\bedrock_ver.ini")}.zip"))
                         InstanceProvider.GetServiceLogger().AppendLine("An update package was not found. Execution may fail if this is first run!");
                 }
                 return true;
