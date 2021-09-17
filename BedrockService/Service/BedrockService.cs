@@ -20,10 +20,6 @@ namespace BedrockService.Service
 {
     public class BedrockService : HostInfo, ServiceControl
     {
-        public List<BedrockServer> bedrockServers = new List<BedrockServer>();
-        readonly LogWriter _log = HostLogger.Get<BedrockService>();
-        public HostControl _hostControl;
-
         public enum ServiceStatus
         {
             Stopped,
@@ -31,21 +27,21 @@ namespace BedrockService.Service
             Started,
             Stopping
         }
-
+        public List<BedrockServer> bedrockServers = new List<BedrockServer>();
+        public HostControl _hostControl;
         public ServiceStatus CurrentServiceStatus;
         private System.Timers.Timer updaterTimer;
         private System.Timers.Timer cronTimer;
-        readonly CrontabSchedule shed;
-        Thread TCPServerThread;
-        private CrontabSchedule updater;
-        readonly TCPListener ClientHost = new TCPListener();
+        private readonly CrontabSchedule shed;
+        private Thread TCPServerThread;
+        private readonly CrontabSchedule updater;
+        private readonly TCPListener ClientHost = new TCPListener();
 
         public BedrockService()
         {
             CurrentServiceStatus = ServiceStatus.Starting;
             if (LoadInit())
             {
-                //Program.ServiceLogger = new Program.ServiceLogger(localHost);
                 TCPServerThread = new Thread(new ThreadStart(ClientHostThread));
                 TCPServerThread.Start();
                 try
@@ -79,77 +75,11 @@ namespace BedrockService.Service
                 }
             }
         }
-
-        /// <summary>
-        /// A utility class to determine a process parent.
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct ParentProcessUtilities
-        {
-            // These members must match PROCESS_BASIC_INFORMATION
-            internal IntPtr Reserved1;
-            internal IntPtr PebBaseAddress;
-            internal IntPtr Reserved2_0;
-            internal IntPtr Reserved2_1;
-            internal IntPtr UniqueProcessId;
-            internal IntPtr InheritedFromUniqueProcessId;
-
-            [DllImport("ntdll.dll")]
-            private static extern int NtQueryInformationProcess(IntPtr processHandle, int processInformationClass, ref ParentProcessUtilities processInformation, int processInformationLength, out int returnLength);
-
-            /// <summary>
-            /// Gets the parent process of the current process.
-            /// </summary>
-            /// <returns>An instance of the Process class.</returns>
-            public static Process GetParentProcess()
-            {
-                return GetParentProcess(Process.GetCurrentProcess().Handle);
-            }
-
-            /// <summary>
-            /// Gets the parent process of specified process.
-            /// </summary>
-            /// <param name="id">The process id.</param>
-            /// <returns>An instance of the Process class.</returns>
-            public static Process GetParentProcess(int id)
-            {
-                Process process = Process.GetProcessById(id);
-                return GetParentProcess(process.Handle);
-            }
-
-            /// <summary>
-            /// Gets the parent process of a specified process.
-            /// </summary>
-            /// <param name="handle">The process handle.</param>
-            /// <returns>An instance of the Process class.</returns>
-            public static Process GetParentProcess(IntPtr handle)
-            {
-                ParentProcessUtilities pbi = new ParentProcessUtilities();
-                int status = NtQueryInformationProcess(handle, 0, ref pbi, Marshal.SizeOf(pbi), out int returnLength);
-                if (status != 0)
-                    throw new Win32Exception(status);
-
-                try
-                {
-                    return Process.GetProcessById(pbi.InheritedFromUniqueProcessId.ToInt32());
-                }
-                catch (ArgumentException)
-                {
-                    // not found
-                    return null;
-                }
-            }
-        }
-
         private void ClientHostThread()
         {
             try
             {
                 ClientHost.StartListening(int.Parse((string)InstanceProvider.GetHostInfo().GetGlobalValue("ClientPort")));
-                InstanceProvider.GetServiceLogger().AppendLine("Before process.WaitForExit()");
-                ParentProcessUtilities.GetParentProcess().WaitForExit();
-                InstanceProvider.GetServiceLogger().AppendLine("After process.WaitForExit()");
-
                 InstanceProvider.GetServiceLogger().AppendLine("Stop socket service");
                 ClientHost.client.Close();
                 GC.Collect();
@@ -180,7 +110,7 @@ namespace BedrockService.Service
             }
             catch (Exception ex)
             {
-                _log.Error("Error in BackupTimer_Elapsed", ex);
+                InstanceProvider.GetServiceLogger().AppendLine($"Error in BackupTimer_Elapsed {ex}");
             }
         }
 
@@ -213,7 +143,7 @@ namespace BedrockService.Service
             }
             catch (Exception ex)
             {
-                _log.Error("Error in UpdateTimer_Elapsed", ex);
+                InstanceProvider.GetServiceLogger().AppendLine($"Error in UpdateTimer_Elapsed {ex}");
             }
         }
 
@@ -284,7 +214,7 @@ namespace BedrockService.Service
                 {
                     _hostControl.RequestAdditionalTime(TimeSpan.FromSeconds(30));
                     brs.CurrentServerStatus = BedrockServer.ServerStatus.Starting;
-                    brs.StartWatchdog(hostControl);
+                    brs.StartWatchdog(_hostControl);
                     Thread.Sleep(2000);
                 }
                 return true;
@@ -299,6 +229,7 @@ namespace BedrockService.Service
         private void ValidSettingsCheck()
         {
             bool validating = true;
+            bool dupedSettingsFound = false;
             while (validating)
             {
                 if (InstanceProvider.GetHostInfo().GetServerInfos().Count() < 1)
@@ -315,11 +246,15 @@ namespace BedrockService.Service
                             {
                                 if (server.ServerExeName.Equals(compareServer.ServerExeName) || server.ServerPath.Equals(compareServer.ServerPath) || server.GetServerProp("server-port").Value.Equals(compareServer.GetServerProp("server-port").Value) || server.GetServerProp("server-portv6").Value.Equals(compareServer.GetServerProp("server-portv6").Value) || server.GetServerProp("server-name").Value.Equals(compareServer.GetServerProp("server-name").Value))
                                 {
-                                    InstanceProvider.GetServiceLogger().AppendLine($"Duplicate server settings detected for: {server.ServerName}");
+                                    InstanceProvider.GetServiceLogger().AppendLine($"Duplicate server settings between servers {server.ServerName} and {compareServer}.");
+                                    dupedSettingsFound = true;
                                 }
                             }
                         }
                     }
+                    if (dupedSettingsFound)
+                        throw new Exception("Duplicate settings found! Check logs.");
+
                     foreach (var server in InstanceProvider.GetHostInfo().GetServerInfos())
                     {
                         if (Updater.VersionChanged)
@@ -330,13 +265,6 @@ namespace BedrockService.Service
                         {
                             File.Copy(server.ServerPath.Value + "\\bedrock_server.exe", server.ServerPath.Value + "\\" + server.ServerExeName.Value);
                         }
-
-                        if (!File.Exists(server.ServerPath.Value + "\\" + server.ServerExeName.Value))
-                        {
-                            ReplaceBuild(server);
-                        }
-
-
                     }
                     if (Updater.VersionChanged)
                         Updater.VersionChanged = false;
@@ -356,8 +284,6 @@ namespace BedrockService.Service
                 ZipFile.ExtractToDirectory($@"{Program.ServiceDirectory}\Server\MCSFiles\Update.zip", server.ServerPath.Value);
                 if (server.ServerExeName.Value != "bedrock_server.exe")
                     File.Copy(server.ServerPath.Value + "\\bedrock_server.exe", server.ServerPath.Value + "\\" + server.ServerExeName.Value);
-                InstanceProvider.GetConfigManager().WriteJSONFiles(server);
-                InstanceProvider.GetConfigManager().SaveServerProps(server, false);
             }
             catch (Exception e)
             {
@@ -381,9 +307,15 @@ namespace BedrockService.Service
         {
             if (InstanceProvider.GetConfigManager().LoadConfigs())
             {
-                _ = Updater.CheckUpdates();
+                if (!Updater.CheckUpdates().Result)
+                {
+                    InstanceProvider.GetServiceLogger().AppendLine("Checking for updates at init failed.");
+                    if(!File.Exists($@"{Program.ServiceDirectory}\Server\MCSFiles\Update.zip"))
+                        InstanceProvider.GetServiceLogger().AppendLine("An update package was not found. Execution may fail if this is first run!");
+                }
+                return true;
             }
-            return true;
+            return false;
         }
     }
 }
