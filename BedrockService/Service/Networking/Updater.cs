@@ -53,8 +53,8 @@ namespace BedrockService.Service.Networking
                     VersionChanged = true;
                     FetchBuild(downloadPath, version).Wait();
                     File.WriteAllText($@"{Program.ServiceDirectory}\Server\bedrock_ver.ini", version);
-                    return true;
                 }
+                return true;
             }
             else
             {
@@ -63,7 +63,6 @@ namespace BedrockService.Service.Networking
                 File.WriteAllText($@"{Program.ServiceDirectory}\Server\bedrock_ver.ini", version);
                 return true;
             }
-            return false;
         }
 
         private static async Task<string> FetchHTTPContent(HttpClient client)
@@ -92,9 +91,9 @@ namespace BedrockService.Service.Networking
             }
             if (File.Exists(ZipDir))
             {
-                File.Delete(ZipDir);
+                return;
             }
-            if ((string)InstanceProvider.GetHostInfo().GetGlobalValue("AcceptedMojangLic") == "false")
+            if (InstanceProvider.GetHostInfo().GetGlobalValue("AcceptedMojangLic") == "false")
             {
                 InstanceProvider.GetServiceLogger().AppendLine("------First time download detected------\n");
                 InstanceProvider.GetServiceLogger().AppendLine("You will need to agree to the Minecraft End User License Agreement");
