@@ -22,7 +22,6 @@ namespace BedrockService.Service
             {
                 x.SetStartTimeout(TimeSpan.FromSeconds(10));
                 x.SetStopTimeout(TimeSpan.FromSeconds(10));
-                //x.UseLog4Net();
                 x.UseAssemblyInfoForServiceInfo();
                 x.Service(settings => InstanceProvider.GetBedrockService(), s =>
                 {

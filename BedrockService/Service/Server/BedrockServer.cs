@@ -195,6 +195,7 @@ namespace BedrockService.Service.Server
                     hostController.RequestAdditionalTime(TimeSpan.FromSeconds(30));
                     StartControl(hostController);
                     InstanceProvider.GetServiceLogger().AppendLine($"Recieved start signal for server {serverInfo.ServerName}.");
+                    Thread.Sleep(1500);
                 }
                 while (MonitoredAppExists(appName) && CurrentServerStatus == ServerStatus.Started)
                 {
