@@ -5,6 +5,7 @@ using BedrockService.Service.Server.HostInfoClasses;
 using BedrockService.Service.Server.Logging;
 using BedrockService.Utilities;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -19,6 +20,7 @@ namespace BedrockService.Client.Networking
         public NetworkStream stream;
         public bool Connected;
         public bool EnableRead;
+        public bool PlayerInfoArrived;
         public Thread ClientReciever;
         public Thread HeartbeatThread;
         private int heartbeatFailTimeout;
@@ -122,8 +124,6 @@ namespace BedrockService.Client.Networking
                                             Console.WriteLine($"Error: ConnectMan reported error: {e.Message}\n{e.StackTrace}");
                                         }
                                         break;
-                                    case NetworkMessageTypes.Disconnect:
-                                        break;
                                     case NetworkMessageTypes.Heartbeat:
                                         heartbeatRecieved = true;
                                         if (!HeartbeatThread.IsAlive)
@@ -135,7 +135,6 @@ namespace BedrockService.Client.Networking
                                             Thread.Sleep(500);
                                         }
                                         break;
-
                                 }
                                 break;
                             case NetworkMessageSource.Server:
@@ -170,7 +169,18 @@ namespace BedrockService.Client.Networking
                                         }
                                         break;
                                     case NetworkMessageTypes.Backup:
+
                                         Console.WriteLine(msgStatus.ToString());
+
+                                        break;
+                                    case NetworkMessageTypes.PlayersRequest:
+
+                                        string[] dataSplit = data.Split(';');
+                                        JsonParser deserialized = JsonParser.Deserialize(dataSplit[1]);
+                                        List<Player> fetchedPlayers = (List<Player>)deserialized.Value.ToObject(typeof(List<Player>));
+                                        MainWindow.connectedHost.GetServerInfos().First(srv => srv.ServerName == dataSplit[0]).KnownPlayers = fetchedPlayers;
+                                        PlayerInfoArrived = true;
+
                                         break;
                                 }
                                 break;

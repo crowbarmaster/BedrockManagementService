@@ -1,6 +1,12 @@
 ﻿using BedrockService.Service.Server.HostInfoClasses;
 using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
+using System.Linq;
+using BedrockService.Utilities;
+using System.Text;
+using BedrockService.Service;
+using BedrockService.Client.Management;
 
 namespace BedrockService.Client.Forms
 {
@@ -8,53 +14,123 @@ namespace BedrockService.Client.Forms
     {
         private readonly ServerInfo Server;
         private readonly string[] RegisteredPlayerColumnArray = new string[] { "XUID:", "Username:", "Permission:", "Whitelisted:", "Ignores max players:", "First connected on:", "Last connected on:", "Time spent in game:" };
-        private readonly string[] KnownPlayerColumnArray = new string[] { "XUID:", "Username:", "Registered status:", "First connected on:", "Last connected on:", "Time spent in game:" };
+        private List<Player> playersFound = new List<Player>();
+        private List<Player> modifiedPlayers = new List<Player>();
+        private Player playerToEdit;
 
         public PlayerManagerForm(ServerInfo server)
         {
             InitializeComponent();
             Server = server;
-            tabPage1.Text = "Registered players";
-            tabPage2.Text = "Known players";
-            tabControl.SelectedTab = tabPage1;
+            playersFound = Server.KnownPlayers;
 
-            tabPage1.Enter += TabPage1_Enter;
-            tabPage2.Enter += TabPage2_Enter;
-        }
-
-        private void TabPage1_Enter(object sender, EventArgs e)
-        {
             gridView.Columns.Clear();
             gridView.Rows.Clear();
             foreach (string s in RegisteredPlayerColumnArray)
             {
                 gridView.Columns.Add(s.Replace(" ", "").Replace(":", ""), s);
             }
-            foreach (Player player in Server.KnownPlayers)
+            RefreshGridContents();
+        }
+
+        private void RefreshGridContents()
+        {
+            gridView.Rows.Clear();
+            foreach (Player player in playersFound)
             {
                 TimeSpan timeSpent = TimeSpan.FromTicks(long.Parse(player.LastDisconnectTime) - long.Parse(player.LastConnectedTime));
                 string[] list = new string[] { player.XUID, player.Username, player.PermissionLevel, player.Whitelisted.ToString(), player.IgnorePlayerLimits.ToString(), player.FirstConnectedTime, player.LastConnectedTime, timeSpent.ToString("hhmmss") };
-                if (player.FromConfig)
-                    gridView.Rows.Add(list);
+                gridView.Rows.Add(list);
             }
             gridView.Refresh();
         }
 
-        private void TabPage2_Enter(object sender, EventArgs e)
+        private void saveBtn_Click(object sender, EventArgs e)
         {
-            gridViewKnown.Columns.Clear();
-            gridViewKnown.Rows.Clear();
-            foreach (string s in KnownPlayerColumnArray)
+            if(modifiedPlayers.Count > 0)
             {
-                gridViewKnown.Columns.Add(s.Replace(" ", "").Replace(":", ""), s);
+                foreach(Player player in modifiedPlayers)
+                {
+                    Player replacedPlayer = Server.KnownPlayers.First(x => x.XUID == player.XUID);
+                    Server.KnownPlayers.Remove(replacedPlayer);
+                    Server.KnownPlayers.Add(player);
+                }
             }
-            foreach (Player player in Server.KnownPlayers)
+            byte[] sendBytes = Encoding.UTF8.GetBytes($"{Server.ServerName};{JsonParser.Serialize(JsonParser.FromValue(modifiedPlayers))}");
+            FormManager.GetTCPClient.SendData(sendBytes, Service.Networking.NetworkMessageSource.Client, Service.Networking.NetworkMessageDestination.Server, Service.Networking.NetworkMessageTypes.PlayersUpdate);
+            Close();
+            Dispose();
+        }
+
+        private void searchEntryBox_TextChanged(object sender, EventArgs e)
+        {
+            playersFound = Server.KnownPlayers;
+            string curText = searchEntryBox.Text;
+            List<Player> tempList = new List<Player>();
+            string[] splitCommands;
+            string cmd;
+            string value;
+
+            if (curText.Contains(":"))
             {
-                TimeSpan timeSpent = TimeSpan.FromTicks(long.Parse(player.LastDisconnectTime) - long.Parse(player.LastConnectedTime));
-                string[] list = new string[] { player.XUID, player.Username, player.FromConfig.ToString(), player.FirstConnectedTime, player.LastConnectedTime, timeSpent.ToString("hhmmss") };
-                gridViewKnown.Rows.Add(list);
+                splitCommands = curText.Split(',');
+                if (splitCommands.Length > 1)
+                {
+                    foreach(string s in splitCommands)
+                    {
+                        if (s.Contains(":"))
+                        {
+                            string[] finalSplit = s.Split(':');
+                            cmd = finalSplit[0];
+                            value = finalSplit[1];
+                            tempList = new List<Player>();
+                            foreach(Player player in playersFound)
+                            {
+                                if (player.CommandStringTranslator(cmd).Contains(value))
+                                {
+                                    tempList.Add(player);
+                                }
+                            }
+                            playersFound = tempList;
+                            gridView.Refresh();
+                        }
+                    }
+                }
+                splitCommands = curText.Split(':');
+                cmd = splitCommands[0];
+                value = splitCommands[1];
+                foreach (Player player in playersFound)
+                {
+                    if (player.CommandStringTranslator(cmd).Contains(value))
+                    {
+                        tempList.Add(player);
+                    }
+                }
+                playersFound = tempList;
+                gridView.Refresh();
+                RefreshGridContents();
             }
-            gridViewKnown.Refresh();
+        }
+
+        private void gridView_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+        {
+            DataGridViewRow focusedRow = gridView.Rows[e.RowIndex];
+            playerToEdit = Server.KnownPlayers.First(p => p.XUID == (string)focusedRow.Cells[0].Value);
+        }
+
+        private void gridView_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            DataGridViewRow focusedRow = gridView.Rows[e.RowIndex];
+            if ((string)focusedRow.Cells[0].Value != playerToEdit.XUID || (string)focusedRow.Cells[1].Value != playerToEdit.Username || (string)focusedRow.Cells[2].Value != playerToEdit.PermissionLevel || (string)focusedRow.Cells[3].Value != playerToEdit.Whitelisted.ToString() || (string)focusedRow.Cells[4].Value != playerToEdit.IgnorePlayerLimits.ToString())
+            {
+                playerToEdit.XUID = (string)focusedRow.Cells[0].Value;
+                playerToEdit.Username = (string)focusedRow.Cells[1].Value;
+                playerToEdit.PermissionLevel = (string)focusedRow.Cells[2].Value;
+                playerToEdit.Whitelisted = bool.Parse((string)focusedRow.Cells[3].Value);
+                playerToEdit.IgnorePlayerLimits = bool.Parse((string)focusedRow.Cells[4].Value);
+                playerToEdit.FromConfig = true;
+                modifiedPlayers.Add(playerToEdit);
+            }
         }
     }
 }

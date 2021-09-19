@@ -201,6 +201,12 @@ namespace BedrockService.Client.Forms
 
         private void PlayerManager_Click(object sender, EventArgs e)
         {
+            FormManager.GetTCPClient.SendData(Encoding.UTF8.GetBytes(selectedServer.ServerName), NetworkMessageSource.Client, NetworkMessageDestination.Server, NetworkMessageTypes.PlayersRequest);
+            while (!FormManager.GetTCPClient.PlayerInfoArrived)
+            {
+                Thread.Sleep(100);
+            }
+            FormManager.GetTCPClient.PlayerInfoArrived = false;
             PlayerManagerForm form = new PlayerManagerForm(selectedServer);
             form.Show();
         }
