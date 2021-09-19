@@ -21,7 +21,7 @@ namespace BedrockService.Service.Server.Management
             }
             else
             {
-                playerFound = new Player(xuid, username)
+                playerFound = new Player(xuid, username, serverInstance.ServerPropList.FirstOrDefault(k => k.KeyName == "default-player-permission-level").Value)
                 {
                     FirstConnectedTime = DateTime.Now.Ticks.ToString()
             };
@@ -51,7 +51,7 @@ namespace BedrockService.Service.Server.Management
             }
             else
             {
-                playerFound = new Player(xuid, username)
+                playerFound = new Player(xuid, username, serverInstance.ServerPropList.FirstOrDefault(k => k.KeyName == "default-player-permission-level").Value)
                 {
                     PermissionLevel = permission,
                     Whitelisted = bool.Parse(whitelisted),

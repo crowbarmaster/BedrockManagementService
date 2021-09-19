@@ -17,6 +17,7 @@ namespace BedrockService.Service.Server.HostInfoClasses
         public Property MaxBackupCount { get; set; }
         public Property AdvancedBackup { get; set; }
         public Property LogToFileEnabled { get; set; }
+
         public List<Player> KnownPlayers = new List<Player>();
         public List<Property> ServerPropList = new List<Property>();
         public List<StartCmdEntry> StartCmds = new List<StartCmdEntry>();

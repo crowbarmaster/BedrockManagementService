@@ -197,7 +197,7 @@ namespace BedrockService.Service.Management
                     continue;
                 string[] split = entry.Split(',');
                 InstanceProvider.GetServiceLogger().AppendLine($"Server \"{server.ServerName}\" Loaded known player: {split[1]}");
-                server.KnownPlayers.Add(new Player(split[0], split[1], split[2], split[3], split[4]));
+                server.KnownPlayers.Add(new Player(split[0], split[1], split[2], split[3], split[4], server.GetServerProp("default-player-permission-level").Value));
             }
             return server;
         }
@@ -209,7 +209,7 @@ namespace BedrockService.Service.Management
                 string filePath = $@"{configDir}\{server.ServerName}.playerdb";
                 if (File.Exists(filePath))
                 {
-                    File.Copy(filePath, $@"{configDir}\{server.ServerName}_{DateTime.Now.ToString("mmddyyhhmmssff")}.dbbak", true);
+                    File.Copy(filePath, $@"{configDir}\Backups\{server.ServerName}_{DateTime.Now.ToString("mmddyyhhmmssff")}.dbbak", true);
                 }
                 TextWriter writer = new StreamWriter(filePath);
                 foreach (Player entry in server.KnownPlayers)
@@ -228,12 +228,17 @@ namespace BedrockService.Service.Management
                 string filePath = $@"{configDir}\{server.ServerName}.players";
                 if (File.Exists(filePath))
                 {
-                    File.Copy(filePath, $@"{configDir}\{server.ServerName}_{DateTime.Now.ToString("mmddyyhhmmssff")}.bak", true);
+                    File.Copy(filePath, $@"{configDir}\Backups\{server.ServerName}_{DateTime.Now.ToString("mmddyyhhmmssff")}.bak", true);
                 }
                 TextWriter writer = new StreamWriter(filePath);
+                writer.WriteLine("# Registered player list");
+                writer.WriteLine("# Register player entries: PlayerEntry=xuid,username,permission,isWhitelisted,ignoreMaxPlayers");
+                writer.WriteLine("# Example: 1234111222333444,TestUser,visitor,false,false");
+                writer.WriteLine("");
                 foreach (Player entry in server.KnownPlayers)
                 {
-                    writer.WriteLine($"{entry.XUID},{entry.Username},{entry.FirstConnectedTime},{entry.LastConnectedTime},{entry.LastDisconnectTime}");
+                    if(entry.Whitelisted || entry.PermissionLevel != server.GetServerProp("default-player-permission-level").Value)
+                        writer.WriteLine($"{entry.XUID},{entry.Username},{entry.PermissionLevel},{entry.Whitelisted},{entry.IgnorePlayerLimits}");
                 }
                 writer.Flush();
                 writer.Close();
@@ -248,12 +253,12 @@ namespace BedrockService.Service.Management
 
             foreach (Player player in server.KnownPlayers)
             {
-                if (player.FromConfig)
+                if (player.FromConfig && player.Whitelisted)
                 {
                     sb.Append("\t{\n");
-                    sb.Append($"\t\t\"ignoresPlayerLimit\": {player.IgnorePlayerLimits}\n");
+                    sb.Append($"\t\t\"ignoresPlayerLimit\": {player.IgnorePlayerLimits.ToString().ToLower()},\n");
                     sb.Append($"\t\t\"name\": \"{player.Username}\",\n");
-                    sb.Append($"\t\t\"xuid\": \"{player.XUID}\",\n");
+                    sb.Append($"\t\t\"xuid\": \"{player.XUID}\"\n");
                     sb.Append("\t},\n");
                 }
             }
@@ -270,7 +275,7 @@ namespace BedrockService.Service.Management
 
             foreach (Player player in server.KnownPlayers)
             {
-                if (player.FromConfig)
+                if (player.FromConfig && server.GetServerProp("default-player-permission-level").Value != player.PermissionLevel)
                 {
                     sb.Append("\t{\n");
                     sb.Append($"\t\t\"permission\": \"{player.PermissionLevel}\",\n");

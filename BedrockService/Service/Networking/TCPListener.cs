@@ -121,6 +121,36 @@ namespace BedrockService.Service.Networking
                                         InstanceProvider.GetServiceLogger().AppendLine($"Sent command {dataSplit[1]} to stdInput stream");
 
                                         break;
+                                    case NetworkMessageTypes.PlayersRequest:
+
+                                        ServerInfo server = InstanceProvider.GetBedrockServer(data).serverInfo;
+                                        string jsonString = $"{data};{JsonParser.Serialize(JsonParser.FromValue(server.KnownPlayers))}";
+                                        SendData(Encoding.UTF8.GetBytes(jsonString), NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.PlayersRequest);
+
+                                        break;
+                                    case NetworkMessageTypes.PlayersUpdate:
+
+                                        dataSplit = data.Split(';');
+                                        JsonParser deserialized = JsonParser.Deserialize(dataSplit[1]);
+                                        List<Player> fetchedPlayers = (List<Player>)deserialized.Value.ToObject(typeof(List<Player>));
+                                        List<Player> known = InstanceProvider.GetBedrockServer(dataSplit[0]).serverInfo.KnownPlayers;
+                                        foreach (Player player in fetchedPlayers)
+                                        {
+                                            try
+                                            {
+                                                Player playerFound = InstanceProvider.GetBedrockServer(dataSplit[0]).serverInfo.KnownPlayers.First(p => p.XUID == player.XUID);
+                                                if (player != playerFound)
+                                                    InstanceProvider.GetBedrockServer(dataSplit[0]).serverInfo.KnownPlayers[InstanceProvider.GetBedrockServer(dataSplit[0]).serverInfo.KnownPlayers.IndexOf(playerFound)] = player;
+                                            }
+                                            catch (Exception)
+                                            {
+                                                InstanceProvider.GetBedrockServer(dataSplit[0]).serverInfo.KnownPlayers.Add(player);
+                                            }
+                                        }
+                                        InstanceProvider.GetConfigManager().SaveRegisteredPlayers(InstanceProvider.GetBedrockServer(dataSplit[0]).serverInfo);
+                                        RestartServer(dataSplit[0], false);
+
+                                        break;
                                 }
                                 break;
                             case NetworkMessageDestination.Service:
@@ -342,25 +372,10 @@ namespace BedrockService.Service.Networking
             return false;
         }
 
-        public bool SendData(NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type)
-        {
-            if (SendData(new byte[0], source, destination, type, NetworkMessageStatus.None))
-                return true;
-            return false;
-        }
+        public bool SendData(NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type) => SendData(new byte[0], source, destination, type, NetworkMessageStatus.None);
 
-        public bool SendData(byte[] bytes, NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type)
-        {
-            if (SendData(bytes, source, destination, type, NetworkMessageStatus.None))
-                return true;
-            return false;
-        }
+        public bool SendData(byte[] bytes, NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type) => SendData(bytes, source, destination, type, NetworkMessageStatus.None);
 
-        public bool SendData(NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type, NetworkMessageStatus status)
-        {
-            if (SendData(new byte[0], source, destination, type, status))
-                return true;
-            return false;
-        }
+        public bool SendData(NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type, NetworkMessageStatus status) => SendData(new byte[0], source, destination, type, status);
     }
 }

@@ -20,13 +20,14 @@ namespace BedrockService.Service.Server.HostInfoClasses
         public bool IgnorePlayerLimits { get; set; }
         public bool FromConfig { get; set; }
 
-        public Player(string xuid, string username, string firstConn, string lastConn, string lastDiscon)
+        public Player(string xuid, string username, string firstConn, string lastConn, string lastDiscon, string serverDefaultPermission)
         {
             Username = username;
             XUID = xuid;
             FirstConnectedTime = firstConn;
             LastConnectedTime = lastConn;
             LastDisconnectTime = lastDiscon;
+            PermissionLevel = serverDefaultPermission;
         }
 
         [JsonConstructor]
@@ -42,10 +43,26 @@ namespace BedrockService.Service.Server.HostInfoClasses
             IgnorePlayerLimits = ignoreLimit;
         }
 
-        public Player(string xuid, string username)
+        public Player(string xuid, string username, string serverDefaultPermission)
         {
             Username = username;
             XUID = xuid;
+            PermissionLevel = serverDefaultPermission;
+        }
+
+        public string CommandStringTranslator (string input)
+        {
+            if (input == "name" || input == "username" || input == "un")
+                return Username;
+            if (input == "xuid" || input == "id")
+                return XUID;
+            if (input == "perm" || input == "permission" || input == "pl")
+                return PermissionLevel;
+            if (input == "whitelist" || input == "white" || input == "wl")
+                return Whitelisted.ToString();
+            if (input == "ignoreslimit" || input == "il")
+                return IgnorePlayerLimits.ToString();
+            return null;
         }
     }
 

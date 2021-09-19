@@ -11,7 +11,7 @@ using Topshelf;
 
 namespace BedrockService.Service.Server
 {
-    public class BedrockServer : ServerInfo
+    public class BedrockServer
     {
         Process process;
         public StreamWriter StdInStream;
@@ -86,6 +86,8 @@ namespace BedrockService.Service.Server
         {
             hostController = hostControl;
             string appName = serverInfo.ServerExeName.Value.Substring(0, serverInfo.ServerExeName.Value.Length - 4);
+            InstanceProvider.GetConfigManager().WriteJSONFiles(serverInfo);
+            InstanceProvider.GetConfigManager().SaveServerProps(serverInfo, false);
 
             try
             {
@@ -231,41 +233,44 @@ namespace BedrockService.Service.Server
         private void StdOutToLog(object sender, DataReceivedEventArgs e)
         {
             serverInfo.ConsoleBuffer = serverInfo.ConsoleBuffer ?? new ServerLogger(serverInfo.LogToFileEnabled.Value == "true", serverInfo.ServerName);
-            serverInfo.ConsoleBuffer.Append($"{serverInfo.ServerName}: {e.Data}\r\n");
-            if (e.Data != null)
+            if (e.Data != "[INFO] Running AutoCompaction...")
             {
-                string dataMsg = e.Data;
-                if (dataMsg.Contains(startupMessage))
+                serverInfo.ConsoleBuffer.Append($"{serverInfo.ServerName}: {e.Data}\r\n");
+                if (e.Data != null)
                 {
-                    CurrentServerStatus = ServerStatus.Started;
-                    Thread.Sleep(1000);
-
-                    if (serverInfo.StartCmds.Count > 0)
+                    string dataMsg = e.Data;
+                    if (dataMsg.Contains(startupMessage))
                     {
-                        RunStartupCommands();
+                        CurrentServerStatus = ServerStatus.Started;
+                        Thread.Sleep(1000);
+
+                        if (serverInfo.StartCmds.Count > 0)
+                        {
+                            RunStartupCommands();
+                        }
                     }
-                }
-                if (dataMsg.Contains("[INFO] Player connected"))
-                {
-                    int usernameStart = dataMsg.IndexOf(':') + 2;
-                    int usernameEnd = dataMsg.IndexOf(',');
-                    int usernameLength = usernameEnd - usernameStart;
-                    int xuidStart = dataMsg.IndexOf(':', usernameEnd) + 2;
-                    string username = dataMsg.Substring(usernameStart, usernameLength);
-                    string xuid = dataMsg.Substring(xuidStart, dataMsg.Length - xuidStart);
-                    Console.WriteLine($"Player {username} connected with XUID: {xuid}");
-                    InstanceProvider.GetPlayerManager().PlayerConnected(username, xuid, serverInfo);
-                }
-                if (dataMsg.Contains("[INFO] Player disconnected"))
-                {
-                    int usernameStart = dataMsg.IndexOf(':') + 2;
-                    int usernameEnd = dataMsg.IndexOf(',');
-                    int usernameLength = usernameEnd - usernameStart;
-                    int xuidStart = dataMsg.IndexOf(':', usernameEnd) + 2;
-                    string username = dataMsg.Substring(usernameStart, usernameLength);
-                    string xuid = dataMsg.Substring(xuidStart, dataMsg.Length - xuidStart);
-                    Console.WriteLine($"Player {username} disconnected with XUID: {xuid}");
-                    InstanceProvider.GetPlayerManager().PlayerDisconnected(xuid, serverInfo);
+                    if (dataMsg.StartsWith("[INFO] Player connected"))
+                    {
+                        int usernameStart = dataMsg.IndexOf(':') + 2;
+                        int usernameEnd = dataMsg.IndexOf(',');
+                        int usernameLength = usernameEnd - usernameStart;
+                        int xuidStart = dataMsg.IndexOf(':', usernameEnd) + 2;
+                        string username = dataMsg.Substring(usernameStart, usernameLength);
+                        string xuid = dataMsg.Substring(xuidStart, dataMsg.Length - xuidStart);
+                        Console.WriteLine($"Player {username} connected with XUID: {xuid}");
+                        InstanceProvider.GetPlayerManager().PlayerConnected(username, xuid, serverInfo);
+                    }
+                    if (dataMsg.StartsWith("[INFO] Player disconnected"))
+                    {
+                        int usernameStart = dataMsg.IndexOf(':') + 2;
+                        int usernameEnd = dataMsg.IndexOf(',');
+                        int usernameLength = usernameEnd - usernameStart;
+                        int xuidStart = dataMsg.IndexOf(':', usernameEnd) + 2;
+                        string username = dataMsg.Substring(usernameStart, usernameLength);
+                        string xuid = dataMsg.Substring(xuidStart, dataMsg.Length - xuidStart);
+                        Console.WriteLine($"Player {username} disconnected with XUID: {xuid}");
+                        InstanceProvider.GetPlayerManager().PlayerDisconnected(xuid, serverInfo);
+                    }
                 }
             }
         }

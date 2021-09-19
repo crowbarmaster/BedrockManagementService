@@ -21,6 +21,8 @@
         Disconnect,
         ConsoleLogUpdate,
         PropUpdate,
+        PlayersRequest,
+        PlayersUpdate,
         Command,
         Backup,
         Restart,

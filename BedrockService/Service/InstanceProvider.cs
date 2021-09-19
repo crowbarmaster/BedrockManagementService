@@ -32,7 +32,11 @@ namespace BedrockService.Service
             return bedrockService;
         }
 
-        public static BedrockServer GetBedrockServer(string serverName) => GetBedrockService().bedrockServers.FirstOrDefault(srv => srv.serverInfo.ServerName == serverName);
+        public static BedrockServer GetBedrockServer(string serverName)
+        {
+            BedrockServer serverFound = GetBedrockService().bedrockServers.First(srv => srv.serverInfo.ServerName == serverName);
+            return serverFound;
+        }
 
         public static HostInfo GetHostInfo()
         {
