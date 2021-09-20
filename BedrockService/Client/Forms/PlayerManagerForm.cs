@@ -13,7 +13,7 @@ namespace BedrockService.Client.Forms
     public partial class PlayerManagerForm : Form
     {
         private readonly ServerInfo Server;
-        private readonly string[] RegisteredPlayerColumnArray = new string[] { "XUID:", "Username:", "Permission:", "Whitelisted:", "Ignores max players:", "First connected on:", "Last connected on:", "Time spent in game:" };
+        private readonly string[] RegisteredPlayerColumnArray = new string[8] { "XUID:", "Username:", "Permission:", "Whitelisted:", "Ignores max players:", "First connected on:", "Last connected on:", "Time spent in game:" };
         private List<Player> playersFound = new List<Player>();
         private List<Player> modifiedPlayers = new List<Player>();
         private Player playerToEdit;
@@ -30,6 +30,13 @@ namespace BedrockService.Client.Forms
             {
                 gridView.Columns.Add(s.Replace(" ", "").Replace(":", ""), s);
             }
+            gridView.Columns[5].ReadOnly = true;
+            gridView.Columns[6].ReadOnly = true;
+            gridView.Columns[7].ReadOnly = true;
+            gridView.Columns[5].CellTemplate.Style.BackColor = System.Drawing.Color.FromArgb(225, 225, 225);
+            gridView.Columns[6].CellTemplate.Style.BackColor = System.Drawing.Color.FromArgb(225, 225, 225);
+            gridView.Columns[7].CellTemplate.Style.BackColor = System.Drawing.Color.FromArgb(225, 225, 225);
+            gridView.AllowUserToAddRows = false;
             RefreshGridContents();
         }
 
@@ -130,6 +137,19 @@ namespace BedrockService.Client.Forms
                 playerToEdit.IgnorePlayerLimits = bool.Parse((string)focusedRow.Cells[4].Value);
                 playerToEdit.FromConfig = true;
                 modifiedPlayers.Add(playerToEdit);
+            }
+        }
+
+        private void registerPlayerBtn_Click(object sender, EventArgs e)
+        {
+            using (NewPlayerRegistrationForm form = new NewPlayerRegistrationForm())
+            {
+                if(form.ShowDialog() == DialogResult.OK)
+                {
+                    Server.KnownPlayers.Add(form.AddPlayer);
+                    modifiedPlayers.Add(form.AddPlayer);
+                    RefreshGridContents();
+                }
             }
         }
     }
