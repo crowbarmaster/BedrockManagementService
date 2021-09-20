@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Threading;
 using System.IO;
 using System.Reflection;
 using Topshelf;
 using Topshelf.Runtime;
+using System.Diagnostics;
 
 namespace BedrockService.Service
 {
@@ -16,8 +18,9 @@ namespace BedrockService.Service
             if (args.Length == 0 && Environment.UserInteractive)
             {
                 IsConsoleMode = true;
-                InstanceProvider.GetServiceLogger().AppendLine("BedrockService startup detected in Console mode."); ;
+                InstanceProvider.GetServiceLogger().AppendLine("BedrockService startup detected in Console mode.");
             }
+
             Host host = HostFactory.New(x =>
             {
                 x.SetStartTimeout(TimeSpan.FromSeconds(10));
@@ -29,7 +32,6 @@ namespace BedrockService.Service
                     s.BeforeStoppingService(_ => InstanceProvider.GetServiceLogger().AppendLine("Stopping service..."));
 
                 });
-
 
                 x.RunAsLocalSystem();
                 x.SetDescription("Windows Service Wrapper for Windows Bedrock Server");
@@ -59,12 +61,6 @@ namespace BedrockService.Service
                 Console.ReadLine();
             }
             Environment.ExitCode = exitCode;
-        }
-
-        private static void Program_Exited(object sender, EventArgs e)
-        {
-            InstanceProvider.GetServiceLogger().AppendLine("Program exit detected... shutting down!");
-            InstanceProvider.GetBedrockService().Stop(InstanceProvider.GetBedrockService()._hostControl);
         }
     }
 }
