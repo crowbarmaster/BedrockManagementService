@@ -20,8 +20,7 @@ namespace BedrockService.Client.Management
                 Directory.CreateDirectory(ConfigDir);
             }
             string[] files = Directory.GetFiles(ConfigDir, "*.conf");
-            string subPattern = @"^\[(\w*)\]$";
-            Regex regex = new Regex(subPattern);
+            Regex regex = new Regex(@"^\[(\w*)\]$");
 
             if (files.Length > 0)
             {

@@ -92,6 +92,8 @@ namespace BedrockService.Client.Management
                     return false;
                 }
                 LogThread = new Thread(new ThreadStart(LogManagerTask));
+                LogThread.Name = "LogThread";
+                LogThread.IsBackground = true;
                 EnableFlag = true;
                 LogThread.Start();
                 Console.WriteLine("LogThread started");

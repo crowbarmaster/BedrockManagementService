@@ -47,6 +47,8 @@ namespace BedrockService.Client.Networking
                 stream = OpenedTcpClient.GetStream();
                 Connected = true;
                 ClientReciever = new Thread(new ThreadStart(ReceiveListener));
+                ClientReciever.Name = "ClientPacketReviever";
+                ClientReciever.IsBackground = true;
                 ClientReciever.Start();
             }
             catch
@@ -269,6 +271,22 @@ namespace BedrockService.Client.Networking
             if (SendData(new byte[0], source, destination, type, status))
                 return true;
             return false;
+        }
+
+        public void Dispose()
+        {
+            if (HeartbeatThread != null && HeartbeatThread.IsAlive)
+                HeartbeatThread.Abort();
+            if (ClientReciever != null && ClientReciever.IsAlive)
+                ClientReciever.Abort();
+            HeartbeatThread = null;
+            ClientReciever = null;
+            if(OpenedTcpClient != null)
+            {
+                OpenedTcpClient.Close();
+                OpenedTcpClient.Dispose();
+            }
+
         }
     }
 }
