@@ -22,7 +22,7 @@ namespace BedrockService.Service.Networking
             client.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
             client.DefaultRequestHeaders.Add("Pragma", "no-cache");
             client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36");
-            client.Timeout = new TimeSpan(0, 0, 2);
+            client.Timeout = new TimeSpan(0, 0, 3);
 
             string content = FetchHTTPContent(client).Result;
             if (content == null) // This really doesn't fail often. Give it one more try or fail.
@@ -32,8 +32,7 @@ namespace BedrockService.Service.Networking
             }
             if (content == null)
                 return false;
-            string pattern = @"(https://minecraft.azureedge.net/bin-win/bedrock-server-)(.*)(\.zip)";
-            Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
+            Regex regex = new Regex(@"(https://minecraft.azureedge.net/bin-win/bedrock-server-)(.*)(\.zip)", RegexOptions.IgnoreCase);
             Match m = regex.Match(content);
             if (!m.Success)
             {

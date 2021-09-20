@@ -41,6 +41,7 @@ namespace BedrockService.Service.Server.HostInfoClasses
             Whitelisted = whtlist;
             PermissionLevel = perm;
             IgnorePlayerLimits = ignoreLimit;
+            FromConfig = fromCfg;
         }
 
         public Player(string xuid, string username, string serverDefaultPermission)
