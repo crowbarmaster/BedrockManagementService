@@ -160,7 +160,7 @@ namespace BedrockService.Service.Management
 
         public ServerInfo LoadRegisteredPlayers(ServerInfo server)
         {
-            string filePath = $@"{configDir}\{server.ServerName}.players";
+            string filePath = $@"{configDir}\{server.ServerName}.preg";
             if (!File.Exists(filePath))
             {
                 File.Create(filePath).Close();
@@ -175,7 +175,7 @@ namespace BedrockService.Service.Management
                 Player playerFound = server.KnownPlayers.FirstOrDefault(ply => ply.XUID == split[0]);
                 if (playerFound == null)
                 {
-                    server.KnownPlayers.Add(new Player(split[0], split[1], DateTime.Now.Ticks.ToString(), "0", "0", split[2] == "true", split[3], split[4] == "true", true));
+                    server.KnownPlayers.Add(new Player(split[0], split[1], DateTime.Now.Ticks.ToString(), "0", "0", split[3].ToLower() == "true", split[2], split[4].ToLower() == "true", true));
                     continue;
                 }
                 InstanceProvider.GetPlayerManager().UpdatePlayerFromCfg(split[0], split[1], split[2], split[3], split[4], server);
@@ -225,7 +225,7 @@ namespace BedrockService.Service.Management
         {
             lock (FileLock)
             {
-                string filePath = $@"{configDir}\{server.ServerName}.players";
+                string filePath = $@"{configDir}\{server.ServerName}.preg";
                 if (File.Exists(filePath))
                 {
                     File.Copy(filePath, $@"{configDir}\Backups\{server.ServerName}_{DateTime.Now.ToString("mmddyyhhmmssff")}.bak", true);
