@@ -25,7 +25,7 @@ namespace BedrockService.Service.Server
         {
             serverInfo = serverToSet;
         }
-        public BackgroundWorker Worker { get; set; }
+        public Thread ServerThread { get; set; }
 
         public enum ServerStatus
         {
@@ -40,7 +40,7 @@ namespace BedrockService.Service.Server
         public bool StopControl()
         {
             CurrentServerStatus = ServerStatus.Stopping;
-            if (!(process is null))
+            if (process != null)
             {
                 InstanceProvider.GetServiceLogger().AppendLine("Sending Stop to Bedrock . Process.HasExited = " + process.HasExited.ToString());
 
@@ -51,13 +51,9 @@ namespace BedrockService.Service.Server
                 while (!process.HasExited) { }
 
             }
-            if (!(Worker is null))
-            {
-                Worker.CancelAsync();
-                while (Worker.IsBusy) { Thread.Sleep(10); }
-                Worker.Dispose();
-            }
-            Worker = null;
+            if (ServerThread != null && ServerThread.IsAlive)
+                ServerThread.Abort();
+            ServerThread = null;
             process = null;
             GC.Collect();
             CurrentServerStatus = ServerStatus.Stopped;
@@ -66,25 +62,20 @@ namespace BedrockService.Service.Server
 
         public void StartControl(HostControl hostControl)
         {
-            if (Worker is null)
+            if (ServerThread == null)
             {
-                Worker = new BackgroundWorker() { WorkerSupportsCancellation = true };
+                ServerThread = new Thread(new ParameterizedThreadStart(RunServer));
+                ServerThread.Name = "ServerThread";
+                ServerThread.IsBackground = true;
             }
 
-            if (!Worker.IsBusy)
-            {
-                Worker.DoWork += (s, e) =>
-                {
-                    RunServer(hostControl);
-                };
-                Worker.RunWorkerAsync();
-            }
+            ServerThread.Start(hostControl);
             CurrentServerStatus = ServerStatus.Started;
         }
 
-        public void RunServer(HostControl hostControl)
+        public void RunServer(object hostControl)
         {
-            hostController = hostControl;
+            hostController = (HostControl)hostControl;
             string appName = serverInfo.ServerExeName.Value.Substring(0, serverInfo.ServerExeName.Value.Length - 4);
             InstanceProvider.GetConfigManager().WriteJSONFiles(serverInfo);
             InstanceProvider.GetConfigManager().SaveServerProps(serverInfo, false);
@@ -108,18 +99,18 @@ namespace BedrockService.Service.Server
                 else
                 {
                     InstanceProvider.GetServiceLogger().AppendLine("The Bedrock Server is not accessible at " + serverInfo.ServerPath.Value + "\\" + serverInfo.ServerExeName.Value + "\r\nCheck if the file is at that location and that permissions are correct.");
-                    hostControl.Stop();
+                    hostController.Stop();
                 }
             }
             catch (Exception e)
             {
                 InstanceProvider.GetServiceLogger().AppendLine($"Error Running Bedrock Server: {e.StackTrace}");
-                hostControl.Stop();
+                hostController.Stop();
 
             }
 
         }
-
+        
         private void CreateProcess()
         {
             process = Process.Start(new ProcessStartInfo
@@ -300,8 +291,7 @@ namespace BedrockService.Service.Server
                     {
                         if (dirCount >= int.Parse(serverInfo.MaxBackupCount.Value)) // Compare the directory count with the value set in the config. Values from config are stored as strings, and therfore must be converted to integer first for compare.
                         {
-                            string pattern = $@"Backup_(.*)$"; // This is a regular expression pattern. If you would like to know more, Grab notepad++ and play with regex search, a lot of guides out there.
-                            Regex reg = new Regex(pattern); // Creates a new Regex class with our pattern loaded.
+                            Regex reg = new Regex(@"Backup_(.*)$"); // Creates a new Regex class with our pattern loaded.
 
                             List<long> Dates = new List<long>(); // creates a new list long integer array named Dates, and initializes it.
                             foreach (DirectoryInfo dir in backupDir.GetDirectories()) // Loop through the array of directories in backup folder. In this "foreach" loop, we name each entry in the array "dir" and then do something to it.
