@@ -114,6 +114,7 @@ namespace BedrockService.Service.Networking
 
                                         RestartServer(data, true);
                                         break;
+
                                     case NetworkMessageTypes.Command:
 
                                         dataSplit = data.Split(';');
@@ -225,6 +226,15 @@ namespace BedrockService.Service.Networking
                                             stringAsBytes = GetBytes(srvString.ToString());
                                             SendData(stringAsBytes, NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.ConsoleLogUpdate);
                                         }
+                                        break;
+                                    case NetworkMessageTypes.StartCmdUpdate:
+
+                                        dataSplit = data.Split(';');
+                                        JsonParser deserialized = JsonParser.Deserialize(dataSplit[1]);
+                                        InstanceProvider.GetBedrockServer(dataSplit[0]).serverInfo.StartCmds = (List<StartCmdEntry>)deserialized.Value.ToObject(typeof(List<StartCmdEntry>));
+                                        InstanceProvider.GetConfigManager().SaveServerProps(InstanceProvider.GetBedrockServer(dataSplit[0]).serverInfo, true);
+                                        RestartServer(dataSplit[0], false);
+
                                         break;
 
                                 }

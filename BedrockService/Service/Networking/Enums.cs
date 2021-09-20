@@ -23,11 +23,13 @@
         PropUpdate,
         PlayersRequest,
         PlayersUpdate,
+        StartCmdUpdate,
         Command,
         Backup,
         Restart,
         Heartbeat
     }
+
     public enum NetworkMessageStatus
     {
         Failed,
