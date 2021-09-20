@@ -222,12 +222,12 @@
             this.EditCfg.UseVisualStyleBackColor = true;
             this.EditCfg.Click += new System.EventHandler(this.EditCfg_Click);
             // 
-            // EditPerms
+            // PlayerManagerBtn
             // 
             this.PlayerManagerBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.PlayerManagerBtn.Enabled = false;
             this.PlayerManagerBtn.Location = new System.Drawing.Point(601, 316);
-            this.PlayerManagerBtn.Name = "EditPerms";
+            this.PlayerManagerBtn.Name = "PlayerManagerBtn";
             this.PlayerManagerBtn.Size = new System.Drawing.Size(170, 23);
             this.PlayerManagerBtn.TabIndex = 16;
             this.PlayerManagerBtn.Text = "PlayerManager";
@@ -244,6 +244,7 @@
             this.EditStCmd.TabIndex = 18;
             this.EditStCmd.Text = "EditStCmd";
             this.EditStCmd.UseVisualStyleBackColor = true;
+            this.EditStCmd.Click += new System.EventHandler(this.EditStCmd_Click);
             // 
             // ManPacks
             // 

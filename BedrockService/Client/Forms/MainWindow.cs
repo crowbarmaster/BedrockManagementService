@@ -37,7 +37,13 @@ namespace BedrockService.Client.Forms
             ConfigManager.LoadConfigs();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            Application.ApplicationExit += OnExit;
             Application.Run(FormManager.GetMainWindow);
+        }
+
+        private static void OnExit(object sender, EventArgs e)
+        {
+            FormManager.GetTCPClient.Dispose();
         }
 
         public void InitForm()
@@ -248,6 +254,20 @@ namespace BedrockService.Client.Forms
             }
         }
 
+        private void EditStCmd_Click(object sender, EventArgs e)
+        {
+            EditSrv editSrvDialog = new EditSrv();
+            editSrvDialog.PopulateStartCmds(selectedServer.StartCmds);
+            if (editSrvDialog.ShowDialog() == DialogResult.OK)
+            {
+                JsonUtilities.SendJsonMsgToSrv<List<StartCmdEntry>>(selectedServer.ServerName, editSrvDialog.startCmds, NetworkMessageDestination.Service, NetworkMessageTypes.StartCmdUpdate);
+                selectedServer.StartCmds = editSrvDialog.startCmds;
+                editSrvDialog.Close();
+                editSrvDialog.Dispose();
+                RestartSrv_Click(null, null);
+            }
+        }
+
         private void ComponentEnableManager()
         {
             Connect.Enabled = connectedHost == null;
@@ -260,7 +280,7 @@ namespace BedrockService.Client.Forms
             //GlobBackup.Enabled = connectedHost != null;
             EditCfg.Enabled = (connectedHost != null && selectedServer != null);
             PlayerManagerBtn.Enabled = (connectedHost != null && selectedServer != null);
-            //EditStCmd.Enabled = (connectedHost != null && selectedServer != null);
+            EditStCmd.Enabled = (connectedHost != null && selectedServer != null);
             //ManPacks.Enabled = (connectedHost != null && selectedServer != null);
             SingBackup.Enabled = (connectedHost != null && selectedServer != null);
             //Rollbackup.Enabled = (connectedHost != null && selectedServer != null);

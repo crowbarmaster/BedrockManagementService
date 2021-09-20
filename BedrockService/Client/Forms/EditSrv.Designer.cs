@@ -61,7 +61,6 @@ namespace BedrockService.Client.Forms
             // 
             // gridView
             // 
-            this.gridView.AllowUserToAddRows = false;
             this.gridView.AllowUserToDeleteRows = false;
             this.gridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
@@ -75,6 +74,7 @@ namespace BedrockService.Client.Forms
             this.gridView.Name = "gridView";
             this.gridView.Size = new System.Drawing.Size(775, 371);
             this.gridView.TabIndex = 1;
+            this.gridView.NewRowNeeded += new System.Windows.Forms.DataGridViewRowEventHandler(this.gridView_NewRowNeeded);
             // 
             // EntryKey
             // 
