@@ -18,5 +18,11 @@ namespace BedrockService.Client.Utilities
             byte[] bytes = Encoding.UTF8.GetBytes(JsonParser.Serialize(JsonParser.FromValue((T)obj)));
             return FormManager.GetTCPClient.SendData(bytes, NetworkMessageSource.Client, destination, type);
         }
+        
+        public static bool SendJsonMsgToSrv<T>(string serverName, object obj, NetworkMessageDestination destination, NetworkMessageTypes type)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes($"{serverName};{JsonParser.Serialize(JsonParser.FromValue((T)obj))}");
+            return FormManager.GetTCPClient.SendData(bytes, NetworkMessageSource.Client, destination, type);
+        }
     }
 }
