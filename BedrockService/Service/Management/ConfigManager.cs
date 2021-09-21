@@ -50,9 +50,9 @@ namespace BedrockService.Service.Management
                             {
                                 split[1] = "";
                             }
-                            if(InstanceProvider.GetHostInfo().SetGlobalProperty(split[0], split[1]))
+                            if (InstanceProvider.GetHostInfo().SetGlobalProperty(split[0], split[1]))
                             {
-                                if(split[0] == "ServersPath")
+                                if (split[0] == "ServersPath")
                                 {
                                     serversPath = split[1];
                                 }
@@ -228,7 +228,7 @@ namespace BedrockService.Service.Management
                 writer.WriteLine("");
                 foreach (Player entry in server.KnownPlayers)
                 {
-                    if(entry.Whitelisted || entry.PermissionLevel != server.GetServerProp("default-player-permission-level").Value)
+                    if (entry.Whitelisted || entry.PermissionLevel != server.GetServerProp("default-player-permission-level").Value)
                         writer.WriteLine($"{entry.XUID},{entry.Username},{entry.PermissionLevel},{entry.Whitelisted},{entry.IgnorePlayerLimits}");
                 }
                 writer.Flush();

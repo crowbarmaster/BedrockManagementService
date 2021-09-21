@@ -2,9 +2,9 @@
 using BedrockService.Service.Server.HostInfoClasses;
 using BedrockService.Service.Server.Logging;
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace BedrockService.Client.Management

@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Threading;
 using System.IO;
 using System.Reflection;
 using Topshelf;
 using Topshelf.Runtime;
-using System.Diagnostics;
 
 namespace BedrockService.Service
 {

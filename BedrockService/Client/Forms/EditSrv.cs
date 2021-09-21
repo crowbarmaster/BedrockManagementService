@@ -25,18 +25,18 @@ namespace BedrockService.Client.Forms
             foreach (Property prop in workingProps)
             {
                 dataGrid.Rows.Add(new string[2] { prop.KeyName, prop.Value });
-                if(prop.KeyName == "server-name")
+                if (prop.KeyName == "server-name")
                     dataGrid.Rows[index].ReadOnly = true;
                 index++;
             }
             gridView.AllowUserToAddRows = false;
         }
 
-        public void PopulateStartCmds (List<StartCmdEntry> list)
+        public void PopulateStartCmds(List<StartCmdEntry> list)
         {
             startCmds = list;
             gridView.Columns.RemoveAt(0);
-            foreach(StartCmdEntry entry in startCmds)
+            foreach (StartCmdEntry entry in startCmds)
             {
                 dataGrid.Rows.Add(new string[1] { entry.Command });
             }
@@ -53,7 +53,7 @@ namespace BedrockService.Client.Forms
             startCmds = new List<StartCmdEntry>();
             foreach (DataGridViewRow row in dataGrid.Rows)
             {
-                if(workingProps != null)
+                if (workingProps != null)
                 {
                     foreach (Property prop in workingProps)
                     {
@@ -65,7 +65,7 @@ namespace BedrockService.Client.Forms
                 }
                 else
                 {
-                    if((string)row.Cells[0].Value != null)
+                    if ((string)row.Cells[0].Value != null)
                         startCmds.Add(new StartCmdEntry((string)row.Cells[0].Value));
                 }
 

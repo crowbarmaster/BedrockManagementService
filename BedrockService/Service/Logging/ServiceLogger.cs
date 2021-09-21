@@ -30,8 +30,8 @@ namespace BedrockService.Service.Logging
             Log.Add(addText);
             LogWriter.WriteLine(text);
             LogWriter.Flush();
-            if(IsServer)
-            Console.WriteLine(text);
+            if (IsServer)
+                Console.WriteLine(text);
         }
 
         public int Count()

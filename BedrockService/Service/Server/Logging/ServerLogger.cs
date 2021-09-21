@@ -1,5 +1,4 @@
-﻿using BedrockService.Service.Server.HostInfoClasses;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -47,7 +46,7 @@ namespace BedrockService.Service.Server.Logging
                 LogWriter.WriteLine(text);
                 LogWriter.Flush();
             }
-            if(LogToConsole)
+            if (LogToConsole)
                 Console.WriteLine(text);
         }
 

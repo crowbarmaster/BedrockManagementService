@@ -194,7 +194,7 @@ namespace BedrockService.Service.Networking
                                             int srvTextLen;
                                             int clientCurLen;
                                             int loop;
-                                            if(srvName != "Service")
+                                            if (srvName != "Service")
                                             {
                                                 ServerLogger srvText = InstanceProvider.GetBedrockServer(srvName).serverInfo.ConsoleBuffer;
                                                 srvTextLen = srvText.Count();
@@ -239,7 +239,7 @@ namespace BedrockService.Service.Networking
                                         break;
                                     case NetworkMessageTypes.BackupAll:
 
-                                        foreach(BedrockServer server in InstanceProvider.GetBedrockService().bedrockServers)
+                                        foreach (BedrockServer server in InstanceProvider.GetBedrockService().bedrockServers)
                                         {
                                             RestartServer(server.serverInfo.ServerName, true);
                                         }
@@ -257,7 +257,7 @@ namespace BedrockService.Service.Networking
                                                 }
                                             }
                                         }
-                                            break;
+                                        break;
                                 }
                                 break;
                         }

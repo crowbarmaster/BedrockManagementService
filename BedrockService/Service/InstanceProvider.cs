@@ -133,7 +133,7 @@ namespace BedrockService.Service
         }
 
         public static Thread GetHeartbeatThread() => heartbeatThread;
- 
+
         public static bool GetHeartbeatThreadAlive() => heartbeatThread != null && heartbeatThread.IsAlive;
 
 

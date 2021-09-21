@@ -150,15 +150,15 @@ namespace BedrockService.Client.Networking
                                             string srvName = srvSplit[0];
                                             string srvText = srvSplit[1];
                                             srvCurLen = int.Parse(srvSplit[2]);
-                                            if(srvName != "Service")
+                                            if (srvName != "Service")
                                             {
-                                            ServerInfo bedrockServer = MainWindow.connectedHost.GetServerInfos().First(srv => srv.ServerName == srvName);
-                                            bedrockServer.ConsoleBuffer = bedrockServer.ConsoleBuffer ?? new ServerLogger(bedrockServer.ServerName);
-                                            int curCount = bedrockServer.ConsoleBuffer.Count();
-                                            if (curCount == srvCurLen)
-                                            {
-                                                bedrockServer.ConsoleBuffer.Append(srvText);
-                                            }
+                                                ServerInfo bedrockServer = MainWindow.connectedHost.GetServerInfos().First(srv => srv.ServerName == srvName);
+                                                bedrockServer.ConsoleBuffer = bedrockServer.ConsoleBuffer ?? new ServerLogger(bedrockServer.ServerName);
+                                                int curCount = bedrockServer.ConsoleBuffer.Count();
+                                                if (curCount == srvCurLen)
+                                                {
+                                                    bedrockServer.ConsoleBuffer.Append(srvText);
+                                                }
                                             }
                                             else
                                             {
@@ -281,7 +281,7 @@ namespace BedrockService.Client.Networking
                 ClientReciever.Abort();
             HeartbeatThread = null;
             ClientReciever = null;
-            if(OpenedTcpClient != null)
+            if (OpenedTcpClient != null)
             {
                 OpenedTcpClient.Close();
                 OpenedTcpClient.Dispose();

@@ -1,12 +1,11 @@
-﻿using BedrockService.Service.Server.HostInfoClasses;
+﻿using BedrockService.Client.Management;
+using BedrockService.Service.Server.HostInfoClasses;
+using BedrockService.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
 using System.Linq;
-using BedrockService.Utilities;
 using System.Text;
-using BedrockService.Service;
-using BedrockService.Client.Management;
+using System.Windows.Forms;
 
 namespace BedrockService.Client.Forms
 {
@@ -54,9 +53,9 @@ namespace BedrockService.Client.Forms
 
         private void saveBtn_Click(object sender, EventArgs e)
         {
-            if(modifiedPlayers.Count > 0)
+            if (modifiedPlayers.Count > 0)
             {
-                foreach(Player player in modifiedPlayers)
+                foreach (Player player in modifiedPlayers)
                 {
                     Player replacedPlayer = Server.KnownPlayers.First(x => x.XUID == player.XUID);
                     Server.KnownPlayers.Remove(replacedPlayer);
@@ -83,7 +82,7 @@ namespace BedrockService.Client.Forms
                 splitCommands = curText.Split(',');
                 if (splitCommands.Length > 1)
                 {
-                    foreach(string s in splitCommands)
+                    foreach (string s in splitCommands)
                     {
                         if (s.Contains(":"))
                         {
@@ -91,7 +90,7 @@ namespace BedrockService.Client.Forms
                             cmd = finalSplit[0];
                             value = finalSplit[1];
                             tempList = new List<Player>();
-                            foreach(Player player in playersFound)
+                            foreach (Player player in playersFound)
                             {
                                 if (player.CommandStringTranslator(cmd).Contains(value))
                                 {
@@ -144,7 +143,7 @@ namespace BedrockService.Client.Forms
         {
             using (NewPlayerRegistrationForm form = new NewPlayerRegistrationForm())
             {
-                if(form.ShowDialog() == DialogResult.OK)
+                if (form.ShowDialog() == DialogResult.OK)
                 {
                     Server.KnownPlayers.Add(form.AddPlayer);
                     modifiedPlayers.Add(form.AddPlayer);

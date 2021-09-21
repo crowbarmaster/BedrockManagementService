@@ -4,17 +4,13 @@ using BedrockService.Service.Server.HostInfoClasses;
 using NCrontab;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using Topshelf;
-using Topshelf.Logging;
 
 namespace BedrockService.Service
 {
@@ -33,7 +29,7 @@ namespace BedrockService.Service
         private System.Timers.Timer updaterTimer;
         private System.Timers.Timer cronTimer;
         private readonly CrontabSchedule shed;
-        private Thread TCPServerThread;
+        private readonly Thread TCPServerThread;
         private readonly CrontabSchedule updater;
         private readonly TCPListener ClientHost = new TCPListener();
 
@@ -283,6 +279,7 @@ namespace BedrockService.Service
                     DeleteFilesRecursively(new DirectoryInfo(server.ServerPath.Value));
                 else
                     Directory.CreateDirectory(server.ServerPath.Value);
+
                 ZipFile.ExtractToDirectory($@"{Program.ServiceDirectory}\Server\MCSFiles\Update_{server.ServerVersion}.zip", server.ServerPath.Value);
                 File.Copy(server.ServerPath.Value + "\\bedrock_server.exe", server.ServerPath.Value + "\\" + server.ServerExeName.Value);
             }
@@ -311,7 +308,7 @@ namespace BedrockService.Service
                 if (!Updater.CheckUpdates().Result)
                 {
                     InstanceProvider.GetServiceLogger().AppendLine("Checking for updates at init failed.");
-                    if(File.Exists($@"{Program.ServiceDirectory}\Server\MCSFiles\bedrock_ver.ini") && !File.Exists($@"{Program.ServiceDirectory}\Server\MCSFiles\Update_{File.ReadAllText($@"{Program.ServiceDirectory}\Server\MCSFiles\bedrock_ver.ini")}.zip"))
+                    if (File.Exists($@"{Program.ServiceDirectory}\Server\MCSFiles\bedrock_ver.ini") && !File.Exists($@"{Program.ServiceDirectory}\Server\MCSFiles\Update_{File.ReadAllText($@"{Program.ServiceDirectory}\Server\MCSFiles\bedrock_ver.ini")}.zip"))
                         InstanceProvider.GetServiceLogger().AppendLine("An update package was not found. Execution may fail if this is first run!");
                 }
                 return true;

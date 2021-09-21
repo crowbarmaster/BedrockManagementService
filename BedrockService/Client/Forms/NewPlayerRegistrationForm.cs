@@ -1,12 +1,5 @@
 ﻿using BedrockService.Service.Server.HostInfoClasses;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace BedrockService.Client.Forms
@@ -21,7 +14,7 @@ namespace BedrockService.Client.Forms
 
         private void saveClick(object sender, EventArgs e)
         {
-            if(usernameTextBox.TextLength > 0 && xuidTextBox.TextLength == 16)
+            if (usernameTextBox.TextLength > 0 && xuidTextBox.TextLength == 16)
             {
                 Player player = new Player(xuidTextBox.Text, usernameTextBox.Text, "");
                 player.PermissionLevel = (string)permissionComboBox.SelectedItem;

@@ -51,7 +51,7 @@ namespace BedrockService.Service.Server.HostInfoClasses
             PermissionLevel = serverDefaultPermission;
         }
 
-        public string CommandStringTranslator (string input)
+        public string CommandStringTranslator(string input)
         {
             if (input == "name" || input == "username" || input == "un")
                 return Username;

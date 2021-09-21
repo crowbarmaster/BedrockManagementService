@@ -24,7 +24,7 @@ namespace BedrockService.Service.Server.Management
                 playerFound = new Player(xuid, username, serverInstance.ServerPropList.FirstOrDefault(k => k.KeyName == "default-player-permission-level").Value)
                 {
                     FirstConnectedTime = DateTime.Now.Ticks.ToString()
-            };
+                };
                 playerFound.LastConnectedTime = playerFound.FirstConnectedTime;
                 serverInstance.KnownPlayers.Add(playerFound);
                 InstanceProvider.GetConfigManager().SaveKnownPlayerDatabase(serverInstance);
