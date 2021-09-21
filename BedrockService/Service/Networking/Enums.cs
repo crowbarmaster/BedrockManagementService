@@ -24,8 +24,10 @@
         PlayersRequest,
         PlayersUpdate,
         StartCmdUpdate,
+        CheckUpdates,
         Command,
         Backup,
+        BackupAll,
         Restart,
         Heartbeat
     }

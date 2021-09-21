@@ -226,6 +226,7 @@ namespace BedrockService.Service.Networking
                                             stringAsBytes = GetBytes(srvString.ToString());
                                             SendData(stringAsBytes, NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.ConsoleLogUpdate);
                                         }
+
                                         break;
                                     case NetworkMessageTypes.StartCmdUpdate:
 
@@ -236,7 +237,27 @@ namespace BedrockService.Service.Networking
                                         RestartServer(dataSplit[0], false);
 
                                         break;
+                                    case NetworkMessageTypes.BackupAll:
 
+                                        foreach(BedrockServer server in InstanceProvider.GetBedrockService().bedrockServers)
+                                        {
+                                            RestartServer(server.serverInfo.ServerName, true);
+                                        }
+
+                                        break;
+                                    case NetworkMessageTypes.CheckUpdates:
+
+                                        if (Updater.CheckUpdates().Result)
+                                        {
+                                            if (Updater.VersionChanged)
+                                            {
+                                                foreach (ServerInfo server in InstanceProvider.GetBedrockService().Servers)
+                                                {
+                                                    RestartServer(server.ServerName, true);
+                                                }
+                                            }
+                                        }
+                                            break;
                                 }
                                 break;
                         }
