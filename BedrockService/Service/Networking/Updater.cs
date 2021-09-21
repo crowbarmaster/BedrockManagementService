@@ -53,6 +53,10 @@ namespace BedrockService.Service.Networking
                     FetchBuild(downloadPath, version).Wait();
                     File.WriteAllText($@"{Program.ServiceDirectory}\Server\bedrock_ver.ini", version);
                 }
+                else
+                {
+                    InstanceProvider.GetServiceLogger().AppendLine($"Current version \"{version}\" is up to date!");
+                }
                 return true;
             }
             else
