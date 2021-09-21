@@ -32,6 +32,7 @@ namespace BedrockService.Service.Management
 
             string[] files = Directory.GetFiles(configDir, "*.conf");
             string globFileResult = null;
+            string serversPath = null;
             foreach (string file in files)
             {
                 if (file.EndsWith("Globals.conf"))
@@ -49,7 +50,19 @@ namespace BedrockService.Service.Management
                             {
                                 split[1] = "";
                             }
-                            InstanceProvider.GetHostInfo().GetGlobals().First(prop => prop.KeyName == split[0]).Value = split[1];
+                            if(InstanceProvider.GetHostInfo().SetGlobalProperty(split[0], split[1]))
+                            {
+                                if(split[0] == "ServersPath")
+                                {
+                                    serversPath = split[1];
+                                }
+                            }
+                            else
+                            {
+                                InstanceProvider.GetServiceLogger().AppendLine($"Error! Key \"{split[0]}\" was not found! Check configs!");
+                            }
+
+
                         }
                     }
                 }
@@ -62,7 +75,7 @@ namespace BedrockService.Service.Management
             }
             InstanceProvider.GetHostInfo().ClearServerInfos();
             ServerInfo serverInfo = new ServerInfo();
-            serverInfo.InitDefaults();
+            serverInfo.InitDefaults(serversPath);
             while (loading)
             {
                 foreach (string file in files)
@@ -71,7 +84,7 @@ namespace BedrockService.Service.Management
                     if (FInfo.Name == "Globals.conf")
                         continue;
                     serverInfo = new ServerInfo();
-                    serverInfo.InitDefaults();
+                    serverInfo.InitDefaults(serversPath);
                     serverInfo.FileName = FInfo.Name;
                     serverInfo.ServerVersion = loadedVersion;
                     string[] linesArray = File.ReadAllLines(file);
@@ -94,36 +107,14 @@ namespace BedrockService.Service.Management
                                 case "server-name":
                                     InstanceProvider.GetServiceLogger().AppendLine($"Loading ServerInfo for server {split[1]}...");
                                     serverInfo.ServerName = split[1];
+                                    serverInfo.ServerPath.Value = $@"{serversPath}\{split[1]}";
+                                    serverInfo.ServerExeName.Value = $"BDS_{split[1]}.exe";
                                     LoadPlayerDatabase(serverInfo);
                                     LoadRegisteredPlayers(serverInfo);
                                     break;
 
                                 case "AddStartCmd":
                                     serverInfo.StartCmds.Add(new StartCmdEntry(split[1]));
-                                    break;
-
-                                case "ServerPath":
-                                    serverInfo.ServerPath.Value = split[1];
-                                    break;
-
-                                case "ServerExeName":
-                                    serverInfo.ServerExeName.Value = split[1];
-                                    break;
-
-                                case "BackupPath":
-                                    serverInfo.BackupPath.Value = split[1];
-                                    break;
-
-                                case "LogToFile":
-                                    serverInfo.LogToFileEnabled.Value = split[1];
-                                    break;
-
-                                case "AdvancedBackup":
-                                    serverInfo.AdvancedBackup.Value = split[1];
-                                    break;
-
-                                case "MaxBackupCount":
-                                    serverInfo.MaxBackupCount.Value = split[1];
                                     break;
                             }
                         }
@@ -295,7 +286,7 @@ namespace BedrockService.Service.Management
         public void SaveServerProps(ServerInfo server, bool SaveServerInfo)
         {
             int index = 0;
-            string[] output = new string[13 + server.ServerPropList.Count + server.StartCmds.Count];
+            string[] output = new string[5 + server.ServerPropList.Count + server.StartCmds.Count];
             output[index++] = "#Server";
             foreach (Property prop in server.ServerPropList)
             {
@@ -311,15 +302,6 @@ namespace BedrockService.Service.Management
             }
             else
             {
-                output[index++] = string.Empty;
-                output[index++] = "#Service";
-                output[index++] = string.Empty;
-                output[index++] = $"{server.ServerPath.KeyName}={server.ServerPath.Value}";
-                output[index++] = $"{server.ServerExeName.KeyName}={server.ServerExeName.Value}";
-                output[index++] = $"{server.BackupPath.KeyName}={server.BackupPath.Value}";
-                output[index++] = $"{server.AdvancedBackup.KeyName}={server.AdvancedBackup.Value}";
-                output[index++] = $"{server.MaxBackupCount.KeyName}={server.MaxBackupCount.Value}";
-                output[index++] = $"{server.LogToFileEnabled.KeyName}={server.LogToFileEnabled.Value}";
                 output[index++] = string.Empty;
                 output[index++] = "#StartCmds";
 

@@ -223,7 +223,7 @@ namespace BedrockService.Service.Server
 
         private void StdOutToLog(object sender, DataReceivedEventArgs e)
         {
-            serverInfo.ConsoleBuffer = serverInfo.ConsoleBuffer ?? new ServerLogger(serverInfo.LogToFileEnabled.Value == "true", serverInfo.ServerName);
+            serverInfo.ConsoleBuffer = serverInfo.ConsoleBuffer ?? new ServerLogger(InstanceProvider.GetHostInfo().GetGlobalValue("LogServersToFile") == "true", serverInfo.ServerName);
             if (e.Data != "[INFO] Running AutoCompaction...")
             {
                 serverInfo.ConsoleBuffer.Append($"{serverInfo.ServerName}: {e.Data}\r\n");
@@ -276,74 +276,76 @@ namespace BedrockService.Service.Server
             try
             {
                 FileInfo exe = new FileInfo(serverInfo.ServerPath.Value + serverInfo.ServerExeName.Value);
-
-                if (serverInfo.BackupPath.Value.Length > 0)
+                string configBackupPath = InstanceProvider.GetHostInfo().GetGlobalValue("BackupPath");
+                DirectoryInfo backupDir = new DirectoryInfo($@"{Program.ServiceDirectory}\Backups\{serverInfo.ServerName}");
+                if (configBackupPath.Length > 0)
                 {
-                    DirectoryInfo serverDir = new DirectoryInfo(serverInfo.ServerPath.Value);
-                    DirectoryInfo worldsDir = new DirectoryInfo($@"{serverInfo.ServerPath.Value}\worlds");
-                    DirectoryInfo backupDir = new DirectoryInfo($@"{serverInfo.BackupPath.Value}\{serverInfo.ServerName}");
-                    if (!Directory.Exists(backupDir.FullName))
-                    {
-                        Directory.CreateDirectory($@"{serverInfo.BackupPath.Value}\{serverInfo.ServerName}");
-                    }
-                    int dirCount = backupDir.GetDirectories().Length; // this line creates a new int with a value derived from the number of directories found in the backups folder.
-                    try // use a try catch any time you know an error could occur.
-                    {
-                        if (dirCount >= int.Parse(serverInfo.MaxBackupCount.Value)) // Compare the directory count with the value set in the config. Values from config are stored as strings, and therfore must be converted to integer first for compare.
-                        {
-                            Regex reg = new Regex(@"Backup_(.*)$"); // Creates a new Regex class with our pattern loaded.
-
-                            List<long> Dates = new List<long>(); // creates a new list long integer array named Dates, and initializes it.
-                            foreach (DirectoryInfo dir in backupDir.GetDirectories()) // Loop through the array of directories in backup folder. In this "foreach" loop, we name each entry in the array "dir" and then do something to it.
-                            {
-                                if (reg.IsMatch(dir.Name)) // Using regex.IsMatch will return true if the pattern matches the name of the folder we are working with. 
-                                {
-                                    Match match = reg.Match(dir.Name); // creates an instance of the match to work with.
-                                    Dates.Add(Convert.ToInt64(match.Groups[1].Value)); // if it was a match, we then pull the number we saved in the (.*) part of the pattern from the groups method in the match. Groups saves the entire match first, followed by anthing saved in parentheses. Because we need to compare dates, we must convert the string to an integer.
-                                }
-                            }
-                            long OldestDate = 0; // Create a new int to store the oldest date in.
-                            foreach (long date in Dates) // for each date in the Dates array....
-                            {
-                                if (OldestDate == 0) // if this is the first entry in Dates, OldestDate will still be 0. Set it to a date so compare can happen.
-                                {
-                                    OldestDate = date; // OldestDate now equals date.
-                                }
-                                else if (date < OldestDate) // If now the next entry in Dates is a smaller number than the previously set OldestDate, reset OldestDate to date.
-                                {
-                                    OldestDate = date; // OldestDate now equals date.
-                                }
-                            }
-                            Directory.Delete($@"{backupDir}\Backup_{OldestDate}", true); // After running through all directories, this string $@"{backupDir}\Backup_{OldestDate}" should now represent the folder that has the lowest/oldest date. Delete it. Supply the "true" after the directory string to enable recusive mode, removing all files and folders.
-                        }
-                    }
-                    catch (Exception e) // catch all exceptions here.
-                    {
-                        if (e.GetType() == typeof(FormatException)) // if the exception is equal a type of FormatException, Do the following... if this was a IOException, they would not match.
-                        {
-                            InstanceProvider.GetServiceLogger().AppendLine("Error in Config! MaxBackupCount must be nothing but a number!"); // this exception will be thrown if the string could not become a number (i.e. of there was a letter in the mix).
-                        }
-                    }
-
-                    var targetDirectory = backupDir.CreateSubdirectory($"Backup_{DateTime.Now:yyyyMMddhhmmss}");
-                    InstanceProvider.GetServiceLogger().AppendLine($"Backing up files for server {serverInfo.ServerName}. Please wait!");
-                    if (serverInfo.AdvancedBackup.Value == "false")
-                    {
-                        CopyFilesRecursively(worldsDir, targetDirectory);
-                    }
-                    else if (serverInfo.AdvancedBackup.Value == "true")
-                    {
-                        CopyFilesRecursively(serverDir, targetDirectory);
-                    }
-                    return true;
+                    if (configBackupPath != "Default")
+                        backupDir = new DirectoryInfo($@"{configBackupPath}\{serverInfo.ServerName}");
                 }
+                DirectoryInfo serverDir = new DirectoryInfo(serverInfo.ServerPath.Value);
+                DirectoryInfo worldsDir = new DirectoryInfo($@"{serverInfo.ServerPath.Value}\worlds");
+                if (!Directory.Exists(backupDir.FullName))
+                {
+                    Directory.CreateDirectory($@"{InstanceProvider.GetHostInfo().GetGlobalValue("BackupPath")}\{serverInfo.ServerName}");
+                }
+                int dirCount = backupDir.GetDirectories().Length; // this line creates a new int with a value derived from the number of directories found in the backups folder.
+                try // use a try catch any time you know an error could occur.
+                {
+                    if (dirCount >= int.Parse(InstanceProvider.GetHostInfo().GetGlobalValue("MaxBackupCount"))) // Compare the directory count with the value set in the config. Values from config are stored as strings, and therfore must be converted to integer first for compare.
+                    {
+                        Regex reg = new Regex(@"Backup_(.*)$"); // Creates a new Regex class with our pattern loaded.
+
+                        List<long> Dates = new List<long>(); // creates a new list long integer array named Dates, and initializes it.
+                        foreach (DirectoryInfo dir in backupDir.GetDirectories()) // Loop through the array of directories in backup folder. In this "foreach" loop, we name each entry in the array "dir" and then do something to it.
+                        {
+                            if (reg.IsMatch(dir.Name)) // Using regex.IsMatch will return true if the pattern matches the name of the folder we are working with. 
+                            {
+                                Match match = reg.Match(dir.Name); // creates an instance of the match to work with.
+                                Dates.Add(Convert.ToInt64(match.Groups[1].Value)); // if it was a match, we then pull the number we saved in the (.*) part of the pattern from the groups method in the match. Groups saves the entire match first, followed by anthing saved in parentheses. Because we need to compare dates, we must convert the string to an integer.
+                            }
+                        }
+                        long OldestDate = 0; // Create a new int to store the oldest date in.
+                        foreach (long date in Dates) // for each date in the Dates array....
+                        {
+                            if (OldestDate == 0) // if this is the first entry in Dates, OldestDate will still be 0. Set it to a date so compare can happen.
+                            {
+                                OldestDate = date; // OldestDate now equals date.
+                            }
+                            else if (date < OldestDate) // If now the next entry in Dates is a smaller number than the previously set OldestDate, reset OldestDate to date.
+                            {
+                                OldestDate = date; // OldestDate now equals date.
+                            }
+                        }
+                        Directory.Delete($@"{backupDir}\Backup_{OldestDate}", true); // After running through all directories, this string $@"{backupDir}\Backup_{OldestDate}" should now represent the folder that has the lowest/oldest date. Delete it. Supply the "true" after the directory string to enable recusive mode, removing all files and folders.
+                    }
+                }
+                catch (Exception e) // catch all exceptions here.
+                {
+                    if (e.GetType() == typeof(FormatException)) // if the exception is equal a type of FormatException, Do the following... if this was a IOException, they would not match.
+                    {
+                        InstanceProvider.GetServiceLogger().AppendLine("Error in Config! MaxBackupCount must be nothing but a number!"); // this exception will be thrown if the string could not become a number (i.e. of there was a letter in the mix).
+                    }
+                }
+
+                var targetDirectory = backupDir.CreateSubdirectory($"Backup_{DateTime.Now:yyyyMMddhhmmss}");
+                InstanceProvider.GetServiceLogger().AppendLine($"Backing up files for server {serverInfo.ServerName}. Please wait!");
+                if (InstanceProvider.GetHostInfo().GetGlobalValue("EntireBackups") == "false")
+                {
+                    CopyFilesRecursively(worldsDir, targetDirectory);
+                }
+                else if (InstanceProvider.GetHostInfo().GetGlobalValue("EntireBackups") == "true")
+                {
+                    CopyFilesRecursively(serverDir, targetDirectory);
+                }
+                return true;
+
             }
             catch (Exception e)
             {
                 InstanceProvider.GetServiceLogger().AppendLine($"Error with Backup: {e.StackTrace}");
                 return false;
             }
-            return false;
         }
 
         private static void CopyFilesRecursively(DirectoryInfo source, DirectoryInfo target)

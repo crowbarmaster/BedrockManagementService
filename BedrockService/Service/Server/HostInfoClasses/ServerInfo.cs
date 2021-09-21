@@ -13,10 +13,6 @@ namespace BedrockService.Service.Server.HostInfoClasses
         public ServerLogger ConsoleBuffer { get; set; }
         public Property ServerPath { get; set; }
         public Property ServerExeName { get; set; }
-        public Property BackupPath { get; set; }
-        public Property MaxBackupCount { get; set; }
-        public Property AdvancedBackup { get; set; }
-        public Property LogToFileEnabled { get; set; }
 
         public List<Player> KnownPlayers = new List<Player>();
         public List<Property> ServerPropList = new List<Property>();
@@ -29,16 +25,12 @@ namespace BedrockService.Service.Server.HostInfoClasses
             Operator
         }
 
-        public void InitDefaults()
+        public void InitDefaults(string serversPath)
         {
             ServerName = "Default Server";
-            FileName = "Default.conf";
-            ServerPath = new Property("ServerPath", @"C:\Program Files (x86)\Minecraft Bedrock Server Launcher\Servers\Server");
-            ServerExeName = new Property("ServerExeName", "bedrock_server.exe");
-            BackupPath = new Property("BackupPath", "Default");
-            MaxBackupCount = new Property("MaxBackupCount", "10");
-            AdvancedBackup = new Property("AdvancedBackup", "false");
-            LogToFileEnabled = new Property("LogToFile", "false");
+            FileName = "Default Server.conf";
+            ServerPath = new Property("ServerPath", $@"{serversPath}\{ServerName}");
+            ServerExeName = new Property("ServerExeName", $"BDS_{ServerName}.exe");
 
             ServerPropList.Add(new Property("server-name", "Default"));
             ServerPropList.Add(new Property("gamemode", "creative"));

@@ -251,7 +251,7 @@ namespace BedrockService.Service.Networking
                                         {
                                             if (Updater.VersionChanged)
                                             {
-                                                foreach (ServerInfo server in InstanceProvider.GetBedrockService().Servers)
+                                                foreach (ServerInfo server in InstanceProvider.GetHostInfo().Servers)
                                                 {
                                                     RestartServer(server.ServerName, true);
                                                 }

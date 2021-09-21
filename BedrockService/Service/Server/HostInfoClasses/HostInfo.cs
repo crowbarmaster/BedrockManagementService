@@ -17,19 +17,32 @@ namespace BedrockService.Service.Server.HostInfoClasses
 
         public void SetGlobalsDefault()
         {
-            Globals.Add(new Property("BackupEnabled", "false"));
+            Globals.Add(new Property("ServersPath", @"C:\Program Files (x86)\Minecraft Bedrock Server Launcher\Servers"));
             Globals.Add(new Property("AcceptedMojangLic", "false"));
-            Globals.Add(new Property("CheckUpdates", "false"));
-            Globals.Add(new Property("LogToFile", "false"));
-            Globals.Add(new Property("BackupCron", "0 1 * * *"));
-            Globals.Add(new Property("UpdateCron", "0 2 * * *"));
             Globals.Add(new Property("ClientPort", "19134"));
+            Globals.Add(new Property("BackupEnabled", "false"));
+            Globals.Add(new Property("BackupPath", "Default"));
+            Globals.Add(new Property("BackupCron", "0 1 * * *"));
+            Globals.Add(new Property("MaxBackupCount", "25"));
+            Globals.Add(new Property("EntireBackups", "false"));
+            Globals.Add(new Property("CheckUpdates", "false"));
+            Globals.Add(new Property("UpdateCron", "0 2 * * *"));
+            Globals.Add(new Property("LogServersToFile", "true"));
+            Globals.Add(new Property("LogServiceToFile", "true"));
         }
 
-        public void SetGlobalProperty(string name, string entry)
+        public bool SetGlobalProperty(string name, string entry)
         {
-            Property GlobalToEdit = Globals.FirstOrDefault(glob => glob.KeyName == name);
-            Globals[Globals.IndexOf(GlobalToEdit)].Value = entry;
+            try
+            {
+                Property GlobalToEdit = Globals.FirstOrDefault(glob => glob.KeyName == name);
+                Globals[Globals.IndexOf(GlobalToEdit)].Value = entry;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public string GetGlobalValue(string key) => Globals.FirstOrDefault(prop => prop.KeyName == key).Value;
@@ -56,7 +69,7 @@ namespace BedrockService.Service.Server.HostInfoClasses
             return OutString.ToString();
         }
 
-            public void SetGlobalPropertyDefault(Property propToSet)
+        public void SetGlobalPropertyDefault(Property propToSet)
         {
             Property GlobalToEdit = Globals.FirstOrDefault(glob => glob.KeyName == propToSet.KeyName);
             Globals[Globals.IndexOf(GlobalToEdit)].Value = GlobalToEdit.DefaultValue;
