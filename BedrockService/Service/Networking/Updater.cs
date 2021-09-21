@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BedrockService.Service.Server.HostInfoClasses;
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -50,8 +51,13 @@ namespace BedrockService.Service.Networking
                 {
                     InstanceProvider.GetServiceLogger().AppendLine($"New version detected! Now fetching from {downloadPath}...");
                     VersionChanged = true;
-                    FetchBuild(downloadPath, version).Wait();
                     File.WriteAllText($@"{Program.ServiceDirectory}\Server\bedrock_ver.ini", version);
+                    FetchBuild(downloadPath, version).Wait();
+                    if(InstanceProvider.GetHostInfo().GetServerInfos().Count > 0)
+                        foreach(ServerInfo server in InstanceProvider.GetHostInfo().GetServerInfos())
+                        {
+                            server.ServerVersion = version;
+                        }
                 }
                 else
                 {
