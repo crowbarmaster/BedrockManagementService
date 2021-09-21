@@ -34,10 +34,8 @@
             this.LogBox = new System.Windows.Forms.TextBox();
             this.ServerSelectBox = new System.Windows.Forms.ListBox();
             this.Disconn = new System.Windows.Forms.Button();
-            this.StopStartSvc = new System.Windows.Forms.Button();
-            this.RestartSvc = new System.Windows.Forms.Button();
             this.EditGlobals = new System.Windows.Forms.Button();
-            this.EditService = new System.Windows.Forms.Button();
+            this.removeSrvBtn = new System.Windows.Forms.Button();
             this.ChkUpdates = new System.Windows.Forms.Button();
             this.GlobBackup = new System.Windows.Forms.Button();
             this.cmdTextBox = new System.Windows.Forms.TextBox();
@@ -51,6 +49,7 @@
             this.Rollbackup = new System.Windows.Forms.Button();
             this.SvcLog = new System.Windows.Forms.CheckBox();
             this.ServerInfoBox = new System.Windows.Forms.TextBox();
+            this.newSrvBtn = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // Connect
@@ -120,72 +119,51 @@
             this.Disconn.UseVisualStyleBackColor = true;
             this.Disconn.Click += new System.EventHandler(this.Disconn_Click);
             // 
-            // StopStartSvc
-            // 
-            this.StopStartSvc.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.StopStartSvc.Enabled = false;
-            this.StopStartSvc.Location = new System.Drawing.Point(786, 229);
-            this.StopStartSvc.Name = "StopStartSvc";
-            this.StopStartSvc.Size = new System.Drawing.Size(75, 23);
-            this.StopStartSvc.TabIndex = 6;
-            this.StopStartSvc.Text = "StopStart";
-            this.StopStartSvc.UseVisualStyleBackColor = true;
-            this.StopStartSvc.Click += new System.EventHandler(this.StopStartSvc_Click);
-            // 
-            // RestartSvc
-            // 
-            this.RestartSvc.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.RestartSvc.Enabled = false;
-            this.RestartSvc.Location = new System.Drawing.Point(881, 229);
-            this.RestartSvc.Name = "RestartSvc";
-            this.RestartSvc.Size = new System.Drawing.Size(75, 23);
-            this.RestartSvc.TabIndex = 7;
-            this.RestartSvc.Text = "RestartSvc";
-            this.RestartSvc.UseVisualStyleBackColor = true;
-            // 
             // EditGlobals
             // 
             this.EditGlobals.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.EditGlobals.Enabled = false;
-            this.EditGlobals.Location = new System.Drawing.Point(786, 258);
+            this.EditGlobals.Location = new System.Drawing.Point(786, 282);
             this.EditGlobals.Name = "EditGlobals";
-            this.EditGlobals.Size = new System.Drawing.Size(75, 23);
+            this.EditGlobals.Size = new System.Drawing.Size(170, 23);
             this.EditGlobals.TabIndex = 8;
-            this.EditGlobals.Text = "EditGlobals";
+            this.EditGlobals.Text = "Edit global service settings";
             this.EditGlobals.UseVisualStyleBackColor = true;
             this.EditGlobals.Click += new System.EventHandler(this.EditGlobals_Click);
             // 
-            // EditService
+            // removeSrvBtn
             // 
-            this.EditService.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.EditService.Enabled = false;
-            this.EditService.Location = new System.Drawing.Point(881, 258);
-            this.EditService.Name = "EditService";
-            this.EditService.Size = new System.Drawing.Size(75, 23);
-            this.EditService.TabIndex = 9;
-            this.EditService.Text = "EditService";
-            this.EditService.UseVisualStyleBackColor = true;
+            this.removeSrvBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.removeSrvBtn.Enabled = false;
+            this.removeSrvBtn.Location = new System.Drawing.Point(786, 369);
+            this.removeSrvBtn.Name = "removeSrvBtn";
+            this.removeSrvBtn.Size = new System.Drawing.Size(170, 23);
+            this.removeSrvBtn.TabIndex = 9;
+            this.removeSrvBtn.Text = "Remove selected server";
+            this.removeSrvBtn.UseVisualStyleBackColor = true;
+            this.removeSrvBtn.Click += new System.EventHandler(this.removeSrvBtn_Click);
             // 
             // ChkUpdates
             // 
             this.ChkUpdates.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.ChkUpdates.Enabled = false;
-            this.ChkUpdates.Location = new System.Drawing.Point(786, 287);
+            this.ChkUpdates.Location = new System.Drawing.Point(786, 311);
             this.ChkUpdates.Name = "ChkUpdates";
-            this.ChkUpdates.Size = new System.Drawing.Size(75, 23);
+            this.ChkUpdates.Size = new System.Drawing.Size(170, 23);
             this.ChkUpdates.TabIndex = 10;
-            this.ChkUpdates.Text = "ChkUpdates";
+            this.ChkUpdates.Text = "Check for updates";
             this.ChkUpdates.UseVisualStyleBackColor = true;
+            this.ChkUpdates.Click += new System.EventHandler(this.ChkUpdates_Click);
             // 
             // GlobBackup
             // 
             this.GlobBackup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.GlobBackup.Enabled = false;
-            this.GlobBackup.Location = new System.Drawing.Point(881, 287);
+            this.GlobBackup.Location = new System.Drawing.Point(786, 253);
             this.GlobBackup.Name = "GlobBackup";
-            this.GlobBackup.Size = new System.Drawing.Size(75, 23);
+            this.GlobBackup.Size = new System.Drawing.Size(170, 23);
             this.GlobBackup.TabIndex = 11;
-            this.GlobBackup.Text = "GlobBckup";
+            this.GlobBackup.Text = "Backup all servers";
             this.GlobBackup.UseVisualStyleBackColor = true;
             this.GlobBackup.Click += new System.EventHandler(this.GlobBackup_Click);
             // 
@@ -193,7 +171,7 @@
             // 
             this.cmdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdTextBox.Enabled = false;
-            this.cmdTextBox.Location = new System.Drawing.Point(601, 391);
+            this.cmdTextBox.Location = new System.Drawing.Point(425, 428);
             this.cmdTextBox.Name = "cmdTextBox";
             this.cmdTextBox.Size = new System.Drawing.Size(355, 20);
             this.cmdTextBox.TabIndex = 12;
@@ -202,11 +180,11 @@
             // 
             this.SendCmd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.SendCmd.Enabled = false;
-            this.SendCmd.Location = new System.Drawing.Point(601, 362);
+            this.SendCmd.Location = new System.Drawing.Point(786, 426);
             this.SendCmd.Name = "SendCmd";
             this.SendCmd.Size = new System.Drawing.Size(170, 23);
             this.SendCmd.TabIndex = 13;
-            this.SendCmd.Text = "SendCmd";
+            this.SendCmd.Text = "Send command to server";
             this.SendCmd.UseVisualStyleBackColor = true;
             this.SendCmd.Click += new System.EventHandler(this.SendCmd_Click);
             // 
@@ -214,11 +192,11 @@
             // 
             this.EditCfg.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.EditCfg.Enabled = false;
-            this.EditCfg.Location = new System.Drawing.Point(601, 229);
+            this.EditCfg.Location = new System.Drawing.Point(601, 224);
             this.EditCfg.Name = "EditCfg";
-            this.EditCfg.Size = new System.Drawing.Size(75, 23);
+            this.EditCfg.Size = new System.Drawing.Size(170, 23);
             this.EditCfg.TabIndex = 15;
-            this.EditCfg.Text = "EditCfg";
+            this.EditCfg.Text = "Edit server config";
             this.EditCfg.UseVisualStyleBackColor = true;
             this.EditCfg.Click += new System.EventHandler(this.EditCfg_Click);
             // 
@@ -226,11 +204,11 @@
             // 
             this.PlayerManagerBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.PlayerManagerBtn.Enabled = false;
-            this.PlayerManagerBtn.Location = new System.Drawing.Point(601, 316);
+            this.PlayerManagerBtn.Location = new System.Drawing.Point(601, 398);
             this.PlayerManagerBtn.Name = "PlayerManagerBtn";
             this.PlayerManagerBtn.Size = new System.Drawing.Size(170, 23);
             this.PlayerManagerBtn.TabIndex = 16;
-            this.PlayerManagerBtn.Text = "PlayerManager";
+            this.PlayerManagerBtn.Text = "Player Manager";
             this.PlayerManagerBtn.UseVisualStyleBackColor = true;
             this.PlayerManagerBtn.Click += new System.EventHandler(this.PlayerManager_Click);
             // 
@@ -238,11 +216,11 @@
             // 
             this.EditStCmd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.EditStCmd.Enabled = false;
-            this.EditStCmd.Location = new System.Drawing.Point(696, 229);
+            this.EditStCmd.Location = new System.Drawing.Point(601, 253);
             this.EditStCmd.Name = "EditStCmd";
-            this.EditStCmd.Size = new System.Drawing.Size(75, 23);
+            this.EditStCmd.Size = new System.Drawing.Size(170, 23);
             this.EditStCmd.TabIndex = 18;
-            this.EditStCmd.Text = "EditStCmd";
+            this.EditStCmd.Text = "Edit start commands";
             this.EditStCmd.UseVisualStyleBackColor = true;
             this.EditStCmd.Click += new System.EventHandler(this.EditStCmd_Click);
             // 
@@ -250,22 +228,22 @@
             // 
             this.ManPacks.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.ManPacks.Enabled = false;
-            this.ManPacks.Location = new System.Drawing.Point(601, 287);
+            this.ManPacks.Location = new System.Drawing.Point(601, 369);
             this.ManPacks.Name = "ManPacks";
-            this.ManPacks.Size = new System.Drawing.Size(75, 23);
+            this.ManPacks.Size = new System.Drawing.Size(170, 23);
             this.ManPacks.TabIndex = 19;
-            this.ManPacks.Text = "ManPacks";
+            this.ManPacks.Text = "Manage server packs";
             this.ManPacks.UseVisualStyleBackColor = true;
             // 
             // SingBackup
             // 
             this.SingBackup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.SingBackup.Enabled = false;
-            this.SingBackup.Location = new System.Drawing.Point(696, 258);
+            this.SingBackup.Location = new System.Drawing.Point(601, 311);
             this.SingBackup.Name = "SingBackup";
-            this.SingBackup.Size = new System.Drawing.Size(75, 23);
+            this.SingBackup.Size = new System.Drawing.Size(170, 23);
             this.SingBackup.TabIndex = 20;
-            this.SingBackup.Text = "SingBackup";
+            this.SingBackup.Text = "Backup selected server";
             this.SingBackup.UseVisualStyleBackColor = true;
             this.SingBackup.Click += new System.EventHandler(this.SingBackup_Click);
             // 
@@ -273,11 +251,11 @@
             // 
             this.RestartSrv.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.RestartSrv.Enabled = false;
-            this.RestartSrv.Location = new System.Drawing.Point(696, 287);
+            this.RestartSrv.Location = new System.Drawing.Point(601, 340);
             this.RestartSrv.Name = "RestartSrv";
-            this.RestartSrv.Size = new System.Drawing.Size(75, 23);
+            this.RestartSrv.Size = new System.Drawing.Size(170, 23);
             this.RestartSrv.TabIndex = 21;
-            this.RestartSrv.Text = "RestartSvr";
+            this.RestartSrv.Text = "Restart selected server";
             this.RestartSrv.UseVisualStyleBackColor = true;
             this.RestartSrv.Click += new System.EventHandler(this.RestartSrv_Click);
             // 
@@ -285,11 +263,11 @@
             // 
             this.Rollbackup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.Rollbackup.Enabled = false;
-            this.Rollbackup.Location = new System.Drawing.Point(601, 258);
+            this.Rollbackup.Location = new System.Drawing.Point(601, 282);
             this.Rollbackup.Name = "Rollbackup";
-            this.Rollbackup.Size = new System.Drawing.Size(75, 23);
+            this.Rollbackup.Size = new System.Drawing.Size(170, 23);
             this.Rollbackup.TabIndex = 22;
-            this.Rollbackup.Text = "RollBackup";
+            this.Rollbackup.Text = "Rollback a backup";
             this.Rollbackup.UseVisualStyleBackColor = true;
             // 
             // SvcLog
@@ -315,11 +293,24 @@
             this.ServerInfoBox.Size = new System.Drawing.Size(170, 95);
             this.ServerInfoBox.TabIndex = 25;
             // 
+            // newSrvBtn
+            // 
+            this.newSrvBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.newSrvBtn.Enabled = false;
+            this.newSrvBtn.Location = new System.Drawing.Point(786, 224);
+            this.newSrvBtn.Name = "newSrvBtn";
+            this.newSrvBtn.Size = new System.Drawing.Size(170, 23);
+            this.newSrvBtn.TabIndex = 26;
+            this.newSrvBtn.Text = "Deploy new server";
+            this.newSrvBtn.UseVisualStyleBackColor = true;
+            this.newSrvBtn.Click += new System.EventHandler(this.newSrvBtn_Click);
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(984, 460);
+            this.Controls.Add(this.newSrvBtn);
             this.Controls.Add(this.ServerInfoBox);
             this.Controls.Add(this.SvcLog);
             this.Controls.Add(this.Rollbackup);
@@ -333,10 +324,8 @@
             this.Controls.Add(this.cmdTextBox);
             this.Controls.Add(this.GlobBackup);
             this.Controls.Add(this.ChkUpdates);
-            this.Controls.Add(this.EditService);
+            this.Controls.Add(this.removeSrvBtn);
             this.Controls.Add(this.EditGlobals);
-            this.Controls.Add(this.RestartSvc);
-            this.Controls.Add(this.StopStartSvc);
             this.Controls.Add(this.Disconn);
             this.Controls.Add(this.ServerSelectBox);
             this.Controls.Add(this.LogBox);
@@ -358,10 +347,8 @@
         public System.Windows.Forms.TextBox LogBox;
         private System.Windows.Forms.ListBox ServerSelectBox;
         private System.Windows.Forms.Button Disconn;
-        private System.Windows.Forms.Button StopStartSvc;
-        private System.Windows.Forms.Button RestartSvc;
         private System.Windows.Forms.Button EditGlobals;
-        private System.Windows.Forms.Button EditService;
+        private System.Windows.Forms.Button removeSrvBtn;
         private System.Windows.Forms.Button ChkUpdates;
         private System.Windows.Forms.Button GlobBackup;
         private System.Windows.Forms.TextBox cmdTextBox;
@@ -376,6 +363,7 @@
         private System.Windows.Forms.CheckBox SvcLog;
         private System.Windows.Forms.TextBox ServerInfoBox;
         public System.Windows.Forms.ComboBox HostListBox;
+        private System.Windows.Forms.Button newSrvBtn;
     }
 }
 

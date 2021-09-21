@@ -70,7 +70,6 @@ namespace BedrockService.Client.Forms
             connectedHost = null;
         }
 
-
         private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
             Console.WriteLine("Stopping log thread...");
@@ -202,6 +201,16 @@ namespace BedrockService.Client.Forms
 
         private void GlobBackup_Click(object sender, EventArgs e)
         {
+            FormManager.GetTCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.BackupAll);
+        }
+
+        private void newSrvBtn_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void removeSrvBtn_Click(object sender, EventArgs e)
+        {
 
         }
 
@@ -268,6 +277,11 @@ namespace BedrockService.Client.Forms
             }
         }
 
+        private void ChkUpdates_Click(object sender, EventArgs e)
+        {
+            FormManager.GetTCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.CheckUpdates);
+        }
+
         private void ComponentEnableManager()
         {
             Connect.Enabled = connectedHost == null;
@@ -276,8 +290,8 @@ namespace BedrockService.Client.Forms
             //RestartSvc.Enabled = connectedHost != null;
             EditGlobals.Enabled = connectedHost != null;
             //EditService.Enabled = connectedHost != null;
-            //ChkUpdates.Enabled = connectedHost != null;
-            //GlobBackup.Enabled = connectedHost != null;
+            ChkUpdates.Enabled = connectedHost != null;
+            GlobBackup.Enabled = connectedHost != null;
             EditCfg.Enabled = (connectedHost != null && selectedServer != null);
             PlayerManagerBtn.Enabled = (connectedHost != null && selectedServer != null);
             EditStCmd.Enabled = (connectedHost != null && selectedServer != null);
