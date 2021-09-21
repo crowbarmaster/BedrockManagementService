@@ -169,7 +169,7 @@
             // 
             // cmdTextBox
             // 
-            this.cmdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdTextBox.Enabled = false;
             this.cmdTextBox.Location = new System.Drawing.Point(425, 428);
             this.cmdTextBox.Name = "cmdTextBox";
@@ -178,7 +178,7 @@
             // 
             // SendCmd
             // 
-            this.SendCmd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.SendCmd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.SendCmd.Enabled = false;
             this.SendCmd.Location = new System.Drawing.Point(786, 426);
             this.SendCmd.Name = "SendCmd";
