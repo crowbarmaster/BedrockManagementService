@@ -18,7 +18,7 @@ using Topshelf.Logging;
 
 namespace BedrockService.Service
 {
-    public class BedrockService : HostInfo, ServiceControl
+    public class BedrockService : ServiceControl
     {
         public enum ServiceStatus
         {
@@ -257,7 +257,7 @@ namespace BedrockService.Service
 
                     foreach (var server in InstanceProvider.GetHostInfo().GetServerInfos())
                     {
-                        if (Updater.VersionChanged)
+                        if (Updater.VersionChanged || !File.Exists(server.ServerPath.Value + "\\bedrock_server.exe"))
                         {
                             ReplaceBuild(server);
                         }
@@ -281,9 +281,10 @@ namespace BedrockService.Service
             {
                 if (Directory.Exists(server.ServerPath.Value))
                     DeleteFilesRecursively(new DirectoryInfo(server.ServerPath.Value));
+                else
+                    Directory.CreateDirectory(server.ServerPath.Value);
                 ZipFile.ExtractToDirectory($@"{Program.ServiceDirectory}\Server\MCSFiles\Update_{server.ServerVersion}.zip", server.ServerPath.Value);
-                if (server.ServerExeName.Value != "bedrock_server.exe")
-                    File.Copy(server.ServerPath.Value + "\\bedrock_server.exe", server.ServerPath.Value + "\\" + server.ServerExeName.Value);
+                File.Copy(server.ServerPath.Value + "\\bedrock_server.exe", server.ServerPath.Value + "\\" + server.ServerExeName.Value);
             }
             catch (Exception e)
             {
