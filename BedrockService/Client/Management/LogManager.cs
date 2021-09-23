@@ -34,41 +34,25 @@ namespace BedrockService.Client.Management
                     byte[] stringsToBytes = Encoding.UTF8.GetBytes(sendString.ToString());
                     FormManager.GetTCPClient.SendData(stringsToBytes, Service.Networking.NetworkMessageSource.Client, Service.Networking.NetworkMessageDestination.Service, Service.Networking.NetworkMessageTypes.ConsoleLogUpdate);
                     Thread.Sleep(200);
-                    MainWindow mainWindow = FormManager.GetMainWindow;
+                    int currentLogBoxLength = 0;
 
-                    if (MainWindow.ShowsSvcLog)
+                    FormManager.GetMainWindow.LogBox.Invoke((MethodInvoker)delegate
                     {
-                        mainWindow.LogBox.Invoke((MethodInvoker)delegate
-                        {
-                            mainWindow.LogBox.Text = connectedHost.ServiceLogToString();
-                            mainWindow.LogBox.Select(mainWindow.LogBox.Text.Length - 1, 0);
-                            mainWindow.LogBox.Refresh();
-
-                        });
-                    }
-                    else
+                        currentLogBoxLength = FormManager.GetMainWindow.LogBox.TextLength;
+                    });
+                    if (FormManager.GetMainWindow.selectedServer == null)
                     {
-                        if (MainWindow.selectedServer == null)
-                        {
-                            mainWindow.Invoke((MethodInvoker)delegate
-                            {
-                                mainWindow.LogBox.Text = "";
-                                mainWindow.LogBox.Refresh();
-                            });
-                            return;
-                        }
-                        else if (MainWindow.selectedServer.ConsoleBuffer != null && MainWindow.selectedServer.ConsoleBuffer.Count() != 0)
-                        {
-
-                            mainWindow.LogBox.Invoke((MethodInvoker)delegate
-                            {
-                                mainWindow.LogBox.Text = MainWindow.selectedServer.ConsoleBuffer.ToString();
-                                mainWindow.LogBox.Select(mainWindow.LogBox.Text.Length - 1, 0);
-                                mainWindow.LogBox.Refresh();
-
-                            });
-                        }
+                        UpdateLogBoxInvoked("");
                     }
+                    if (FormManager.GetMainWindow.ShowsSvcLog && connectedHost.ServiceLog.Count != currentLogBoxLength)
+                    {
+                        UpdateLogBoxInvoked(connectedHost.ServiceLogToString());
+                    }
+                    else if (FormManager.GetMainWindow.selectedServer.ConsoleBuffer != null && FormManager.GetMainWindow.selectedServer.ConsoleBuffer.Count() != currentLogBoxLength)
+                    {
+                        UpdateLogBoxInvoked(FormManager.GetMainWindow.selectedServer.ConsoleBuffer.ToString());
+                    }
+
                 }
                 catch (Exception e)
                 {
@@ -87,10 +71,8 @@ namespace BedrockService.Client.Management
         {
             try
             {
-                if (LogThread != null || (LogThread != null && LogThread.IsAlive))
-                {
-                    return false;
-                }
+                if (LogThread != null && LogThread.IsAlive)
+                    LogThread.Abort();
                 LogThread = new Thread(new ThreadStart(LogManagerTask));
                 LogThread.Name = "LogThread";
                 LogThread.IsBackground = true;
@@ -123,6 +105,14 @@ namespace BedrockService.Client.Management
             Console.WriteLine("LogThread stopped");
             LogThread = null;
             return true;
+        }
+
+        private static void UpdateLogBoxInvoked (string contents)
+        {
+            FormManager.GetMainWindow.LogBox.Invoke((MethodInvoker)delegate
+            {
+                FormManager.GetMainWindow.UpdateLogBox(contents);
+            });
         }
     }
 }
