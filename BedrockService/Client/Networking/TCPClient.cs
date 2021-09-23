@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Windows.Forms;
 
 namespace BedrockService.Client.Networking
 {
@@ -24,7 +25,7 @@ namespace BedrockService.Client.Networking
         public Thread ClientReciever;
         public Thread HeartbeatThread;
         private int heartbeatFailTimeout;
-        private int heartbeatFailTimeoutLimit = 200;
+        private int heartbeatFailTimeoutLimit = 150;
         private bool heartbeatRecieved;
 
         public bool ConnectHost(HostInfo host)
@@ -93,7 +94,7 @@ namespace BedrockService.Client.Networking
                         NetworkMessageSource source = (NetworkMessageSource)buffer[0];
                         NetworkMessageDestination destination = (NetworkMessageDestination)buffer[1];
                         NetworkMessageTypes msgType = (NetworkMessageTypes)buffer[2];
-                        NetworkMessageStatus msgStatus = (NetworkMessageStatus)buffer[3];
+                        NetworkMessageFlags msgStatus = (NetworkMessageFlags)buffer[3];
                         string data = GetString(buffer);
                         if (destination != NetworkMessageDestination.Client)
                             continue;
@@ -111,13 +112,16 @@ namespace BedrockService.Client.Networking
                                             {
                                                 Console.WriteLine($"{message.Value}");
                                                 Console.WriteLine("Connection to Host successful!");
-                                                MainWindow.connectedHost = message.Value.ToObject<HostInfo>();
+                                                FormManager.GetMainWindow.connectedHost = null;
+                                                FormManager.GetMainWindow.connectedHost = message.Value.ToObject<HostInfo>();
+                                                FormManager.GetMainWindow.RefreshServerContents();
                                                 heartbeatFailTimeout = 0;
-                                                HeartbeatThread = new Thread(new ThreadStart(SendHeatbeatSignal))
-                                                {
-                                                    IsBackground = true,
-                                                    Name = "HeartBeatThread"
-                                                };
+                                                if(HeartbeatThread == null || !HeartbeatThread.IsAlive)
+                                                    HeartbeatThread = new Thread(new ThreadStart(SendHeatbeatSignal))
+                                                    {
+                                                        IsBackground = true,
+                                                        Name = "HeartBeatThread"
+                                                    };
                                                 HeartbeatThread.Start();
                                             }
                                         }
@@ -152,7 +156,7 @@ namespace BedrockService.Client.Networking
                                             srvCurLen = int.Parse(srvSplit[2]);
                                             if (srvName != "Service")
                                             {
-                                                ServerInfo bedrockServer = MainWindow.connectedHost.GetServerInfos().First(srv => srv.ServerName == srvName);
+                                                ServerInfo bedrockServer = FormManager.GetMainWindow.connectedHost.GetServerInfos().First(srv => srv.ServerName == srvName);
                                                 bedrockServer.ConsoleBuffer = bedrockServer.ConsoleBuffer ?? new ServerLogger(bedrockServer.ServerName);
                                                 int curCount = bedrockServer.ConsoleBuffer.Count();
                                                 if (curCount == srvCurLen)
@@ -162,10 +166,10 @@ namespace BedrockService.Client.Networking
                                             }
                                             else
                                             {
-                                                int curCount = MainWindow.connectedHost.ServiceLog.Count;
+                                                int curCount = FormManager.GetMainWindow.connectedHost.ServiceLog.Count;
                                                 if (curCount == srvCurLen)
                                                 {
-                                                    MainWindow.connectedHost.ServiceLog.Add(srvText);
+                                                    FormManager.GetMainWindow.connectedHost.ServiceLog.Add(srvText);
                                                 }
                                             }
                                         }
@@ -180,7 +184,7 @@ namespace BedrockService.Client.Networking
                                         string[] dataSplit = data.Split(';');
                                         JsonParser deserialized = JsonParser.Deserialize(dataSplit[1]);
                                         List<Player> fetchedPlayers = (List<Player>)deserialized.Value.ToObject(typeof(List<Player>));
-                                        MainWindow.connectedHost.GetServerInfos().First(srv => srv.ServerName == dataSplit[0]).KnownPlayers = fetchedPlayers;
+                                        FormManager.GetMainWindow.connectedHost.GetServerInfos().First(srv => srv.ServerName == dataSplit[0]).KnownPlayers = fetchedPlayers;
                                         PlayerInfoArrived = true;
 
                                         break;
@@ -202,7 +206,7 @@ namespace BedrockService.Client.Networking
         public void SendHeatbeatSignal()
         {
             Console.WriteLine("HeartbeatThread started.");
-            while (Connected)
+            while (HeartbeatThread != null && HeartbeatThread.IsAlive)
             {
                 heartbeatRecieved = false;
                 SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Heartbeat);
@@ -224,7 +228,7 @@ namespace BedrockService.Client.Networking
             }
         }
 
-        public bool SendData(byte[] bytes, NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type, NetworkMessageStatus status)
+        public bool SendData(byte[] bytes, NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type, NetworkMessageFlags status)
         {
             byte[] compiled = new byte[8 + bytes.Length];
             byte[] len = BitConverter.GetBytes(4 + bytes.Length);
@@ -254,19 +258,19 @@ namespace BedrockService.Client.Networking
 
         public bool SendData(NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type)
         {
-            if (SendData(new byte[0], source, destination, type, NetworkMessageStatus.None))
+            if (SendData(new byte[0], source, destination, type, NetworkMessageFlags.None))
                 return true;
             return false;
         }
 
         public bool SendData(byte[] bytes, NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type)
         {
-            if (SendData(bytes, source, destination, type, NetworkMessageStatus.None))
+            if (SendData(bytes, source, destination, type, NetworkMessageFlags.None))
                 return true;
             return false;
         }
 
-        public bool SendData(NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type, NetworkMessageStatus status)
+        public bool SendData(NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type, NetworkMessageFlags status)
         {
             if (SendData(new byte[0], source, destination, type, status))
                 return true;
