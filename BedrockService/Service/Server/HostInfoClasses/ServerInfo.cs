@@ -8,7 +8,6 @@ namespace BedrockService.Service.Server.HostInfoClasses
     {
         public bool Primary { get; set; }
         public string ServerName { get; set; }
-        public string ServerVersion { get; set; }
         public string FileName { get; set; }
         public ServerLogger ConsoleBuffer { get; set; }
         public Property ServerPath { get; set; }
@@ -32,6 +31,7 @@ namespace BedrockService.Service.Server.HostInfoClasses
             ServerPath = new Property("ServerPath", $@"{serversPath}\{ServerName}");
             ServerExeName = new Property("ServerExeName", $"BDS_{ServerName}.exe");
 
+            ServerPropList.Clear();
             ServerPropList.Add(new Property("server-name", "Default"));
             ServerPropList.Add(new Property("gamemode", "creative"));
             ServerPropList.Add(new Property("difficulty", "easy"));
@@ -91,7 +91,6 @@ namespace BedrockService.Service.Server.HostInfoClasses
         {
             return ServerName;
         }
-
     }
 
 }

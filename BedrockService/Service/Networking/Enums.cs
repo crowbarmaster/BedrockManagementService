@@ -19,6 +19,8 @@
     {
         Connect,
         Disconnect,
+        AddNewServer,
+        RemoveServer,
         ConsoleLogUpdate,
         PropUpdate,
         PlayersRequest,
@@ -29,13 +31,21 @@
         Backup,
         BackupAll,
         Restart,
+        RestartComplete,
         Heartbeat
     }
 
-    public enum NetworkMessageStatus
+    public enum NetworkMessageFlags
     {
         Failed,
         Passed,
+        RemoveBackups,
+        RemoveSrv,
+        RemovePlayers,
+        RemoveBckSrv,
+        RemoveBckPly,
+        RemovePlySrv,
+        RemoveAll,
         None
     }
 }

@@ -12,20 +12,9 @@ namespace BedrockService.Service.Server
 {
     public class BedrockServer
     {
-        Process process;
-        public StreamWriter StdInStream;
-        Thread WatchdogThread;
-        public ServerInfo serverInfo;
-
-
-        const string startupMessage = "[INFO] Server started.";
-        HostControl hostController;
-        public BedrockServer(ServerInfo serverToSet)
-        {
-            serverInfo = serverToSet;
-        }
         public Thread ServerThread { get; set; }
-
+        public StreamWriter StdInStream;
+        public ServerInfo serverInfo;
         public enum ServerStatus
         {
             Stopped,
@@ -33,15 +22,33 @@ namespace BedrockService.Service.Server
             Stopping,
             Started
         }
-
         public ServerStatus CurrentServerStatus;
+
+        Thread WatchdogThread;
+        Process process;
+        const string startupMessage = "[INFO] Server started.";
+        HostControl hostController;
+
+        public BedrockServer(ServerInfo serverToSet)
+        {
+            serverInfo = serverToSet;
+        }
+
+        public void StartControl(HostControl hostControl)
+        {
+            ServerThread = new Thread(new ParameterizedThreadStart(RunServer));
+            ServerThread.Name = "ServerThread";
+            ServerThread.IsBackground = true;
+            ServerThread.Start(hostControl);
+            CurrentServerStatus = ServerStatus.Started;
+        }
 
         public bool StopControl()
         {
             CurrentServerStatus = ServerStatus.Stopping;
             if (process != null)
             {
-                InstanceProvider.GetServiceLogger().AppendLine("Sending Stop to Bedrock . Process.HasExited = " + process.HasExited.ToString());
+                InstanceProvider.ServiceLogger.AppendLine("Sending Stop to Bedrock . Process.HasExited = " + process.HasExited.ToString());
 
                 process.CancelOutputRead();
                 process.CancelErrorRead();
@@ -59,25 +66,12 @@ namespace BedrockService.Service.Server
             return true;
         }
 
-        public void StartControl(HostControl hostControl)
-        {
-            if (ServerThread == null)
-            {
-                ServerThread = new Thread(new ParameterizedThreadStart(RunServer));
-                ServerThread.Name = "ServerThread";
-                ServerThread.IsBackground = true;
-            }
-
-            ServerThread.Start(hostControl);
-            CurrentServerStatus = ServerStatus.Started;
-        }
-
         public void RunServer(object hostControl)
         {
             hostController = (HostControl)hostControl;
             string appName = serverInfo.ServerExeName.Value.Substring(0, serverInfo.ServerExeName.Value.Length - 4);
-            InstanceProvider.GetConfigManager().WriteJSONFiles(serverInfo);
-            InstanceProvider.GetConfigManager().SaveServerProps(serverInfo, false);
+            InstanceProvider.ConfigManager.WriteJSONFiles(serverInfo);
+            InstanceProvider.ConfigManager.SaveServerProps(serverInfo, false);
 
             try
             {
@@ -88,7 +82,7 @@ namespace BedrockService.Service.Server
                         Process[] processList = Process.GetProcessesByName(appName);
                         if (processList.Length != 0)
                         {
-                            InstanceProvider.GetServiceLogger().AppendLine($@"Application {appName} was found running! Killing to proceed.");
+                            InstanceProvider.ServiceLogger.AppendLine($@"Application {appName} was found running! Killing to proceed.");
                             KillProcess(processList);
                         }
                     }
@@ -97,84 +91,29 @@ namespace BedrockService.Service.Server
                 }
                 else
                 {
-                    InstanceProvider.GetServiceLogger().AppendLine("The Bedrock Server is not accessible at " + serverInfo.ServerPath.Value + "\\" + serverInfo.ServerExeName.Value + "\r\nCheck if the file is at that location and that permissions are correct.");
+                    InstanceProvider.ServiceLogger.AppendLine("The Bedrock Server is not accessible at " + serverInfo.ServerPath.Value + "\\" + serverInfo.ServerExeName.Value + "\r\nCheck if the file is at that location and that permissions are correct.");
                     hostController.Stop();
                 }
             }
             catch (Exception e)
             {
-                InstanceProvider.GetServiceLogger().AppendLine($"Error Running Bedrock Server: {e.StackTrace}");
+                InstanceProvider.ServiceLogger.AppendLine($"Error Running Bedrock Server: {e.StackTrace}");
                 hostController.Stop();
 
             }
 
         }
 
-        private void CreateProcess()
-        {
-            process = Process.Start(new ProcessStartInfo
-            {
-                UseShellExecute = false,
-                RedirectStandardError = true,
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true,
-                WindowStyle = ProcessWindowStyle.Hidden,
-                FileName = serverInfo.ServerPath.Value + "\\" + serverInfo.ServerExeName.Value
-            });
-            process.PriorityClass = ProcessPriorityClass.RealTime;
-            process.OutputDataReceived += StdOutToLog;
-            process.ErrorDataReceived += ErrOutToLog;
-
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
-            StdInStream = process.StandardInput;
-        }
-
-        private void KillProcess(Process[] processList)
-        {
-            foreach (Process process in processList)
-            {
-                try
-                {
-                    process.Kill();
-                    Thread.Sleep(1000);
-                    InstanceProvider.GetServiceLogger().AppendLine($@"App {serverInfo.ServerExeName.Value.Substring(0, serverInfo.ServerExeName.Value.Length - 4)} killed!");
-                }
-                catch (Exception e)
-                {
-                    InstanceProvider.GetServiceLogger().AppendLine($"Killing proccess resulted in error: {e.StackTrace}");
-                }
-            }
-        }
-
-        private bool MonitoredAppExists(string monitoredAppName)
-        {
-            try
-            {
-                Process[] processList = Process.GetProcessesByName(monitoredAppName);
-                if (processList.Length == 0)
-                {
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
-            }
-            catch (Exception ex)
-            {
-                InstanceProvider.GetServiceLogger().AppendLine("ApplicationWatcher MonitoredAppExists Exception: " + ex.StackTrace);
-                return true;
-            }
-        }
-
         public void StartWatchdog(HostControl hostControl)
         {
             hostController = hostControl;
-            WatchdogThread = new Thread(new ThreadStart(ApplicationWatchdogMonitor));
-            WatchdogThread.IsBackground = true;
-            WatchdogThread.Name = "WatchdogMonitor";
-            WatchdogThread.Start();
+            if (WatchdogThread == null)
+            {
+                WatchdogThread = new Thread(new ThreadStart(ApplicationWatchdogMonitor));
+                WatchdogThread.IsBackground = true;
+                WatchdogThread.Name = "WatchdogMonitor";
+                WatchdogThread.Start();
+            }
         }
 
         public void ApplicationWatchdogMonitor()
@@ -186,8 +125,8 @@ namespace BedrockService.Service.Server
                 {
                     hostController.RequestAdditionalTime(TimeSpan.FromSeconds(30));
                     StartControl(hostController);
-                    InstanceProvider.GetServiceLogger().AppendLine($"Recieved start signal for server {serverInfo.ServerName}.");
-                    Thread.Sleep(1500);
+                    InstanceProvider.ServiceLogger.AppendLine($"Recieved start signal for server {serverInfo.ServerName}.");
+                    Thread.Sleep(5000);
                 }
                 while (MonitoredAppExists(appName) && CurrentServerStatus == ServerStatus.Started)
                 {
@@ -195,8 +134,8 @@ namespace BedrockService.Service.Server
                 }
                 if (MonitoredAppExists(appName) && CurrentServerStatus == ServerStatus.Stopping)
                 {
-                    InstanceProvider.GetServiceLogger().AppendLine($"BedrockService signaled stop to application {appName}.");
-                    InstanceProvider.GetServiceLogger().AppendLine("Stopping...");
+                    InstanceProvider.ServiceLogger.AppendLine($"BedrockService signaled stop to application {appName}.");
+                    InstanceProvider.ServiceLogger.AppendLine("Stopping...");
                     StopControl();
                     while (CurrentServerStatus == ServerStatus.Stopping)
                     {
@@ -206,12 +145,13 @@ namespace BedrockService.Service.Server
                 if (!MonitoredAppExists(appName) && CurrentServerStatus == ServerStatus.Started)
                 {
                     StopControl();
-                    InstanceProvider.GetServiceLogger().AppendLine($"Started application {appName} was not found in running processes... Resarting {appName}.");
+                    InstanceProvider.ServiceLogger.AppendLine($"Started application {appName} was not found in running processes... Resarting {appName}.");
                     StartControl(hostController);
+                    Thread.Sleep(1500);
                 }
                 if (!MonitoredAppExists(appName) && CurrentServerStatus == ServerStatus.Stopped)
                 {
-                    InstanceProvider.GetServiceLogger().AppendLine("Server stopped successfully.");
+                    InstanceProvider.ServiceLogger.AppendLine("Server stopped successfully.");
                 }
                 while (!MonitoredAppExists(appName) && CurrentServerStatus == ServerStatus.Stopped)
                 {
@@ -220,78 +160,23 @@ namespace BedrockService.Service.Server
             }
         }
 
-        private void StdOutToLog(object sender, DataReceivedEventArgs e)
-        {
-            serverInfo.ConsoleBuffer = serverInfo.ConsoleBuffer ?? new ServerLogger(InstanceProvider.GetHostInfo().GetGlobalValue("LogServersToFile") == "true", serverInfo.ServerName);
-            if (e.Data != "[INFO] Running AutoCompaction...")
-            {
-                serverInfo.ConsoleBuffer.Append($"{serverInfo.ServerName}: {e.Data}\r\n");
-                if (e.Data != null)
-                {
-                    string dataMsg = e.Data;
-                    if (dataMsg.Contains(startupMessage))
-                    {
-                        CurrentServerStatus = ServerStatus.Started;
-                        Thread.Sleep(1000);
-
-                        if (serverInfo.StartCmds.Count > 0)
-                        {
-                            RunStartupCommands();
-                        }
-                    }
-                    if (dataMsg.StartsWith("[INFO] Player connected"))
-                    {
-                        int usernameStart = dataMsg.IndexOf(':') + 2;
-                        int usernameEnd = dataMsg.IndexOf(',');
-                        int usernameLength = usernameEnd - usernameStart;
-                        int xuidStart = dataMsg.IndexOf(':', usernameEnd) + 2;
-                        string username = dataMsg.Substring(usernameStart, usernameLength);
-                        string xuid = dataMsg.Substring(xuidStart, dataMsg.Length - xuidStart);
-                        Console.WriteLine($"Player {username} connected with XUID: {xuid}");
-                        InstanceProvider.GetPlayerManager().PlayerConnected(username, xuid, serverInfo);
-                    }
-                    if (dataMsg.StartsWith("[INFO] Player disconnected"))
-                    {
-                        int usernameStart = dataMsg.IndexOf(':') + 2;
-                        int usernameEnd = dataMsg.IndexOf(',');
-                        int usernameLength = usernameEnd - usernameStart;
-                        int xuidStart = dataMsg.IndexOf(':', usernameEnd) + 2;
-                        string username = dataMsg.Substring(usernameStart, usernameLength);
-                        string xuid = dataMsg.Substring(xuidStart, dataMsg.Length - xuidStart);
-                        Console.WriteLine($"Player {username} disconnected with XUID: {xuid}");
-                        InstanceProvider.GetPlayerManager().PlayerDisconnected(xuid, serverInfo);
-                    }
-                }
-            }
-        }
-
-        private void ErrOutToLog(object sender, DataReceivedEventArgs e)
-        {
-            serverInfo.ConsoleBuffer.Append($"{serverInfo.ServerName}: ERROR!! {e.Data}\r\n");
-        }
-
         public bool Backup()
         {
             try
             {
                 FileInfo exe = new FileInfo(serverInfo.ServerPath.Value + serverInfo.ServerExeName.Value);
-                string configBackupPath = InstanceProvider.GetHostInfo().GetGlobalValue("BackupPath");
-                DirectoryInfo backupDir = new DirectoryInfo($@"{Program.ServiceDirectory}\Backups\{serverInfo.ServerName}");
-                if (configBackupPath.Length > 0)
-                {
-                    if (configBackupPath != "Default")
-                        backupDir = new DirectoryInfo($@"{configBackupPath}\{serverInfo.ServerName}");
-                }
+                string configBackupPath = InstanceProvider.HostInfo.GetGlobalValue("BackupPath");
+                DirectoryInfo backupDir = new DirectoryInfo($@"{configBackupPath}\{serverInfo.ServerName}");
                 DirectoryInfo serverDir = new DirectoryInfo(serverInfo.ServerPath.Value);
                 DirectoryInfo worldsDir = new DirectoryInfo($@"{serverInfo.ServerPath.Value}\worlds");
                 if (!Directory.Exists(backupDir.FullName))
                 {
-                    Directory.CreateDirectory($@"{InstanceProvider.GetHostInfo().GetGlobalValue("BackupPath")}\{serverInfo.ServerName}");
+                    Directory.CreateDirectory($@"{InstanceProvider.HostInfo.GetGlobalValue("BackupPath")}\{serverInfo.ServerName}");
                 }
                 int dirCount = backupDir.GetDirectories().Length; // this line creates a new int with a value derived from the number of directories found in the backups folder.
                 try // use a try catch any time you know an error could occur.
                 {
-                    if (dirCount >= int.Parse(InstanceProvider.GetHostInfo().GetGlobalValue("MaxBackupCount"))) // Compare the directory count with the value set in the config. Values from config are stored as strings, and therfore must be converted to integer first for compare.
+                    if (dirCount >= int.Parse(InstanceProvider.HostInfo.GetGlobalValue("MaxBackupCount"))) // Compare the directory count with the value set in the config. Values from config are stored as strings, and therfore must be converted to integer first for compare.
                     {
                         Regex reg = new Regex(@"Backup_(.*)$"); // Creates a new Regex class with our pattern loaded.
 
@@ -323,17 +208,17 @@ namespace BedrockService.Service.Server
                 {
                     if (e.GetType() == typeof(FormatException)) // if the exception is equal a type of FormatException, Do the following... if this was a IOException, they would not match.
                     {
-                        InstanceProvider.GetServiceLogger().AppendLine("Error in Config! MaxBackupCount must be nothing but a number!"); // this exception will be thrown if the string could not become a number (i.e. of there was a letter in the mix).
+                        InstanceProvider.ServiceLogger.AppendLine("Error in Config! MaxBackupCount must be nothing but a number!"); // this exception will be thrown if the string could not become a number (i.e. of there was a letter in the mix).
                     }
                 }
 
                 var targetDirectory = backupDir.CreateSubdirectory($"Backup_{DateTime.Now:yyyyMMddhhmmss}");
-                InstanceProvider.GetServiceLogger().AppendLine($"Backing up files for server {serverInfo.ServerName}. Please wait!");
-                if (InstanceProvider.GetHostInfo().GetGlobalValue("EntireBackups") == "false")
+                InstanceProvider.ServiceLogger.AppendLine($"Backing up files for server {serverInfo.ServerName}. Please wait!");
+                if (InstanceProvider.HostInfo.GetGlobalValue("EntireBackups") == "false")
                 {
                     CopyFilesRecursively(worldsDir, targetDirectory);
                 }
-                else if (InstanceProvider.GetHostInfo().GetGlobalValue("EntireBackups") == "true")
+                else if (InstanceProvider.HostInfo.GetGlobalValue("EntireBackups") == "true")
                 {
                     CopyFilesRecursively(serverDir, targetDirectory);
                 }
@@ -342,12 +227,133 @@ namespace BedrockService.Service.Server
             }
             catch (Exception e)
             {
-                InstanceProvider.GetServiceLogger().AppendLine($"Error with Backup: {e.StackTrace}");
+                InstanceProvider.ServiceLogger.AppendLine($"Error with Backup: {e.StackTrace}");
                 return false;
             }
         }
 
-        private static void CopyFilesRecursively(DirectoryInfo source, DirectoryInfo target)
+        private void CreateProcess()
+        {
+            process = Process.Start(new ProcessStartInfo
+            {
+                UseShellExecute = false,
+                RedirectStandardError = true,
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                FileName = serverInfo.ServerPath.Value + "\\" + serverInfo.ServerExeName.Value
+            });
+            process.PriorityClass = ProcessPriorityClass.RealTime;
+            process.OutputDataReceived += StdOutToLog;
+            process.ErrorDataReceived += ErrOutToLog;
+
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+            StdInStream = process.StandardInput;
+        }
+
+        private void KillProcess(Process[] processList)
+        {
+            foreach (Process process in processList)
+            {
+                try
+                {
+                    process.Kill();
+                    Thread.Sleep(1000);
+                    InstanceProvider.ServiceLogger.AppendLine($@"App {serverInfo.ServerExeName.Value.Substring(0, serverInfo.ServerExeName.Value.Length - 4)} killed!");
+                }
+                catch (Exception e)
+                {
+                    InstanceProvider.ServiceLogger.AppendLine($"Killing proccess resulted in error: {e.StackTrace}");
+                }
+            }
+        }
+
+        private bool MonitoredAppExists(string monitoredAppName)
+        {
+            try
+            {
+                Process[] processList = Process.GetProcessesByName(monitoredAppName);
+                if (processList.Length == 0)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                InstanceProvider.ServiceLogger.AppendLine("ApplicationWatcher MonitoredAppExists Exception: " + ex.StackTrace);
+                return true;
+            }
+        }
+
+        private void StdOutToLog(object sender, DataReceivedEventArgs e)
+        {
+            serverInfo.ConsoleBuffer = serverInfo.ConsoleBuffer ?? new ServerLogger(InstanceProvider.HostInfo.GetGlobalValue("LogServersToFile") == "true", serverInfo.ServerName);
+            if (e.Data != null && !e.Data.Contains("[INFO] Running AutoCompaction..."))
+            {
+                string dataMsg = e.Data;
+                string logFileText = "NO LOG FILE! - ";
+                if (dataMsg.StartsWith(logFileText))
+                    dataMsg = dataMsg.Substring(logFileText.Length, dataMsg.Length - logFileText.Length);
+                serverInfo.ConsoleBuffer.Append($"{serverInfo.ServerName}: {dataMsg}\r\n");
+                if (e.Data != null)
+                {
+                    
+                    if (dataMsg.Contains(startupMessage))
+                    {
+                        CurrentServerStatus = ServerStatus.Started;
+                        Thread.Sleep(1000);
+
+                        if (serverInfo.StartCmds.Count > 0)
+                        {
+                            RunStartupCommands();
+                        }
+                    }
+                    if (dataMsg.StartsWith("[INFO] Player connected"))
+                    {
+                        int usernameStart = dataMsg.IndexOf(':') + 2;
+                        int usernameEnd = dataMsg.IndexOf(',');
+                        int usernameLength = usernameEnd - usernameStart;
+                        int xuidStart = dataMsg.IndexOf(':', usernameEnd) + 2;
+                        string username = dataMsg.Substring(usernameStart, usernameLength);
+                        string xuid = dataMsg.Substring(xuidStart, dataMsg.Length - xuidStart);
+                        Console.WriteLine($"Player {username} connected with XUID: {xuid}");
+                        InstanceProvider.PlayerManager.PlayerConnected(username, xuid, serverInfo);
+                    }
+                    if (dataMsg.StartsWith("[INFO] Player disconnected"))
+                    {
+                        int usernameStart = dataMsg.IndexOf(':') + 2;
+                        int usernameEnd = dataMsg.IndexOf(',');
+                        int usernameLength = usernameEnd - usernameStart;
+                        int xuidStart = dataMsg.IndexOf(':', usernameEnd) + 2;
+                        string username = dataMsg.Substring(usernameStart, usernameLength);
+                        string xuid = dataMsg.Substring(xuidStart, dataMsg.Length - xuidStart);
+                        Console.WriteLine($"Player {username} disconnected with XUID: {xuid}");
+                        InstanceProvider.PlayerManager.PlayerDisconnected(xuid, serverInfo);
+                    }
+                }
+            }
+        }
+
+        private void ErrOutToLog(object sender, DataReceivedEventArgs e)
+        {
+            serverInfo.ConsoleBuffer.Append($"{serverInfo.ServerName}: ERROR!! {e.Data}\r\n");
+        }
+ 
+        private void RunStartupCommands()
+        {
+            foreach (StartCmdEntry cmd in serverInfo.StartCmds)
+            {
+                StdInStream.WriteLine(cmd.Command.Trim());
+                Thread.Sleep(1000);
+            }
+        }
+
+        private void CopyFilesRecursively(DirectoryInfo source, DirectoryInfo target)
         {
             foreach (DirectoryInfo dir in source.GetDirectories())
                 CopyFilesRecursively(dir, target.CreateSubdirectory(dir.Name));
@@ -355,7 +361,7 @@ namespace BedrockService.Service.Server
                 file.CopyTo(Path.Combine(target.FullName, file.Name));
         }
 
-        private static void DeleteFilesRecursively(DirectoryInfo source)
+        private void DeleteFilesRecursively(DirectoryInfo source)
         {
             foreach (DirectoryInfo dir in source.GetDirectories())
             {
@@ -366,15 +372,6 @@ namespace BedrockService.Service.Server
             {
                 file.Delete();
                 Directory.Delete(source.FullName);
-            }
-        }
-
-        private void RunStartupCommands()
-        {
-            foreach (StartCmdEntry cmd in serverInfo.StartCmds)
-            {
-                StdInStream.WriteLine(cmd.Command.Trim());
-                Thread.Sleep(1000);
             }
         }
     }

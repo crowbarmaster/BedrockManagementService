@@ -22,72 +22,67 @@ namespace BedrockService.Service
         private static HostInfo hostInfo;
         private static PlayerManager playerManager;
         private static int storedPort;
-
-        public static BedrockService GetBedrockService()
+        public static BedrockService BedrockService
         {
-            if (bedrockService == null)
+            get
             {
-                bedrockService = new BedrockService();
+                if (bedrockService == null)
+                {
+                    bedrockService = new BedrockService();
+                }
+                return bedrockService;
             }
-            return bedrockService;
         }
-
-        public static BedrockServer GetBedrockServer(string serverName)
+        public static HostInfo HostInfo
         {
-            BedrockServer serverFound = GetBedrockService().bedrockServers.First(srv => srv.serverInfo.ServerName == serverName);
-            return serverFound;
-        }
-
-        public static HostInfo GetHostInfo()
-        {
-            if (hostInfo == null)
+            get
             {
-                hostInfo = new HostInfo();
+                if (hostInfo == null)
+                {
+                    hostInfo = new HostInfo();
+                }
+                return hostInfo;
             }
-            return hostInfo;
         }
-
-        public static PlayerManager GetPlayerManager()
+        public static PlayerManager PlayerManager
         {
-            if (playerManager == null)
+            get
             {
-                playerManager = new PlayerManager();
+                if (playerManager == null)
+                {
+                    playerManager = new PlayerManager();
+                }
+                return playerManager;
             }
-            return playerManager;
         }
-
-        public static ConfigManager GetConfigManager()
+        public static ConfigManager ConfigManager
         {
-            if (configManager == null)
+            get
             {
-                configManager = new ConfigManager();
+                if (configManager == null)
+                {
+                    configManager = new ConfigManager();
+                }
+                return configManager;
             }
-            return configManager;
         }
-
-        public static ServiceLogger GetServiceLogger()
+        public static ServiceLogger ServiceLogger
         {
-            if (serviceLogger == null)
+            get
             {
-                serviceLogger = new ServiceLogger(true);
+                if (serviceLogger == null)
+                {
+                    serviceLogger = new ServiceLogger(true);
+                }
+                return serviceLogger;
             }
-            return serviceLogger;
         }
-
-        public static TcpListener InitTCPListener(IPAddress address, int port)
+        public static Thread ClientService
         {
-            storedAddress = address;
-            storedPort = port;
-            tcpListener = null;
-            tcpListener = new TcpListener(storedAddress, storedPort);
-            return tcpListener;
-        }
-
-        public static TcpListener GetTcpListener()
-        {
-            if (tcpListener != null)
-                return tcpListener;
-            return null;
+            get
+            {
+                return clientservice;
+            }
         }
 
         public static Thread InitClientService(ThreadStart threadStart)
@@ -103,22 +98,6 @@ namespace BedrockService.Service
             return clientservice;
         }
 
-        public static Thread GetClientService() => clientservice;
-
-        public static bool GetClientServiceAlive() => clientservice != null && clientservice.IsAlive;
-
-        public static void DisposeClientService()
-        {
-            if (clientservice != null)
-            {
-                if (clientservice.IsAlive)
-                {
-                    clientservice.Abort();
-                }
-                clientservice = null;
-            }
-        }
-
         public static Thread InitHeartbeatThread(ThreadStart threadStart)
         {
             if (heartbeatThread == null || heartbeatThread.ThreadState == ThreadState.Stopped || heartbeatThread.ThreadState == ThreadState.Aborted)
@@ -132,10 +111,36 @@ namespace BedrockService.Service
             return heartbeatThread;
         }
 
-        public static Thread GetHeartbeatThread() => heartbeatThread;
+        public static TcpListener InitTCPListener(IPAddress address, int port)
+        {
+            storedAddress = address;
+            storedPort = port;
+            tcpListener = null;
+            tcpListener = new TcpListener(storedAddress, storedPort);
+            return tcpListener;
+        }
+
+        public static BedrockServer GetBedrockServer(string serverName)
+        {
+            BedrockServer serverFound = BedrockService.bedrockServers.First(srv => srv.serverInfo.ServerName == serverName);
+            return serverFound;
+        }
+
+        public static bool GetClientServiceAlive() => clientservice != null && clientservice.IsAlive;
 
         public static bool GetHeartbeatThreadAlive() => heartbeatThread != null && heartbeatThread.IsAlive;
 
+        public static void DisposeClientService()
+        {
+            if (clientservice != null)
+            {
+                if (clientservice.IsAlive)
+                {
+                    clientservice.Abort();
+                }
+                clientservice = null;
+            }
+        }
 
         public static void DisposeHeartbeatThread()
         {

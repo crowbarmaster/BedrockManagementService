@@ -1,8 +1,10 @@
 ﻿using BedrockService.Service.Server.HostInfoClasses;
+using BedrockService.Service.Networking;
 using System;
 using System.IO;
 using System.Linq;
 using System.Text;
+using BedrockService.Service.Server;
 
 namespace BedrockService.Service.Management
 {
@@ -16,6 +18,10 @@ namespace BedrockService.Service.Management
         public ConfigManager()
         {
             globalFile = $@"{configDir}\Globals.conf";
+            if (!Directory.Exists($@"{configDir}\KnownPlayers\Backups"))
+                Directory.CreateDirectory($@"{configDir}\KnownPlayers\Backups");
+            if (!Directory.Exists($@"{configDir}\RegisteredPlayers\Backups"))
+                Directory.CreateDirectory($@"{configDir}\RegisteredPlayers\Backups");
             if (!Directory.Exists($@"{configDir}\Backups"))
                 Directory.CreateDirectory($@"{configDir}\Backups");
         }
@@ -38,8 +44,8 @@ namespace BedrockService.Service.Management
                 if (file.EndsWith("Globals.conf"))
                 {
                     globFileResult = file;
-                    InstanceProvider.GetServiceLogger().AppendLine("Loading Globals...");
-                    InstanceProvider.GetHostInfo().SetGlobalsDefault();
+                    InstanceProvider.ServiceLogger.AppendLine("Loading Globals...");
+                    InstanceProvider.HostInfo.SetGlobalsDefault();
                     string[] lines = File.ReadAllLines(file);
                     foreach (string line in lines)
                     {
@@ -50,7 +56,12 @@ namespace BedrockService.Service.Management
                             {
                                 split[1] = "";
                             }
-                            if (InstanceProvider.GetHostInfo().SetGlobalProperty(split[0], split[1]))
+                            if (split[0] == "BackupPath")
+                            {
+                                if (split[1] == "Default")
+                                    split[1] = $@"{Program.ServiceDirectory}\Backups";
+                            }
+                            if (InstanceProvider.HostInfo.SetGlobalProperty(split[0], split[1]))
                             {
                                 if (split[0] == "ServersPath")
                                 {
@@ -59,7 +70,7 @@ namespace BedrockService.Service.Management
                             }
                             else
                             {
-                                InstanceProvider.GetServiceLogger().AppendLine($"Error! Key \"{split[0]}\" was not found! Check configs!");
+                                InstanceProvider.ServiceLogger.AppendLine($"Error! Key \"{split[0]}\" was not found! Check configs!");
                             }
 
 
@@ -69,11 +80,11 @@ namespace BedrockService.Service.Management
             }
             if (globFileResult == null)
             {
-                InstanceProvider.GetHostInfo().SetGlobalsDefault();
-                InstanceProvider.GetServiceLogger().AppendLine("Globals.conf was not found. Loaded defaults and saved to file.");
+                InstanceProvider.HostInfo.SetGlobalsDefault();
+                InstanceProvider.ServiceLogger.AppendLine("Globals.conf was not found. Loaded defaults and saved to file.");
                 SaveGlobalFile();
             }
-            InstanceProvider.GetHostInfo().ClearServerInfos();
+            InstanceProvider.HostInfo.ClearServerInfos();
             ServerInfo serverInfo = new ServerInfo();
             serverInfo.InitDefaults(serversPath);
             while (loading)
@@ -86,7 +97,7 @@ namespace BedrockService.Service.Management
                     serverInfo = new ServerInfo();
                     serverInfo.InitDefaults(serversPath);
                     serverInfo.FileName = FInfo.Name;
-                    serverInfo.ServerVersion = loadedVersion;
+                    InstanceProvider.HostInfo.ServerVersion = loadedVersion;
                     string[] linesArray = File.ReadAllLines(file);
                     foreach (string line in linesArray)
                     {
@@ -105,7 +116,7 @@ namespace BedrockService.Service.Management
                             switch (split[0])
                             {
                                 case "server-name":
-                                    InstanceProvider.GetServiceLogger().AppendLine($"Loading ServerInfo for server {split[1]}...");
+                                    InstanceProvider.ServiceLogger.AppendLine($"Loading ServerInfo for server {split[1]}...");
                                     serverInfo.ServerName = split[1];
                                     serverInfo.ServerPath.Value = $@"{serversPath}\{split[1]}";
                                     serverInfo.ServerExeName.Value = $"BDS_{split[1]}.exe";
@@ -119,9 +130,9 @@ namespace BedrockService.Service.Management
                             }
                         }
                     }
-                    InstanceProvider.GetHostInfo().GetServerInfos().Add(serverInfo);
+                    InstanceProvider.HostInfo.GetServerInfos().Add(serverInfo);
                 }
-                if (InstanceProvider.GetHostInfo().GetServerInfos().Count == 0)
+                if (InstanceProvider.HostInfo.GetServerInfos().Count == 0)
                 {
                     SaveServerProps(serverInfo, true);
                     files = Directory.GetFiles(configDir, "*.conf");
@@ -136,11 +147,11 @@ namespace BedrockService.Service.Management
 
         public void SaveGlobalFile()
         {
-            string[] output = new string[InstanceProvider.GetHostInfo().GetGlobals().Count + 3];
+            string[] output = new string[InstanceProvider.HostInfo.GetGlobals().Count + 3];
             int index = 0;
             output[index++] = "#Globals";
             output[index++] = string.Empty;
-            foreach (Property prop in InstanceProvider.GetHostInfo().GetGlobals())
+            foreach (Property prop in InstanceProvider.HostInfo.GetGlobals())
             {
                 output[index++] = $"{prop.KeyName}={prop.Value}";
             }
@@ -151,7 +162,7 @@ namespace BedrockService.Service.Management
 
         public ServerInfo LoadRegisteredPlayers(ServerInfo server)
         {
-            string filePath = $@"{configDir}\{server.ServerName}.preg";
+            string filePath = $@"{configDir}\RegisteredPlayers\{server.ServerName}.preg";
             if (!File.Exists(filePath))
             {
                 File.Create(filePath).Close();
@@ -162,21 +173,21 @@ namespace BedrockService.Service.Management
                 if (entry.StartsWith("#") || string.IsNullOrWhiteSpace(entry))
                     continue;
                 string[] split = entry.Split(',');
-                InstanceProvider.GetServiceLogger().AppendLine($"Server \"{server.ServerName}\" Loaded registered player: {split[1]}");
+                InstanceProvider.ServiceLogger.AppendLine($"Server \"{server.ServerName}\" Loaded registered player: {split[1]}");
                 Player playerFound = server.KnownPlayers.FirstOrDefault(ply => ply.XUID == split[0]);
                 if (playerFound == null)
                 {
                     server.KnownPlayers.Add(new Player(split[0], split[1], DateTime.Now.Ticks.ToString(), "0", "0", split[3].ToLower() == "true", split[2], split[4].ToLower() == "true", true));
                     continue;
                 }
-                InstanceProvider.GetPlayerManager().UpdatePlayerFromCfg(split[0], split[1], split[2], split[3], split[4], server);
+                InstanceProvider.PlayerManager.UpdatePlayerFromCfg(split[0], split[1], split[2], split[3], split[4], server);
             }
             return server;
         }
 
         public ServerInfo LoadPlayerDatabase(ServerInfo server)
         {
-            string filePath = $@"{configDir}\{server.ServerName}.playerdb";
+            string filePath = $@"{configDir}\KnownPlayers\{server.ServerName}.playerdb";
             if (!File.Exists(filePath))
             {
                 File.Create(filePath).Close();
@@ -187,7 +198,7 @@ namespace BedrockService.Service.Management
                 if (entry.StartsWith("#") || string.IsNullOrWhiteSpace(entry))
                     continue;
                 string[] split = entry.Split(',');
-                InstanceProvider.GetServiceLogger().AppendLine($"Server \"{server.ServerName}\" Loaded known player: {split[1]}");
+                InstanceProvider.ServiceLogger.AppendLine($"Server \"{server.ServerName}\" Loaded known player: {split[1]}");
                 server.KnownPlayers.Add(new Player(split[0], split[1], split[2], split[3], split[4], server.GetServerProp("default-player-permission-level").Value));
             }
             return server;
@@ -197,10 +208,10 @@ namespace BedrockService.Service.Management
         {
             lock (FileLock)
             {
-                string filePath = $@"{configDir}\{server.ServerName}.playerdb";
+                string filePath = $@"{configDir}\RegisteredPlayers\{server.ServerName}.playerdb";
                 if (File.Exists(filePath))
                 {
-                    File.Copy(filePath, $@"{configDir}\Backups\{server.ServerName}_{DateTime.Now.ToString("mmddyyhhmmssff")}.dbbak", true);
+                    File.Copy(filePath, $@"{configDir}\Backups\RegisteredPlayers\{server.ServerName}_{DateTime.Now.ToString("mmddyyhhmmssff")}.dbbak", true);
                 }
                 TextWriter writer = new StreamWriter(filePath);
                 foreach (Player entry in server.KnownPlayers)
@@ -216,10 +227,10 @@ namespace BedrockService.Service.Management
         {
             lock (FileLock)
             {
-                string filePath = $@"{configDir}\{server.ServerName}.preg";
+                string filePath = $@"{configDir}\KnownPlayers\{server.ServerName}.preg";
                 if (File.Exists(filePath))
                 {
-                    File.Copy(filePath, $@"{configDir}\Backups\{server.ServerName}_{DateTime.Now.ToString("mmddyyhhmmssff")}.bak", true);
+                    File.Copy(filePath, $@"{configDir}\Backups\KnownPlayers\{server.ServerName}_{DateTime.Now.ToString("mmddyyhhmmssff")}.bak", true);
                 }
                 TextWriter writer = new StreamWriter(filePath);
                 writer.WriteLine("# Registered player list");
@@ -235,7 +246,6 @@ namespace BedrockService.Service.Management
                 writer.Close();
             }
         }
-
 
         public void WriteJSONFiles(ServerInfo server)
         {
@@ -320,6 +330,122 @@ namespace BedrockService.Service.Management
                 }
                 File.WriteAllLines($@"{server.ServerPath.Value}\server.properties", output);
             }
+        }
+
+        public void RemoveServerConfigs(ServerInfo serverInfo, NetworkMessageFlags flag)
+        {
+            try
+            {
+                File.Delete($@"{configDir}\{serverInfo.FileName}");
+                switch (flag)
+                {
+                    case NetworkMessageFlags.RemoveBckPly:
+                        if (DeleteBackups(serverInfo))
+                            InstanceProvider.ServiceLogger.AppendLine($"Deleted Backups for server {serverInfo.ServerName}");
+                        if (DeletePlayerFiles(serverInfo))
+                            InstanceProvider.ServiceLogger.AppendLine($"Deleted Player files for server {serverInfo.ServerName}");
+                        break;
+                    case NetworkMessageFlags.RemoveBckSrv:
+                        if (DeleteBackups(serverInfo))
+                            InstanceProvider.ServiceLogger.AppendLine($"Deleted Backups for server {serverInfo.ServerName}");
+                        if (DeleteServerFiles(serverInfo))
+                            InstanceProvider.ServiceLogger.AppendLine($"Deleted server directory for server {serverInfo.ServerName}");
+                        break;
+                    case NetworkMessageFlags.RemovePlySrv:
+                        if (DeletePlayerFiles(serverInfo))
+                            InstanceProvider.ServiceLogger.AppendLine($"Deleted Player files for server {serverInfo.ServerName}");
+                        if (DeleteServerFiles(serverInfo))
+                            InstanceProvider.ServiceLogger.AppendLine($"Deleted server directory for server {serverInfo.ServerName}");
+                        break;
+                    case NetworkMessageFlags.RemoveSrv:
+                        if (DeleteServerFiles(serverInfo))
+                            InstanceProvider.ServiceLogger.AppendLine($"Deleted server directory for server {serverInfo.ServerName}");
+                        break;
+                    case NetworkMessageFlags.RemovePlayers:
+                        if (DeletePlayerFiles(serverInfo))
+                            InstanceProvider.ServiceLogger.AppendLine($"Deleted Player files for server {serverInfo.ServerName}");
+                        break;
+                    case NetworkMessageFlags.RemoveBackups:
+                        if (DeleteBackups(serverInfo))
+                            InstanceProvider.ServiceLogger.AppendLine($"Deleted Backups for server {serverInfo.ServerName}");
+                        break;
+                    case NetworkMessageFlags.RemoveAll:
+                        if (DeleteBackups(serverInfo))
+                            InstanceProvider.ServiceLogger.AppendLine($"Deleted Backups for server {serverInfo.ServerName}");
+                        if (DeletePlayerFiles(serverInfo))
+                            InstanceProvider.ServiceLogger.AppendLine($"Deleted Player files for server {serverInfo.ServerName}");
+                        if (DeleteServerFiles(serverInfo))
+                            InstanceProvider.ServiceLogger.AppendLine($"Deleted server directory for server {serverInfo.ServerName}");
+                        break;
+                    case NetworkMessageFlags.None:
+                        break;
+                }
+                BedrockServer removeMe = InstanceProvider.BedrockService.bedrockServers.First(brs => brs.serverInfo == serverInfo);
+                InstanceProvider.BedrockService.bedrockServers.Remove(removeMe);
+
+            }
+            catch { }
+        }
+
+        private bool DeleteBackups(ServerInfo serverInfo)
+        {
+            try
+            {
+
+                string configBackupPath = InstanceProvider.HostInfo.GetGlobalValue("BackupPath");
+                DirectoryInfo backupDirInfo = new DirectoryInfo($@"{configBackupPath}\{serverInfo.ServerName}");
+                DirectoryInfo configDirInfo = new DirectoryInfo($@"{configDir}\Backups");
+                foreach (DirectoryInfo dir in backupDirInfo.GetDirectories())
+                {
+                    if (dir.Name.Contains($"{serverInfo.ServerName}"))
+                    {
+                        dir.Delete(true);
+                    }
+                }
+                foreach (FileInfo file in configDirInfo.GetFiles())
+                {
+                    if (file.Name.Contains($"{serverInfo.ServerName}_"))
+                    {
+                        file.Delete();
+                    }
+                }
+                return true;
+            }
+            catch { return false; }
+        }
+
+        private bool DeleteServerFiles(ServerInfo serverInfo)
+        {
+            try
+            {
+                DirectoryInfo serverDirInfo = new DirectoryInfo(serverInfo.ServerPath.Value);
+                serverDirInfo.Delete(true);
+                return true;
+            }
+            catch { return false; }
+        }
+
+        private bool DeletePlayerFiles (ServerInfo serverInfo)
+        {
+            try
+            {
+                DirectoryInfo configDirInfo = new DirectoryInfo(configDir);
+                foreach (DirectoryInfo dir in configDirInfo.GetDirectories())
+                {
+                    if (dir.Name == "KnownPlayers" || dir.Name == "RegisteredPlayers")
+                    {
+                        foreach (FileInfo file in dir.GetFiles())
+                        {
+                            if (file.Name.Contains($"{serverInfo.ServerName}"))
+                            {
+                                file.Delete();
+                            }
+                        }
+                    }
+                }
+                return true;
+            }
+            catch { return false; }
         }
     }
 }

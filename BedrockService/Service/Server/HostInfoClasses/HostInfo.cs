@@ -9,6 +9,7 @@ namespace BedrockService.Service.Server.HostInfoClasses
         public string HostName { get; set; }
         public string Address { get; set; }
         public string HostDisplayName { get; set; }
+        public string ServerVersion { get; set; }
 
         public List<string> ServiceLog = new List<string>();
         public List<ServerInfo> Servers = new List<ServerInfo>();
@@ -16,6 +17,7 @@ namespace BedrockService.Service.Server.HostInfoClasses
 
         public void SetGlobalsDefault()
         {
+            Globals.Clear();
             Globals.Add(new Property("ServersPath", @"C:\Program Files (x86)\Minecraft Bedrock Server Launcher\Servers"));
             Globals.Add(new Property("AcceptedMojangLic", "false"));
             Globals.Add(new Property("ClientPort", "19134"));
@@ -28,6 +30,7 @@ namespace BedrockService.Service.Server.HostInfoClasses
             Globals.Add(new Property("UpdateCron", "0 2 * * *"));
             Globals.Add(new Property("LogServersToFile", "true"));
             Globals.Add(new Property("LogServiceToFile", "true"));
+            ServerVersion = "None";
         }
 
         public bool SetGlobalProperty(string name, string entry)

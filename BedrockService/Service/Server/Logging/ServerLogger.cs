@@ -8,7 +8,7 @@ namespace BedrockService.Service.Server.Logging
 {
     public class ServerLogger
     {
-        private List<string> Log = new List<string>();
+        public List<string> Log { get; set; }
         private StringBuilder OutString = new StringBuilder();
         [NonSerialized]
         private StreamWriter LogWriter;
@@ -19,6 +19,7 @@ namespace BedrockService.Service.Server.Logging
 
         public ServerLogger(bool enableWriteToFile, string serverName)
         {
+            Log = new List<string>();
             LogToFile = enableWriteToFile;
             ServerName = serverName;
             LogToConsole = true;
@@ -33,6 +34,7 @@ namespace BedrockService.Service.Server.Logging
         [JsonConstructor]
         public ServerLogger(string serverName)
         {
+            Log = new List<string>();
             ServerName = serverName;
             LogToFile = false;
             LogToConsole = false;
@@ -40,28 +42,40 @@ namespace BedrockService.Service.Server.Logging
 
         public void AppendLine(string text)
         {
-            Log.Add(text);
-            if (LogToFile && LogWriter != null)
+            try
             {
-                LogWriter.WriteLine(text);
-                LogWriter.Flush();
+                Log.Add(text);
+                if (LogToFile && LogWriter != null)
+                {
+                    LogWriter.WriteLine(text);
+                    LogWriter.Flush();
+                }
+                if (LogToConsole)
+                    Console.WriteLine(text);
             }
-            if (LogToConsole)
-                Console.WriteLine(text);
+            catch
+            {
+            }
         }
 
         public void Append(string text)
         {
-            Log.Add(text);
-            if (LogToFile && LogWriter != null)
+            try
             {
-                LogWriter.Write(text);
-                LogWriter.Flush();
+                Log.Add(text);
+                if (LogToFile && LogWriter != null)
+                {
+                    LogWriter.Write(text);
+                    LogWriter.Flush();
+                }
+                if (LogToConsole)
+                {
+                    Console.Write(text);
+                    Console.Out.Flush();
+                }
             }
-            if (LogToConsole)
+            catch
             {
-                Console.Write(text);
-                Console.Out.Flush();
             }
         }
 
@@ -73,6 +87,16 @@ namespace BedrockService.Service.Server.Logging
         public string FromIndex(int index)
         {
             return Log[index];
+        }
+
+        public void AppendPreviousLog (List<string> logToAppend)
+        {
+            List<string> newList = new List<string>(logToAppend);
+            if(Log.Count > 0)
+            {
+                newList.AddRange(Log);
+            }
+            Log = newList;
         }
 
         public override string ToString()

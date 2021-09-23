@@ -11,12 +11,13 @@ namespace BedrockService.Service
         public static readonly string ServiceDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         public static bool DebugModeEnabled = false;
         public static bool IsConsoleMode = false;
+
         static void Main(string[] args)
         {
             if (args.Length == 0 && Environment.UserInteractive)
             {
                 IsConsoleMode = true;
-                InstanceProvider.GetServiceLogger().AppendLine("BedrockService startup detected in Console mode.");
+                InstanceProvider.ServiceLogger.AppendLine("BedrockService startup detected in Console mode.");
             }
 
             Host host = HostFactory.New(x =>
@@ -24,10 +25,10 @@ namespace BedrockService.Service
                 x.SetStartTimeout(TimeSpan.FromSeconds(10));
                 x.SetStopTimeout(TimeSpan.FromSeconds(10));
                 x.UseAssemblyInfoForServiceInfo();
-                x.Service(settings => InstanceProvider.GetBedrockService(), s =>
+                x.Service(settings => InstanceProvider.BedrockService, s =>
                 {
-                    s.BeforeStartingService(_ => InstanceProvider.GetServiceLogger().AppendLine("Starting service..."));
-                    s.BeforeStoppingService(_ => InstanceProvider.GetServiceLogger().AppendLine("Stopping service..."));
+                    s.BeforeStartingService(_ => InstanceProvider.ServiceLogger.AppendLine("Starting service..."));
+                    s.BeforeStoppingService(_ => InstanceProvider.ServiceLogger.AppendLine("Stopping service..."));
 
                 });
 
@@ -46,7 +47,7 @@ namespace BedrockService.Service
 
                 x.OnException((ex) =>
                 {
-                    InstanceProvider.GetServiceLogger().AppendLine("Exception occured Main : " + ex.ToString());
+                    InstanceProvider.ServiceLogger.AppendLine("Exception occured Main : " + ex.ToString());
                 });
             });
 

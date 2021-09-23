@@ -7,12 +7,6 @@ namespace BedrockService.Service.Server.HostInfoClasses
         public string Username { get; set; }
         public string XUID { get; set; }
         public string PermissionLevel;
-        public string[] PermissionLevels = new string[3]
-        {
-                    "visitor",
-                    "member" ,
-                    "operator"
-        };
         public string FirstConnectedTime { get; set; }
         public string LastConnectedTime { get; set; }
         public string LastDisconnectTime { get; set; }

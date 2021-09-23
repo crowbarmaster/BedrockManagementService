@@ -35,139 +35,28 @@ namespace BedrockService.Service
 
         public BedrockService()
         {
-            CurrentServiceStatus = ServiceStatus.Starting;
             if (LoadInit())
             {
                 TCPServerThread = new Thread(new ThreadStart(ClientHostThread));
-                TCPServerThread.Start();
-                try
-                {
-                    foreach (ServerInfo Server in InstanceProvider.GetHostInfo().GetServerInfos())
-                    {
-                        BedrockServer srv = new BedrockServer(Server);
-                        shed = CrontabSchedule.TryParse(InstanceProvider.GetHostInfo().GetGlobalValue("BackupCron"));
-                        if (InstanceProvider.GetHostInfo().GetGlobalValue("BackupEnabled") == "true" && shed != null)
-                        {
-                            cronTimer = new System.Timers.Timer((shed.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
-                            cronTimer.Elapsed += CronTimer_Elapsed;
-                            cronTimer.Start();
-                        }
-
-                        updater = CrontabSchedule.TryParse(InstanceProvider.GetHostInfo().GetGlobalValue("UpdateCron"));
-                        if (InstanceProvider.GetHostInfo().GetGlobalValue("CheckUpdates") == "true" && updater != null)
-                        {
-                            updaterTimer = new System.Timers.Timer((updater.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
-                            updaterTimer.Elapsed += UpdateTimer_Elapsed;
-                            InstanceProvider.GetServiceLogger().AppendLine($"Updates Enabled, will be checked in: {((float)updaterTimer.Interval / 1000)} seconds.");
-                            updaterTimer.Start();
-                        }
-                        bedrockServers.Add(srv);
-                    }
-                    CurrentServiceStatus = ServiceStatus.Started;
-                }
-                catch (Exception e)
-                {
-                    InstanceProvider.GetServiceLogger().AppendLine($"Error Instantiating BedrockServiceWrapper: {e.StackTrace}");
-                }
-            }
-        }
-        private void ClientHostThread()
-        {
-            try
-            {
-                ClientHost.StartListening(int.Parse((string)InstanceProvider.GetHostInfo().GetGlobalValue("ClientPort")));
-                InstanceProvider.GetServiceLogger().AppendLine("Stop socket service");
-                ClientHost.client.Close();
-                GC.Collect();
-            }
-            catch (ThreadAbortException abort)
-            {
-                InstanceProvider.GetServiceLogger().AppendLine($"WCF Thread reports {abort.Message}");
+                shed = CrontabSchedule.TryParse(InstanceProvider.HostInfo.GetGlobalValue("BackupCron"));
+                updater = CrontabSchedule.TryParse(InstanceProvider.HostInfo.GetGlobalValue("UpdateCron"));
+                Initialize();
             }
         }
 
-        private void CronTimer_Elapsed(object sender, ElapsedEventArgs e)
+        private bool LoadInit()
         {
-            try
+            if (InstanceProvider.ConfigManager.LoadConfigs())
             {
-                if (cronTimer != null)
+                if (!Updater.CheckUpdates().Result)
                 {
-                    cronTimer.Stop();
-                    cronTimer = null;
+                    InstanceProvider.ServiceLogger.AppendLine("Checking for updates at init failed.");
+                    if (File.Exists($@"{Program.ServiceDirectory}\Server\MCSFiles\bedrock_ver.ini") && !File.Exists($@"{Program.ServiceDirectory}\Server\MCSFiles\Update_{File.ReadAllText($@"{Program.ServiceDirectory}\Server\MCSFiles\bedrock_ver.ini")}.zip"))
+                        InstanceProvider.ServiceLogger.AppendLine("An update package was not found. Execution may fail if this is first run!");
                 }
-                if ((string)InstanceProvider.GetHostInfo().GetGlobalValue("BackupEnabled") == "true" && shed != null)
-                {
-                    Backup();
-
-                    cronTimer = new System.Timers.Timer((shed.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
-                    cronTimer.Elapsed += CronTimer_Elapsed;
-                    cronTimer.Start();
-                }
+                return true;
             }
-            catch (Exception ex)
-            {
-                InstanceProvider.GetServiceLogger().AppendLine($"Error in BackupTimer_Elapsed {ex}");
-            }
-        }
-
-        private void UpdateTimer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            try
-            {
-                if (updaterTimer != null)
-                {
-                    updaterTimer.Stop();
-                    updaterTimer = null;
-                }
-                Task<bool> task = Updater.CheckUpdates();
-                task.Wait();
-                if (InstanceProvider.GetHostInfo().GetGlobalValue("CheckUpdates") == "true" && updater != null && task.Result)
-                {
-                    if (Updater.VersionChanged)
-                    {
-                        InstanceProvider.GetServiceLogger().AppendLine("Version change detected! Restarting server(s) to apply update...");
-                        if (Stop(_hostControl))
-                        {
-                            Start(_hostControl);
-                        }
-                    }
-
-                    updaterTimer = new System.Timers.Timer((updater.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
-                    updaterTimer.Elapsed += UpdateTimer_Elapsed;
-                    updaterTimer.Start();
-                }
-            }
-            catch (Exception ex)
-            {
-                InstanceProvider.GetServiceLogger().AppendLine($"Error in UpdateTimer_Elapsed {ex}");
-            }
-        }
-
-        private void Backup()
-        {
-            InstanceProvider.GetServiceLogger().AppendLine("Service started backup manager.");
-            foreach (var brs in bedrockServers.OrderByDescending(t => t.serverInfo.Primary).ToList())
-            {
-                brs.CurrentServerStatus = BedrockServer.ServerStatus.Stopping;
-                while (brs.CurrentServerStatus == BedrockServer.ServerStatus.Stopping)
-                {
-                    Thread.Sleep(100);
-                }
-            }
-
-            foreach (var brs in bedrockServers.OrderByDescending(t => t.serverInfo.Primary).ToList())
-            {
-                if (brs.CurrentServerStatus == BedrockServer.ServerStatus.Stopped) brs.Backup();
-
-            }
-            foreach (var brs in bedrockServers.OrderByDescending(t => t.serverInfo.Primary).ToList())
-            {
-
-                brs.StartControl(_hostControl);
-                Thread.Sleep(2000);
-
-            }
-            InstanceProvider.GetServiceLogger().AppendLine("Backups have been completed.");
+            return false;
         }
 
         public bool Stop(HostControl hostControl)
@@ -189,7 +78,7 @@ namespace BedrockService.Service
             }
             catch (Exception e)
             {
-                InstanceProvider.GetServiceLogger().AppendLine($"Error Stopping BedrockServiceWrapper {e.StackTrace}");
+                InstanceProvider.ServiceLogger.AppendLine($"Error Stopping BedrockServiceWrapper {e.StackTrace}");
                 return false;
             }
         }
@@ -217,9 +106,156 @@ namespace BedrockService.Service
             }
             catch (Exception e)
             {
-                InstanceProvider.GetServiceLogger().AppendLine($"Error Starting BedrockServiceWrapper {e.StackTrace}");
+                InstanceProvider.ServiceLogger.AppendLine($"Error Starting BedrockServiceWrapper {e.StackTrace}");
                 return false;
             }
+        }
+
+        public bool RestartService()
+        {
+            Stop(_hostControl);
+            if (LoadInit())
+            {
+                Initialize();
+                Start(_hostControl);
+                return true;
+            }
+            return false;
+        }
+
+        private void Initialize()
+        {
+            CurrentServiceStatus = ServiceStatus.Starting;
+            bedrockServers = new List<BedrockServer>();
+            
+            if(!TCPServerThread.IsAlive)
+                TCPServerThread.Start();
+                try
+                {
+                    foreach (ServerInfo Server in InstanceProvider.HostInfo.GetServerInfos())
+                    {
+                        BedrockServer srv = new BedrockServer(Server);
+                        if (InstanceProvider.HostInfo.GetGlobalValue("BackupEnabled") == "true" && shed != null)
+                        {
+                            cronTimer = new System.Timers.Timer((shed.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
+                            cronTimer.Elapsed += CronTimer_Elapsed;
+                            cronTimer.Start();
+                        }
+
+                        if (InstanceProvider.HostInfo.GetGlobalValue("CheckUpdates") == "true" && updater != null)
+                        {
+                            updaterTimer = new System.Timers.Timer((updater.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
+                            updaterTimer.Elapsed += UpdateTimer_Elapsed;
+                            InstanceProvider.ServiceLogger.AppendLine($"Updates Enabled, will be checked in: {((float)updaterTimer.Interval / 1000)} seconds.");
+                            updaterTimer.Start();
+                        }
+                        bedrockServers.Add(srv);
+                    }
+                    CurrentServiceStatus = ServiceStatus.Started;
+                }
+                catch (Exception e)
+                {
+                    InstanceProvider.ServiceLogger.AppendLine($"Error Instantiating BedrockServiceWrapper: {e.StackTrace}");
+                }
+        }
+
+        private void ClientHostThread()
+        {
+            try
+            {
+                ClientHost.StartListening(int.Parse((string)InstanceProvider.HostInfo.GetGlobalValue("ClientPort")));
+                InstanceProvider.ServiceLogger.AppendLine("Stop socket service");
+                ClientHost.client.Close();
+                GC.Collect();
+            }
+            catch (ThreadAbortException abort)
+            {
+                InstanceProvider.ServiceLogger.AppendLine($"WCF Thread reports {abort.Message}");
+            }
+        }
+
+        private void CronTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            try
+            {
+                if (cronTimer != null)
+                {
+                    cronTimer.Stop();
+                    cronTimer = null;
+                }
+                if ((string)InstanceProvider.HostInfo.GetGlobalValue("BackupEnabled") == "true" && shed != null)
+                {
+                    Backup();
+
+                    cronTimer = new System.Timers.Timer((shed.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
+                    cronTimer.Elapsed += CronTimer_Elapsed;
+                    cronTimer.Start();
+                }
+            }
+            catch (Exception ex)
+            {
+                InstanceProvider.ServiceLogger.AppendLine($"Error in BackupTimer_Elapsed {ex}");
+            }
+        }
+
+        private void UpdateTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            try
+            {
+                if (updaterTimer != null)
+                {
+                    updaterTimer.Stop();
+                    updaterTimer = null;
+                }
+                Task<bool> task = Updater.CheckUpdates();
+                task.Wait();
+                if (InstanceProvider.HostInfo.GetGlobalValue("CheckUpdates") == "true" && updater != null && task.Result)
+                {
+                    if (Updater.VersionChanged)
+                    {
+                        InstanceProvider.ServiceLogger.AppendLine("Version change detected! Restarting server(s) to apply update...");
+                        if (Stop(_hostControl))
+                        {
+                            Start(_hostControl);
+                        }
+                    }
+
+                    updaterTimer = new System.Timers.Timer((updater.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
+                    updaterTimer.Elapsed += UpdateTimer_Elapsed;
+                    updaterTimer.Start();
+                }
+            }
+            catch (Exception ex)
+            {
+                InstanceProvider.ServiceLogger.AppendLine($"Error in UpdateTimer_Elapsed {ex}");
+            }
+        }
+
+        private void Backup()
+        {
+            InstanceProvider.ServiceLogger.AppendLine("Service started backup manager.");
+            foreach (var brs in bedrockServers.OrderByDescending(t => t.serverInfo.Primary).ToList())
+            {
+                brs.CurrentServerStatus = BedrockServer.ServerStatus.Stopping;
+                while (brs.CurrentServerStatus == BedrockServer.ServerStatus.Stopping)
+                {
+                    Thread.Sleep(100);
+                }
+            }
+
+            foreach (var brs in bedrockServers.OrderByDescending(t => t.serverInfo.Primary).ToList())
+            {
+                if (brs.CurrentServerStatus == BedrockServer.ServerStatus.Stopped) brs.Backup();
+
+            }
+            foreach (var brs in bedrockServers.OrderByDescending(t => t.serverInfo.Primary).ToList())
+            {
+
+                brs.StartControl(_hostControl);
+                Thread.Sleep(2000);
+
+            }
+            InstanceProvider.ServiceLogger.AppendLine("Backups have been completed.");
         }
 
         private void ValidSettingsCheck()
@@ -228,21 +264,21 @@ namespace BedrockService.Service
             bool dupedSettingsFound = false;
             while (validating)
             {
-                if (InstanceProvider.GetHostInfo().GetServerInfos().Count() < 1)
+                if (InstanceProvider.HostInfo.GetServerInfos().Count() < 1)
                 {
                     throw new Exception("No Servers Configured");
                 }
                 else
                 {
-                    foreach (ServerInfo server in InstanceProvider.GetHostInfo().GetServerInfos())
+                    foreach (ServerInfo server in InstanceProvider.HostInfo.GetServerInfos())
                     {
-                        foreach (ServerInfo compareServer in InstanceProvider.GetHostInfo().GetServerInfos())
+                        foreach (ServerInfo compareServer in InstanceProvider.HostInfo.GetServerInfos())
                         {
                             if (server != compareServer)
                             {
                                 if (server.ServerExeName.Equals(compareServer.ServerExeName) || server.ServerPath.Equals(compareServer.ServerPath) || server.GetServerProp("server-port").Value.Equals(compareServer.GetServerProp("server-port").Value) || server.GetServerProp("server-portv6").Value.Equals(compareServer.GetServerProp("server-portv6").Value) || server.GetServerProp("server-name").Value.Equals(compareServer.GetServerProp("server-name").Value))
                                 {
-                                    InstanceProvider.GetServiceLogger().AppendLine($"Duplicate server settings between servers {server.ServerName} and {compareServer}.");
+                                    InstanceProvider.ServiceLogger.AppendLine($"Duplicate server settings between servers {server.ServerName} and {compareServer}.");
                                     dupedSettingsFound = true;
                                 }
                             }
@@ -251,11 +287,12 @@ namespace BedrockService.Service
                     if (dupedSettingsFound)
                         throw new Exception("Duplicate settings found! Check logs.");
 
-                    foreach (var server in InstanceProvider.GetHostInfo().GetServerInfos())
+                    foreach (var server in InstanceProvider.HostInfo.GetServerInfos())
                     {
                         if (Updater.VersionChanged || !File.Exists(server.ServerPath.Value + "\\bedrock_server.exe"))
                         {
-                            ReplaceBuild(server);
+                            if (!ReplaceBuild(server).Wait(10000))
+                                InstanceProvider.ServiceLogger.AppendLine("Error! Timeout to replace build exceeded.");
                         }
                         if (server.ServerExeName.Value != "bedrock_server.exe" && File.Exists(server.ServerPath.Value + "\\bedrock_server.exe") && !File.Exists(server.ServerPath.Value + "\\" + server.ServerExeName.Value))
                         {
@@ -271,25 +308,34 @@ namespace BedrockService.Service
 
         }
 
-        private static void ReplaceBuild(ServerInfo server)
+        private async Task ReplaceBuild(ServerInfo server)
         {
-            try
+            await Task.Run(() =>
             {
-                if (Directory.Exists(server.ServerPath.Value))
-                    DeleteFilesRecursively(new DirectoryInfo(server.ServerPath.Value));
-                else
-                    Directory.CreateDirectory(server.ServerPath.Value);
+                try
+                {
+                    if (Directory.Exists(server.ServerPath.Value))
+                        DeleteFilesRecursively(new DirectoryInfo(server.ServerPath.Value));
+                    else
+                        Directory.CreateDirectory(server.ServerPath.Value);
+                    while (InstanceProvider.HostInfo.ServerVersion == null || InstanceProvider.HostInfo.ServerVersion == "None")
+                    {
+                        Thread.Sleep(150);
+                    }
 
-                ZipFile.ExtractToDirectory($@"{Program.ServiceDirectory}\Server\MCSFiles\Update_{server.ServerVersion}.zip", server.ServerPath.Value);
-                File.Copy(server.ServerPath.Value + "\\bedrock_server.exe", server.ServerPath.Value + "\\" + server.ServerExeName.Value);
-            }
-            catch (Exception e)
-            {
-                InstanceProvider.GetServiceLogger().AppendLine($"ERROR: Got an exception deleting entire directory! {e.Message}");
-            }
+                    ZipFile.ExtractToDirectory($@"{Program.ServiceDirectory}\Server\MCSFiles\Update_{InstanceProvider.HostInfo.ServerVersion}.zip", server.ServerPath.Value);
+                    File.Copy(server.ServerPath.Value + "\\bedrock_server.exe", server.ServerPath.Value + "\\" + server.ServerExeName.Value);
+                }
+                catch (Exception e)
+                {
+                    InstanceProvider.ServiceLogger.AppendLine($"ERROR: Got an exception deleting entire directory! {e.Message}");
+                }
+
+
+            });
         }
 
-        private static void DeleteFilesRecursively(DirectoryInfo source)
+        private void DeleteFilesRecursively(DirectoryInfo source)
         {
             try
             {
@@ -297,23 +343,8 @@ namespace BedrockService.Service
             }
             catch (Exception e)
             {
-                InstanceProvider.GetServiceLogger().AppendLine($@"Error Deleting Dir: {e.StackTrace}");
+                InstanceProvider.ServiceLogger.AppendLine($@"Error Deleting Dir: {e.StackTrace}");
             }
-        }
-
-        private bool LoadInit()
-        {
-            if (InstanceProvider.GetConfigManager().LoadConfigs())
-            {
-                if (!Updater.CheckUpdates().Result)
-                {
-                    InstanceProvider.GetServiceLogger().AppendLine("Checking for updates at init failed.");
-                    if (File.Exists($@"{Program.ServiceDirectory}\Server\MCSFiles\bedrock_ver.ini") && !File.Exists($@"{Program.ServiceDirectory}\Server\MCSFiles\Update_{File.ReadAllText($@"{Program.ServiceDirectory}\Server\MCSFiles\bedrock_ver.ini")}.zip"))
-                        InstanceProvider.GetServiceLogger().AppendLine("An update package was not found. Execution may fail if this is first run!");
-                }
-                return true;
-            }
-            return false;
         }
     }
 }

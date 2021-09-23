@@ -17,7 +17,7 @@ namespace BedrockService.Service.Server.Management
                 {
                     playerFound.FirstConnectedTime = playerFound.LastConnectedTime;
                 }
-                InstanceProvider.GetConfigManager().SaveKnownPlayerDatabase(serverInstance);
+                InstanceProvider.ConfigManager.SaveKnownPlayerDatabase(serverInstance);
             }
             else
             {
@@ -27,7 +27,7 @@ namespace BedrockService.Service.Server.Management
                 };
                 playerFound.LastConnectedTime = playerFound.FirstConnectedTime;
                 serverInstance.KnownPlayers.Add(playerFound);
-                InstanceProvider.GetConfigManager().SaveKnownPlayerDatabase(serverInstance);
+                InstanceProvider.ConfigManager.SaveKnownPlayerDatabase(serverInstance);
             }
 
         }
@@ -36,7 +36,7 @@ namespace BedrockService.Service.Server.Management
         {
             Player playerFound = serverInstance.KnownPlayers.FirstOrDefault(ply => ply.XUID == xuid);
             playerFound.LastDisconnectTime = DateTime.Now.Ticks.ToString();
-            InstanceProvider.GetConfigManager().SaveKnownPlayerDatabase(serverInstance);
+            InstanceProvider.ConfigManager.SaveKnownPlayerDatabase(serverInstance);
         }
 
         public void UpdatePlayerFromCfg(string xuid, string username, string permission, string whitelisted, string ignoreMaxPlayerLimit, ServerInfo serverInstance)
