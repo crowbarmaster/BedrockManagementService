@@ -25,8 +25,11 @@ namespace BedrockService.Client.Forms
             foreach (Property prop in workingProps)
             {
                 dataGrid.Rows.Add(new string[2] { prop.KeyName, prop.Value });
-                if (prop.KeyName == "server-name")
+                if (prop.KeyName == "server-name" || prop.KeyName == "server-port" || prop.KeyName == "server-portv6")
+                {
                     dataGrid.Rows[index].ReadOnly = true;
+                    dataGrid.Rows[index].DefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(225, 225, 225);
+                }
                 index++;
             }
             gridView.AllowUserToAddRows = false;
