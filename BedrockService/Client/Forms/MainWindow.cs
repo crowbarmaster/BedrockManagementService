@@ -5,6 +5,7 @@ using BedrockService.Service.Server.HostInfoClasses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -13,11 +14,12 @@ namespace BedrockService.Client.Forms
 {
     public partial class MainWindow : Form
     {
-        public static HostInfo connectedHost;
-        public static ServerInfo selectedServer;
-        public static int ConnectTimeout;
-        public static bool ShowsSvcLog = false;
-        public static readonly int ConnectTimeoutLimit = 100;
+        public HostInfo connectedHost;
+        public ServerInfo selectedServer;
+        public int ConnectTimeout;
+        public bool ShowsSvcLog = false;
+        public bool FollowTail = false;
+        public readonly int ConnectTimeoutLimit = 100;
 
         public MainWindow()
         {
@@ -26,10 +28,67 @@ namespace BedrockService.Client.Forms
             SvcLog.CheckedChanged += SvcLog_CheckedChanged;
         }
 
-        private void SvcLog_CheckedChanged(object sender, EventArgs e)
+        #region Win32 API
+#pragma warning disable 649
+#pragma warning disable 169
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool GetScrollInfo(IntPtr hWnd, int scrollDirection, ref ScrollInfo si); //Thanks goes out to stever@GitHub for this!
+
+        [DllImport("user32.dll")]
+        static extern int SetScrollInfo(IntPtr hWnd, int scrollDirection, [In] ref ScrollInfo si, bool redraw);
+
+        [DllImport("user32.dll")]
+        static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
+        struct ScrollInfo
         {
-            ShowsSvcLog = SvcLog.Checked;
+            public uint Size;
+            public uint Mask;
+            public int Min;
+            public int Max;
+            public uint Page;
+            public int Pos;
+            public int TrackPos;
         }
+
+        enum ScrollInfoMask
+        {
+            Range = 0x1,
+            Page = 0x2,
+            Pos = 0x4,
+            DisableEndScroll = 0x8,
+            TrackPos = 0x10,
+            All = Range + Page + Pos + TrackPos
+        }
+
+        enum ScrollBarDirection
+        {
+            Horizontal = 0,
+            Vertical = 1,
+            Ctl = 2,
+            Both = 3
+        }
+
+        const int VerticalScroll = 277;
+        const int LineUp = 0;
+        const int LineDown = 1;
+        const int ThumbPosition = 4;
+        const int Thumbtrack = 5;
+        const int ScrollTop = 6;
+        const int ScrolBottom = 7;
+        const int EndScroll = 8;
+
+        const int SetRedraw = 0x000B;
+        const int User = 0x400;
+        const int GetEventMask = (User + 59);
+        const int SetEventMask = (User + 69);
+
+#pragma warning restore 649
+#pragma warning restore 169
+        #endregion
+
 
         [STAThread]
         static void Main()
@@ -41,9 +100,31 @@ namespace BedrockService.Client.Forms
             Application.Run(FormManager.GetMainWindow);
         }
 
-        private static void OnExit(object sender, EventArgs e)
+        public void RefreshServerContents()
         {
-            FormManager.GetTCPClient.Dispose();
+                Invoke((MethodInvoker)delegate
+                {
+                    Refresh();
+                    return;
+                });
+        }
+
+        public override void Refresh()
+        {
+            LogManager.InitLogThread(connectedHost);
+            HostInfoLabel.Text = $"Connected to host:";
+            ServerSelectBox.Items.Clear();
+
+            foreach (ServerInfo server in connectedHost.GetServerInfos())
+            {
+                ServerSelectBox.Items.Add(server.ServerName);
+            }
+
+            ServerSelectBox.Refresh();
+            ServerSelectBox.SelectedIndex = 0;
+            selectedServer = connectedHost.GetServerInfo((string)ServerSelectBox.SelectedItem);
+            LogManager.StartLogThread();
+            base.Refresh();
         }
 
         public void InitForm()
@@ -68,6 +149,25 @@ namespace BedrockService.Client.Forms
 
             selectedServer = null;
             connectedHost = null;
+        }
+
+        public void UpdateLogBox(string contents)
+        {
+            int curPos = HorizontalScrollPosition;
+            LogBox.Text = contents;
+            HorizontalScrollPosition = curPos;
+            if (FollowTail)
+                ScrollToEnd();
+        }
+
+        private static void OnExit(object sender, EventArgs e)
+        {
+            FormManager.GetTCPClient.Dispose();
+        }
+
+        private void SvcLog_CheckedChanged(object sender, EventArgs e)
+        {
+            ShowsSvcLog = SvcLog.Checked;
         }
 
         private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
@@ -110,16 +210,7 @@ namespace BedrockService.Client.Forms
                             HostInfoLabel.Text = $"Failed to connect to host!";
                             return;
                         }
-                        LogManager.InitLogThread(connectedHost);
-                        HostInfoLabel.Text = $"Connected to host:";
-                        foreach (ServerInfo server in connectedHost.GetServerInfos())
-                        {
-                            ServerSelectBox.Items.Add(server.ServerName);
-                        }
-                        ServerSelectBox.Refresh();
-                        ServerSelectBox.SelectedIndex = 0;
-                        selectedServer = connectedHost.GetServerInfo((string)ServerSelectBox.SelectedItem);
-                        LogManager.StartLogThread();
+                        RefreshServerContents();
                         ComponentEnableManager();
                     }
                     else
@@ -206,12 +297,19 @@ namespace BedrockService.Client.Forms
 
         private void newSrvBtn_Click(object sender, EventArgs e)
         {
-
+            AddNewServerForm newServerForm = new AddNewServerForm();
+            if(newServerForm.ShowDialog() == DialogResult.OK)
+            {
+                JsonUtilities.SendJsonMsg<List<Property>>(newServerForm.DefaultProps, NetworkMessageDestination.Service, NetworkMessageTypes.AddNewServer);
+                newServerForm.Close();
+                newServerForm.Dispose();
+            }
         }
 
         private void removeSrvBtn_Click(object sender, EventArgs e)
         {
-
+            byte[] serverName = Encoding.UTF8.GetBytes(selectedServer.ServerName);
+            FormManager.GetTCPClient.SendData(serverName, NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.RemoveServer, NetworkMessageFlags.RemoveAll);
         }
 
         private void PlayerManager_Click(object sender, EventArgs e)
@@ -261,6 +359,7 @@ namespace BedrockService.Client.Forms
                 byte[] msg = Encoding.UTF8.GetBytes($"{selectedServer.ServerName};{cmdTextBox.Text}");
                 FormManager.GetTCPClient.SendData(msg, NetworkMessageSource.Client, NetworkMessageDestination.Server, NetworkMessageTypes.Command);
             }
+            cmdTextBox.Text = "";
         }
 
         private void EditStCmd_Click(object sender, EventArgs e)
@@ -282,22 +381,60 @@ namespace BedrockService.Client.Forms
             FormManager.GetTCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.CheckUpdates);
         }
 
+        private int HorizontalScrollPosition
+        {
+            get
+            {
+                ScrollInfo si = new ScrollInfo();
+                si.Size = (uint)Marshal.SizeOf(si);
+                si.Mask = (uint)ScrollInfoMask.All;
+                GetScrollInfo(LogBox.Handle, (int)ScrollBarDirection.Vertical, ref si);
+                return si.Pos;
+            }
+            set
+            {
+
+                ScrollInfo si = new ScrollInfo();
+                si.Size = (uint)Marshal.SizeOf(si);
+                si.Mask = (uint)ScrollInfoMask.All;
+                GetScrollInfo(LogBox.Handle, (int)ScrollBarDirection.Vertical, ref si);
+                si.Pos = value;
+                SetScrollInfo(LogBox.Handle, (int)ScrollBarDirection.Vertical, ref si, true);
+                SendMessage(LogBox.Handle, VerticalScroll, new IntPtr(Thumbtrack + 0x10000 * si.Pos), new IntPtr(0));
+            }
+        }
+
+        public void ScrollToEnd()
+        {
+
+            // Get the current scroll info.
+            ScrollInfo si = new ScrollInfo();
+            si.Size = (uint)Marshal.SizeOf(si);
+            si.Mask = (uint)ScrollInfoMask.All;
+            GetScrollInfo(LogBox.Handle, (int)ScrollBarDirection.Vertical, ref si);
+
+            // Set the scroll position to maximum.
+            si.Pos = si.Max - (int)si.Page;
+            SetScrollInfo(LogBox.Handle, (int)ScrollBarDirection.Vertical, ref si, true);
+            SendMessage(LogBox.Handle, VerticalScroll, new IntPtr(Thumbtrack + 0x10000 * si.Pos), new IntPtr(0));
+
+            FollowTail = true;
+        }
+
         private void ComponentEnableManager()
         {
             Connect.Enabled = connectedHost == null;
             Disconn.Enabled = connectedHost != null;
-            //StopStartSvc.Enabled = connectedHost != null;
-            //RestartSvc.Enabled = connectedHost != null;
-            EditGlobals.Enabled = connectedHost != null;
-            //EditService.Enabled = connectedHost != null;
+            newSrvBtn.Enabled = connectedHost != null;
             ChkUpdates.Enabled = connectedHost != null;
             GlobBackup.Enabled = connectedHost != null;
+            EditGlobals.Enabled = connectedHost != null;
+            scrollLockChkBox.Enabled = (connectedHost != null && selectedServer != null);
+            removeSrvBtn.Enabled = (connectedHost != null && selectedServer != null);
             EditCfg.Enabled = (connectedHost != null && selectedServer != null);
             PlayerManagerBtn.Enabled = (connectedHost != null && selectedServer != null);
             EditStCmd.Enabled = (connectedHost != null && selectedServer != null);
-            //ManPacks.Enabled = (connectedHost != null && selectedServer != null);
             SingBackup.Enabled = (connectedHost != null && selectedServer != null);
-            //Rollbackup.Enabled = (connectedHost != null && selectedServer != null);
             RestartSrv.Enabled = (connectedHost != null && selectedServer != null);
             ServerInfoBox.Enabled = (connectedHost != null && selectedServer != null);
             SendCmd.Enabled = (connectedHost != null && selectedServer != null);
@@ -305,7 +442,7 @@ namespace BedrockService.Client.Forms
             SvcLog.Enabled = (connectedHost != null && selectedServer != null);
         }
 
-        private class ServerConnectException : Exception
+        public class ServerConnectException : Exception
         {
             public ServerConnectException() { }
 
@@ -319,6 +456,24 @@ namespace BedrockService.Client.Forms
                 : base(message, inner)
             {
 
+            }
+        }
+
+        private void scrollLockChkBox_CheckedChanged(object sender, EventArgs e) => FollowTail = scrollLockChkBox.Checked;
+
+        private void cmdTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if(e.KeyChar == (char)Keys.Enter)
+            {
+                SendCmd_Click(null, null);
+            }
+        }
+
+        private void HostListBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                Connect_Click(null, null);
             }
         }
     }

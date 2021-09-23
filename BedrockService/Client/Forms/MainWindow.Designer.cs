@@ -50,6 +50,7 @@
             this.SvcLog = new System.Windows.Forms.CheckBox();
             this.ServerInfoBox = new System.Windows.Forms.TextBox();
             this.newSrvBtn = new System.Windows.Forms.Button();
+            this.scrollLockChkBox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // Connect
@@ -82,6 +83,7 @@
             this.HostListBox.Name = "HostListBox";
             this.HostListBox.Size = new System.Drawing.Size(355, 21);
             this.HostListBox.TabIndex = 2;
+            this.HostListBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.HostListBox_KeyPress);
             // 
             // LogBox
             // 
@@ -175,6 +177,7 @@
             this.cmdTextBox.Name = "cmdTextBox";
             this.cmdTextBox.Size = new System.Drawing.Size(355, 20);
             this.cmdTextBox.TabIndex = 12;
+            this.cmdTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.cmdTextBox_KeyPress);
             // 
             // SendCmd
             // 
@@ -305,11 +308,26 @@
             this.newSrvBtn.UseVisualStyleBackColor = true;
             this.newSrvBtn.Click += new System.EventHandler(this.newSrvBtn_Click);
             // 
+            // scrollLockChkBox
+            // 
+            this.scrollLockChkBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.scrollLockChkBox.Enabled = false;
+            this.scrollLockChkBox.Location = new System.Drawing.Point(425, 391);
+            this.scrollLockChkBox.Name = "scrollLockChkBox";
+            this.scrollLockChkBox.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.scrollLockChkBox.Size = new System.Drawing.Size(137, 23);
+            this.scrollLockChkBox.TabIndex = 27;
+            this.scrollLockChkBox.Text = "Lock scrollbar to end";
+            this.scrollLockChkBox.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.scrollLockChkBox.UseVisualStyleBackColor = true;
+            this.scrollLockChkBox.CheckedChanged += new System.EventHandler(this.scrollLockChkBox_CheckedChanged);
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(984, 460);
+            this.Controls.Add(this.scrollLockChkBox);
             this.Controls.Add(this.newSrvBtn);
             this.Controls.Add(this.ServerInfoBox);
             this.Controls.Add(this.SvcLog);
@@ -364,6 +382,7 @@
         private System.Windows.Forms.TextBox ServerInfoBox;
         public System.Windows.Forms.ComboBox HostListBox;
         private System.Windows.Forms.Button newSrvBtn;
+        private System.Windows.Forms.CheckBox scrollLockChkBox;
     }
 }
 
