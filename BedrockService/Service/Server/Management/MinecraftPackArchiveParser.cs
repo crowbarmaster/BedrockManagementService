@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -23,9 +23,6 @@ namespace BedrockService.Service.Server.Management
 
         public MinecraftPackArchiveParser (byte[] fileContents)
         {
-            byte[] stripHeader = new byte[fileContents.Length - 5];
-            Buffer.BlockCopy(fileContents, 5, stripHeader, 0, stripHeader.Length);
-
             if (!PackExtractDirectory.Exists)
                 PackExtractDirectory.Create();
             else
@@ -33,7 +30,7 @@ namespace BedrockService.Service.Server.Management
                     file.Delete();
             foreach (DirectoryInfo directory in PackExtractDirectory.GetDirectories())
                 directory.Delete(true);
-            using (MemoryStream fileStream = new MemoryStream(stripHeader))
+            using (MemoryStream fileStream = new MemoryStream(buffer, 9, buffer.Length - 9))
             {
                 using (ZipArchive zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read))
                 {
