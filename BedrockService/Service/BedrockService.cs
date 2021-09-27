@@ -40,6 +40,20 @@ namespace BedrockService.Service
                 TCPServerThread = new Thread(new ThreadStart(ClientHostThread));
                 shed = CrontabSchedule.TryParse(InstanceProvider.HostInfo.GetGlobalValue("BackupCron"));
                 updater = CrontabSchedule.TryParse(InstanceProvider.HostInfo.GetGlobalValue("UpdateCron"));
+                if (InstanceProvider.HostInfo.GetGlobalValue("BackupEnabled") == "true" && shed != null)
+                {
+                    cronTimer = new System.Timers.Timer((shed.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
+                    cronTimer.Elapsed += CronTimer_Elapsed;
+                    cronTimer.Start();
+                }
+
+                if (InstanceProvider.HostInfo.GetGlobalValue("CheckUpdates") == "true" && updater != null)
+                {
+                    updaterTimer = new System.Timers.Timer((updater.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
+                    updaterTimer.Elapsed += UpdateTimer_Elapsed;
+                    InstanceProvider.ServiceLogger.AppendLine($"Updates Enabled, will be checked in: {((float)updaterTimer.Interval / 1000)} seconds.");
+                    updaterTimer.Start();
+                }
                 Initialize();
             }
         }
@@ -100,7 +114,6 @@ namespace BedrockService.Service
                     _hostControl.RequestAdditionalTime(TimeSpan.FromSeconds(30));
                     brs.CurrentServerStatus = BedrockServer.ServerStatus.Starting;
                     brs.StartWatchdog(_hostControl);
-                    Thread.Sleep(2000);
                 }
                 return true;
             }
@@ -111,52 +124,36 @@ namespace BedrockService.Service
             }
         }
 
-        public bool RestartService()
-        {
-            Stop(_hostControl);
-            if (LoadInit())
-            {
-                Initialize();
-                Start(_hostControl);
-                return true;
-            }
-            return false;
-        }
-
         private void Initialize()
         {
             CurrentServiceStatus = ServiceStatus.Starting;
             bedrockServers = new List<BedrockServer>();
-            
-            if(!TCPServerThread.IsAlive)
-                TCPServerThread.Start();
-                try
-                {
-                    foreach (ServerInfo Server in InstanceProvider.HostInfo.GetServerInfos())
-                    {
-                        BedrockServer srv = new BedrockServer(Server);
-                        if (InstanceProvider.HostInfo.GetGlobalValue("BackupEnabled") == "true" && shed != null)
-                        {
-                            cronTimer = new System.Timers.Timer((shed.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
-                            cronTimer.Elapsed += CronTimer_Elapsed;
-                            cronTimer.Start();
-                        }
 
-                        if (InstanceProvider.HostInfo.GetGlobalValue("CheckUpdates") == "true" && updater != null)
-                        {
-                            updaterTimer = new System.Timers.Timer((updater.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
-                            updaterTimer.Elapsed += UpdateTimer_Elapsed;
-                            InstanceProvider.ServiceLogger.AppendLine($"Updates Enabled, will be checked in: {((float)updaterTimer.Interval / 1000)} seconds.");
-                            updaterTimer.Start();
-                        }
-                        bedrockServers.Add(srv);
-                    }
-                    CurrentServiceStatus = ServiceStatus.Started;
-                }
-                catch (Exception e)
+            if (!TCPServerThread.IsAlive)
+                TCPServerThread.Start();
+            try
+            {
+                foreach (ServerInfo server in InstanceProvider.HostInfo.GetServerInfos())
                 {
-                    InstanceProvider.ServiceLogger.AppendLine($"Error Instantiating BedrockServiceWrapper: {e.StackTrace}");
+                    bedrockServers.Add(new BedrockServer(server));
                 }
+                CurrentServiceStatus = ServiceStatus.Started;
+            }
+            catch (Exception e)
+            {
+                InstanceProvider.ServiceLogger.AppendLine($"Error Instantiating BedrockServiceWrapper: {e.StackTrace}");
+            }
+        }
+        public void InitializeNewServer(ServerInfo server)
+        {
+            BedrockServer brs = new BedrockServer(server);
+            bedrockServers.Add(brs);
+            InstanceProvider.HostInfo.Servers.Add(server);
+            if (ValidSettingsCheck())
+            {
+                brs.CurrentServerStatus = BedrockServer.ServerStatus.Starting;
+                brs.StartWatchdog(_hostControl);
+            }
         }
 
         private void ClientHostThread()
@@ -258,7 +255,7 @@ namespace BedrockService.Service
             InstanceProvider.ServiceLogger.AppendLine("Backups have been completed.");
         }
 
-        private void ValidSettingsCheck()
+        private bool ValidSettingsCheck()
         {
             bool validating = true;
             bool dupedSettingsFound = false;
@@ -285,8 +282,9 @@ namespace BedrockService.Service
                         }
                     }
                     if (dupedSettingsFound)
+                    {
                         throw new Exception("Duplicate settings found! Check logs.");
-
+                    }
                     foreach (var server in InstanceProvider.HostInfo.GetServerInfos())
                     {
                         if (Updater.VersionChanged || !File.Exists(server.ServerPath.Value + "\\bedrock_server.exe"))
@@ -302,10 +300,12 @@ namespace BedrockService.Service
                     if (Updater.VersionChanged)
                         Updater.VersionChanged = false;
                     else
+                    {
                         validating = false;
+                    }
                 }
             }
-
+            return true;
         }
 
         private async Task ReplaceBuild(ServerInfo server)
