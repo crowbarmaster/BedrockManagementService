@@ -46,7 +46,7 @@
             this.ManPacks = new System.Windows.Forms.Button();
             this.SingBackup = new System.Windows.Forms.Button();
             this.RestartSrv = new System.Windows.Forms.Button();
-            this.Rollbackup = new System.Windows.Forms.Button();
+            this.BackupManagerBtn = new System.Windows.Forms.Button();
             this.SvcLog = new System.Windows.Forms.CheckBox();
             this.ServerInfoBox = new System.Windows.Forms.TextBox();
             this.newSrvBtn = new System.Windows.Forms.Button();
@@ -235,14 +235,14 @@
             this.ManPacks.Name = "ManPacks";
             this.ManPacks.Size = new System.Drawing.Size(170, 23);
             this.ManPacks.TabIndex = 19;
-            this.ManPacks.Text = "Manage server packs";
+            this.ManPacks.Text = "R/B Pack Manager";
             this.ManPacks.UseVisualStyleBackColor = true;
             // 
             // SingBackup
             // 
             this.SingBackup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.SingBackup.Enabled = false;
-            this.SingBackup.Location = new System.Drawing.Point(601, 311);
+            this.SingBackup.Location = new System.Drawing.Point(601, 282);
             this.SingBackup.Name = "SingBackup";
             this.SingBackup.Size = new System.Drawing.Size(170, 23);
             this.SingBackup.TabIndex = 20;
@@ -254,7 +254,7 @@
             // 
             this.RestartSrv.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.RestartSrv.Enabled = false;
-            this.RestartSrv.Location = new System.Drawing.Point(601, 340);
+            this.RestartSrv.Location = new System.Drawing.Point(601, 311);
             this.RestartSrv.Name = "RestartSrv";
             this.RestartSrv.Size = new System.Drawing.Size(170, 23);
             this.RestartSrv.TabIndex = 21;
@@ -262,16 +262,17 @@
             this.RestartSrv.UseVisualStyleBackColor = true;
             this.RestartSrv.Click += new System.EventHandler(this.RestartSrv_Click);
             // 
-            // Rollbackup
+            // BackupManager
             // 
-            this.Rollbackup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.Rollbackup.Enabled = false;
-            this.Rollbackup.Location = new System.Drawing.Point(601, 282);
-            this.Rollbackup.Name = "Rollbackup";
-            this.Rollbackup.Size = new System.Drawing.Size(170, 23);
-            this.Rollbackup.TabIndex = 22;
-            this.Rollbackup.Text = "Rollback a backup";
-            this.Rollbackup.UseVisualStyleBackColor = true;
+            this.BackupManagerBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.BackupManagerBtn.Enabled = false;
+            this.BackupManagerBtn.Location = new System.Drawing.Point(601, 340);
+            this.BackupManagerBtn.Name = "BackupManager";
+            this.BackupManagerBtn.Size = new System.Drawing.Size(170, 23);
+            this.BackupManagerBtn.TabIndex = 22;
+            this.BackupManagerBtn.Text = "Backup Manager";
+            this.BackupManagerBtn.UseVisualStyleBackColor = true;
+            this.BackupManagerBtn.Click += new System.EventHandler(this.BackupManager_Click);
             // 
             // SvcLog
             // 
@@ -331,7 +332,7 @@
             this.Controls.Add(this.newSrvBtn);
             this.Controls.Add(this.ServerInfoBox);
             this.Controls.Add(this.SvcLog);
-            this.Controls.Add(this.Rollbackup);
+            this.Controls.Add(this.BackupManagerBtn);
             this.Controls.Add(this.RestartSrv);
             this.Controls.Add(this.SingBackup);
             this.Controls.Add(this.ManPacks);
@@ -377,7 +378,7 @@
         private System.Windows.Forms.Button ManPacks;
         private System.Windows.Forms.Button SingBackup;
         private System.Windows.Forms.Button RestartSrv;
-        private System.Windows.Forms.Button Rollbackup;
+        private System.Windows.Forms.Button BackupManagerBtn;
         private System.Windows.Forms.CheckBox SvcLog;
         private System.Windows.Forms.TextBox ServerInfoBox;
         public System.Windows.Forms.ComboBox HostListBox;

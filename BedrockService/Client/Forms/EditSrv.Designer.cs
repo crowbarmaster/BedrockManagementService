@@ -34,13 +34,14 @@ namespace BedrockService.Client.Forms
             this.gridView = new System.Windows.Forms.DataGridView();
             this.EntryKey = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.EntryData = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.DelBackupBtn = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.gridView)).BeginInit();
             this.SuspendLayout();
             // 
             // CancelBtn
             // 
             this.CancelBtn.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.CancelBtn.Location = new System.Drawing.Point(96, 390);
+            this.CancelBtn.Location = new System.Drawing.Point(13, 362);
             this.CancelBtn.Name = "CancelBtn";
             this.CancelBtn.Size = new System.Drawing.Size(200, 23);
             this.CancelBtn.TabIndex = 48;
@@ -51,7 +52,7 @@ namespace BedrockService.Client.Forms
             // SaveBtn
             // 
             this.SaveBtn.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.SaveBtn.Location = new System.Drawing.Point(428, 390);
+            this.SaveBtn.Location = new System.Drawing.Point(588, 362);
             this.SaveBtn.Name = "SaveBtn";
             this.SaveBtn.Size = new System.Drawing.Size(200, 23);
             this.SaveBtn.TabIndex = 49;
@@ -72,7 +73,7 @@ namespace BedrockService.Client.Forms
             this.gridView.Location = new System.Drawing.Point(13, 13);
             this.gridView.MultiSelect = false;
             this.gridView.Name = "gridView";
-            this.gridView.Size = new System.Drawing.Size(775, 371);
+            this.gridView.Size = new System.Drawing.Size(775, 343);
             this.gridView.TabIndex = 1;
             this.gridView.NewRowNeeded += new System.Windows.Forms.DataGridViewRowEventHandler(this.gridView_NewRowNeeded);
             // 
@@ -90,11 +91,25 @@ namespace BedrockService.Client.Forms
             this.EntryData.Name = "EntryData";
             this.EntryData.Width = 600;
             // 
+            // DelBackupBtn
+            // 
+            this.DelBackupBtn.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.DelBackupBtn.Enabled = false;
+            this.DelBackupBtn.Location = new System.Drawing.Point(301, 362);
+            this.DelBackupBtn.Name = "DelBackupBtn";
+            this.DelBackupBtn.Size = new System.Drawing.Size(200, 23);
+            this.DelBackupBtn.TabIndex = 50;
+            this.DelBackupBtn.Text = "Delete Backup";
+            this.DelBackupBtn.UseVisualStyleBackColor = true;
+            this.DelBackupBtn.Visible = false;
+            this.DelBackupBtn.Click += new System.EventHandler(this.DelBackupBtn_Click);
+            // 
             // EditSrv
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(800, 397);
+            this.Controls.Add(this.DelBackupBtn);
             this.Controls.Add(this.gridView);
             this.Controls.Add(this.SaveBtn);
             this.Controls.Add(this.CancelBtn);
@@ -112,5 +127,6 @@ namespace BedrockService.Client.Forms
         private System.Windows.Forms.DataGridView gridView;
         private System.Windows.Forms.DataGridViewTextBoxColumn EntryKey;
         private System.Windows.Forms.DataGridViewTextBoxColumn EntryData;
+        private System.Windows.Forms.Button DelBackupBtn;
     }
 }

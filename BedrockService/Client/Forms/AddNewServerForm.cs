@@ -1,9 +1,7 @@
-﻿using System.Collections.Generic;
-using BedrockService.Service.Server.HostInfoClasses;
+﻿using BedrockService.Service.Server.HostInfoClasses;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using BedrockService.Client.Utilities;
-using BedrockService.Service.Networking;
 
 namespace BedrockService.Client.Forms
 {

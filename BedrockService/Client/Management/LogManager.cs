@@ -1,5 +1,4 @@
-﻿using BedrockService.Client.Forms;
-using BedrockService.Service.Server.HostInfoClasses;
+﻿using BedrockService.Service.Server.HostInfoClasses;
 using BedrockService.Service.Server.Logging;
 using System;
 using System.Collections.Generic;
@@ -107,7 +106,7 @@ namespace BedrockService.Client.Management
             return true;
         }
 
-        private static void UpdateLogBoxInvoked (string contents)
+        private static void UpdateLogBoxInvoked(string contents)
         {
             FormManager.GetMainWindow.LogBox.Invoke((MethodInvoker)delegate
             {

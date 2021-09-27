@@ -1,4 +1,6 @@
-﻿using BedrockService.Service.Server.HostInfoClasses;
+﻿using BedrockService.Client.Management;
+using BedrockService.Service.Networking;
+using BedrockService.Service.Server.HostInfoClasses;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
@@ -10,7 +12,6 @@ namespace BedrockService.Client.Forms
         DataGridView dataGrid;
         public List<Property> workingProps;
         public List<StartCmdEntry> startCmds;
-
 
         public EditSrv()
         {
@@ -43,6 +44,14 @@ namespace BedrockService.Client.Forms
             {
                 dataGrid.Rows.Add(new string[1] { entry.Command });
             }
+        }
+
+        public void EnableBackupManager()
+        {
+            gridView.MultiSelect = true;
+            DelBackupBtn.Enabled = true;
+            DelBackupBtn.Visible = true;
+            SaveBtn.Text = "Rollback this date";
         }
 
         private void CancelBtn_Click(object sender, EventArgs e)
@@ -82,6 +91,16 @@ namespace BedrockService.Client.Forms
             DataGridViewRow focusedRow = gridView.CurrentRow;
             focusedRow.Cells[0].Value = "Cmd:";
             gridView.Refresh();
+        }
+
+        private void DelBackupBtn_Click(object sender, EventArgs e)
+        {
+            List<string> removeBackups = new List<string>();
+            if (dataGrid.SelectedRows.Count > 0)
+                foreach (DataGridViewRow viewRow in dataGrid.SelectedRows)
+                    removeBackups.Add((string)viewRow.Cells[0].Value);
+            Utilities.JsonUtilities.SendJsonMsgToSrv<List<string>>(removeBackups, NetworkMessageDestination.Service, (byte)FormManager.GetMainWindow.connectedHost.Servers.IndexOf(FormManager.GetMainWindow.selectedServer), NetworkMessageTypes.DelBackups);
+
         }
     }
 }
