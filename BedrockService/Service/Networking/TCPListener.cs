@@ -2,10 +2,12 @@
 using BedrockService.Service.Server;
 using BedrockService.Service.Server.HostInfoClasses;
 using BedrockService.Service.Server.Logging;
+using BedrockService.Service.Server.Management;
 using BedrockService.Utilities;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -58,16 +60,17 @@ namespace BedrockService.Service.Networking
             //listener.Stop();
         }
 
-        public bool SendData(byte[] bytes, NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type, NetworkMessageFlags status)
+        public bool SendData(byte[] bytes, NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type, NetworkMessageFlags status)
         {
-            byte[] compiled = new byte[8 + bytes.Length];
-            byte[] len = BitConverter.GetBytes(4 + bytes.Length);
+            byte[] compiled = new byte[9 + bytes.Length];
+            byte[] len = BitConverter.GetBytes(5 + bytes.Length);
             Buffer.BlockCopy(len, 0, compiled, 0, 4);
             compiled[4] = (byte)source;
             compiled[5] = (byte)destination;
-            compiled[6] = (byte)type;
-            compiled[7] = (byte)status;
-            Buffer.BlockCopy(bytes, 0, compiled, 8, bytes.Length);
+            compiled[6] = serverIndex;
+            compiled[7] = (byte)type;
+            compiled[8] = (byte)status;
+            Buffer.BlockCopy(bytes, 0, compiled, 9, bytes.Length);
             if (keepalive)
             {
                 try
@@ -86,11 +89,15 @@ namespace BedrockService.Service.Networking
             return false;
         }
 
-        public bool SendData(NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type) => SendData(new byte[0], source, destination, type, NetworkMessageFlags.None);
+        public bool SendData(NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type) => SendData(new byte[0], source, destination, 0xFF, type, NetworkMessageFlags.None);
 
-        public bool SendData(byte[] bytes, NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type) => SendData(bytes, source, destination, type, NetworkMessageFlags.None);
+        public void SendData(NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type) => SendData(new byte[0], source, destination, serverIndex, type, NetworkMessageFlags.None);
 
-        public bool SendData(NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type, NetworkMessageFlags status) => SendData(new byte[0], source, destination, type, status);
+        public bool SendData(byte[] bytes, NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type) => SendData(bytes, source, destination, serverIndex, type, NetworkMessageFlags.None);
+
+        public bool SendData(byte[] bytes, NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type) => SendData(bytes, source, destination, 0xFF, type, NetworkMessageFlags.None);
+
+        public bool SendData(NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type, NetworkMessageFlags status) => SendData(new byte[0], source, destination, 0xFF, type, status);
 
         private void IncomingListener()
         {
@@ -98,6 +105,12 @@ namespace BedrockService.Service.Networking
             InstanceProvider.ServiceLogger.AppendLine("Established connection! Listening for incoming packets!");
             int AvailBytes = 0;
             int byteCount = 0;
+            NetworkMessageSource msgSource = 0;
+            NetworkMessageDestination msgDest = 0;
+            byte serverIndex = 0xFF;
+            NetworkMessageTypes msgType = 0;
+            NetworkMessageFlags msgFlag = 0;
+            List<byte[]> byteBlocks = new List<byte[]>();
             while (InstanceProvider.GetClientServiceAlive())
             {
                 try
@@ -110,11 +123,14 @@ namespace BedrockService.Service.Networking
                         int expectedLen = BitConverter.ToInt32(buffer, 0);
                         buffer = new byte[expectedLen];
                         byteCount = stream.Read(buffer, 0, expectedLen);
-                        NetworkMessageSource msgSource = (NetworkMessageSource)buffer[0];
-                        NetworkMessageDestination msgDest = (NetworkMessageDestination)buffer[1];
-                        NetworkMessageTypes msgType = (NetworkMessageTypes)buffer[2];
-                        NetworkMessageFlags msgFlag = (NetworkMessageFlags)buffer[3];
-                        string data = GetOffsetString(buffer);
+                        msgSource = (NetworkMessageSource)buffer[0];
+                        msgDest = (NetworkMessageDestination)buffer[1];
+                        serverIndex = buffer[2];
+                        msgType = (NetworkMessageTypes)buffer[3];
+                        msgFlag = (NetworkMessageFlags)buffer[4];
+                        string data = "";
+                        if (msgType != NetworkMessageTypes.PackFile)
+                            data = GetOffsetString(buffer);
                         string[] dataSplit = null;
                         Dictionary<string, List<string>> LogPersist = new Dictionary<string, List<string>>();
                         switch (msgDest)
@@ -129,63 +145,73 @@ namespace BedrockService.Service.Networking
                                         message = JsonParser.Deserialize(data);
                                         List<Property> propList = message.Value.ToObject<List<Property>>();
                                         Property prop = propList.First(p => p.KeyName == "server-name");
-                                        InstanceProvider.GetBedrockServer(prop.Value).serverInfo.ServerPropList = propList;
-                                        InstanceProvider.ConfigManager.SaveServerProps(InstanceProvider.GetBedrockServer(prop.Value).serverInfo, true);
+                                        InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPropList = propList;
+                                        InstanceProvider.ConfigManager.SaveServerProps(InstanceProvider.GetServerInfoByIndex(serverIndex), true);
                                         InstanceProvider.ConfigManager.LoadConfigs();
-                                        InstanceProvider.GetBedrockServer(prop.Value).CurrentServerStatus = BedrockServer.ServerStatus.Stopping;
-                                        while (InstanceProvider.GetBedrockServer(prop.Value).CurrentServerStatus == BedrockServer.ServerStatus.Stopping)
+                                        InstanceProvider.GetBedrockServerByIndex(serverIndex).CurrentServerStatus = BedrockServer.ServerStatus.Stopping;
+                                        while (InstanceProvider.GetBedrockServerByIndex(serverIndex).CurrentServerStatus == BedrockServer.ServerStatus.Stopping)
                                         {
                                             Thread.Sleep(100);
                                         }
-                                        InstanceProvider.GetBedrockServer(prop.Value).StartControl(InstanceProvider.BedrockService._hostControl);
-                                        SendData(NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.PropUpdate);
+                                        InstanceProvider.GetBedrockServerByIndex(serverIndex).StartControl(InstanceProvider.BedrockService._hostControl);
+                                        SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
 
                                         break;
                                     case NetworkMessageTypes.Restart:
 
-                                        RestartServer(data, false);
+                                        RestartServer(serverIndex, false);
+                                        SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+
                                         break;
 
                                     case NetworkMessageTypes.Backup:
 
-                                        RestartServer(data, true);
+                                        RestartServer(serverIndex, true);
+                                        SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+
+
                                         break;
 
                                     case NetworkMessageTypes.Command:
 
-                                        dataSplit = data.Split(';');
-                                        InstanceProvider.GetBedrockServer(dataSplit[0]).StdInStream.WriteLine(dataSplit[1]);
-                                        InstanceProvider.ServiceLogger.AppendLine($"Sent command {dataSplit[1]} to stdInput stream");
+                                        InstanceProvider.GetBedrockServerByIndex(serverIndex).StdInStream.WriteLine(data);
+                                        InstanceProvider.ServiceLogger.AppendLine($"Sent command {data} to stdInput stream");
 
                                         break;
                                     case NetworkMessageTypes.PlayersRequest:
 
-                                        ServerInfo server = InstanceProvider.GetBedrockServer(data).serverInfo;
-                                        string jsonString = $"{data};{JsonParser.Serialize(JsonParser.FromValue(server.KnownPlayers))}";
-                                        SendData(Encoding.UTF8.GetBytes(jsonString), NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.PlayersRequest);
+                                        ServerInfo server = InstanceProvider.GetServerInfoByIndex(serverIndex);
+                                        string jsonString = JsonParser.Serialize(JsonParser.FromValue(server.KnownPlayers));
+                                        SendData(Encoding.UTF8.GetBytes(jsonString), NetworkMessageSource.Server, NetworkMessageDestination.Client, serverIndex, NetworkMessageTypes.PlayersRequest);
+
+                                        break;
+                                    case NetworkMessageTypes.PackFile:
+
+                                        MinecraftPackArchiveParser archiveParser = new MinecraftPackArchiveParser(buffer);
 
                                         break;
                                     case NetworkMessageTypes.PlayersUpdate:
 
-                                        dataSplit = data.Split(';');
-                                        JsonParser deserialized = JsonParser.Deserialize(dataSplit[1]);
+                                        JsonParser deserialized = JsonParser.Deserialize(data);
                                         List<Player> fetchedPlayers = (List<Player>)deserialized.Value.ToObject(typeof(List<Player>));
-                                        List<Player> known = InstanceProvider.GetBedrockServer(dataSplit[0]).serverInfo.KnownPlayers;
+                                        List<Player> known = InstanceProvider.GetServerInfoByIndex(serverIndex).KnownPlayers;
                                         foreach (Player player in fetchedPlayers)
                                         {
                                             try
                                             {
-                                                Player playerFound = InstanceProvider.GetBedrockServer(dataSplit[0]).serverInfo.KnownPlayers.First(p => p.XUID == player.XUID);
+                                                Player playerFound = InstanceProvider.GetServerInfoByIndex(serverIndex).KnownPlayers.First(p => p.XUID == player.XUID);
                                                 if (player != playerFound)
-                                                    InstanceProvider.GetBedrockServer(dataSplit[0]).serverInfo.KnownPlayers[InstanceProvider.GetBedrockServer(dataSplit[0]).serverInfo.KnownPlayers.IndexOf(playerFound)] = player;
+                                                    InstanceProvider.GetServerInfoByIndex(serverIndex).KnownPlayers[InstanceProvider.GetServerInfoByIndex(serverIndex).KnownPlayers.IndexOf(playerFound)] = player;
                                             }
                                             catch (Exception)
                                             {
-                                                InstanceProvider.GetBedrockServer(dataSplit[0]).serverInfo.KnownPlayers.Add(player);
+                                                InstanceProvider.GetServerInfoByIndex(serverIndex).KnownPlayers.Add(player);
                                             }
                                         }
-                                        InstanceProvider.ConfigManager.SaveRegisteredPlayers(InstanceProvider.GetBedrockServer(dataSplit[0]).serverInfo);
-                                        RestartServer(dataSplit[0], false);
+                                        InstanceProvider.ConfigManager.SaveRegisteredPlayers(InstanceProvider.GetServerInfoByIndex(serverIndex));
+                                        InstanceProvider.ConfigManager.LoadConfigs();
+                                        InstanceProvider.ConfigManager.LoadRegisteredPlayers(InstanceProvider.GetServerInfoByIndex(serverIndex));
+                                        SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
 
                                         break;
                                 }
@@ -232,8 +258,8 @@ namespace BedrockService.Service.Networking
                                             int loop;
                                             if (srvName != "Service")
                                             {
-                                                InstanceProvider.GetBedrockServer(srvName).serverInfo.ConsoleBuffer = InstanceProvider.GetBedrockServer(srvName).serverInfo.ConsoleBuffer ?? new ServerLogger(srvName);
-                                                ServerLogger srvText = InstanceProvider.GetBedrockServer(srvName).serverInfo.ConsoleBuffer;
+                                                InstanceProvider.GetBedrockServerByName(srvName).serverInfo.ConsoleBuffer = InstanceProvider.GetBedrockServerByName(srvName).serverInfo.ConsoleBuffer ?? new ServerLogger(srvName);
+                                                ServerLogger srvText = InstanceProvider.GetBedrockServerByName(srvName).serverInfo.ConsoleBuffer;
                                                 srvTextLen = srvText.Count();
                                                 clientCurLen = int.Parse(dataSplit[1]);
                                                 loop = clientCurLen;
@@ -267,19 +293,34 @@ namespace BedrockService.Service.Networking
                                         break;
                                     case NetworkMessageTypes.StartCmdUpdate:
 
-                                        dataSplit = data.Split(';');
-                                        JsonParser deserialized = JsonParser.Deserialize(dataSplit[1]);
-                                        InstanceProvider.GetBedrockServer(dataSplit[0]).serverInfo.StartCmds = (List<StartCmdEntry>)deserialized.Value.ToObject(typeof(List<StartCmdEntry>));
-                                        InstanceProvider.ConfigManager.SaveServerProps(InstanceProvider.GetBedrockServer(dataSplit[0]).serverInfo, true);
-                                        RestartServer(dataSplit[0], false);
+                                        JsonParser deserialized = JsonParser.Deserialize(data);
+                                        InstanceProvider.GetServerInfoByIndex(serverIndex).StartCmds = (List<StartCmdEntry>)deserialized.Value.ToObject(typeof(List<StartCmdEntry>));
+                                        InstanceProvider.ConfigManager.SaveServerProps(InstanceProvider.GetServerInfoByIndex(serverIndex), true);
 
                                         break;
                                     case NetworkMessageTypes.BackupAll:
 
                                         foreach (BedrockServer server in InstanceProvider.BedrockService.bedrockServers)
                                         {
-                                            RestartServer(server.serverInfo.ServerName, true);
+                                            RestartServer((byte)InstanceProvider.BedrockService.bedrockServers.IndexOf(server), true);
                                         }
+                                        while (InstanceProvider.BedrockService.bedrockServers[InstanceProvider.BedrockService.bedrockServers.Count - 1].CurrentServerStatus != BedrockServer.ServerStatus.Started)
+                                            Thread.Sleep(250);
+                                        SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+
+                                        break;
+                                    case NetworkMessageTypes.DelBackups:
+
+                                        deserialized = JsonParser.Deserialize(data);
+                                        List<string> backupFileNames = (List<string>)deserialized.Value.ToObject(typeof(List<string>));
+                                        InstanceProvider.ConfigManager.DeleteBackupsForServer(serverIndex, backupFileNames);
+
+                                        break;
+                                    case NetworkMessageTypes.EnumBackups:
+
+                                        jsonString = JsonParser.Serialize(JsonParser.FromValue(InstanceProvider.ConfigManager.EnumerateBackupsForServer(serverIndex)));
+                                        stringAsBytes = GetBytes(jsonString);
+                                        SendData(stringAsBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.EnumBackups);
 
                                         break;
                                     case NetworkMessageTypes.CheckUpdates:
@@ -288,12 +329,11 @@ namespace BedrockService.Service.Networking
                                         {
                                             if (Updater.VersionChanged)
                                             {
-                                                foreach (ServerInfo server in InstanceProvider.HostInfo.Servers)
-                                                {
-                                                    RestartServer(server.ServerName, true);
-                                                }
+                                                SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.CheckUpdates);
+                                                break;
                                             }
                                         }
+                                        SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
 
                                         break;
                                     case NetworkMessageTypes.AddNewServer:
@@ -310,27 +350,32 @@ namespace BedrockService.Service.Networking
                                         newServer.ServerExeName.Value = $"BDS_{prop.Value}.exe";
                                         newServer.FileName = $@"{prop.Value}.conf";
                                         InstanceProvider.ConfigManager.SaveServerProps(newServer, true);
-                                        InstanceProvider.BedrockService.RestartService();
+                                        InstanceProvider.BedrockService.InitializeNewServer(newServer);
                                         jsonString = JsonParser.Serialize(JsonParser.FromValue(InstanceProvider.HostInfo));
                                         stringAsBytes = GetBytes(jsonString);
                                         SendData(stringAsBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
+                                        SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+
 
                                         break;
                                     case NetworkMessageTypes.RemoveServer:
 
-                                        InstanceProvider.GetBedrockServer(data).CurrentServerStatus = BedrockServer.ServerStatus.Stopping;
-                                        while (InstanceProvider.GetBedrockServer(data).CurrentServerStatus != BedrockServer.ServerStatus.Stopped)
+                                        InstanceProvider.GetBedrockServerByIndex(serverIndex).CurrentServerStatus = BedrockServer.ServerStatus.Stopping;
+                                        while (InstanceProvider.GetBedrockServerByIndex(serverIndex).CurrentServerStatus != BedrockServer.ServerStatus.Stopped)
                                             Thread.Sleep(200);
-                                        InstanceProvider.ConfigManager.RemoveServerConfigs(InstanceProvider.GetBedrockServer(data).serverInfo, msgFlag);
-                                        foreach (ServerInfo server in InstanceProvider.HostInfo.Servers)
-                                            if (server.ServerName != data)
-                                                LogPersist.Add(server.ServerName, server.ConsoleBuffer.Log);
-                                        if (InstanceProvider.BedrockService.RestartService())
-                                            foreach (ServerInfo server in InstanceProvider.HostInfo.Servers)
-                                                server.ConsoleBuffer.AppendPreviousLog(LogPersist[server.ServerName]);
+                                        InstanceProvider.ConfigManager.RemoveServerConfigs(InstanceProvider.GetBedrockServerByIndex(serverIndex).serverInfo, msgFlag);
+                                        InstanceProvider.HostInfo.Servers.Remove(InstanceProvider.GetServerInfoByIndex(serverIndex));
+                                        //  foreach (ServerInfo server in InstanceProvider.HostInfo.Servers)
+                                        //      if (server.ServerName != data)
+                                        //          LogPersist.Add(server.ServerName, server.ConsoleBuffer.Log);
+                                        //  if (InstanceProvider.BedrockService.RestartService())
+                                        //      foreach (ServerInfo server in InstanceProvider.HostInfo.Servers)
+                                        //         if(server.ConsoleBuffer != null)
+                                        //              server.ConsoleBuffer.AppendPreviousLog(LogPersist[server.ServerName]);
                                         jsonString = JsonParser.Serialize(JsonParser.FromValue(InstanceProvider.HostInfo));
                                         stringAsBytes = GetBytes(jsonString);
                                         SendData(stringAsBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
+                                        SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
 
                                         break;
                                 }
@@ -342,13 +387,20 @@ namespace BedrockService.Service.Networking
                 }
                 catch (OutOfMemoryException)
                 {
-                    InstanceProvider.ServiceLogger.AppendLine("");
-
+                    InstanceProvider.ServiceLogger.AppendLine("Out of memory exception thrown.");
                 }
-                catch (ObjectDisposedException e)
+                catch (ObjectDisposedException)
                 {
                     InstanceProvider.ServiceLogger.AppendLine("Client was disposed! Killing thread...");
                     break;
+                }
+                catch (InvalidOperationException e)
+                {
+                    if (msgType != NetworkMessageTypes.ConsoleLogUpdate)
+                    {
+                        InstanceProvider.ServiceLogger.AppendLine(e.Message);
+                        InstanceProvider.ServiceLogger.AppendLine(e.StackTrace);
+                    }
                 }
                 catch (ThreadAbortException) { }
 
@@ -359,8 +411,7 @@ namespace BedrockService.Service.Networking
                 }
                 catch (Exception e)
                 {
-                    //InstanceProvider.GetServiceLogger.AppendLine($"Error: {e.Message} {e.StackTrace}");
-                    //InstanceProvider.GetServiceLogger.AppendLine($"Error: {e.Message}: {AvailBytes}, {byteCount}\n{e.StackTrace}");
+                    InstanceProvider.ServiceLogger.AppendLine($"Error: {e.Message} {e.StackTrace}");
                 }
                 AvailBytes = client.Client.Available;
                 if (InstanceProvider.ClientService.ThreadState == ThreadState.Aborted)
@@ -421,18 +472,18 @@ namespace BedrockService.Service.Networking
             InstanceProvider.ServiceLogger.AppendLine("HeartBeatSender exited.");
         }
 
-        private void RestartServer(string payload, bool performBackup)
+        private void RestartServer(byte serverIndex, bool performBackup)
         {
-            if (InstanceProvider.GetBedrockServer(payload).CurrentServerStatus == BedrockServer.ServerStatus.Started)
+            if (InstanceProvider.GetBedrockServerByIndex(serverIndex).CurrentServerStatus == BedrockServer.ServerStatus.Started)
             {
-                InstanceProvider.GetBedrockServer(payload).CurrentServerStatus = BedrockServer.ServerStatus.Stopping;
-                while (InstanceProvider.GetBedrockServer(payload).CurrentServerStatus == BedrockServer.ServerStatus.Stopping)
+                InstanceProvider.GetBedrockServerByIndex(serverIndex).CurrentServerStatus = BedrockServer.ServerStatus.Stopping;
+                while (InstanceProvider.GetBedrockServerByIndex(serverIndex).CurrentServerStatus == BedrockServer.ServerStatus.Stopping)
                 {
                     Thread.Sleep(100);
                 }
                 if (performBackup)
                 {
-                    if (InstanceProvider.GetBedrockServer(payload).Backup())
+                    if (InstanceProvider.GetBedrockServerByIndex(serverIndex).Backup())
                     {
                         SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Backup, NetworkMessageFlags.Passed);
                     }
@@ -441,12 +492,12 @@ namespace BedrockService.Service.Networking
                         SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Backup, NetworkMessageFlags.Failed);
                     }
                 }
-                InstanceProvider.GetBedrockServer(payload).CurrentServerStatus = BedrockServer.ServerStatus.Starting;
+                InstanceProvider.GetBedrockServerByIndex(serverIndex).CurrentServerStatus = BedrockServer.ServerStatus.Starting;
                 Thread.Sleep(1000);
             }
         }
 
-        private string GetOffsetString(byte[] array) => Encoding.UTF8.GetString(array, 4, array.Length - 4);
+        private string GetOffsetString(byte[] array) => Encoding.UTF8.GetString(array, 5, array.Length - 5);
 
         private byte[] GetBytes(string input) => Encoding.UTF8.GetBytes(input);
     }

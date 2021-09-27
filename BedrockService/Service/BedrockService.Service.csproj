@@ -72,6 +72,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.IO.Compression.ZipFile, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\System.IO.Compression.ZipFile.4.3.0\lib\net46\System.IO.Compression.ZipFile.dll</HintPath>
@@ -103,6 +104,8 @@
     <Compile Include="BedrockService.cs" />
     <Compile Include="Management\ConfigManager.cs" />
     <Compile Include="Server\HostInfoClasses\HostInfo.cs" />
+    <Compile Include="Server\Management\MinecraftPackArchiveParser.cs" />
+    <Compile Include="Server\Management\MinecraftPackManifestJsonClass.cs" />
     <Compile Include="Server\HostInfoClasses\Player.cs" />
     <Compile Include="Server\HostInfoClasses\Property.cs" />
     <Compile Include="Server\HostInfoClasses\ServerInfo.cs" />

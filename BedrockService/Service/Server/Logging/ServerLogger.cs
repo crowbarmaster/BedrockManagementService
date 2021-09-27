@@ -89,10 +89,10 @@ namespace BedrockService.Service.Server.Logging
             return Log[index];
         }
 
-        public void AppendPreviousLog (List<string> logToAppend)
+        public void AppendPreviousLog(List<string> logToAppend)
         {
             List<string> newList = new List<string>(logToAppend);
-            if(Log.Count > 0)
+            if (Log.Count > 0)
             {
                 newList.AddRange(Log);
             }

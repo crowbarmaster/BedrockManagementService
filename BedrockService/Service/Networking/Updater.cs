@@ -1,5 +1,4 @@
-﻿using BedrockService.Service.Server.HostInfoClasses;
-using System;
+﻿using System;
 using System.IO;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -91,11 +90,11 @@ namespace BedrockService.Service.Networking
             {
                 return;
             }
-          //if (InstanceProvider.HostInfo.GetGlobalValue("AcceptedMojangLic") == "false")
-          //{
-          //    InstanceProvider.ServiceLogger.AppendLine("You have not accepted the license. Please visit the readme for more info!");
-          //    return;
-          //}
+            //if (InstanceProvider.HostInfo.GetGlobalValue("AcceptedMojangLic") == "false")
+            //{
+            //    InstanceProvider.ServiceLogger.AppendLine("You have not accepted the license. Please visit the readme for more info!");
+            //    return;
+            //}
             InstanceProvider.ServiceLogger.AppendLine("Now downloading latest build of Minecraft Bedrock Server. Please wait...");
             using (var httpClient = new HttpClient())
             {

@@ -84,6 +84,8 @@ namespace BedrockService.Service.Server.HostInfoClasses
 
         public List<ServerInfo> GetServerInfos() => Servers;
 
+        public ServerInfo GetServerInfoByIndex(byte serverIndex) => serverIndex != 0xFF ? Servers[serverIndex] : null;
+
         public void ClearServerInfos() => Servers = new List<ServerInfo>();
 
         public List<Property> GetGlobals() => Globals;

@@ -27,12 +27,15 @@
         PlayersUpdate,
         StartCmdUpdate,
         CheckUpdates,
+        PackFile,
         Command,
         Backup,
         BackupAll,
+        DelBackups,
+        EnumBackups,
         Restart,
-        RestartComplete,
-        Heartbeat
+        Heartbeat,
+        UICallback
     }
 
     public enum NetworkMessageFlags
