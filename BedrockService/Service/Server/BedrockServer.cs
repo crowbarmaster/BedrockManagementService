@@ -212,7 +212,7 @@ namespace BedrockService.Service.Server
                     }
                 }
 
-                var targetDirectory = backupDir.CreateSubdirectory($"Backup_{DateTime.Now:yyyyMMddhhmmss}");
+                var targetDirectory = backupDir.CreateSubdirectory($"Backup_{DateTime.Now.Ticks}");
                 InstanceProvider.ServiceLogger.AppendLine($"Backing up files for server {serverInfo.ServerName}. Please wait!");
                 if (InstanceProvider.HostInfo.GetGlobalValue("EntireBackups") == "false")
                 {
@@ -302,7 +302,7 @@ namespace BedrockService.Service.Server
                 serverInfo.ConsoleBuffer.Append($"{serverInfo.ServerName}: {dataMsg}\r\n");
                 if (e.Data != null)
                 {
-                    
+
                     if (dataMsg.Contains(startupMessage))
                     {
                         CurrentServerStatus = ServerStatus.Started;
@@ -343,7 +343,7 @@ namespace BedrockService.Service.Server
         {
             serverInfo.ConsoleBuffer.Append($"{serverInfo.ServerName}: ERROR!! {e.Data}\r\n");
         }
- 
+
         private void RunStartupCommands()
         {
             foreach (StartCmdEntry cmd in serverInfo.StartCmds)
