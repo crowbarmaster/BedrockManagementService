@@ -1,10 +1,11 @@
-﻿using BedrockService.Service.Server.HostInfoClasses;
-using BedrockService.Service.Networking;
+﻿using BedrockService.Service.Networking;
+using BedrockService.Service.Server;
+using BedrockService.Service.Server.HostInfoClasses;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using BedrockService.Service.Server;
 
 namespace BedrockService.Service.Management
 {
@@ -59,7 +60,7 @@ namespace BedrockService.Service.Management
                             if (split[0] == "BackupPath")
                             {
                                 if (split[1] == "Default")
-                                    split[1] = $@"{Program.ServiceDirectory}\Backups";
+                                    split[1] = $@"{Program.ServiceDirectory}\Server\Backups";
                             }
                             if (InstanceProvider.HostInfo.SetGlobalProperty(split[0], split[1]))
                             {
@@ -208,10 +209,10 @@ namespace BedrockService.Service.Management
         {
             lock (FileLock)
             {
-                string filePath = $@"{configDir}\RegisteredPlayers\{server.ServerName}.playerdb";
+                string filePath = $@"{configDir}\KnownPlayers\{server.ServerName}.playerdb";
                 if (File.Exists(filePath))
                 {
-                    File.Copy(filePath, $@"{configDir}\Backups\RegisteredPlayers\{server.ServerName}_{DateTime.Now.ToString("mmddyyhhmmssff")}.dbbak", true);
+                    File.Copy(filePath, $@"{configDir}\KnownPlayers\Backups\{server.ServerName}_{DateTime.Now.ToString("mmddyyhhmmssff")}.dbbak", true);
                 }
                 TextWriter writer = new StreamWriter(filePath);
                 foreach (Player entry in server.KnownPlayers)
@@ -227,10 +228,10 @@ namespace BedrockService.Service.Management
         {
             lock (FileLock)
             {
-                string filePath = $@"{configDir}\KnownPlayers\{server.ServerName}.preg";
+                string filePath = $@"{configDir}\RegisteredPlayers\{server.ServerName}.preg";
                 if (File.Exists(filePath))
                 {
-                    File.Copy(filePath, $@"{configDir}\Backups\KnownPlayers\{server.ServerName}_{DateTime.Now.ToString("mmddyyhhmmssff")}.bak", true);
+                    File.Copy(filePath, $@"{configDir}\RegisteredPlayers\Backups\{server.ServerName}_{DateTime.Now.ToString("mmddyyhhmmssff")}.bak", true);
                 }
                 TextWriter writer = new StreamWriter(filePath);
                 writer.WriteLine("# Registered player list");
@@ -387,6 +388,49 @@ namespace BedrockService.Service.Management
             catch { }
         }
 
+        public List<Property> EnumerateBackupsForServer(byte serverIndex)
+        {
+            string serverName = InstanceProvider.GetServerInfoByIndex(serverIndex).ServerName;
+            List<Property> newList = new List<Property>();
+            try
+            {
+                foreach (DirectoryInfo dir in new DirectoryInfo($@"{InstanceProvider.HostInfo.GetGlobalValue("BackupPath")}\{serverName}").GetDirectories())
+                {
+                    string[] splitName = dir.Name.Split('_');
+                    newList.Add(new Property(dir.Name, new DateTime(long.Parse(splitName[1])).ToString("G")));
+                }
+            }
+            catch (IOException)
+            {
+                return newList;
+            }
+            return newList;
+        }
+
+        public void DeleteBackupsForServer(byte serverIndex, List<string> list)
+        {
+            string serverName = InstanceProvider.GetServerInfoByIndex(serverIndex).ServerName;
+            try
+            {
+                foreach (string deleteDir in list)
+                    foreach (DirectoryInfo dir in new DirectoryInfo($@"{InstanceProvider.HostInfo.GetGlobalValue("BackupPath")}\{serverName}").GetDirectories())
+                        if (dir.Name == deleteDir)
+                        {
+                            Directory.Delete($@"{InstanceProvider.HostInfo.GetGlobalValue("BackupPath")}\{serverName}\{deleteDir}", true);
+                            InstanceProvider.ServiceLogger.AppendLine($"Deleted backup {deleteDir}.");
+                        }
+            }
+            catch (IOException e)
+            {
+                InstanceProvider.ServiceLogger.AppendLine($"Error deleting selected backups! {e.Message}");
+            }
+        }
+
+        public void RollbackToBackup(byte serverIndex, string folderName)
+        {
+
+        }
+
         private bool DeleteBackups(ServerInfo serverInfo)
         {
             try
@@ -425,7 +469,7 @@ namespace BedrockService.Service.Management
             catch { return false; }
         }
 
-        private bool DeletePlayerFiles (ServerInfo serverInfo)
+        private bool DeletePlayerFiles(ServerInfo serverInfo)
         {
             try
             {
