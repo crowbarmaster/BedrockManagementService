@@ -30,7 +30,7 @@ namespace BedrockService.Service.Server.Management
                     file.Delete();
             foreach (DirectoryInfo directory in PackExtractDirectory.GetDirectories())
                 directory.Delete(true);
-            using (MemoryStream fileStream = new MemoryStream(buffer, 9, buffer.Length - 9))
+            using (MemoryStream fileStream = new MemoryStream(fileContents, 5, fileContents.Length - 5))
             {
                 using (ZipArchive zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read))
                 {
