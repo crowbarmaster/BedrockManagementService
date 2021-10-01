@@ -236,6 +236,7 @@ namespace BedrockService.Client.Forms
                     {
                         selectedServer = server;
                         ServerInfoBox.Text = server.ServerName;
+                        selectedServer.ConsoleBuffer = selectedServer.ConsoleBuffer ?? new Service.Server.Logging.ServerLogger(selectedServer.ServerName);
                         LogBox.Text = selectedServer.ConsoleBuffer.ToString();
                         LogBox.Select(LogBox.Text.Length, 0);
                         ComponentEnableManager();
@@ -426,6 +427,7 @@ namespace BedrockService.Client.Forms
             GlobBackup.Enabled = connectedHost != null && !ServerBusy;
             EditGlobals.Enabled = connectedHost != null && !ServerBusy;
             BackupManagerBtn.Enabled = (connectedHost != null && selectedServer != null && !ServerBusy);
+            ManPacks.Enabled = (connectedHost != null && selectedServer != null && !ServerBusy);
             scrollLockChkBox.Enabled = (connectedHost != null && selectedServer != null && !ServerBusy);
             removeSrvBtn.Enabled = (connectedHost != null && selectedServer != null && !ServerBusy);
             EditCfg.Enabled = (connectedHost != null && selectedServer != null && !ServerBusy);
@@ -510,10 +512,27 @@ namespace BedrockService.Client.Forms
             editDialog.PopulateBoxes(FormManager.GetTCPClient.BackupList);
             if (editDialog.ShowDialog() == DialogResult.OK)
             {
-
+                FormManager.GetTCPClient.SendData(Encoding.UTF8.GetBytes(editDialog.RollbackFolderName), NetworkMessageSource.Client, NetworkMessageDestination.Service, (byte)connectedHost.Servers.IndexOf(selectedServer), NetworkMessageTypes.BackupRollback);
+                ServerBusy = true;
             }
             editDialog.Close();
             editDialog.Dispose();
+        }
+
+        private void ManPacks_Click(object sender, EventArgs e)
+        {
+            FormManager.GetTCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Server, (byte)connectedHost.Servers.IndexOf(selectedServer), NetworkMessageTypes.PackList);
+            while(FormManager.GetTCPClient.RecievedPacks == null)
+            {
+                Thread.Sleep(150);
+            }
+            using (ManagePacksForms form = new ManagePacksForms((byte)connectedHost.Servers.IndexOf(selectedServer)))
+            {
+                form.PopulateServerPacks(FormManager.GetTCPClient.RecievedPacks);
+                if (form.ShowDialog() == DialogResult.OK)
+                    form.Close();
+            }
+            FormManager.GetTCPClient.RecievedPacks = null;
         }
     }
 }

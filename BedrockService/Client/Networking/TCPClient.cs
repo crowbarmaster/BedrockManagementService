@@ -2,7 +2,10 @@
 using BedrockService.Service.Networking;
 using BedrockService.Service.Server.HostInfoClasses;
 using BedrockService.Service.Server.Logging;
+using BedrockService.Service.Server.PackParser;
 using BedrockService.Utilities;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,6 +26,7 @@ namespace BedrockService.Client.Networking
         public bool PlayerInfoArrived;
         public bool EnumBackupsArrived;
         public List<Property> BackupList;
+        public List<MinecraftPackParser> RecievedPacks;
         public Thread ClientReciever;
         public Thread HeartbeatThread;
         private int heartbeatFailTimeout;
@@ -94,24 +98,6 @@ namespace BedrockService.Client.Networking
                         int expectedLen = BitConverter.ToInt32(buffer, 0);
                         buffer = new byte[expectedLen];
                         byteCount = stream.Read(buffer, 0, expectedLen);
-                     // if (expectedLen > 65000)
-                     //     byteBlocks.Add(buffer);
-                     // if (byteBlocks.Count > 0)
-                     // {
-                     //     byte[] bufferCompile = new byte[(expectedLen - 9) + (byteBlocks.Count * 65000)];
-                     //     int index = 9;
-                     //     for (int i = 0; index < 9; i++)
-                     //     {
-                     //         bufferCompile[i] = buffer[i];
-                     //     }
-                     //     foreach (byte[] bytes in byteBlocks)
-                     //     {
-                     //         Buffer.BlockCopy(bytes, 9, bufferCompile, index, bytes.Length);
-                     //         index += 65000;
-                     //     }
-                     //     Buffer.BlockCopy(buffer, 9, bufferCompile, index, buffer.Length);
-                     //     buffer = bufferCompile;
-                     // }
                         NetworkMessageSource source = (NetworkMessageSource)buffer[0];
                         NetworkMessageDestination destination = (NetworkMessageDestination)buffer[1];
                         byte serverIndex = buffer[2];
@@ -175,13 +161,12 @@ namespace BedrockService.Client.Networking
                                         break;
                                     case NetworkMessageTypes.CheckUpdates:
 
-                                        //TODO: Aak user if update now or perform later.
+                                        //TODO: Ask user if update now or perform later.
                                         UnlockUI();
 
                                         break;
                                     case NetworkMessageTypes.UICallback:
 
-                                        SendData(File.ReadAllBytes($@"E:\testRB.zip"), NetworkMessageSource.Client, NetworkMessageDestination.Server, 0x00, NetworkMessageTypes.PackFile);
                                         UnlockUI();
 
                                         break;
@@ -226,6 +211,15 @@ namespace BedrockService.Client.Networking
                                     case NetworkMessageTypes.UICallback:
 
                                         UnlockUI();
+
+                                        break;
+                                    case NetworkMessageTypes.PackList:
+
+                                        List<MinecraftPackParser> temp = new List<MinecraftPackParser>();
+                                        JArray jArray = JArray.Parse(data);
+                                        foreach (JToken token in jArray)
+                                            temp.Add(token.ToObject<MinecraftPackParser>());
+                                        RecievedPacks = temp;
 
                                         break;
                                     case NetworkMessageTypes.PlayersRequest:

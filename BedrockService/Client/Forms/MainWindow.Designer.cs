@@ -237,6 +237,7 @@
             this.ManPacks.TabIndex = 19;
             this.ManPacks.Text = "R/B Pack Manager";
             this.ManPacks.UseVisualStyleBackColor = true;
+            this.ManPacks.Click += new System.EventHandler(this.ManPacks_Click);
             // 
             // SingBackup
             // 
@@ -262,12 +263,12 @@
             this.RestartSrv.UseVisualStyleBackColor = true;
             this.RestartSrv.Click += new System.EventHandler(this.RestartSrv_Click);
             // 
-            // BackupManager
+            // BackupManagerBtn
             // 
             this.BackupManagerBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.BackupManagerBtn.Enabled = false;
             this.BackupManagerBtn.Location = new System.Drawing.Point(601, 340);
-            this.BackupManagerBtn.Name = "BackupManager";
+            this.BackupManagerBtn.Name = "BackupManagerBtn";
             this.BackupManagerBtn.Size = new System.Drawing.Size(170, 23);
             this.BackupManagerBtn.TabIndex = 22;
             this.BackupManagerBtn.Text = "Backup Manager";

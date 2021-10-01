@@ -12,6 +12,7 @@ namespace BedrockService.Client.Forms
         DataGridView dataGrid;
         public List<Property> workingProps;
         public List<StartCmdEntry> startCmds;
+        public string RollbackFolderName = "";
 
         public EditSrv()
         {
@@ -62,6 +63,13 @@ namespace BedrockService.Client.Forms
 
         private void SaveBtn_Click(object sender, EventArgs e)
         {
+            if (DelBackupBtn.Enabled)
+            {
+                if(dataGrid.SelectedRows.Count < 2)
+                RollbackFolderName = (string)dataGrid.CurrentRow.Cells[0].Value;
+                DialogResult = DialogResult.OK;
+                Close();
+            }
             startCmds = new List<StartCmdEntry>();
             foreach (DataGridViewRow row in dataGrid.Rows)
             {
