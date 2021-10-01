@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.IO.Compression;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -57,10 +58,15 @@ namespace BedrockService.Service.Networking
                         InstanceProvider.ServiceLogger.AppendLine("Fetching build timed out. If this is a new service instance, please restart service!");
                         return false;
                     }
+                    GenerateFileList(version);
                 }
                 else
                 {
                     InstanceProvider.ServiceLogger.AppendLine($"Current version \"{version}\" is up to date!");
+                    if (!File.Exists($@"{Program.ServiceDirectory}\Server\MCSFiles\stock_filelist.ini"))
+                    {
+                        GenerateFileList(version);
+                    }
                 }
                 return true;
             }
@@ -75,6 +81,7 @@ namespace BedrockService.Service.Networking
                 }
                 InstanceProvider.HostInfo.ServerVersion = version;
                 File.WriteAllText($@"{Program.ServiceDirectory}\Server\bedrock_ver.ini", version);
+                GenerateFileList(version);
                 return true;
             }
         }
@@ -117,6 +124,7 @@ namespace BedrockService.Service.Networking
                     }
                 }
             }
+
         }
 
         private static async Task<string> FetchHTTPContent(HttpClient client)
@@ -134,6 +142,19 @@ namespace BedrockService.Service.Networking
                 InstanceProvider.ServiceLogger.AppendLine($"Updater resulted in error: {e.Message}\n{e.InnerException}\n{e.StackTrace}");
             }
             return null;
+        }
+
+        private static void GenerateFileList(string version)
+        {
+            using (ZipArchive zip = ZipFile.OpenRead($@"{Program.ServiceDirectory}\Server\MCSFiles\Update_{version}.zip"))
+            {
+                string[] fileList = new string[zip.Entries.Count];
+                for (int i = 0; i < zip.Entries.Count; i++)
+                {
+                    fileList[i] = zip.Entries[i].FullName.Replace('/', '\\');
+                }
+                File.WriteAllLines($@"{Program.ServiceDirectory}\Server\MCSFiles\stock_filelist.ini", fileList);
+            }
         }
     }
 }

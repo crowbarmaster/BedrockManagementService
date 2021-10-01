@@ -15,5 +15,10 @@ namespace BedrockService.Service.Server.HostInfoClasses
             Value = defaultValue;
             DefaultValue = defaultValue;
         }
+
+        public override string ToString()
+        {
+            return Value;
+        }
     }
 }

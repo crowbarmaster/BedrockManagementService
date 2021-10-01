@@ -3,8 +3,10 @@ using BedrockService.Service.Server;
 using BedrockService.Service.Server.HostInfoClasses;
 using BedrockService.Service.Server.Logging;
 using BedrockService.Service.Server.Management;
+using BedrockService.Service.Server.PackParser;
 using BedrockService.Utilities;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -163,15 +165,12 @@ namespace BedrockService.Service.Networking
                                         SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
 
                                         break;
-
                                     case NetworkMessageTypes.Backup:
 
                                         RestartServer(serverIndex, true);
                                         SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
 
-
                                         break;
-
                                     case NetworkMessageTypes.Command:
 
                                         InstanceProvider.GetBedrockServerByIndex(serverIndex).StdInStream.WriteLine(data);
@@ -187,7 +186,36 @@ namespace BedrockService.Service.Networking
                                         break;
                                     case NetworkMessageTypes.PackFile:
 
-                                        MinecraftPackArchiveParser archiveParser = new MinecraftPackArchiveParser(buffer);
+                                        MinecraftPackParser archiveParser = new MinecraftPackParser(buffer);
+                                        foreach (MinecraftPackContainer container in archiveParser.FoundPacks)
+                                        {
+                                            if (container.ManifestType == "WorldPack")
+                                                CopyFilesRecursively(container.PackContentLocation, new DirectoryInfo($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath.Value}\worlds\{container.FolderName}"));
+                                            if (container.ManifestType == "data")
+                                                CopyFilesRecursively(container.PackContentLocation, new DirectoryInfo($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath.Value}\behavior_packs\{container.FolderName}"));
+                                            if (container.ManifestType == "resources")
+                                                CopyFilesRecursively(container.PackContentLocation, new DirectoryInfo($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath.Value}\resource_packs\{container.FolderName}"));
+                                        }
+
+                                        break;
+                                    case NetworkMessageTypes.RemovePack:
+
+                                        MinecraftKnownPacksClass knownPacks = new MinecraftKnownPacksClass($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath.Value}\valid_known_packs.json", $@"{Program.ServiceDirectory}\Server\stock_packs.json");
+                                        List<MinecraftPackContainer> MCContainer = JsonConvert.DeserializeObject<List<MinecraftPackContainer>>(data);
+                                        foreach(MinecraftPackContainer cont in MCContainer)
+                                            knownPacks.RemovePackFromServer(InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath.Value, cont);
+
+                                        break;
+                                    case NetworkMessageTypes.PackList:
+
+                                        if (!File.Exists($@"{Program.ServiceDirectory}\Server\stock_packs.json"))
+                                            File.Copy($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath}\valid_known_packs.json", $@"{Program.ServiceDirectory}\Server\stock_packs.json");
+                                        knownPacks = new MinecraftKnownPacksClass($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath}\valid_known_packs.json", $@"{Program.ServiceDirectory}\Server\stock_packs.json");
+                                        List<MinecraftPackParser> list = new List<MinecraftPackParser>();
+                                        foreach (MinecraftKnownPacksClass.KnownPack pack in knownPacks.KnownPacks)
+                                            list.Add(new MinecraftPackParser($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath}\{pack.path.Replace(@"/", @"\")}"));
+                                        
+                                        SendData(Encoding.UTF8.GetBytes(JArray.FromObject(list).ToString()), NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.PackList);
 
                                         break;
                                     case NetworkMessageTypes.PlayersUpdate:
@@ -323,6 +351,12 @@ namespace BedrockService.Service.Networking
                                         SendData(stringAsBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.EnumBackups);
 
                                         break;
+                                    case NetworkMessageTypes.BackupRollback:
+
+                                        InstanceProvider.ConfigManager.RollbackToBackup(serverIndex, data);
+                                        SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+
+                                        break;
                                     case NetworkMessageTypes.CheckUpdates:
 
                                         if (Updater.CheckUpdates().Result)
@@ -365,13 +399,6 @@ namespace BedrockService.Service.Networking
                                             Thread.Sleep(200);
                                         InstanceProvider.ConfigManager.RemoveServerConfigs(InstanceProvider.GetBedrockServerByIndex(serverIndex).serverInfo, msgFlag);
                                         InstanceProvider.HostInfo.Servers.Remove(InstanceProvider.GetServerInfoByIndex(serverIndex));
-                                        //  foreach (ServerInfo server in InstanceProvider.HostInfo.Servers)
-                                        //      if (server.ServerName != data)
-                                        //          LogPersist.Add(server.ServerName, server.ConsoleBuffer.Log);
-                                        //  if (InstanceProvider.BedrockService.RestartService())
-                                        //      foreach (ServerInfo server in InstanceProvider.HostInfo.Servers)
-                                        //         if(server.ConsoleBuffer != null)
-                                        //              server.ConsoleBuffer.AppendPreviousLog(LogPersist[server.ServerName]);
                                         jsonString = JsonParser.Serialize(JsonParser.FromValue(InstanceProvider.HostInfo));
                                         stringAsBytes = GetBytes(jsonString);
                                         SendData(stringAsBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
@@ -432,6 +459,26 @@ namespace BedrockService.Service.Networking
                 InstanceProvider.DisposeHeartbeatThread();
             }
             catch { }
+        }
+
+        private void CopyFilesRecursively(DirectoryInfo source, DirectoryInfo target)
+        {
+            foreach (DirectoryInfo dir in source.GetDirectories())
+                CopyFilesRecursively(dir, target.CreateSubdirectory(dir.Name));
+            foreach (FileInfo file in source.GetFiles())
+                file.CopyTo(Path.Combine(target.FullName, file.Name));
+        }
+
+        private void DeleteFilesRecursively(DirectoryInfo source)
+        {
+            try
+            {
+                source.Delete(true);
+            }
+            catch (Exception e)
+            {
+                InstanceProvider.ServiceLogger.AppendLine($@"Error Deleting Dir {source.Name}: {e.StackTrace}");
+            }
         }
 
         private void SendBackHeatbeatSignal()

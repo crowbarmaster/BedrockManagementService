@@ -1,6 +1,7 @@
 ﻿using BedrockService.Service.Networking;
 using BedrockService.Service.Server;
 using BedrockService.Service.Server.HostInfoClasses;
+using BedrockService.Service.Server.PackParser;
 using NCrontab;
 using System;
 using System.Collections.Generic;
@@ -144,6 +145,7 @@ namespace BedrockService.Service
                 InstanceProvider.ServiceLogger.AppendLine($"Error Instantiating BedrockServiceWrapper: {e.StackTrace}");
             }
         }
+
         public void InitializeNewServer(ServerInfo server)
         {
             BedrockServer brs = new BedrockServer(server);
@@ -273,7 +275,7 @@ namespace BedrockService.Service
                         {
                             if (server != compareServer)
                             {
-                                if (server.ServerExeName.Equals(compareServer.ServerExeName) || server.ServerPath.Equals(compareServer.ServerPath) || server.GetServerProp("server-port").Value.Equals(compareServer.GetServerProp("server-port").Value) || server.GetServerProp("server-portv6").Value.Equals(compareServer.GetServerProp("server-portv6").Value) || server.GetServerProp("server-name").Value.Equals(compareServer.GetServerProp("server-name").Value))
+                                if (server.ServerExeName.Value.Equals(compareServer.ServerExeName) || server.ServerPath.Equals(compareServer.ServerPath) || server.GetServerProp("server-port").Value.Equals(compareServer.GetServerProp("server-port").Value) || server.GetServerProp("server-portv6").Value.Equals(compareServer.GetServerProp("server-portv6").Value) || server.GetServerProp("server-name").Value.Equals(compareServer.GetServerProp("server-name").Value))
                                 {
                                     InstanceProvider.ServiceLogger.AppendLine($"Duplicate server settings between servers {server.ServerName} and {compareServer}.");
                                     dupedSettingsFound = true;
@@ -287,14 +289,14 @@ namespace BedrockService.Service
                     }
                     foreach (var server in InstanceProvider.HostInfo.GetServerInfos())
                     {
-                        if (Updater.VersionChanged || !File.Exists(server.ServerPath.Value + "\\bedrock_server.exe"))
+                        if (Updater.VersionChanged || !File.Exists(server.ServerPath + "\\bedrock_server.exe"))
                         {
-                            if (!ReplaceBuild(server).Wait(10000))
+                            if (!ReplaceBuild(server).Wait(60000))
                                 InstanceProvider.ServiceLogger.AppendLine("Error! Timeout to replace build exceeded.");
                         }
-                        if (server.ServerExeName.Value != "bedrock_server.exe" && File.Exists(server.ServerPath.Value + "\\bedrock_server.exe") && !File.Exists(server.ServerPath.Value + "\\" + server.ServerExeName.Value))
+                        if (server.ServerExeName.Value != "bedrock_server.exe" && File.Exists(server.ServerPath + "\\bedrock_server.exe") && !File.Exists(server.ServerPath + "\\" + server.ServerExeName.Value))
                         {
-                            File.Copy(server.ServerPath.Value + "\\bedrock_server.exe", server.ServerPath.Value + "\\" + server.ServerExeName.Value);
+                            File.Copy(server.ServerPath + "\\bedrock_server.exe", server.ServerPath + "\\" + server.ServerExeName.Value);
                         }
                     }
                     if (Updater.VersionChanged)
@@ -314,17 +316,20 @@ namespace BedrockService.Service
             {
                 try
                 {
-                    if (Directory.Exists(server.ServerPath.Value))
-                        DeleteFilesRecursively(new DirectoryInfo(server.ServerPath.Value));
-                    else
+                    if (!Directory.Exists(server.ServerPath.Value))
                         Directory.CreateDirectory(server.ServerPath.Value);
+                    else if (File.Exists($@"{Program.ServiceDirectory}\Server\MCSFiles\stock_filelist.ini"))
+                        DeleteFilelist(File.ReadAllLines($@"{Program.ServiceDirectory}\Server\MCSFiles\stock_filelist.ini"), server.ServerPath.Value);
+                    else
+                        DeleteFilesRecursively(new DirectoryInfo(server.ServerPath.Value)); 
+                    
                     while (InstanceProvider.HostInfo.ServerVersion == null || InstanceProvider.HostInfo.ServerVersion == "None")
                     {
                         Thread.Sleep(150);
                     }
 
                     ZipFile.ExtractToDirectory($@"{Program.ServiceDirectory}\Server\MCSFiles\Update_{InstanceProvider.HostInfo.ServerVersion}.zip", server.ServerPath.Value);
-                    File.Copy(server.ServerPath.Value + "\\bedrock_server.exe", server.ServerPath.Value + "\\" + server.ServerExeName.Value);
+                    File.Move(server.ServerPath.Value + "\\bedrock_server.exe", server.ServerPath.Value + "\\" + server.ServerExeName.Value);
                 }
                 catch (Exception e)
                 {
@@ -343,8 +348,24 @@ namespace BedrockService.Service
             }
             catch (Exception e)
             {
-                InstanceProvider.ServiceLogger.AppendLine($@"Error Deleting Dir: {e.StackTrace}");
+                InstanceProvider.ServiceLogger.AppendLine($@"Error Deleting Dir {source.Name}: {e.StackTrace}");
             }
+        }
+
+        private void DeleteFilelist(string[] fileList, string serverPath)
+        {
+            foreach (string file in fileList)
+                try
+                {
+                    File.Delete($@"{serverPath}\{file}");
+                }
+                catch { }
+            List<string> exesInPath = Directory.EnumerateFiles(serverPath, "*.exe", SearchOption.AllDirectories).ToList();
+            foreach (string exe in exesInPath)
+                File.Delete(exe);
+            foreach (string dir in Directory.GetDirectories(serverPath))
+                if (Directory.EnumerateFiles(dir, "*", SearchOption.AllDirectories).Count() == 0)
+                    Directory.Delete(dir, true);
         }
     }
 }

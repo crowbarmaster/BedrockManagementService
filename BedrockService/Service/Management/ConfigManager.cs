@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace BedrockService.Service.Management
 {
@@ -270,7 +271,7 @@ namespace BedrockService.Service.Management
             }
             sb.Append("\n]");
 
-            File.WriteAllText($@"{server.ServerPath.Value}\whitelist.json", sb.ToString());
+            File.WriteAllText($@"{server.ServerPath}\whitelist.json", sb.ToString());
 
             sb = new StringBuilder();
             sb.Append("[\n");
@@ -291,7 +292,7 @@ namespace BedrockService.Service.Management
                 sb.Remove(sb.Length - 2, 2);
             }
             sb.Append("\n]");
-            File.WriteAllText($@"{server.ServerPath.Value}\permissions.json", sb.ToString());
+            File.WriteAllText($@"{server.ServerPath}\permissions.json", sb.ToString());
         }
 
         public void SaveServerProps(ServerInfo server, bool SaveServerInfo)
@@ -309,7 +310,7 @@ namespace BedrockService.Service.Management
                 {
                     Directory.CreateDirectory(server.ServerPath.Value);
                 }
-                File.WriteAllLines($@"{server.ServerPath.Value}\server.properties", output);
+                File.WriteAllLines($@"{server.ServerPath}\server.properties", output);
             }
             else
             {
@@ -323,13 +324,13 @@ namespace BedrockService.Service.Management
                 output[index++] = string.Empty;
 
                 File.WriteAllLines($@"{configDir}\{server.FileName}", output);
-                if (server.ServerPath.Value == null)
+                if (server.ServerPath == null)
                     server.ServerPath.Value = server.ServerPath.DefaultValue;
                 if (!Directory.Exists(server.ServerPath.Value))
                 {
                     Directory.CreateDirectory(server.ServerPath.Value);
                 }
-                File.WriteAllLines($@"{server.ServerPath.Value}\server.properties", output);
+                File.WriteAllLines($@"{server.ServerPath}\server.properties", output);
             }
         }
 
@@ -426,9 +427,55 @@ namespace BedrockService.Service.Management
             }
         }
 
-        public void RollbackToBackup(byte serverIndex, string folderName)
+        public bool RollbackToBackup(byte serverIndex, string folderName)
         {
+            ServerInfo server = InstanceProvider.GetServerInfoByIndex(serverIndex);
+            BedrockServer brs = InstanceProvider.GetBedrockServerByIndex(serverIndex);
+            brs.CurrentServerStatus = BedrockServer.ServerStatus.Stopping;
+            while(brs.CurrentServerStatus != BedrockServer.ServerStatus.Stopped)
+            {
+                Thread.Sleep(100);
+            }
+            try
+            {
+                foreach (DirectoryInfo dir in new DirectoryInfo($@"{InstanceProvider.HostInfo.GetGlobalValue("BackupPath")}\{server.ServerName}").GetDirectories())
+                    if (dir.Name == folderName)
+                    {
+                        DeleteFilesRecursively(new DirectoryInfo($@"{server.ServerPath.Value}\worlds"));
+                        InstanceProvider.ServiceLogger.AppendLine($"Deleted world folder contents.");
+                        foreach (DirectoryInfo worldDir in new DirectoryInfo($@"{InstanceProvider.HostInfo.GetGlobalValue("BackupPath")}\{server.ServerName}\{folderName}").GetDirectories())
+                        {
+                            CopyFilesRecursively(worldDir, new DirectoryInfo($@"{server.ServerPath.Value}\worlds\{worldDir.Name}"));
+                            InstanceProvider.ServiceLogger.AppendLine($@"Copied {worldDir.Name} to path {server.ServerPath.Value}\worlds");
+                        }
+                        brs.CurrentServerStatus = BedrockServer.ServerStatus.Starting;
+                        return true;
+                    }
+            }
+            catch (IOException e)
+            {
+                InstanceProvider.ServiceLogger.AppendLine($"Error deleting selected backups! {e.Message}");
+            }
+            return false;
+        }
 
+
+        private void CopyFilesRecursively(DirectoryInfo source, DirectoryInfo target)
+        {
+            foreach (DirectoryInfo dir in source.GetDirectories())
+                CopyFilesRecursively(dir, target.CreateSubdirectory(dir.Name));
+            foreach (FileInfo file in source.GetFiles())
+                file.CopyTo(Path.Combine(target.FullName, file.Name));
+        }
+        
+        private void DeleteFilesRecursively(DirectoryInfo source)
+        {
+            foreach (DirectoryInfo dir in source.GetDirectories())
+                DeleteFilesRecursively(dir);
+            foreach (FileInfo file in source.GetFiles())
+                file.Delete();
+            foreach (DirectoryInfo emptyDir in source.GetDirectories())
+                emptyDir.Delete(true);
         }
 
         private bool DeleteBackups(ServerInfo serverInfo)

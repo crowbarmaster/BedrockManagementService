@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BedrockService.Service.Server.Management
+namespace BedrockService.Service.Server.PackParser
 {
     public class MinecraftPackManifestJsonClass
     {
@@ -38,7 +38,5 @@ namespace BedrockService.Service.Server.Management
             public List<Module> modules { get; set; }
             public List<Dependency> dependencies { get; set; }
         }
-
-        public Manifest ManifestFromFile;
     }
 }

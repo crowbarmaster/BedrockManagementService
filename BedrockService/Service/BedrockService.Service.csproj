@@ -61,6 +61,13 @@
   <PropertyGroup>
     <SignManifests>false</SignManifests>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="NCrontab.Signed, Version=3.3.2.0, Culture=neutral, PublicKeyToken=5247b4370afff365, processorArchitecture=MSIL">
       <HintPath>..\packages\NCrontab.Signed.3.3.2\lib\net35\NCrontab.Signed.dll</HintPath>
@@ -104,8 +111,9 @@
     <Compile Include="BedrockService.cs" />
     <Compile Include="Management\ConfigManager.cs" />
     <Compile Include="Server\HostInfoClasses\HostInfo.cs" />
-    <Compile Include="Server\Management\MinecraftPackArchiveParser.cs" />
-    <Compile Include="Server\Management\MinecraftPackManifestJsonClass.cs" />
+    <Compile Include="Server\PackParser\MinecraftKnownPacksClass.cs" />
+    <Compile Include="Server\PackParser\MinecraftPackParser.cs" />
+    <Compile Include="Server\PackParser\MinecraftPackManifestJsonClass.cs" />
     <Compile Include="Server\HostInfoClasses\Player.cs" />
     <Compile Include="Server\HostInfoClasses\Property.cs" />
     <Compile Include="Server\HostInfoClasses\ServerInfo.cs" />
