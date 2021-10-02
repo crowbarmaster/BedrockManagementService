@@ -1,234 +1,148 @@
-# BedrockService
+# Minecraft Bedrock management service
+## An application suite for running and controlling multiple bedrock dedicated servers
 
-# 2.0Beta notes!
-## Readme is out of date! Current beta is not complete enough to post a readme yet. Hovever, some intuitive browsing through the default files that generate after the first run will give an easy idea of how things work. Progress has picked back up on this project. Expect a true release and a proper readme soon!
+## Project information
 
-Moddified by Crowbarmaster brings you:
+BedrockService started as a fork from Ravetroll's BedrockService, using TopShelf for multiple servers and a hidden server instance. This worked okay, but still required manual updates, lacked a way to monitor server instances, and using a WPF Console to merely monitor and send server commands was not enough for my wishes. It still would require you to interact with the server files directly, and if your server is remote, this can become a pain. My main goals for this project are as follows:
 
-Windows Service Wrapper around Bedrock Server for Minecraft
+* A multiple server service run in the background. [Implemented, needs testing]
+* Add/remove/modify/monitor servers from the GUI remotely. [Implemented]
+* Both Service and individual server persistence over failure (AKA WatchDog). [implemented; needs further testing]
+* Zero interaction with actual Minecraft server files and configs; all handled with service configuration. [Mostly implemented]
+* Automatic server updates and deployment, all while leaving the configuration and added packs/worlds intact. [implemented]
+* Automatic backup system, with the ability to manage backups and rollback via GUI. [implemented; needs further testing]
+* Complete control of players, track known players, manage player permission and whitelist statuses and more. [Partially implemented, needs further testing]
+* Pack manager to add/remove packs and worlds from servers via GUI. [Partially implemented, needs further testing]
 
-Built on original code written by RaveTroll and supporters
+TODO:
+* Implement a way to modify level information. Not sure if I want to use an existing lib yet, or just add a couple static methods to change a few values (Ex. enabling experimental gameplay).
+* Block more bad behavior in the GUI.
+* Plans to add more information to the player manager. Implement sending commands to the running server to coincide with updated player settings (Ex. /op, /whitelist), currently servers require a restart before updated players can be recognized.
+* Pack manager still needs a way to determine installed MCWorld packs, most likely adding a service-specific configuration file to come.
+* Implement a way to ignore updates to enable old version persistence, as well as possibly allowing initial deployment of various versions.
+* Client needs debug information written to file.
+* Pull server props from new updates and apply. Currently using hard-coded copy and shouldn't be an issue as long as entries are not added to config in the future.
+* Testing of all systems. There is still plenty of bugs to work out still, GUI hangs and plenty of bad behavior is possible. Please feel free to open an issue on GitHub with info of the issue from the logs.
 
-This service wrapper for Minecraft Bedrock has been updated to provide
+## Quick-start guide
 
-automatically applied updates, new configuration loader, and a process watchdog.
+Download the latest release and extract to any directory. Run BedrockService.Service.exe, this will automatically download the latest copy of BDS (Bedrock Dedicated Server) from minecraft.net, extract to the default directory of C:\MCBedrockService, deploy stock settings and start the server. Once the new server is running, you can either close it and modify the configs with a text editor (see below for more details) or modify/add servers from the GUI Client.
 
-Initial installation:
+## Service configuration files and directory layout
 
-Extract files to a directory of your chosing. If you want a quick-start jump-right-in experience,
+Default configurations are not shipped with the application. Please follow the quick-start guide to generate new config files. Once Generated, you will find that the paths Server and Service were created. 
 
-launch BedrockService.exe, accept the terms, and watch your new server launch in seconds!
+* Server folder contains:
+	* bedrock_ver.ini - keeps track of last downloaded version.
+	* stock_packs.json - created after first use of pack manager, lists factory R/B packs on vanilla server.
+	* Configs folder:
+		* KnownPlayers folder:
+			* This folder contains files with a name format of "ServerName.playerdb". See below for example file.
+		* RegisteredPlayers folder:
+			* This folder contains files with a name format of "ServerName.preg". See below for example file and usage.
+		* Backups folder for configuration files.
+		* Individual server configuration files.
+	* MCSFiles folder:
+		* stock_filelist.ini - contains a list of all files in vanilla build. Part of mod/world persist.
+		* Update_x.xx.xx.xx.zip - Archive files downloaded from minecraft.net, x.xx.xx.xx is version of server.
+	* Logs folder - Contains logs of only server outputs.
+* Service folder contains:
+	* Globals.conf - Global service configuration file.
+	* Logs folder - Logs of service-specific outputs.
+* Batch Folder - Contains a few batch files useful for installing/stating/stopping and removing the service from Windows Services. To use these please copy/move to BedrockService.Service.exe directory!
+* BedrockService.Service.exe - core service executable.
 
-See below for a full, flexable, single or multi-server setup.
+All configuration files use a key=value layout. (Ex. ServersPath=C:\MCBedrockService). The parser will ignore any lines beginning with a "#" sign and empty lines for comments.
 
-Configuration:
-
-Server configuration(s) are found in the Configs folder. Default package ships with a "Globals.conf"
-
-and "Default.conf". Configs are in plain-text format. Configuration sections are defined by wrapping them with "[]".
-
-Globals File:
-
-```
-    [Globals]
-    BackupEnabled=false // Enable backups here
-    BackupCron=0 1 * * * // Set Cron interval for backups here
-    AcceptedMojangLic=false // Mojang Licence accepted? NOTE: Must be set "true" here before installing as a service!
-    CheckUpdates=true // Enable update routines here...
-    UpdateCron=38 19 * * * // Set Cron interval for updates here
-```
-The Globals file contains just a few variables that will be shared between multiple servers.
-
-Note the AcceptedMojangLic entry. In order to fetch downloads from minecraft.net, you must agree to the Terms
-
-found at: https://minecraft.net/terms. If you plan to use this wrapper only to run multiple servers and NOT as a service,
-
-ignore this. You will be asked in the console to accept the terms. Otherwise if you will run servers-as-a-service, this must
-
-be set to "true" before running, or the build will not download.
-
-Default Server File:
-
-```
-    [Service_Default]
-    BedrockServerExeLocation=D:\MCSRV\MC1\
-    BedrockServerExeName=bedrock_server.exe
-    BackupFolderName=Default
-    WCFPortNumber=19134
-
-    [Server_Default]
-    server-name=Test
-    gamemode=creative
-    difficulty=easy
-    allow-cheats=false
-    max-players=10
-    online-mode=true
-    white-list=true
-    server-port=19132
-    server-portv6=19133
-    view-distance=32
-    tick-distance=4
-    player-idle-timeout=30
-    max-threads=8
-    level-name=Bedrock level
-    level-seed=
-    default-player-permission-level=member
-    texturepack-required=false
-    content-log-file-enabled=false
-    compression-threshold=1
-    server-authoritative-movement=server-auth
-    player-movement-score-threshold=20
-    player-movement-distance-threshold=0.3
-    player-movement-duration-threshold-in-ms=500
-    correct-player-movement=false
-
-    [Perms_Default]
-    visitor=5555555555555555
-
-    [Whitelist_Default]
-    test=5555555555555555,false
-
-    [StartCmds_Default]
-    CmdDesc=help 1
-```
-
-This default file contains all information to run a single server, including minecraft-specific configs.
-
-If you plan only to run a single server instance, you don’t need to change anything but what you need to.
-
-To run more than a single server instance, create a copy of the default configuration file. The name of the
-
-file you create does not matter, so long as the extension remains ".conf". In order to successfully launch
-
-multiple servers:
-
-    -All Config section definitions must be changed from "xxxxx_Default" to "xxxxx_YouDefineMe". "YouDefineMe" can be
-    
-    any char sequence/phase you wish and should be unique between servers.
-    
-    This will now be used by the wrapper to internally define this server.
-
-    -Every entry found in the [Service_YouDefineMe] section must be both unique between servers, and point to unused resources.
-
-    -The standard interference Minecraft settings, including server-name and ports, must be unique.
-
-Everything else can be customized to your liking.
-
-Perms_YouDefineMe & Whitelist_YouDefineMe are sections of the config that will push these files to the server root directory.
-
-The Perms section will create entries in permissions.json. Each permission is formatted as DesiredPermissionLevel=PlayersXUID.
-
-Default.conf's example:
+Globals.conf:
 
 ```
-[Perms_Default]
-visitor=5555555555555555
+#Globals
+ServersPath=C:\MCBedrockService // This is the path you wish to house your actual dedicated server files. Servers will deploy in a folder named after the chosen server’s name.
+AcceptedMojangLic=false // Currently disabled! Will replace with disclaimer here in readme and remove this soon.
+ClientPort=19134 // This is the port that will be used to listen for clients.
+#Backups
+BackupEnabled=false // Enable automatic backup system. Can still do manual one-click backups from GUI when disabled.
+BackupPath=Default // Specify a path you wish to store server backups in. Leaving as Default will send your backups to "PathToService"\Servers\Backups\ServerName
+BackupCron=0 1 * * * // Backup time interval. This is a Cron string, search "Cron time format" in your favorite search engine to find more details.
+MaxBackupCount=25 // This number determines the maximum number of backups to maintain. Does not affect manual backups via GUI.
+EntireBackups=false // Enabling this option will backup the entire server directory. Default "false" will backup only the "worlds" folder.
+#Updates
+CheckUpdates=true // Enabling this option turns on automatic updates.
+UpdateCron=38 19 * * * // Update time interval. This is a Cron string, search "Cron time format" in your favorite search engine to find more details.
+#Logging
+LogServersToFile=false // Enabling this option will cause the service to write server logs to file.
+LogServiceToFile=false // Enabling this option will cause the service to write the service log to file.
 ```
 
-Will output "permissions.json" to selected BedrockServerExeLocation that looks like:
+Server config file (Filename layout - if your server's name is “DefaultServer”, your config should be “DefaultServer.conf”)
 
 ```
-[
-	{
-		"permission": "visitor",
-		"xuid": "5555555555555555"
-	}
-]
+# Server  
+server-name=Default // These 24 entries are pulled directly from “server.properties”. Modify values to your liking, but do not modify anything left of the equals sign!
+gamemode=creative
+difficulty=easy
+allow-cheats=false
+max-players=10
+online-mode=true
+white-list=false
+server-port=19132
+server-portv6=19133
+view-distance=32
+tick-distance=4
+player-idle-timeout=30
+max-threads=8
+level-name=Bedrock level
+level-seed=
+default-player-permission-level=member
+texturepack-required=false
+content-log-file-enabled=false
+compression-threshold=1
+server-authoritative-movement=server-auth
+player-movement-score-threshold=20
+player-movement-distance-threshold=0.3
+player-movement-duration-threshold-in-ms=500
+correct-player-movement=false
+
+# StartCmds
+Distracted=help 1 // Any of these optional fields will send following command to server on startup.
 ```
 
-All Whitelist entries will output to "whitelist.json" in the same formatting as Perms, however formatted in the config
-
-a bit differently: MCUsername=XUID,IgnoresPlayerLimit
-
-Example:
-
+Registered player databases:
 ```
-[Whitelist_Default]
-test=5555555555555555,false
-```
+# Registered player list
+# Register player entries: xuid,username,permission,isWhitelisted,ignoreMaxPlayers
+# Example: 1234111222333444,TestUser,visitor,false,false
 
-Translates to:
-
+1234111222333444,TestUser,visitor,false,false
 ```
-[
-	{
-		"username": "test",
-		"xuid": "5555555555555555",
-		"ignoresPlayerLimit": false
-	}
-]
+These files contain any players that are anything but default players. A default player is non-whitelisted with a player level equal to that set in the server’s configuration file. The comments included pretty much says what goes on here. You can add entries here manually after first start, or create the file and start from scratch. Players can also be added or modified in the GUI with the Player Manager.
+
+Known player databases: 
+```
+1234111222333444,TestUser,637673952325785737,637673952325785737,637673952411885867
 ```
 
+The service keeps track of player connection events and stores that information in these files. Currently only keeping track of connect and disconnect times. Current Layout: XUID,UserName,FirstConnectedTime,LastConnectedTime,DisconnectedTime. Times are in ticks.
+This file is generated automatically, and while you can add entries to it, there is much reason to edit this file.
 
-Backups by default ("BackupFolderName=Default" in config) will backup servers to "backups\ServerShortName\Backup_DateString" unless changed to a custom path.
+## Client configuration and directory layout
 
-Backup system backs up the entire minecraft folder, in the case that resource packs are install, they are also backed up.
+As with the service, The Client will generate a config on first run. Simply start and close the application, no connection is necessary.
 
+* Client\Configs folder - Contains one file, Config.conf. Only used to configure hosts to connect to.
+* BedrockService.Client.exe - core client executable.
 
-StartCmds are passable commandline startup options to this server. Each command defined in this format: CommandDescription=CommandToPass
+## Configuring hosts
+Client Config.conf:
 
-CommandDescription is meaningless, and can be the same for each, or unique to you liking.
-
-Service installation is simmilar to before, however you need not set permissions on the MC server folder, since it will be created by the service.
-
-1.  You need to give permissions to SYSTEM to Modify the directory where BedrockService is located.
-
-2.  Start a command prompt console with admin priviledges and navigate to the directory where you unzipped BedrockService.  
 ```
-    Type: bedrockservice install   
-    then
-    Type: bedrockservice start
-```    
-If you need to uninstall BedrockService Start a command prompt console with admin priviledges and navigate to the directory where you unzipped BedrockService.
+[Hosts]
+host1=127.0.0.1:19134
 ```
-    Type: bedrockservice stop
-    then
-    Type: bedrockservice uninstall
-```    
 
-!! Notice: To ensure proper opperation, I highly reccomend you check "Run program as an administrator" in the Properties>Compatabity tab of BedrockService.exe !!
-**************************************************************************************
+This file has one section defined by [Hosts]. Entry format: HostName=IPAddress:Port. You can change the name and address to whatever/wherever you wish. You Can also add more than one host for easy multiple host management.
 
-Original Readme:
-
-Windows Service Wrapper around Bedrock Server for Minecraft
-
-Lets you run Bedrock Server as a Windows Service
-
-This approach does NOT require Docker.
-
-There is a Windows Server Software for Windows to allow users to run a multiplayer Minecraft server.
-
-You can get it at https://www.minecraft.net/en-us/download/server/bedrock/
-
-Its easy to install and runs as a console application.
-
-What if you want it to run invisibly on your computer whenever it starts and shutdown statefully whenever your computer shuts?
-
-Enter BedrockService, the little control program that performs just that task for you.  Download it here: https://github.com/ravetroll/BedrockService/raw/master/Releases/BedrockService.exe.zip
-
-To configure it you have to do 4 things:
-
-1.  Unzip the BedrockService.exe zip to a directory on your computer.
-
-2.  You have to put the path to your copy of bedrock_server.exe in the BedrockService.exe.config file.  Make sure you have run your bedrock server in console mode first to be sure it works.
-
-3.  You need to give permissions to SYSTEM to Modify both the directory with BedrockService as well as the directory containing bedrock_server.exe
-
-4.  Start a command prompt console with admin priviledges and navigate to the directory where you unzipped BedrockService.  
-```
-    Type: bedrockservice install   
-    then
-    Type: bedrockservice start
-```    
-If you need to uninstall BedrockService Start a command prompt console with admin priviledges and navigate to the directory where you unzipped BedrockService.
-```
-    Type: bedrockservice stop
-    then
-    Type: bedrockservice uninstall
-```    
-
-If you have some problems getting the service running Check in Windows Event Log in the Application Events for events related to BedrockService.  That might help you find the problem.
-
-See the wiki at https://github.com/ravetroll/BedrockService/wiki
+The GUI Still has plenty of forms work to do, it’s a bit lower on the list. Constant progress will continue. With most everything I had initially hoped for currently working, I will be spending plenty of time weeding out bugs. Please feel free to drop me a message or post if you have any concerns or suggestions to offer on the MinecraftForum page located here:
+https://www.minecraftforum.net/forums/minecraft/discussion/3120644-windows-bedrock-multi-host-multi-server-dedicated
 
