@@ -19,7 +19,7 @@ namespace BedrockService.Service.Management
 
         public ConfigManager()
         {
-            globalFile = $@"{configDir}\Globals.conf";
+            globalFile = $@"{Program.ServiceDirectory}\Service\Globals.conf";
             if (!Directory.Exists($@"{configDir}\KnownPlayers\Backups"))
                 Directory.CreateDirectory($@"{configDir}\KnownPlayers\Backups");
             if (!Directory.Exists($@"{configDir}\RegisteredPlayers\Backups"))
@@ -41,50 +41,46 @@ namespace BedrockService.Service.Management
             string[] files = Directory.GetFiles(configDir, "*.conf");
             string globFileResult = null;
             string serversPath = null;
-            foreach (string file in files)
-            {
-                if (file.EndsWith("Globals.conf"))
-                {
-                    globFileResult = file;
-                    InstanceProvider.ServiceLogger.AppendLine("Loading Globals...");
-                    InstanceProvider.HostInfo.SetGlobalsDefault();
-                    string[] lines = File.ReadAllLines(file);
-                    foreach (string line in lines)
-                    {
-                        if (!line.StartsWith("#") && !string.IsNullOrEmpty(line))
-                        {
-                            string[] split = line.Split('=');
-                            if (split.Length == 1)
-                            {
-                                split[1] = "";
-                            }
-                            if (split[0] == "BackupPath")
-                            {
-                                if (split[1] == "Default")
-                                    split[1] = $@"{Program.ServiceDirectory}\Server\Backups";
-                            }
-                            if (InstanceProvider.HostInfo.SetGlobalProperty(split[0], split[1]))
-                            {
-                                if (split[0] == "ServersPath")
-                                {
-                                    serversPath = split[1];
-                                }
-                            }
-                            else
-                            {
-                                InstanceProvider.ServiceLogger.AppendLine($"Error! Key \"{split[0]}\" was not found! Check configs!");
-                            }
-
-
-                        }
-                    }
-                }
-            }
-            if (globFileResult == null)
+            if (!File.Exists(globalFile))
             {
                 InstanceProvider.HostInfo.SetGlobalsDefault();
                 InstanceProvider.ServiceLogger.AppendLine("Globals.conf was not found. Loaded defaults and saved to file.");
                 SaveGlobalFile();
+            }
+            else
+            {
+                InstanceProvider.ServiceLogger.AppendLine("Loading Globals...");
+                InstanceProvider.HostInfo.SetGlobalsDefault();
+                string[] lines = File.ReadAllLines(globalFile);
+                foreach (string line in lines)
+                {
+                    if (!line.StartsWith("#") && !string.IsNullOrEmpty(line))
+                    {
+                        string[] split = line.Split('=');
+                        if (split.Length == 1)
+                        {
+                            split[1] = "";
+                        }
+                        if (split[0] == "BackupPath")
+                        {
+                            if (split[1] == "Default")
+                                split[1] = $@"{Program.ServiceDirectory}\Server\Backups";
+                        }
+                        if (InstanceProvider.HostInfo.SetGlobalProperty(split[0], split[1]))
+                        {
+                            if (split[0] == "ServersPath")
+                            {
+                                serversPath = split[1];
+                            }
+                        }
+                        else
+                        {
+                            InstanceProvider.ServiceLogger.AppendLine($"Error! Key \"{split[0]}\" was not found! Check configs!");
+                        }
+
+
+                    }
+                }
             }
             InstanceProvider.HostInfo.ClearServerInfos();
             ServerInfo serverInfo = new ServerInfo();
@@ -465,7 +461,7 @@ namespace BedrockService.Service.Management
             foreach (DirectoryInfo dir in source.GetDirectories())
                 CopyFilesRecursively(dir, target.CreateSubdirectory(dir.Name));
             foreach (FileInfo file in source.GetFiles())
-                file.CopyTo(Path.Combine(target.FullName, file.Name));
+                file.CopyTo(Path.Combine(target.FullName, file.Name), true);
         }
         
         private void DeleteFilesRecursively(DirectoryInfo source)
