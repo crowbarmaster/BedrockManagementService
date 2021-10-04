@@ -123,7 +123,6 @@ namespace BedrockService.Service.Server
                 string appName = serverInfo.ServerExeName.Value.Substring(0, serverInfo.ServerExeName.Value.Length - 4);
                 if (!MonitoredAppExists(appName) && CurrentServerStatus == ServerStatus.Starting)
                 {
-                    hostController.RequestAdditionalTime(TimeSpan.FromSeconds(30));
                     StartControl(hostController);
                     InstanceProvider.ServiceLogger.AppendLine($"Recieved start signal for server {serverInfo.ServerName}.");
                     Thread.Sleep(5000);
@@ -153,10 +152,20 @@ namespace BedrockService.Service.Server
                 {
                     InstanceProvider.ServiceLogger.AppendLine("Server stopped successfully.");
                 }
-                while (!MonitoredAppExists(appName) && CurrentServerStatus == ServerStatus.Stopped)
+                if (!MonitoredAppExists(appName) && CurrentServerStatus == ServerStatus.Stopping)
+                {
+                    InstanceProvider.ServiceLogger.AppendLine("Server stopped unexpectedly. Setting server status to stopped.");
+                    CurrentServerStatus = ServerStatus.Stopped;
+                }
+                while (!MonitoredAppExists(appName) && CurrentServerStatus == ServerStatus.Stopped && !Program.IsExiting)
                 {
                     Thread.Sleep(1000);
                 }
+                if (!MonitoredAppExists(appName) && CurrentServerStatus == ServerStatus.Stopped && Program.IsExiting)
+                {
+                    return;
+                }
+                
             }
         }
 
@@ -243,7 +252,7 @@ namespace BedrockService.Service.Server
                 WindowStyle = ProcessWindowStyle.Hidden,
                 FileName = serverInfo.ServerPath.Value + "\\" + serverInfo.ServerExeName.Value
             });
-            process.PriorityClass = ProcessPriorityClass.RealTime;
+            process.PriorityClass = ProcessPriorityClass.High;
             process.OutputDataReceived += StdOutToLog;
             process.ErrorDataReceived += ErrOutToLog;
 
@@ -358,7 +367,7 @@ namespace BedrockService.Service.Server
             foreach (DirectoryInfo dir in source.GetDirectories())
                 CopyFilesRecursively(dir, target.CreateSubdirectory(dir.Name));
             foreach (FileInfo file in source.GetFiles())
-                file.CopyTo(Path.Combine(target.FullName, file.Name));
+                file.CopyTo(Path.Combine(target.FullName, file.Name), true);
         }
 
         private void DeleteFilesRecursively(DirectoryInfo source)
