@@ -120,6 +120,8 @@ namespace BedrockService.Service
             return tcpListener;
         }
 
+        public static TcpListener GetTcpListener() => tcpListener;
+
         public static BedrockServer GetBedrockServerByName(string serverName) => BedrockService.bedrockServers.First(srv => srv.serverInfo.ServerName == serverName);
 
         public static BedrockServer GetBedrockServerByIndex(byte serverIndex) => serverIndex != 0xFF ? BedrockService.bedrockServers[serverIndex] : null;
