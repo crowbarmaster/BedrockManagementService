@@ -18,7 +18,7 @@ namespace BedrockService.Service.Server.HostInfoClasses
         public void SetGlobalsDefault()
         {
             Globals.Clear();
-            Globals.Add(new Property("ServersPath", @"C:\Minecraft Bedrock Servers"));
+            Globals.Add(new Property("ServersPath", @"C:\MCBedrockService"));
             Globals.Add(new Property("AcceptedMojangLic", "false"));
             Globals.Add(new Property("ClientPort", "19134"));
             Globals.Add(new Property("BackupEnabled", "false"));
