@@ -17,17 +17,10 @@ namespace BedrockService.Service.Server.HostInfoClasses
         public List<Property> ServerPropList = new List<Property>();
         public List<StartCmdEntry> StartCmds = new List<StartCmdEntry>();
 
-        public enum PermissionLevels
-        {
-            Visitor,
-            Member,
-            Operator
-        }
-
         public void InitDefaults(string serversPath)
         {
-            ServerName = "Default Server";
-            FileName = "Default Server.conf";
+            ServerName = "Default";
+            FileName = "Default.conf";
             ServerPath = new Property("ServerPath", $@"{serversPath}\{ServerName}");
             ServerExeName = new Property("ServerExeName", $"BDS_{ServerName}.exe");
 
