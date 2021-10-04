@@ -39,7 +39,6 @@ namespace BedrockService.Service.Management
                 loadedVersion = File.ReadAllText($@"{configDir}\..\bedrock_ver.ini");
 
             string[] files = Directory.GetFiles(configDir, "*.conf");
-            string globFileResult = null;
             string serversPath = null;
             if (!File.Exists(globalFile))
             {
