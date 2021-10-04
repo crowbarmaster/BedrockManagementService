@@ -45,17 +45,14 @@ namespace BedrockService.Service.Server
 
         public bool StopControl()
         {
-            CurrentServerStatus = ServerStatus.Stopping;
             if (process != null)
             {
                 InstanceProvider.ServiceLogger.AppendLine("Sending Stop to Bedrock . Process.HasExited = " + process.HasExited.ToString());
 
                 process.CancelOutputRead();
-                process.CancelErrorRead();
 
                 StdInStream.WriteLine("stop");
                 while (!process.HasExited) { }
-
             }
             if (ServerThread != null && ServerThread.IsAlive)
                 ServerThread.Abort();
@@ -254,10 +251,8 @@ namespace BedrockService.Service.Server
             });
             process.PriorityClass = ProcessPriorityClass.High;
             process.OutputDataReceived += StdOutToLog;
-            process.ErrorDataReceived += ErrOutToLog;
 
             process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
             StdInStream = process.StandardInput;
         }
 
@@ -354,11 +349,6 @@ namespace BedrockService.Service.Server
                     }
                 }
             }
-        }
-
-        private void ErrOutToLog(object sender, DataReceivedEventArgs e)
-        {
-            serverInfo.ConsoleBuffer.Append($"{serverInfo.ServerName}: ERROR!! {e.Data}\r\n");
         }
 
         private void RunStartupCommands()
