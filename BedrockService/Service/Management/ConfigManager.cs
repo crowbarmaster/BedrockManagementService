@@ -116,7 +116,7 @@ namespace BedrockService.Service.Management
                                     InstanceProvider.ServiceLogger.AppendLine($"Loading ServerInfo for server {split[1]}...");
                                     serverInfo.ServerName = split[1];
                                     serverInfo.ServerPath.Value = $@"{serversPath}\{split[1]}";
-                                    serverInfo.ServerExeName.Value = $"BDS_{split[1]}.exe";
+                                    serverInfo.ServerExeName.Value = $"BedrockService.{split[1]}.exe";
                                     LoadPlayerDatabase(serverInfo);
                                     LoadRegisteredPlayers(serverInfo);
                                     break;

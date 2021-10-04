@@ -22,7 +22,7 @@ namespace BedrockService.Service.Server.HostInfoClasses
             ServerName = "Default";
             FileName = "Default.conf";
             ServerPath = new Property("ServerPath", $@"{serversPath}\{ServerName}");
-            ServerExeName = new Property("ServerExeName", $"BDS_{ServerName}.exe");
+            ServerExeName = new Property("ServerExeName", $"BedrockService.{ServerName}.exe");
 
             ServerPropList.Clear();
             ServerPropList.Add(new Property("server-name", "Default"));
