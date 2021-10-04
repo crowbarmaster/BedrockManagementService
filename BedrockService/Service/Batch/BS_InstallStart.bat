@@ -1,2 +1,2 @@
-bedrockservice install
-bedrockservice start
+bedrockservice.Service install
+bedrockservice.Service start

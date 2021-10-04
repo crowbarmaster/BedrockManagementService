@@ -1,2 +1,2 @@
-bedrockservice stop
-bedrockservice uninstall
+bedrockservice.Service stop
+bedrockservice.Service uninstall

@@ -1,1 +1,1 @@
-bedrockservice stop
+bedrockservice.Service stop

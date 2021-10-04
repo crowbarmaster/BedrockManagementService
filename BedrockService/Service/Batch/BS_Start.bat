@@ -1,1 +1,1 @@
-bedrockservice start
+bedrockservice.Service start
