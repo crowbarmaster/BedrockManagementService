@@ -84,10 +84,8 @@ namespace BedrockService.Service
                 foreach (var brs in bedrockServers)
                 {
                     brs.CurrentServerStatus = BedrockServer.ServerStatus.Stopping;
-                    while (brs.CurrentServerStatus == BedrockServer.ServerStatus.Stopping)
-                    {
+                    while (brs.CurrentServerStatus == BedrockServer.ServerStatus.Stopping && !Program.IsExiting)
                         Thread.Sleep(100);
-                    }
                 }
                 return true;
             }
@@ -250,8 +248,7 @@ namespace BedrockService.Service
             foreach (var brs in bedrockServers.OrderByDescending(t => t.serverInfo.Primary).ToList())
             {
 
-                brs.StartControl(_hostControl);
-                Thread.Sleep(2000);
+                brs.CurrentServerStatus = BedrockServer.ServerStatus.Starting;
 
             }
             InstanceProvider.ServiceLogger.AppendLine("Backups have been completed.");
@@ -329,7 +326,8 @@ namespace BedrockService.Service
                     }
 
                     ZipFile.ExtractToDirectory($@"{Program.ServiceDirectory}\Server\MCSFiles\Update_{InstanceProvider.HostInfo.ServerVersion}.zip", server.ServerPath.Value);
-                    File.Move(server.ServerPath.Value + "\\bedrock_server.exe", server.ServerPath.Value + "\\" + server.ServerExeName.Value);
+                    File.Copy(server.ServerPath.Value + "\\bedrock_server.exe", server.ServerPath.Value + "\\" + server.ServerExeName.Value, true);
+                    File.Delete(server.ServerPath.Value + "\\bedrock_server.exe");
                 }
                 catch (Exception e)
                 {
