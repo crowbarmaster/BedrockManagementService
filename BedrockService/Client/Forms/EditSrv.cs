@@ -65,8 +65,8 @@ namespace BedrockService.Client.Forms
         {
             if (DelBackupBtn.Enabled)
             {
-                if(dataGrid.SelectedRows.Count < 2)
-                RollbackFolderName = (string)dataGrid.CurrentRow.Cells[0].Value;
+                if (dataGrid.SelectedRows.Count < 2)
+                    RollbackFolderName = (string)dataGrid.CurrentRow.Cells[0].Value;
                 DialogResult = DialogResult.OK;
                 Close();
             }

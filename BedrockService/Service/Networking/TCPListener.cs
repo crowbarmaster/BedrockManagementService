@@ -2,7 +2,6 @@
 using BedrockService.Service.Server;
 using BedrockService.Service.Server.HostInfoClasses;
 using BedrockService.Service.Server.Logging;
-using BedrockService.Service.Server.Management;
 using BedrockService.Service.Server.PackParser;
 using BedrockService.Utilities;
 using Newtonsoft.Json;
@@ -202,7 +201,7 @@ namespace BedrockService.Service.Networking
 
                                         MinecraftKnownPacksClass knownPacks = new MinecraftKnownPacksClass($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath.Value}\valid_known_packs.json", $@"{Program.ServiceDirectory}\Server\stock_packs.json");
                                         List<MinecraftPackContainer> MCContainer = JsonConvert.DeserializeObject<List<MinecraftPackContainer>>(data);
-                                        foreach(MinecraftPackContainer cont in MCContainer)
+                                        foreach (MinecraftPackContainer cont in MCContainer)
                                             knownPacks.RemovePackFromServer(InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath.Value, cont);
 
                                         break;
@@ -214,7 +213,7 @@ namespace BedrockService.Service.Networking
                                         List<MinecraftPackParser> list = new List<MinecraftPackParser>();
                                         foreach (MinecraftKnownPacksClass.KnownPack pack in knownPacks.KnownPacks)
                                             list.Add(new MinecraftPackParser($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath}\{pack.path.Replace(@"/", @"\")}"));
-                                        
+
                                         SendData(Encoding.UTF8.GetBytes(JArray.FromObject(list).ToString()), NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.PackList);
 
                                         break;

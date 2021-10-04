@@ -1,11 +1,7 @@
-﻿using System;
-using System.IO;
+﻿using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 
 namespace BedrockService.Service.Server.PackParser
 {
@@ -29,7 +25,7 @@ namespace BedrockService.Service.Server.PackParser
             }
         }
 
-        public MinecraftKnownPacksClass (string serverFile, string stockFile)
+        public MinecraftKnownPacksClass(string serverFile, string stockFile)
         {
             KnownPacks = ParseJsonArray(serverFile);
             stockPacks = ParseJsonArray(stockFile);
@@ -44,7 +40,7 @@ namespace BedrockService.Service.Server.PackParser
             }
         }
 
-        public void RemovePackFromServer (string serverPath, MinecraftPackContainer pack)
+        public void RemovePackFromServer(string serverPath, MinecraftPackContainer pack)
         {
             if (pack.ManifestType == "WorldPack")
                 Directory.Delete($@"{serverPath}\worlds\{pack.FolderName}", true);
@@ -54,7 +50,7 @@ namespace BedrockService.Service.Server.PackParser
                 Directory.Delete($@"{serverPath}\resource_packs\{ pack.FolderName}", true);
             KnownPacks.Remove(KnownPacks.First(p => p.uuid != null || p.uuid == pack.JsonManifest.header.uuid));
             List<KnownPack> packsToWrite = new List<KnownPack>(stockPacks);
-            if(KnownPacks.Count > 0)
+            if (KnownPacks.Count > 0)
                 packsToWrite.AddRange(KnownPacks);
             File.WriteAllText($@"{serverPath}\valid_known_packs.json", JArray.FromObject(packsToWrite).ToString());
         }

@@ -1,11 +1,7 @@
-using System;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using Newtonsoft.Json;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BedrockService.Service.Server.PackParser
 {
@@ -69,9 +65,9 @@ namespace BedrockService.Service.Server.PackParser
                 FileInfo fInfo = new FileInfo(file);
                 string zipFilePath = $@"{PackExtractDirectory.FullName}\{fInfo.Name.Replace(fInfo.Extension, "")}";
                 ZipFile.ExtractToDirectory(file, zipFilePath);
-                foreach(FileInfo extractedFile in new DirectoryInfo(zipFilePath).GetFiles())
+                foreach (FileInfo extractedFile in new DirectoryInfo(zipFilePath).GetFiles())
                 {
-                    if(extractedFile.Extension == ".mcpack")
+                    if (extractedFile.Extension == ".mcpack")
                     {
                         Directory.CreateDirectory($@"{zipFilePath}\{extractedFile.Name.Replace(extractedFile.Extension, "")}");
                         ZipFile.ExtractToDirectory(extractedFile.FullName, $@"{zipFilePath}\{fInfo.Name.Replace(fInfo.Extension, "")}_{extractedFile.Name.Replace(extractedFile.Extension, "")}");
@@ -82,7 +78,7 @@ namespace BedrockService.Service.Server.PackParser
                 ParseDirectory(directory);
         }
 
-            private void ParseDirectory(DirectoryInfo directoryToParse)
+        private void ParseDirectory(DirectoryInfo directoryToParse)
         {
             InstanceProvider.ServiceLogger.AppendLine($"Parsing directory {directoryToParse.Name}");
             if (directoryToParse.Exists)

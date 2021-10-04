@@ -427,7 +427,7 @@ namespace BedrockService.Service.Management
             ServerInfo server = InstanceProvider.GetServerInfoByIndex(serverIndex);
             BedrockServer brs = InstanceProvider.GetBedrockServerByIndex(serverIndex);
             brs.CurrentServerStatus = BedrockServer.ServerStatus.Stopping;
-            while(brs.CurrentServerStatus != BedrockServer.ServerStatus.Stopped)
+            while (brs.CurrentServerStatus != BedrockServer.ServerStatus.Stopped)
             {
                 Thread.Sleep(100);
             }
@@ -462,7 +462,7 @@ namespace BedrockService.Service.Management
             foreach (FileInfo file in source.GetFiles())
                 file.CopyTo(Path.Combine(target.FullName, file.Name), true);
         }
-        
+
         private void DeleteFilesRecursively(DirectoryInfo source)
         {
             foreach (DirectoryInfo dir in source.GetDirectories())

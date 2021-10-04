@@ -1,11 +1,11 @@
-﻿using System;
-using System.Threading;
+﻿using BedrockService.Service.Server;
+using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using Topshelf;
 using Topshelf.Runtime;
-using BedrockService.Service.Server;
-using System.Diagnostics;
 
 namespace BedrockService.Service
 {
@@ -44,7 +44,7 @@ namespace BedrockService.Service
                 x.Service(settings => InstanceProvider.BedrockService, s =>
                 {
                     s.BeforeStartingService(_ => InstanceProvider.ServiceLogger.AppendLine("Starting service..."));
-                    s.BeforeStoppingService(_ => 
+                    s.BeforeStoppingService(_ =>
                     {
                         InstanceProvider.ServiceLogger.AppendLine("Stopping service...");
                         IsExiting = true;

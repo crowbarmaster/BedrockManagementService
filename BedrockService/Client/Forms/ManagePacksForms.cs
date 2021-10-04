@@ -1,19 +1,14 @@
 ﻿using BedrockService.Client.Management;
 using BedrockService.Service.Networking;
-using BedrockService.Utilities;
+using BedrockService.Service.Server.PackParser;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using BedrockService.Service.Server.PackParser;
 using System.IO.Compression;
+using System.Text;
+using System.Windows.Forms;
 
 namespace BedrockService.Client.Forms
 {
@@ -28,7 +23,7 @@ namespace BedrockService.Client.Forms
             //FormManager.GetTCPClient.SendData(File.ReadAllBytes($@"E:\testRB.zip"), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.PackFile);
         }
 
-        public void PopulateServerPacks (List<MinecraftPackParser> packList)
+        public void PopulateServerPacks(List<MinecraftPackParser> packList)
         {
             foreach (MinecraftPackParser pack in packList)
                 foreach (MinecraftPackContainer container in pack.FoundPacks)
@@ -42,14 +37,14 @@ namespace BedrockService.Client.Forms
                 parsedPacksListBox.SelectedIndex = -1;
             if (thisBox == parsedPacksListBox)
                 serverListBox.SelectedIndex = -1;
-            if(thisBox.SelectedIndex != -1)
+            if (thisBox.SelectedIndex != -1)
             {
                 MinecraftPackContainer selectedPack = (MinecraftPackContainer)thisBox.SelectedItem;
-                if(selectedPack.IconBytes != null)
-                using (MemoryStream ms = new MemoryStream(selectedPack.IconBytes))
-                {
-                    selectedPackIcon.Image = Image.FromStream(ms);
-                }
+                if (selectedPack.IconBytes != null)
+                    using (MemoryStream ms = new MemoryStream(selectedPack.IconBytes))
+                    {
+                        selectedPackIcon.Image = Image.FromStream(ms);
+                    }
                 if (selectedPack.JsonManifest != null)
                     textBox1.Text = $"{selectedPack.JsonManifest.header.name}\r\n{selectedPack.JsonManifest.header.description}\r\n{selectedPack.JsonManifest.header.uuid}\r\n{selectedPack.JsonManifest.header.version[0]}";
                 else
@@ -72,7 +67,7 @@ namespace BedrockService.Client.Forms
         private void removeAllPacksBtn_Click(object sender, EventArgs e)
         {
             List<MinecraftPackContainer> temp = new List<MinecraftPackContainer>();
-            foreach(object item in serverListBox.Items)
+            foreach (object item in serverListBox.Items)
                 temp.Add((MinecraftPackContainer)item);
             FormManager.GetTCPClient.SendData(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(temp)), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.RemovePack);
             serverListBox.Items.Clear();
@@ -116,7 +111,7 @@ namespace BedrockService.Client.Forms
             openFileDialog.Filter = "MC pack file (.MCWORLD, .MCPACK, .MCADDON, .Zip)|*.mcworld;*.mcpack;*.mcaddon;*.zip";
             openFileDialog.Title = "Select pack file(s)";
             openFileDialog.Multiselect = true;
-            if(openFileDialog.ShowDialog() == DialogResult.OK)
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 MinecraftPackParser parser = new MinecraftPackParser(openFileDialog.FileNames);
                 PackExtractDir = parser.PackExtractDirectory;

@@ -522,7 +522,7 @@ namespace BedrockService.Client.Forms
         private void ManPacks_Click(object sender, EventArgs e)
         {
             FormManager.GetTCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Server, (byte)connectedHost.Servers.IndexOf(selectedServer), NetworkMessageTypes.PackList);
-            while(FormManager.GetTCPClient.RecievedPacks == null)
+            while (FormManager.GetTCPClient.RecievedPacks == null)
             {
                 Thread.Sleep(150);
             }
