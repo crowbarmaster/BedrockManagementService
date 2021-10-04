@@ -326,7 +326,6 @@ namespace BedrockService.Service
 
                     ZipFile.ExtractToDirectory($@"{Program.ServiceDirectory}\Server\MCSFiles\Update_{InstanceProvider.HostInfo.ServerVersion}.zip", server.ServerPath.Value);
                     File.Copy(server.ServerPath.Value + "\\bedrock_server.exe", server.ServerPath.Value + "\\" + server.ServerExeName.Value, true);
-                    File.Delete(server.ServerPath.Value + "\\bedrock_server.exe");
                 }
                 catch (Exception e)
                 {
