@@ -133,9 +133,14 @@ namespace BedrockService.Service.Networking
             {
                 return await client.GetStringAsync("https://www.minecraft.net/en-us/download/server/bedrock");
             }
-            catch (HttpRequestException e)
+            catch (HttpRequestException)
             {
                 InstanceProvider.ServiceLogger.AppendLine($"Error! Updater timed out, could not fetch current build!");
+            }
+            catch (TaskCanceledException)
+            {
+                Thread.Sleep(200);
+                return await FetchHTTPContent(client);
             }
             catch (Exception e)
             {
