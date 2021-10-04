@@ -1,23 +1,39 @@
 ﻿using System;
+using System.Threading;
 using System.IO;
 using System.Reflection;
 using Topshelf;
 using Topshelf.Runtime;
+using BedrockService.Service.Server;
+using System.Diagnostics;
 
 namespace BedrockService.Service
 {
     class Program
     {
         public static readonly string ServiceDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        public static readonly string ServiceExeName = Path.GetFileName(Assembly.GetExecutingAssembly().Location);
         public static bool DebugModeEnabled = false;
         public static bool IsConsoleMode = false;
+        public static bool IsExiting = false;
 
         static void Main(string[] args)
         {
+            Process[] processList;
             if (args.Length == 0 && Environment.UserInteractive)
             {
                 IsConsoleMode = true;
                 InstanceProvider.ServiceLogger.AppendLine("BedrockService startup detected in Console mode.");
+            }
+            else
+            {
+                InstanceProvider.ServiceLogger.AppendLine("BedrockService startup detected in Service mode.");
+                do
+                {
+                    processList = Process.GetProcessesByName(ServiceExeName.Substring(0, ServiceExeName.Length - 4));
+                    Thread.Sleep(500);
+                }
+                while (processList.Length > 1);
             }
 
             Host host = HostFactory.New(x =>
@@ -28,8 +44,18 @@ namespace BedrockService.Service
                 x.Service(settings => InstanceProvider.BedrockService, s =>
                 {
                     s.BeforeStartingService(_ => InstanceProvider.ServiceLogger.AppendLine("Starting service..."));
-                    s.BeforeStoppingService(_ => InstanceProvider.ServiceLogger.AppendLine("Stopping service..."));
-
+                    s.BeforeStoppingService(_ => 
+                    {
+                        InstanceProvider.ServiceLogger.AppendLine("Stopping service...");
+                        IsExiting = true;
+                        foreach (BedrockServer server in InstanceProvider.BedrockService.bedrockServers)
+                        {
+                            server.CurrentServerStatus = BedrockServer.ServerStatus.Stopping;
+                            while (server.CurrentServerStatus != BedrockServer.ServerStatus.Stopped)
+                                Thread.Sleep(100);
+                        }
+                        InstanceProvider.GetTcpListener().Stop();
+                    });
                 });
 
                 x.RunAsLocalSystem();
