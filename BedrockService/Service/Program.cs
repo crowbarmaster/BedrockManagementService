@@ -13,13 +13,13 @@ namespace BedrockService.Service
     {
         public static readonly string ServiceDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         public static readonly string ServiceExeName = Path.GetFileName(Assembly.GetExecutingAssembly().Location);
+        public static readonly int ServicePID = Process.GetCurrentProcess().Id;
         public static bool DebugModeEnabled = false;
         public static bool IsConsoleMode = false;
         public static bool IsExiting = false;
 
         static void Main(string[] args)
         {
-            Process[] processList;
             if (args.Length == 0 && Environment.UserInteractive)
             {
                 IsConsoleMode = true;
@@ -28,12 +28,16 @@ namespace BedrockService.Service
             else
             {
                 InstanceProvider.ServiceLogger.AppendLine("BedrockService startup detected in Service mode.");
-                do
+
+                foreach (Process process in Process.GetProcesses())
                 {
-                    processList = Process.GetProcessesByName(ServiceExeName.Substring(0, ServiceExeName.Length - 4));
-                    Thread.Sleep(500);
+                    if (process.Id != ServicePID && process.ProcessName.StartsWith("BedrockService.") && process.ProcessName != "BedrockService.Client")
+                    {
+                        InstanceProvider.ServiceLogger.AppendLine($"Found additional running instance of {process.ProcessName} with ID {process.Id}");
+                        InstanceProvider.ServiceLogger.AppendLine($"Killing process with id {process.Id}");
+                        process.Kill();
+                    }
                 }
-                while (processList.Length > 1);
             }
 
             Host host = HostFactory.New(x =>
