@@ -30,7 +30,7 @@ namespace BedrockService.Service.Networking
 
         public void StartListening(int port)
         {
-            IPAddress addr = IPAddress.Parse("127.0.0.1");
+            IPAddress addr = IPAddress.Parse("0.0.0.0");
             InListener = InstanceProvider.InitTCPListener(addr, port);
             try
             {
