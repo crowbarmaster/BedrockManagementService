@@ -307,7 +307,7 @@ namespace BedrockService.Service
             return true;
         }
 
-        private async Task ReplaceBuild(ServerInfo server)
+        public async Task ReplaceBuild(ServerInfo server)
         {
             await Task.Run(() =>
             {

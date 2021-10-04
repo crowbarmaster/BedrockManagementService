@@ -344,6 +344,14 @@ namespace BedrockService.Service.Server
                         Console.WriteLine($"Player {username} disconnected with XUID: {xuid}");
                         InstanceProvider.PlayerManager.PlayerDisconnected(xuid, serverInfo);
                     }
+                    if(dataMsg.Contains("Failed to load Vanilla"))
+                    {
+                        CurrentServerStatus = ServerStatus.Stopping;
+                        while (CurrentServerStatus != ServerStatus.Stopped)
+                            Thread.Sleep(200);
+                        if (InstanceProvider.BedrockService.ReplaceBuild(serverInfo).Wait(30000))
+                            CurrentServerStatus = ServerStatus.Starting;
+                    }
                 }
             }
         }
