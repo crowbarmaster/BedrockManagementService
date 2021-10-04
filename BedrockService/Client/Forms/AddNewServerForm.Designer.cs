@@ -110,6 +110,8 @@ namespace BedrockService.Client.Forms
             // 
             // label4
             // 
+            this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.label4.Location = new System.Drawing.Point(30, 9);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(176, 44);
@@ -131,7 +133,10 @@ namespace BedrockService.Client.Forms
             this.Controls.Add(this.ipV4Box);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.srvNameBox);
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "AddNewServerForm";
+            this.ShowInTaskbar = false;
             this.Text = "AddNewServerForm";
             this.ResumeLayout(false);
             this.PerformLayout();
