@@ -44,7 +44,7 @@ namespace BedrockService.Service.Networking
                 Environment.Exit(1);
             }
 
-            while (true)
+            while (!Program.IsExiting)
             {
                 try
                 {
@@ -113,7 +113,7 @@ namespace BedrockService.Service.Networking
             NetworkMessageTypes msgType = 0;
             NetworkMessageFlags msgFlag = 0;
             List<byte[]> byteBlocks = new List<byte[]>();
-            while (InstanceProvider.GetClientServiceAlive())
+            while (InstanceProvider.GetClientServiceAlive() && !Program.IsExiting)
             {
                 try
                 {
@@ -155,7 +155,7 @@ namespace BedrockService.Service.Networking
                                         {
                                             Thread.Sleep(100);
                                         }
-                                        InstanceProvider.GetBedrockServerByIndex(serverIndex).StartControl(InstanceProvider.BedrockService._hostControl);
+                                        InstanceProvider.GetBedrockServerByIndex(serverIndex).CurrentServerStatus = BedrockServer.ServerStatus.Starting;
                                         SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
 
                                         break;
@@ -484,7 +484,7 @@ namespace BedrockService.Service.Networking
         private void SendBackHeatbeatSignal()
         {
             InstanceProvider.ServiceLogger.AppendLine("HeartBeatSender started.");
-            while (keepalive)
+            while (keepalive && !Program.IsExiting)
             {
                 heartbeatRecieved = false;
                 while (!heartbeatRecieved)
