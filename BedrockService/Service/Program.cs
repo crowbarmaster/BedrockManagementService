@@ -20,7 +20,7 @@ namespace BedrockService.Service
 
         static void Main(string[] args)
         {
-            if (args.Length == 0 && Environment.UserInteractive)
+            if (args.Length == 0 || Environment.UserInteractive)
             {
                 IsConsoleMode = true;
                 InstanceProvider.ServiceLogger.AppendLine("BedrockService startup detected in Console mode.");
@@ -28,18 +28,16 @@ namespace BedrockService.Service
             else
             {
                 InstanceProvider.ServiceLogger.AppendLine("BedrockService startup detected in Service mode.");
-
-                foreach (Process process in Process.GetProcesses())
-                {
-                    if (process.Id != ServicePID && process.ProcessName.StartsWith("BedrockService.") && process.ProcessName != "BedrockService.Client")
+                    foreach (Process process in Process.GetProcesses())
                     {
-                        InstanceProvider.ServiceLogger.AppendLine($"Found additional running instance of {process.ProcessName} with ID {process.Id}");
-                        InstanceProvider.ServiceLogger.AppendLine($"Killing process with id {process.Id}");
-                        process.Kill();
+                        if (process.Id != ServicePID && process.ProcessName.StartsWith("BedrockService.") && process.ProcessName != "BedrockService.Client")
+                        {
+                            InstanceProvider.ServiceLogger.AppendLine($"Found additional running instance of {process.ProcessName} with ID {process.Id}");
+                            InstanceProvider.ServiceLogger.AppendLine($"Killing process with id {process.Id}");
+                            process.Kill();
+                        }
                     }
-                }
             }
-
             Host host = HostFactory.New(x =>
             {
                 x.SetStartTimeout(TimeSpan.FromSeconds(10));
@@ -77,7 +75,7 @@ namespace BedrockService.Service
 
                 x.OnException((ex) =>
                 {
-                    InstanceProvider.ServiceLogger.AppendLine("Exception occured Main : " + ex.ToString());
+                    InstanceProvider.ServiceLogger.AppendLine("Exception occured Main : " + ex.Message);
                 });
             });
 
