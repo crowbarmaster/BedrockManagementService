@@ -26,7 +26,21 @@ TODO:
 
 ## Quick-start guide
 
+This service can be run strictly as a windows service, or as a regular console application.
 Download the latest release and extract to any directory. Run BedrockService.Service.exe, this will automatically download the latest copy of BDS (Bedrock Dedicated Server) from minecraft.net, extract to the default directory of C:\MCBedrockService, deploy stock settings and start the server. Once the new server is running, you can either close it and modify the configs with a text editor (see below for more details) or modify/add servers from the GUI Client.
+
+
+### Install as a service
+
+This service uses TopShelf to install, run and manage the service.
+
+To install as a service, simply open a command prompt (or powershell) as Administrator, browse to the service directory, and run:
+```
+BedrockService.Service install
+```
+You should see a message stating the service installed successfully. By default, the service will install as "BedrockService" with automatic start. Many additional commandline arguments exist for TopShelf for custom control of the service installation, Please have a look at the documentation here: https://topshelf.readthedocs.io/en/latest/ for more information.
+
+Once the service is installed, the reccomended way to start, stop, or restart the service externally is to use the "net" command (Example: net start "BedrockService" in command prompt). Use the GUI Client to verify that the server(s) are running as intended.
 
 ## Service configuration files and directory layout
 
