@@ -3,7 +3,7 @@ using BedrockService.Service.Server;
 using BedrockService.Service.Server.HostInfoClasses;
 using BedrockService.Service.Server.Logging;
 using BedrockService.Service.Server.PackParser;
-using BedrockService.Utilities;
+using BedrockService.Service.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -138,13 +138,11 @@ namespace BedrockService.Service.Networking
                         {
                             case NetworkMessageDestination.Server:
 
-                                JsonParser message;
                                 switch (msgType)
                                 {
                                     case NetworkMessageTypes.PropUpdate:
 
-                                        message = JsonParser.Deserialize(data);
-                                        List<Property> propList = message.Value.ToObject<List<Property>>();
+                                        List<Property> propList = JsonConvert.DeserializeObject<List<Property>>(data);
                                         Property prop = propList.First(p => p.KeyName == "server-name");
                                         InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPropList = propList;
                                         InstanceProvider.ConfigManager.SaveServerProps(InstanceProvider.GetServerInfoByIndex(serverIndex), true);
@@ -179,8 +177,8 @@ namespace BedrockService.Service.Networking
                                     case NetworkMessageTypes.PlayersRequest:
 
                                         ServerInfo server = InstanceProvider.GetServerInfoByIndex(serverIndex);
-                                        string jsonString = JsonParser.Serialize(JsonParser.FromValue(server.KnownPlayers));
-                                        SendData(Encoding.UTF8.GetBytes(jsonString), NetworkMessageSource.Server, NetworkMessageDestination.Client, serverIndex, NetworkMessageTypes.PlayersRequest);
+                                        byte[] serializeToBytes = GetBytes(JsonConvert.SerializeObject(server.KnownPlayers));
+                                        SendData(serializeToBytes, NetworkMessageSource.Server, NetworkMessageDestination.Client, serverIndex, NetworkMessageTypes.PlayersRequest);
 
                                         break;
                                     case NetworkMessageTypes.PackFile:
@@ -189,11 +187,11 @@ namespace BedrockService.Service.Networking
                                         foreach (MinecraftPackContainer container in archiveParser.FoundPacks)
                                         {
                                             if (container.ManifestType == "WorldPack")
-                                                CopyFilesRecursively(container.PackContentLocation, new DirectoryInfo($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath.Value}\worlds\{container.FolderName}"));
+                                                FileUtils.CopyFilesRecursively(container.PackContentLocation, new DirectoryInfo($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath.Value}\worlds\{container.FolderName}"));
                                             if (container.ManifestType == "data")
-                                                CopyFilesRecursively(container.PackContentLocation, new DirectoryInfo($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath.Value}\behavior_packs\{container.FolderName}"));
+                                                FileUtils.CopyFilesRecursively(container.PackContentLocation, new DirectoryInfo($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath.Value}\behavior_packs\{container.FolderName}"));
                                             if (container.ManifestType == "resources")
-                                                CopyFilesRecursively(container.PackContentLocation, new DirectoryInfo($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath.Value}\resource_packs\{container.FolderName}"));
+                                                FileUtils.CopyFilesRecursively(container.PackContentLocation, new DirectoryInfo($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath.Value}\resource_packs\{container.FolderName}"));
                                         }
 
                                         break;
@@ -214,13 +212,12 @@ namespace BedrockService.Service.Networking
                                         foreach (MinecraftKnownPacksClass.KnownPack pack in knownPacks.KnownPacks)
                                             list.Add(new MinecraftPackParser($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath}\{pack.path.Replace(@"/", @"\")}"));
 
-                                        SendData(Encoding.UTF8.GetBytes(JArray.FromObject(list).ToString()), NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.PackList);
+                                        SendData(GetBytes(JArray.FromObject(list).ToString()), NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.PackList);
 
                                         break;
                                     case NetworkMessageTypes.PlayersUpdate:
 
-                                        JsonParser deserialized = JsonParser.Deserialize(data);
-                                        List<Player> fetchedPlayers = (List<Player>)deserialized.Value.ToObject(typeof(List<Player>));
+                                        List<Player> fetchedPlayers = JsonConvert.DeserializeObject<List<Player>>(data);
                                         List<Player> known = InstanceProvider.GetServerInfoByIndex(serverIndex).KnownPlayers;
                                         foreach (Player player in fetchedPlayers)
                                         {
@@ -249,9 +246,8 @@ namespace BedrockService.Service.Networking
                                     case NetworkMessageTypes.Connect:
 
                                         InstanceProvider.HostInfo.ServiceLog = InstanceProvider.ServiceLogger.Log;
-                                        string jsonString = JsonParser.Serialize(JsonParser.FromValue(InstanceProvider.HostInfo));
-                                        byte[] stringAsBytes = GetBytes(jsonString);
-                                        SendData(stringAsBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
+                                        byte[] serializeToBytes = GetBytes(JsonConvert.SerializeObject(InstanceProvider.HostInfo));
+                                        SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
                                         heartbeatRecieved = false;
 
                                         break;
@@ -313,15 +309,13 @@ namespace BedrockService.Service.Networking
                                         if (srvString.Length > 1)
                                         {
                                             srvString.Remove(srvString.Length - 1, 1);
-                                            stringAsBytes = GetBytes(srvString.ToString());
-                                            SendData(stringAsBytes, NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.ConsoleLogUpdate);
+                                            SendData(GetBytes(srvString.ToString()), NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.ConsoleLogUpdate);
                                         }
 
                                         break;
                                     case NetworkMessageTypes.StartCmdUpdate:
 
-                                        JsonParser deserialized = JsonParser.Deserialize(data);
-                                        InstanceProvider.GetServerInfoByIndex(serverIndex).StartCmds = (List<StartCmdEntry>)deserialized.Value.ToObject(typeof(List<StartCmdEntry>));
+                                        InstanceProvider.GetServerInfoByIndex(serverIndex).StartCmds = JsonConvert.DeserializeObject<List<StartCmdEntry>>(data);
                                         InstanceProvider.ConfigManager.SaveServerProps(InstanceProvider.GetServerInfoByIndex(serverIndex), true);
 
                                         break;
@@ -338,16 +332,14 @@ namespace BedrockService.Service.Networking
                                         break;
                                     case NetworkMessageTypes.DelBackups:
 
-                                        deserialized = JsonParser.Deserialize(data);
-                                        List<string> backupFileNames = (List<string>)deserialized.Value.ToObject(typeof(List<string>));
+                                        List<string> backupFileNames = JsonConvert.DeserializeObject<List<string>>(data);
                                         InstanceProvider.ConfigManager.DeleteBackupsForServer(serverIndex, backupFileNames);
 
                                         break;
                                     case NetworkMessageTypes.EnumBackups:
 
-                                        jsonString = JsonParser.Serialize(JsonParser.FromValue(InstanceProvider.ConfigManager.EnumerateBackupsForServer(serverIndex)));
-                                        stringAsBytes = GetBytes(jsonString);
-                                        SendData(stringAsBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.EnumBackups);
+                                        serializeToBytes = GetBytes(JsonConvert.SerializeObject(InstanceProvider.ConfigManager.EnumerateBackupsForServer(serverIndex)));
+                                        SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.EnumBackups);
 
                                         break;
                                     case NetworkMessageTypes.BackupRollback:
@@ -372,8 +364,7 @@ namespace BedrockService.Service.Networking
                                     case NetworkMessageTypes.AddNewServer:
 
                                         string serversPath = InstanceProvider.HostInfo.GetGlobalValue("ServersPath");
-                                        message = JsonParser.Deserialize(data);
-                                        List<Property> propList = message.Value.ToObject<List<Property>>();
+                                        List<Property> propList = JsonConvert.DeserializeObject<List<Property>>(data);
                                         Property prop = propList.First(p => p.KeyName == "server-name");
                                         ServerInfo newServer = new ServerInfo();
                                         newServer.InitDefaults(serversPath);
@@ -384,9 +375,8 @@ namespace BedrockService.Service.Networking
                                         newServer.FileName = $@"{prop.Value}.conf";
                                         InstanceProvider.ConfigManager.SaveServerProps(newServer, true);
                                         InstanceProvider.BedrockService.InitializeNewServer(newServer);
-                                        jsonString = JsonParser.Serialize(JsonParser.FromValue(InstanceProvider.HostInfo));
-                                        stringAsBytes = GetBytes(jsonString);
-                                        SendData(stringAsBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
+                                        serializeToBytes = GetBytes(JsonConvert.SerializeObject((InstanceProvider.HostInfo)));
+                                        SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
                                         SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
 
 
@@ -398,9 +388,8 @@ namespace BedrockService.Service.Networking
                                             Thread.Sleep(200);
                                         InstanceProvider.ConfigManager.RemoveServerConfigs(InstanceProvider.GetBedrockServerByIndex(serverIndex).serverInfo, msgFlag);
                                         InstanceProvider.HostInfo.Servers.Remove(InstanceProvider.GetServerInfoByIndex(serverIndex));
-                                        jsonString = JsonParser.Serialize(JsonParser.FromValue(InstanceProvider.HostInfo));
-                                        stringAsBytes = GetBytes(jsonString);
-                                        SendData(stringAsBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
+                                        serializeToBytes = GetBytes(JsonConvert.SerializeObject(InstanceProvider.HostInfo));
+                                        SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
                                         SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
 
                                         break;
@@ -458,26 +447,6 @@ namespace BedrockService.Service.Networking
                 InstanceProvider.DisposeHeartbeatThread();
             }
             catch { }
-        }
-
-        private void CopyFilesRecursively(DirectoryInfo source, DirectoryInfo target)
-        {
-            foreach (DirectoryInfo dir in source.GetDirectories())
-                CopyFilesRecursively(dir, target.CreateSubdirectory(dir.Name));
-            foreach (FileInfo file in source.GetFiles())
-                file.CopyTo(Path.Combine(target.FullName, file.Name), true);
-        }
-
-        private void DeleteFilesRecursively(DirectoryInfo source)
-        {
-            try
-            {
-                source.Delete(true);
-            }
-            catch (Exception e)
-            {
-                InstanceProvider.ServiceLogger.AppendLine($@"Error Deleting Dir {source.Name}: {e.StackTrace}");
-            }
         }
 
         private void SendBackHeatbeatSignal()

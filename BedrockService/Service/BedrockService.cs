@@ -1,6 +1,7 @@
 ﻿using BedrockService.Service.Networking;
 using BedrockService.Service.Server;
 using BedrockService.Service.Server.HostInfoClasses;
+using BedrockService.Service.Utilities;
 using NCrontab;
 using System;
 using System.Collections.Generic;
@@ -317,7 +318,7 @@ namespace BedrockService.Service
                     else if (File.Exists($@"{Program.ServiceDirectory}\Server\MCSFiles\stock_filelist.ini"))
                         DeleteFilelist(File.ReadAllLines($@"{Program.ServiceDirectory}\Server\MCSFiles\stock_filelist.ini"), server.ServerPath.Value);
                     else
-                        DeleteFilesRecursively(new DirectoryInfo(server.ServerPath.Value));
+                        FileUtils.DeleteFilesRecursively(new DirectoryInfo(server.ServerPath.Value), false);
 
                     while (InstanceProvider.HostInfo.ServerVersion == null || InstanceProvider.HostInfo.ServerVersion == "None")
                     {
@@ -334,18 +335,6 @@ namespace BedrockService.Service
 
 
             });
-        }
-
-        private void DeleteFilesRecursively(DirectoryInfo source)
-        {
-            try
-            {
-                source.Delete(true);
-            }
-            catch (Exception e)
-            {
-                InstanceProvider.ServiceLogger.AppendLine($@"Error Deleting Dir {source.Name}: {e.StackTrace}");
-            }
         }
 
         private void DeleteFilelist(string[] fileList, string serverPath)

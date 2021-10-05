@@ -123,7 +123,6 @@
     <Compile Include="Server\HostInfoClasses\Property.cs" />
     <Compile Include="Server\HostInfoClasses\ServerInfo.cs" />
     <Compile Include="Server\HostInfoClasses\StartCmdEntry.cs" />
-    <Compile Include="Utilities\JsonParser.cs" />
     <Compile Include="Server\Management\PlayerManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -131,25 +130,11 @@
     <Compile Include="Logging\ServiceLogger.cs" />
     <Compile Include="Networking\TCPListener.cs" />
     <Compile Include="Networking\Updater.cs" />
+    <Compile Include="Utilities\FileUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Configs\Default.conf" />
     <None Include="Configs\Globals.conf" />
-    <AdditionalFiles Include="Batch\BS_InstallStart.bat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AdditionalFiles>
-    <AdditionalFiles Include="Batch\BS_Restart.bat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AdditionalFiles>
-    <AdditionalFiles Include="Batch\BS_StopUninstall.bat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AdditionalFiles>
-    <AdditionalFiles Include="Batch\BS_Start.bat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AdditionalFiles>
-    <AdditionalFiles Include="Batch\BS_Stop.bat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AdditionalFiles>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
@@ -167,5 +152,6 @@
     <None Include="Configs\Default.players" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

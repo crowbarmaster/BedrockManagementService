@@ -1,5 +1,6 @@
 ﻿using BedrockService.Service.Server.HostInfoClasses;
 using BedrockService.Service.Server.Logging;
+using BedrockService.Service.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -222,11 +223,11 @@ namespace BedrockService.Service.Server
                 InstanceProvider.ServiceLogger.AppendLine($"Backing up files for server {serverInfo.ServerName}. Please wait!");
                 if (InstanceProvider.HostInfo.GetGlobalValue("EntireBackups") == "false")
                 {
-                    CopyFilesRecursively(worldsDir, targetDirectory);
+                    FileUtils.CopyFilesRecursively(worldsDir, targetDirectory);
                 }
                 else if (InstanceProvider.HostInfo.GetGlobalValue("EntireBackups") == "true")
                 {
-                    CopyFilesRecursively(serverDir, targetDirectory);
+                    FileUtils.CopyFilesRecursively(serverDir, targetDirectory);
                 }
                 return true;
 
@@ -357,28 +358,6 @@ namespace BedrockService.Service.Server
             {
                 StdInStream.WriteLine(cmd.Command.Trim());
                 Thread.Sleep(1000);
-            }
-        }
-
-        private void CopyFilesRecursively(DirectoryInfo source, DirectoryInfo target)
-        {
-            foreach (DirectoryInfo dir in source.GetDirectories())
-                CopyFilesRecursively(dir, target.CreateSubdirectory(dir.Name));
-            foreach (FileInfo file in source.GetFiles())
-                file.CopyTo(Path.Combine(target.FullName, file.Name), true);
-        }
-
-        private void DeleteFilesRecursively(DirectoryInfo source)
-        {
-            foreach (DirectoryInfo dir in source.GetDirectories())
-            {
-                DeleteFilesRecursively(dir);
-            }
-
-            foreach (FileInfo file in source.GetFiles())
-            {
-                file.Delete();
-                Directory.Delete(source.FullName);
             }
         }
     }

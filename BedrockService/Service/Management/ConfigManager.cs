@@ -1,6 +1,7 @@
 ﻿using BedrockService.Service.Networking;
 using BedrockService.Service.Server;
 using BedrockService.Service.Server.HostInfoClasses;
+using BedrockService.Service.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -412,7 +413,7 @@ namespace BedrockService.Service.Management
                     foreach (DirectoryInfo dir in new DirectoryInfo($@"{InstanceProvider.HostInfo.GetGlobalValue("BackupPath")}\{serverName}").GetDirectories())
                         if (dir.Name == deleteDir)
                         {
-                            Directory.Delete($@"{InstanceProvider.HostInfo.GetGlobalValue("BackupPath")}\{serverName}\{deleteDir}", true);
+                            FileUtils.DeleteFilesRecursively(new DirectoryInfo($@"{InstanceProvider.HostInfo.GetGlobalValue("BackupPath")}\{serverName}\{deleteDir}"), true);
                             InstanceProvider.ServiceLogger.AppendLine($"Deleted backup {deleteDir}.");
                         }
             }
@@ -436,11 +437,11 @@ namespace BedrockService.Service.Management
                 foreach (DirectoryInfo dir in new DirectoryInfo($@"{InstanceProvider.HostInfo.GetGlobalValue("BackupPath")}\{server.ServerName}").GetDirectories())
                     if (dir.Name == folderName)
                     {
-                        DeleteFilesRecursively(new DirectoryInfo($@"{server.ServerPath.Value}\worlds"));
+                        FileUtils.DeleteFilesRecursively(new DirectoryInfo($@"{server.ServerPath.Value}\worlds"), false);
                         InstanceProvider.ServiceLogger.AppendLine($"Deleted world folder contents.");
                         foreach (DirectoryInfo worldDir in new DirectoryInfo($@"{InstanceProvider.HostInfo.GetGlobalValue("BackupPath")}\{server.ServerName}\{folderName}").GetDirectories())
                         {
-                            CopyFilesRecursively(worldDir, new DirectoryInfo($@"{server.ServerPath.Value}\worlds\{worldDir.Name}"));
+                            FileUtils.CopyFilesRecursively(worldDir, new DirectoryInfo($@"{server.ServerPath.Value}\worlds\{worldDir.Name}"));
                             InstanceProvider.ServiceLogger.AppendLine($@"Copied {worldDir.Name} to path {server.ServerPath.Value}\worlds");
                         }
                         brs.CurrentServerStatus = BedrockServer.ServerStatus.Starting;
@@ -454,33 +455,13 @@ namespace BedrockService.Service.Management
             return false;
         }
 
-
-        private void CopyFilesRecursively(DirectoryInfo source, DirectoryInfo target)
-        {
-            foreach (DirectoryInfo dir in source.GetDirectories())
-                CopyFilesRecursively(dir, target.CreateSubdirectory(dir.Name));
-            foreach (FileInfo file in source.GetFiles())
-                file.CopyTo(Path.Combine(target.FullName, file.Name), true);
-        }
-
-        private void DeleteFilesRecursively(DirectoryInfo source)
-        {
-            foreach (DirectoryInfo dir in source.GetDirectories())
-                DeleteFilesRecursively(dir);
-            foreach (FileInfo file in source.GetFiles())
-                file.Delete();
-            foreach (DirectoryInfo emptyDir in source.GetDirectories())
-                emptyDir.Delete(true);
-        }
-
         private bool DeleteBackups(ServerInfo serverInfo)
         {
             try
             {
-
                 string configBackupPath = InstanceProvider.HostInfo.GetGlobalValue("BackupPath");
                 DirectoryInfo backupDirInfo = new DirectoryInfo($@"{configBackupPath}\{serverInfo.ServerName}");
-                DirectoryInfo configDirInfo = new DirectoryInfo($@"{configDir}\Backups");
+                DirectoryInfo configBackupDirInfo = new DirectoryInfo($@"{configDir}\Backups");
                 foreach (DirectoryInfo dir in backupDirInfo.GetDirectories())
                 {
                     if (dir.Name.Contains($"{serverInfo.ServerName}"))
@@ -488,7 +469,7 @@ namespace BedrockService.Service.Management
                         dir.Delete(true);
                     }
                 }
-                foreach (FileInfo file in configDirInfo.GetFiles())
+                foreach (FileInfo file in configBackupDirInfo.GetFiles())
                 {
                     if (file.Name.Contains($"{serverInfo.ServerName}_"))
                     {
@@ -504,8 +485,7 @@ namespace BedrockService.Service.Management
         {
             try
             {
-                DirectoryInfo serverDirInfo = new DirectoryInfo(serverInfo.ServerPath.Value);
-                serverDirInfo.Delete(true);
+                FileUtils.DeleteFilesRecursively(new DirectoryInfo(serverInfo.ServerPath.Value), false);
                 return true;
             }
             catch { return false; }
