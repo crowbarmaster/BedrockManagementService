@@ -1,6 +1,6 @@
 ﻿using BedrockService.Client.Management;
 using BedrockService.Service.Server.HostInfoClasses;
-using BedrockService.Utilities;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -62,7 +62,7 @@ namespace BedrockService.Client.Forms
                     Server.KnownPlayers.Add(player);
                 }
             }
-            byte[] sendBytes = Encoding.UTF8.GetBytes(JsonParser.Serialize(JsonParser.FromValue(modifiedPlayers)));
+            byte[] sendBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(modifiedPlayers));
             FormManager.GetTCPClient.SendData(sendBytes, Service.Networking.NetworkMessageSource.Client, Service.Networking.NetworkMessageDestination.Server, (byte)FormManager.GetMainWindow.connectedHost.Servers.IndexOf(Server), Service.Networking.NetworkMessageTypes.PlayersUpdate);
             FormManager.GetMainWindow.WaitForCallbackInvoked();
             Close();

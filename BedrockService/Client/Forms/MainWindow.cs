@@ -1,7 +1,7 @@
 ﻿using BedrockService.Client.Management;
-using BedrockService.Client.Utilities;
 using BedrockService.Service.Networking;
 using BedrockService.Service.Server.HostInfoClasses;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +19,7 @@ namespace BedrockService.Client.Forms
         public ServerInfo selectedServer;
         public bool ShowsSvcLog = false;
         public bool ServerBusy = false;
-        private EditSrv Editor;
+        private EditSrv editDialog;
         private int ConnectTimeout;
         private bool FollowTail = false;
         private readonly int ConnectTimeoutLimit = 100;
@@ -254,14 +254,15 @@ namespace BedrockService.Client.Forms
 
         private void EditCfg_Click(object sender, EventArgs e)
         {
-            Editor = new EditSrv();
-            Editor.PopulateBoxes(selectedServer.ServerPropList);
-            if (Editor.ShowDialog() == DialogResult.OK)
+            editDialog = new EditSrv();
+            editDialog.PopulateBoxes(selectedServer.ServerPropList);
+            if (editDialog.ShowDialog() == DialogResult.OK)
             {
-                JsonUtilities.SendJsonMsgToSrv<List<Property>>(Editor.workingProps, NetworkMessageDestination.Server, (byte)connectedHost.Servers.IndexOf(selectedServer), NetworkMessageTypes.PropUpdate);
-                selectedServer.ServerPropList = Editor.workingProps;
-                Editor.Close();
-                Editor.Dispose();
+                byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(editDialog.workingProps));
+                FormManager.GetTCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Server, (byte)connectedHost.Servers.IndexOf(selectedServer), NetworkMessageTypes.PropUpdate);
+                selectedServer.ServerPropList = editDialog.workingProps;
+                editDialog.Close();
+                editDialog.Dispose();
                 RestartSrv_Click(null, null);
             }
         }
@@ -274,14 +275,15 @@ namespace BedrockService.Client.Forms
 
         private void EditGlobals_Click(object sender, EventArgs e)
         {
-            Editor = new EditSrv();
-            Editor.PopulateBoxes(connectedHost.GetGlobals());
-            if (Editor.ShowDialog() == DialogResult.OK)
+            editDialog = new EditSrv();
+            editDialog.PopulateBoxes(connectedHost.GetGlobals());
+            if (editDialog.ShowDialog() == DialogResult.OK)
             {
-                JsonUtilities.SendJsonMsg<List<Property>>(Editor.workingProps, NetworkMessageDestination.Service, NetworkMessageTypes.PropUpdate);
-                connectedHost.SetGlobals(Editor.workingProps);
-                Editor.Close();
-                Editor.Dispose();
+                byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(editDialog.workingProps));
+                FormManager.GetTCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.PropUpdate);
+                connectedHost.SetGlobals(editDialog.workingProps);
+                editDialog.Close();
+                editDialog.Dispose();
                 RestartSrv_Click(null, null);
             }
         }
@@ -297,7 +299,8 @@ namespace BedrockService.Client.Forms
             AddNewServerForm newServerForm = new AddNewServerForm();
             if (newServerForm.ShowDialog() == DialogResult.OK)
             {
-                JsonUtilities.SendJsonMsg<List<Property>>(newServerForm.DefaultProps, NetworkMessageDestination.Service, NetworkMessageTypes.AddNewServer);
+                byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(newServerForm.DefaultProps));
+                FormManager.GetTCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.AddNewServer);
                 newServerForm.Close();
                 newServerForm.Dispose();
             }
@@ -362,9 +365,10 @@ namespace BedrockService.Client.Forms
         {
             EditSrv editSrvDialog = new EditSrv();
             editSrvDialog.PopulateStartCmds(selectedServer.StartCmds);
+            byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(editSrvDialog.startCmds));
             if (editSrvDialog.ShowDialog() == DialogResult.OK)
             {
-                JsonUtilities.SendJsonMsgToSrv<List<StartCmdEntry>>(editSrvDialog.startCmds, NetworkMessageDestination.Service, (byte)connectedHost.Servers.IndexOf(selectedServer), NetworkMessageTypes.StartCmdUpdate);
+                FormManager.GetTCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, (byte)connectedHost.Servers.IndexOf(selectedServer), NetworkMessageTypes.StartCmdUpdate);
                 WaitForCallback();
                 selectedServer.StartCmds = editSrvDialog.startCmds;
                 editSrvDialog.Close();

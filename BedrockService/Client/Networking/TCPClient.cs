@@ -3,7 +3,7 @@ using BedrockService.Service.Networking;
 using BedrockService.Service.Server.HostInfoClasses;
 using BedrockService.Service.Server.Logging;
 using BedrockService.Service.Server.PackParser;
-using BedrockService.Utilities;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -115,13 +115,9 @@ namespace BedrockService.Client.Networking
                                     case NetworkMessageTypes.Connect:
                                         try
                                         {
-                                            JsonParser message = JsonParser.Deserialize(data);
-                                            if (message.Type == typeof(HostInfo))
-                                            {
-                                                Console.WriteLine($"{message.Value}");
                                                 Console.WriteLine("Connection to Host successful!");
                                                 FormManager.GetMainWindow.connectedHost = null;
-                                                FormManager.GetMainWindow.connectedHost = message.Value.ToObject<HostInfo>();
+                                                FormManager.GetMainWindow.connectedHost = JsonConvert.DeserializeObject<HostInfo>(data);
                                                 FormManager.GetMainWindow.RefreshServerContents();
                                                 heartbeatFailTimeout = 0;
                                                 if (HeartbeatThread == null || !HeartbeatThread.IsAlive)
@@ -131,7 +127,7 @@ namespace BedrockService.Client.Networking
                                                         Name = "HeartBeatThread"
                                                     };
                                                 HeartbeatThread.Start();
-                                            }
+                                            
                                         }
                                         catch (Exception e)
                                         {
@@ -152,8 +148,7 @@ namespace BedrockService.Client.Networking
 
                                     case NetworkMessageTypes.EnumBackups:
 
-                                        JsonParser props = JsonParser.Deserialize(data);
-                                        BackupList = props.Value.ToObject<List<Property>>();
+                                        BackupList = JsonConvert.DeserializeObject<List<Property>>(data);
                                         EnumBackupsArrived = true;
 
                                         break;
@@ -222,8 +217,7 @@ namespace BedrockService.Client.Networking
                                         break;
                                     case NetworkMessageTypes.PlayersRequest:
 
-                                        JsonParser deserialized = JsonParser.Deserialize(data);
-                                        List<Player> fetchedPlayers = (List<Player>)deserialized.Value.ToObject(typeof(List<Player>));
+                                        List<Player> fetchedPlayers = JsonConvert.DeserializeObject<List<Player>>(data);
                                         FormManager.GetMainWindow.connectedHost.Servers[serverIndex].KnownPlayers = fetchedPlayers;
                                         PlayerInfoArrived = true;
 

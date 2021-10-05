@@ -1,8 +1,10 @@
 ﻿using BedrockService.Client.Management;
 using BedrockService.Service.Networking;
 using BedrockService.Service.Server.HostInfoClasses;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Windows.Forms;
 
 namespace BedrockService.Client.Forms
@@ -107,7 +109,8 @@ namespace BedrockService.Client.Forms
             if (dataGrid.SelectedRows.Count > 0)
                 foreach (DataGridViewRow viewRow in dataGrid.SelectedRows)
                     removeBackups.Add((string)viewRow.Cells[0].Value);
-            Utilities.JsonUtilities.SendJsonMsgToSrv<List<string>>(removeBackups, NetworkMessageDestination.Service, (byte)FormManager.GetMainWindow.connectedHost.Servers.IndexOf(FormManager.GetMainWindow.selectedServer), NetworkMessageTypes.DelBackups);
+            byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(removeBackups));
+           FormManager.GetTCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, (byte)FormManager.GetMainWindow.connectedHost.Servers.IndexOf(FormManager.GetMainWindow.selectedServer), NetworkMessageTypes.DelBackups);
 
         }
     }
