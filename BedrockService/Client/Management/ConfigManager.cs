@@ -20,7 +20,6 @@ namespace BedrockService.Client.Management
                 Directory.CreateDirectory(ConfigDir);
             }
             string[] files = Directory.GetFiles(ConfigDir, "*.conf");
-            Regex regex = new Regex(@"^\[(\w*)\]$");
 
             if (files.Length > 0)
             {
@@ -29,20 +28,19 @@ namespace BedrockService.Client.Management
                     string[] lines = File.ReadAllLines(file);
                     foreach (string line in lines)
                     {
-                        if (regex.Match(line).Groups[1].Value != "Hosts" || !string.IsNullOrEmpty(line) || !line.StartsWith("#"))
+                        string[] entrySplit = line.Split('=');
+                        if (!string.IsNullOrEmpty(line) && !line.StartsWith("#") && entrySplit[0] == "HostEntry")
                         {
-                            string[] split = line.Split('=');
-                            if (split.Length == 2)
-                            {
                                 HostInfo hostToList = new HostInfo();
                                 hostToList.SetGlobalsDefault();
-                                string[] split2 = split[1].Split(':');
-                                hostToList.HostName = split[0];
-                                hostToList.Address = split2[0];
-                                hostToList.SetGlobalProperty("ClientPort", split2[1]);
-                                hostToList.HostDisplayName = $@"Host {split[0]} @ {split2[0]}:{split2[1]}";
+                                string[] hostSplit = entrySplit[1].Split(';');
+                                string[] addressSplit = hostSplit[1].Split(':');
+                                hostToList.HostName = hostSplit[0];
+                                hostToList.Address = addressSplit[0];
+                                hostToList.SetGlobalProperty("ClientPort", addressSplit[1]);
+                                hostToList.HostDisplayName = $@"Host {entrySplit[0]} @ {addressSplit[0]}:{addressSplit[1]}";
                                 HostConnectList.Add(hostToList);
-                            }
+                            
                         }
                     }
                 }
@@ -59,14 +57,16 @@ namespace BedrockService.Client.Management
         {
             string[] Config = new string[]
             {
-                "host1=127.0.0.1:19134"
+                "HostEntry=host1;127.0.0.1:19134"
             };
             StringBuilder builder = new StringBuilder();
-            builder.Append("[Hosts]\n");
+            builder.Append("# Hosts\n");
             foreach (string entry in Config)
             {
                 builder.Append($"{entry}\n");
             }
+            builder.Append("\n# Settings\n");
+            builder.Append("NBTStudioPath=\n");
             File.WriteAllText(ConfigFile, builder.ToString());
         }
 
