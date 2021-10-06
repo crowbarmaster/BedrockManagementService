@@ -15,7 +15,7 @@ namespace BedrockService.Client.Forms
     public partial class ManagePacksForms : Form
     {
         private byte ServerIndex = 0x00;
-        private DirectoryInfo PackExtractDir = new DirectoryInfo(@"C:\");
+        private DirectoryInfo PackExtractDir = new DirectoryInfo(@"C:\RBPacks");
         public ManagePacksForms(byte serverIndex)
         {
             ServerIndex = serverIndex;
@@ -77,31 +77,17 @@ namespace BedrockService.Client.Forms
         {
             if (parsedPacksListBox.SelectedIndex != -1)
             {
-                foreach (object pack in parsedPacksListBox.SelectedItems)
-                {
-                    Directory.CreateDirectory($@"{PackExtractDir.FullName}\ZipTemp");
-                    MinecraftPackContainer container = (MinecraftPackContainer)pack;
-                    container.PackContentLocation.Parent.MoveTo($@"{PackExtractDir.FullName}\ZipTemp\{container.PackContentLocation.Name}");
-                    container.PackContentLocation = new DirectoryInfo($@"{PackExtractDir.FullName}\ZipTemp\{container.PackContentLocation.Name}");
-                }
-                ZipFile.CreateFromDirectory($@"{PackExtractDir.FullName}\ZipTemp", $@"{PackExtractDir.FullName}\SendZip.zip");
-                FormManager.GetTCPClient.SendData(File.ReadAllBytes($@"{PackExtractDir.FullName}\SendZip.zip"), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.PackFile);
-                parsedPacksListBox.Items.Clear();
+                object[] items = new object[parsedPacksListBox.SelectedItems.Count];
+                parsedPacksListBox.SelectedItems.CopyTo(items, 0);
+                SendPacks(items);
             }
         }
 
         private void sendAllBtn_Click(object sender, EventArgs e)
         {
-            foreach (MinecraftPackContainer container in parsedPacksListBox.Items)
-            {
-                Directory.CreateDirectory($@"{PackExtractDir.FullName}\ZipTemp");
-                container.PackContentLocation.MoveTo($@"{PackExtractDir.FullName}\ZipTemp\{container.PackContentLocation.Name}");
-                container.PackContentLocation = new DirectoryInfo($@"{PackExtractDir.FullName}\ZipTemp\{container.PackContentLocation.Name}");
-            }
-            ZipFile.CreateFromDirectory($@"{PackExtractDir.FullName}\ZipTemp", $@"{PackExtractDir.FullName}\SendZip.zip");
-            FormManager.GetTCPClient.SendData(File.ReadAllBytes($@"{PackExtractDir.FullName}\SendZip.zip"), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.PackFile);
-            parsedPacksListBox.Items.Clear();
-
+            object[] items = new object[parsedPacksListBox.Items.Count];
+            parsedPacksListBox.Items.CopyTo(items, 0);
+            SendPacks(items);
         }
 
         private void openFileBtn_Click(object sender, EventArgs e)
@@ -119,6 +105,19 @@ namespace BedrockService.Client.Forms
                 foreach (MinecraftPackContainer container in parser.FoundPacks)
                     parsedPacksListBox.Items.Add(container);
             }
+        }
+
+        private void SendPacks(object[] packList)
+        {
+            foreach (MinecraftPackContainer container in packList)
+            {
+                Directory.CreateDirectory($@"{PackExtractDir.FullName}\ZipTemp");
+                container.PackContentLocation.MoveTo($@"{PackExtractDir.FullName}\ZipTemp\{container.PackContentLocation.Name}");
+                container.PackContentLocation = new DirectoryInfo($@"{PackExtractDir.FullName}\ZipTemp\{container.PackContentLocation.Name}");
+            }
+            ZipFile.CreateFromDirectory($@"{PackExtractDir.FullName}\ZipTemp", $@"{PackExtractDir.FullName}\SendZip.zip");
+            FormManager.GetTCPClient.SendData(File.ReadAllBytes($@"{PackExtractDir.FullName}\SendZip.zip"), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.PackFile);
+            parsedPacksListBox.Items.Clear();
         }
     }
 }
