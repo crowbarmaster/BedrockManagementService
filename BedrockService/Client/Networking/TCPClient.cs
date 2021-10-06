@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -102,7 +103,7 @@ namespace BedrockService.Client.Networking
                         NetworkMessageTypes msgType = (NetworkMessageTypes)buffer[3];
                         NetworkMessageFlags msgStatus = (NetworkMessageFlags)buffer[4];
                         string data = "";
-                        if (msgType != NetworkMessageTypes.PackFile)
+                        if (msgType != NetworkMessageTypes.PackFile || msgType != NetworkMessageTypes.LevelEditFile)
                             data = GetOffsetString(buffer);
                         if (destination != NetworkMessageDestination.Client)
                             continue;
@@ -218,8 +219,17 @@ namespace BedrockService.Client.Networking
                                     case NetworkMessageTypes.PlayersRequest:
 
                                         List<Player> fetchedPlayers = JsonConvert.DeserializeObject<List<Player>>(data);
-                                        FormManager.GetMainWindow.connectedHost.Servers[serverIndex].KnownPlayers = fetchedPlayers;
+                                        FormManager.GetMainWindow.connectedHost.ServerList[serverIndex].KnownPlayers = fetchedPlayers;
                                         PlayerInfoArrived = true;
+
+                                        break;
+                                    case NetworkMessageTypes.LevelEditFile:
+
+                                        byte[] stripHeaderFromBuffer = new byte[buffer.Length - 5];
+                                        Buffer.BlockCopy(buffer, 5, stripHeaderFromBuffer, 0, stripHeaderFromBuffer.Length);
+                                        string pathToLevelDat = $@"{Path.GetTempPath()}\level.dat";
+                                        File.WriteAllBytes(pathToLevelDat, stripHeaderFromBuffer);
+                                        UnlockUI();
 
                                         break;
                                 }

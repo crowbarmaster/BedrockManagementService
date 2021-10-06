@@ -29,6 +29,8 @@
         CheckUpdates,
         PackFile,
         PackList,
+        LevelEditRequest,
+        LevelEditFile,
         RemovePack,
         Command,
         Backup,

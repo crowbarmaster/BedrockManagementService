@@ -12,6 +12,7 @@ namespace BedrockService.Client.Management
         public static string ConfigDir = $@"{Directory.GetCurrentDirectory()}\Client\Configs";
         public static string ConfigFile = $@"{ConfigDir}\Config.conf";
         public static List<HostInfo> HostConnectList = new List<HostInfo>();
+        public static string NBTStudioPath = "";
 
         public static void LoadConfigs()
         {
@@ -29,8 +30,10 @@ namespace BedrockService.Client.Management
                     foreach (string line in lines)
                     {
                         string[] entrySplit = line.Split('=');
-                        if (!string.IsNullOrEmpty(line) && !line.StartsWith("#") && entrySplit[0] == "HostEntry")
+                        if (!string.IsNullOrEmpty(line) && !line.StartsWith("#"))
                         {
+                            if (entrySplit[0] == "HostEntry")
+                            {
                                 HostInfo hostToList = new HostInfo();
                                 hostToList.SetGlobalsDefault();
                                 string[] hostSplit = entrySplit[1].Split(';');
@@ -40,7 +43,12 @@ namespace BedrockService.Client.Management
                                 hostToList.SetGlobalProperty("ClientPort", addressSplit[1]);
                                 hostToList.HostDisplayName = $@"Host {entrySplit[0]} @ {addressSplit[0]}:{addressSplit[1]}";
                                 HostConnectList.Add(hostToList);
-                            
+
+                            }
+                            if (entrySplit[0] == "NBTStudioPath")
+                            {
+                                NBTStudioPath = entrySplit[1];
+                            }
                         }
                     }
                 }
@@ -70,16 +78,17 @@ namespace BedrockService.Client.Management
             File.WriteAllText(ConfigFile, builder.ToString());
         }
 
-        public static int[] GetPorts(string input)
+        public static void SaveConfigFile ()
         {
-            string[] StrArr = input.Split(';');
-            int[] Output = new int[StrArr.Length];
-
-            for (int i = 0; i < StrArr.Length; i++)
+            StringBuilder fileContent = new StringBuilder();
+            fileContent.Append("# hosts\n\n");
+            foreach(HostInfo host in HostConnectList)
             {
-                Output[i] = Convert.ToInt32(StrArr[i]);
+                fileContent.Append($"HostEntry={host.Address}:{host.GetGlobalValue("ClientPort")}\n");
             }
-            return Output;
+            fileContent.Append("\n# Settings\n");
+            fileContent.Append($"NBTStudioPath={NBTStudioPath}");
+            File.WriteAllText(ConfigFile, fileContent.ToString());
         }
     }
 }

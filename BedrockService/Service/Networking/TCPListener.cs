@@ -111,7 +111,6 @@ namespace BedrockService.Service.Networking
             byte serverIndex = 0xFF;
             NetworkMessageTypes msgType = 0;
             NetworkMessageFlags msgFlag = 0;
-            List<byte[]> byteBlocks = new List<byte[]>();
             while (InstanceProvider.GetClientServiceAlive() && !Program.IsExiting)
             {
                 try
@@ -129,271 +128,13 @@ namespace BedrockService.Service.Networking
                         serverIndex = buffer[2];
                         msgType = (NetworkMessageTypes)buffer[3];
                         msgFlag = (NetworkMessageFlags)buffer[4];
-                        string data = "";
-                        if (msgType != NetworkMessageTypes.PackFile)
-                            data = GetOffsetString(buffer);
-                        string[] dataSplit = null;
-                        Dictionary<string, List<string>> LogPersist = new Dictionary<string, List<string>>();
                         switch (msgDest)
                         {
                             case NetworkMessageDestination.Server:
-
-                                switch (msgType)
-                                {
-                                    case NetworkMessageTypes.PropUpdate:
-
-                                        List<Property> propList = JsonConvert.DeserializeObject<List<Property>>(data);
-                                        Property prop = propList.First(p => p.KeyName == "server-name");
-                                        InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPropList = propList;
-                                        InstanceProvider.ConfigManager.SaveServerProps(InstanceProvider.GetServerInfoByIndex(serverIndex), true);
-                                        InstanceProvider.ConfigManager.LoadConfigs();
-                                        InstanceProvider.GetBedrockServerByIndex(serverIndex).CurrentServerStatus = BedrockServer.ServerStatus.Stopping;
-                                        while (InstanceProvider.GetBedrockServerByIndex(serverIndex).CurrentServerStatus == BedrockServer.ServerStatus.Stopping)
-                                        {
-                                            Thread.Sleep(100);
-                                        }
-                                        InstanceProvider.GetBedrockServerByIndex(serverIndex).CurrentServerStatus = BedrockServer.ServerStatus.Starting;
-                                        SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
-
-                                        break;
-                                    case NetworkMessageTypes.Restart:
-
-                                        RestartServer(serverIndex, false);
-                                        SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
-
-                                        break;
-                                    case NetworkMessageTypes.Backup:
-
-                                        RestartServer(serverIndex, true);
-                                        SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
-
-                                        break;
-                                    case NetworkMessageTypes.Command:
-
-                                        InstanceProvider.GetBedrockServerByIndex(serverIndex).StdInStream.WriteLine(data);
-                                        InstanceProvider.ServiceLogger.AppendLine($"Sent command {data} to stdInput stream");
-
-                                        break;
-                                    case NetworkMessageTypes.PlayersRequest:
-
-                                        ServerInfo server = InstanceProvider.GetServerInfoByIndex(serverIndex);
-                                        byte[] serializeToBytes = GetBytes(JsonConvert.SerializeObject(server.KnownPlayers));
-                                        SendData(serializeToBytes, NetworkMessageSource.Server, NetworkMessageDestination.Client, serverIndex, NetworkMessageTypes.PlayersRequest);
-
-                                        break;
-                                    case NetworkMessageTypes.PackFile:
-
-                                        MinecraftPackParser archiveParser = new MinecraftPackParser(buffer);
-                                        foreach (MinecraftPackContainer container in archiveParser.FoundPacks)
-                                        {
-                                            if (container.ManifestType == "WorldPack")
-                                                FileUtils.CopyFilesRecursively(container.PackContentLocation, new DirectoryInfo($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath.Value}\worlds\{container.FolderName}"));
-                                            if (container.ManifestType == "data")
-                                                FileUtils.CopyFilesRecursively(container.PackContentLocation, new DirectoryInfo($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath.Value}\behavior_packs\{container.FolderName}"));
-                                            if (container.ManifestType == "resources")
-                                                FileUtils.CopyFilesRecursively(container.PackContentLocation, new DirectoryInfo($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath.Value}\resource_packs\{container.FolderName}"));
-                                        }
-
-                                        break;
-                                    case NetworkMessageTypes.RemovePack:
-
-                                        MinecraftKnownPacksClass knownPacks = new MinecraftKnownPacksClass($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath.Value}\valid_known_packs.json", $@"{Program.ServiceDirectory}\Server\stock_packs.json");
-                                        List<MinecraftPackContainer> MCContainer = JsonConvert.DeserializeObject<List<MinecraftPackContainer>>(data);
-                                        foreach (MinecraftPackContainer cont in MCContainer)
-                                            knownPacks.RemovePackFromServer(InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath.Value, cont);
-
-                                        break;
-                                    case NetworkMessageTypes.PackList:
-
-                                        if (!File.Exists($@"{Program.ServiceDirectory}\Server\stock_packs.json"))
-                                            File.Copy($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath}\valid_known_packs.json", $@"{Program.ServiceDirectory}\Server\stock_packs.json");
-                                        knownPacks = new MinecraftKnownPacksClass($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath}\valid_known_packs.json", $@"{Program.ServiceDirectory}\Server\stock_packs.json");
-                                        List<MinecraftPackParser> list = new List<MinecraftPackParser>();
-                                        foreach (MinecraftKnownPacksClass.KnownPack pack in knownPacks.KnownPacks)
-                                            list.Add(new MinecraftPackParser($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath}\{pack.path.Replace(@"/", @"\")}"));
-
-                                        SendData(GetBytes(JArray.FromObject(list).ToString()), NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.PackList);
-
-                                        break;
-                                    case NetworkMessageTypes.PlayersUpdate:
-
-                                        List<Player> fetchedPlayers = JsonConvert.DeserializeObject<List<Player>>(data);
-                                        List<Player> known = InstanceProvider.GetServerInfoByIndex(serverIndex).KnownPlayers;
-                                        foreach (Player player in fetchedPlayers)
-                                        {
-                                            try
-                                            {
-                                                Player playerFound = InstanceProvider.GetServerInfoByIndex(serverIndex).KnownPlayers.First(p => p.XUID == player.XUID);
-                                                if (player != playerFound)
-                                                    InstanceProvider.GetServerInfoByIndex(serverIndex).KnownPlayers[InstanceProvider.GetServerInfoByIndex(serverIndex).KnownPlayers.IndexOf(playerFound)] = player;
-                                            }
-                                            catch (Exception)
-                                            {
-                                                InstanceProvider.GetServerInfoByIndex(serverIndex).KnownPlayers.Add(player);
-                                            }
-                                        }
-                                        InstanceProvider.ConfigManager.SaveRegisteredPlayers(InstanceProvider.GetServerInfoByIndex(serverIndex));
-                                        InstanceProvider.ConfigManager.LoadConfigs();
-                                        InstanceProvider.ConfigManager.LoadRegisteredPlayers(InstanceProvider.GetServerInfoByIndex(serverIndex));
-                                        SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
-
-                                        break;
-                                }
+                                ParseServerMessage(msgType, serverIndex, buffer, msgFlag);
                                 break;
                             case NetworkMessageDestination.Service:
-                                switch (msgType)
-                                {
-                                    case NetworkMessageTypes.Connect:
-
-                                        InstanceProvider.HostInfo.ServiceLog = InstanceProvider.ServiceLogger.Log;
-                                        byte[] serializeToBytes = GetBytes(JsonConvert.SerializeObject(InstanceProvider.HostInfo));
-                                        SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
-                                        heartbeatRecieved = false;
-
-                                        break;
-                                    case NetworkMessageTypes.Disconnect:
-
-                                        DisconnectClient();
-
-                                        break;
-                                    case NetworkMessageTypes.Heartbeat:
-
-                                        if (InstanceProvider.GetHeartbeatThreadAlive())
-                                            heartbeatRecieved = true;
-                                        else
-                                        {
-                                            InstanceProvider.InitHeartbeatThread(new ThreadStart(SendBackHeatbeatSignal)).Start();
-                                            Thread.Sleep(500);
-                                            heartbeatRecieved = true;
-                                        }
-
-                                        break;
-                                    case NetworkMessageTypes.ConsoleLogUpdate:
-
-                                        StringBuilder srvString = new StringBuilder();
-                                        string[] split = data.Split('|');
-                                        for (int i = 0; i < split.Length; i++)
-                                        {
-                                            dataSplit = split[i].Split(';');
-                                            string srvName = dataSplit[0];
-                                            int srvTextLen;
-                                            int clientCurLen;
-                                            int loop;
-                                            if (srvName != "Service")
-                                            {
-                                                InstanceProvider.GetBedrockServerByName(srvName).serverInfo.ConsoleBuffer = InstanceProvider.GetBedrockServerByName(srvName).serverInfo.ConsoleBuffer ?? new ServerLogger(srvName);
-                                                ServerLogger srvText = InstanceProvider.GetBedrockServerByName(srvName).serverInfo.ConsoleBuffer;
-                                                srvTextLen = srvText.Count();
-                                                clientCurLen = int.Parse(dataSplit[1]);
-                                                loop = clientCurLen;
-                                                while (loop < srvTextLen)
-                                                {
-                                                    srvString.Append($"{srvName};{srvText.FromIndex(loop)};{loop}|");
-                                                    loop++;
-                                                }
-
-                                            }
-                                            else
-                                            {
-                                                ServiceLogger srvText = InstanceProvider.ServiceLogger;
-                                                srvTextLen = srvText.Count();
-                                                clientCurLen = int.Parse(dataSplit[1]);
-                                                loop = clientCurLen;
-                                                while (loop < srvTextLen)
-                                                {
-                                                    srvString.Append($"{srvName};{srvText.FromIndex(loop)};{loop}|");
-                                                    loop++;
-                                                }
-                                            }
-                                        }
-                                        if (srvString.Length > 1)
-                                        {
-                                            srvString.Remove(srvString.Length - 1, 1);
-                                            SendData(GetBytes(srvString.ToString()), NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.ConsoleLogUpdate);
-                                        }
-
-                                        break;
-                                    case NetworkMessageTypes.StartCmdUpdate:
-
-                                        InstanceProvider.GetServerInfoByIndex(serverIndex).StartCmds = JsonConvert.DeserializeObject<List<StartCmdEntry>>(data);
-                                        InstanceProvider.ConfigManager.SaveServerProps(InstanceProvider.GetServerInfoByIndex(serverIndex), true);
-
-                                        break;
-                                    case NetworkMessageTypes.BackupAll:
-
-                                        foreach (BedrockServer server in InstanceProvider.BedrockService.bedrockServers)
-                                        {
-                                            RestartServer((byte)InstanceProvider.BedrockService.bedrockServers.IndexOf(server), true);
-                                        }
-                                        while (InstanceProvider.BedrockService.bedrockServers[InstanceProvider.BedrockService.bedrockServers.Count - 1].CurrentServerStatus != BedrockServer.ServerStatus.Started)
-                                            Thread.Sleep(250);
-                                        SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
-
-                                        break;
-                                    case NetworkMessageTypes.DelBackups:
-
-                                        List<string> backupFileNames = JsonConvert.DeserializeObject<List<string>>(data);
-                                        InstanceProvider.ConfigManager.DeleteBackupsForServer(serverIndex, backupFileNames);
-
-                                        break;
-                                    case NetworkMessageTypes.EnumBackups:
-
-                                        serializeToBytes = GetBytes(JsonConvert.SerializeObject(InstanceProvider.ConfigManager.EnumerateBackupsForServer(serverIndex)));
-                                        SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.EnumBackups);
-
-                                        break;
-                                    case NetworkMessageTypes.BackupRollback:
-
-                                        InstanceProvider.ConfigManager.RollbackToBackup(serverIndex, data);
-                                        SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
-
-                                        break;
-                                    case NetworkMessageTypes.CheckUpdates:
-
-                                        if (Updater.CheckUpdates().Result)
-                                        {
-                                            if (Updater.VersionChanged)
-                                            {
-                                                SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.CheckUpdates);
-                                                break;
-                                            }
-                                        }
-                                        SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
-
-                                        break;
-                                    case NetworkMessageTypes.AddNewServer:
-
-                                        string serversPath = InstanceProvider.HostInfo.GetGlobalValue("ServersPath");
-                                        List<Property> propList = JsonConvert.DeserializeObject<List<Property>>(data);
-                                        Property prop = propList.First(p => p.KeyName == "server-name");
-                                        ServerInfo newServer = new ServerInfo();
-                                        newServer.InitDefaults(serversPath);
-                                        newServer.ServerName = prop.Value;
-                                        newServer.ServerPropList = propList;
-                                        newServer.ServerPath.Value = $@"{serversPath}\{prop.Value}";
-                                        newServer.ServerExeName.Value = $"BDS_{prop.Value}.exe";
-                                        newServer.FileName = $@"{prop.Value}.conf";
-                                        InstanceProvider.ConfigManager.SaveServerProps(newServer, true);
-                                        InstanceProvider.BedrockService.InitializeNewServer(newServer);
-                                        serializeToBytes = GetBytes(JsonConvert.SerializeObject((InstanceProvider.HostInfo)));
-                                        SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
-                                        SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
-
-
-                                        break;
-                                    case NetworkMessageTypes.RemoveServer:
-
-                                        InstanceProvider.GetBedrockServerByIndex(serverIndex).CurrentServerStatus = BedrockServer.ServerStatus.Stopping;
-                                        while (InstanceProvider.GetBedrockServerByIndex(serverIndex).CurrentServerStatus != BedrockServer.ServerStatus.Stopped)
-                                            Thread.Sleep(200);
-                                        InstanceProvider.ConfigManager.RemoveServerConfigs(InstanceProvider.GetBedrockServerByIndex(serverIndex).serverInfo, msgFlag);
-                                        InstanceProvider.HostInfo.Servers.Remove(InstanceProvider.GetServerInfoByIndex(serverIndex));
-                                        serializeToBytes = GetBytes(JsonConvert.SerializeObject(InstanceProvider.HostInfo));
-                                        SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
-                                        SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
-
-                                        break;
-                                }
+                                ParseServiceMessage(msgType, serverIndex, buffer, msgFlag);
                                 break;
                         }
                         AvailBytes = client.Client.Available;
@@ -433,6 +174,295 @@ namespace BedrockService.Service.Networking
                     keepalive = false;
             }
             InstanceProvider.ServiceLogger.AppendLine("IncomingListener thread exited.");
+        }
+
+        private void ParseServerMessage(NetworkMessageTypes messageType, byte serverIndex, byte[] byteData, NetworkMessageFlags flag)
+        {
+            string serversPath = InstanceProvider.HostInfo.GetGlobalValue("ServersPath");
+    
+            string stringData = messageType != NetworkMessageTypes.PackFile || messageType != NetworkMessageTypes.LevelEditFile ? GetOffsetString(byteData) : "";
+            switch (messageType)
+            {
+                case NetworkMessageTypes.PropUpdate:
+
+                    List<Property> propList = JsonConvert.DeserializeObject<List<Property>>(stringData);
+                    Property prop = propList.First(p => p.KeyName == "server-name");
+                    InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPropList = propList;
+                    InstanceProvider.ConfigManager.SaveServerProps(InstanceProvider.GetServerInfoByIndex(serverIndex), true);
+                    InstanceProvider.ConfigManager.LoadConfigs();
+                    InstanceProvider.GetBedrockServerByIndex(serverIndex).CurrentServerStatus = BedrockServer.ServerStatus.Stopping;
+                    while (InstanceProvider.GetBedrockServerByIndex(serverIndex).CurrentServerStatus == BedrockServer.ServerStatus.Stopping)
+                    {
+                        Thread.Sleep(100);
+                    }
+                    InstanceProvider.GetBedrockServerByIndex(serverIndex).CurrentServerStatus = BedrockServer.ServerStatus.Starting;
+                    SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+
+                    break;
+                case NetworkMessageTypes.Restart:
+
+                    RestartServer(serverIndex, false);
+                    SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+
+                    break;
+                case NetworkMessageTypes.Backup:
+
+                    RestartServer(serverIndex, true);
+                    SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+
+                    break;
+                case NetworkMessageTypes.Command:
+
+                    InstanceProvider.GetBedrockServerByIndex(serverIndex).StdInStream.WriteLine(stringData);
+                    InstanceProvider.ServiceLogger.AppendLine($"Sent command {stringData} to stdInput stream");
+
+                    break;
+                case NetworkMessageTypes.PlayersRequest:
+
+                    ServerInfo server = InstanceProvider.GetServerInfoByIndex(serverIndex);
+                    byte[] serializeToBytes = GetBytesFromString(JsonConvert.SerializeObject(server.KnownPlayers));
+                    SendData(serializeToBytes, NetworkMessageSource.Server, NetworkMessageDestination.Client, serverIndex, NetworkMessageTypes.PlayersRequest);
+
+                    break;
+                case NetworkMessageTypes.RemovePack:
+
+                    MinecraftKnownPacksClass knownPacks = new MinecraftKnownPacksClass($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath.Value}\valid_known_packs.json", $@"{Program.ServiceDirectory}\Server\stock_packs.json");
+                    List<MinecraftPackContainer> MCContainer = JsonConvert.DeserializeObject<List<MinecraftPackContainer>>(stringData);
+                    foreach (MinecraftPackContainer cont in MCContainer)
+                        knownPacks.RemovePackFromServer(InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath.Value, cont);
+
+                    break;
+                case NetworkMessageTypes.PackList:
+
+                    if (!File.Exists($@"{Program.ServiceDirectory}\Server\stock_packs.json"))
+                        File.Copy($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath}\valid_known_packs.json", $@"{Program.ServiceDirectory}\Server\stock_packs.json");
+                    knownPacks = new MinecraftKnownPacksClass($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath}\valid_known_packs.json", $@"{Program.ServiceDirectory}\Server\stock_packs.json");
+                    List<MinecraftPackParser> list = new List<MinecraftPackParser>();
+                    foreach (MinecraftKnownPacksClass.KnownPack pack in knownPacks.KnownPacks)
+                        list.Add(new MinecraftPackParser($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath}\{pack.path.Replace(@"/", @"\")}"));
+
+                    SendData(GetBytesFromString(JArray.FromObject(list).ToString()), NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.PackList);
+
+                    break;
+                case NetworkMessageTypes.LevelEditRequest:
+
+                    server = InstanceProvider.GetServerInfoByIndex(serverIndex);
+                    string pathToLevelDat = $@"{serversPath}\{server.GetServerProp("server-name")}\worlds\{server.GetServerProp("level-name")}\level.dat";
+                    byte[] levelDatToBytes = File.ReadAllBytes(pathToLevelDat);
+                    SendData(levelDatToBytes, NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.LevelEditFile);
+
+               break;
+                case NetworkMessageTypes.PlayersUpdate:
+
+                    List<Player> fetchedPlayers = JsonConvert.DeserializeObject<List<Player>>(stringData);
+                    List<Player> known = InstanceProvider.GetServerInfoByIndex(serverIndex).KnownPlayers;
+                    foreach (Player player in fetchedPlayers)
+                    {
+                        try
+                        {
+                            Player playerFound = InstanceProvider.GetServerInfoByIndex(serverIndex).KnownPlayers.First(p => p.XUID == player.XUID);
+                            if (player != playerFound)
+                                InstanceProvider.GetServerInfoByIndex(serverIndex).KnownPlayers[InstanceProvider.GetServerInfoByIndex(serverIndex).KnownPlayers.IndexOf(playerFound)] = player;
+                        }
+                        catch (Exception)
+                        {
+                            InstanceProvider.GetServerInfoByIndex(serverIndex).KnownPlayers.Add(player);
+                        }
+                    }
+                    InstanceProvider.ConfigManager.SaveRegisteredPlayers(InstanceProvider.GetServerInfoByIndex(serverIndex));
+                    InstanceProvider.ConfigManager.LoadConfigs();
+                    InstanceProvider.ConfigManager.LoadRegisteredPlayers(InstanceProvider.GetServerInfoByIndex(serverIndex));
+                    SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+
+                    break;
+                    case NetworkMessageTypes.PackFile:
+
+                        MinecraftPackParser archiveParser = new MinecraftPackParser(byteData);
+                        foreach (MinecraftPackContainer container in archiveParser.FoundPacks)
+                        {
+                            if (container.ManifestType == "WorldPack")
+                                FileUtils.CopyFilesRecursively(container.PackContentLocation, new DirectoryInfo($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath.Value}\worlds\{container.FolderName}"));
+                            if (container.ManifestType == "data")
+                                FileUtils.CopyFilesRecursively(container.PackContentLocation, new DirectoryInfo($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath.Value}\behavior_packs\{container.FolderName}"));
+                            if (container.ManifestType == "resources")
+                                FileUtils.CopyFilesRecursively(container.PackContentLocation, new DirectoryInfo($@"{InstanceProvider.GetServerInfoByIndex(serverIndex).ServerPath.Value}\resource_packs\{container.FolderName}"));
+                        }
+
+                        break;
+                    case NetworkMessageTypes.LevelEditFile:
+
+                        byte[] stripHeaderFromBuffer = new byte[byteData.Length - 5];
+                        Buffer.BlockCopy(byteData, 5, stripHeaderFromBuffer, 0, stripHeaderFromBuffer.Length);
+                        server = InstanceProvider.GetServerInfoByIndex(serverIndex);
+                        pathToLevelDat = $@"{serversPath}\{server.GetServerProp("server-name")}\worlds\{server.GetServerProp("level-name")}\level.dat";
+                        if (InstanceProvider.GetBedrockServerByIndex(serverIndex).StopControl())
+                            File.WriteAllBytes(pathToLevelDat, stripHeaderFromBuffer);
+                        InstanceProvider.GetBedrockServerByIndex(serverIndex).CurrentServerStatus = BedrockServer.ServerStatus.Starting;
+
+                        break;
+                
+            }
+        }
+
+        private void ParseServiceMessage(NetworkMessageTypes messageType, byte serverIndex, byte[] byteData, NetworkMessageFlags flag)
+        {
+            string stringData = GetOffsetString(byteData);
+            string serversPath = InstanceProvider.HostInfo.GetGlobalValue("ServersPath");
+            string[] dataSplit = null;
+            switch (messageType)
+            {
+                case NetworkMessageTypes.Connect:
+
+                    InstanceProvider.HostInfo.ServiceLog = InstanceProvider.ServiceLogger.Log;
+                    byte[] serializeToBytes = GetBytesFromString(JsonConvert.SerializeObject(InstanceProvider.HostInfo));
+                    SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
+                    heartbeatRecieved = false;
+
+                    break;
+                case NetworkMessageTypes.Disconnect:
+
+                    DisconnectClient();
+
+                    break;
+                case NetworkMessageTypes.Heartbeat:
+
+                    if (InstanceProvider.GetHeartbeatThreadAlive())
+                        heartbeatRecieved = true;
+                    else
+                    {
+                        InstanceProvider.InitHeartbeatThread(new ThreadStart(SendBackHeatbeatSignal)).Start();
+                        Thread.Sleep(500);
+                        heartbeatRecieved = true;
+                    }
+
+                    break;
+                case NetworkMessageTypes.ConsoleLogUpdate:
+
+                    StringBuilder srvString = new StringBuilder();
+                    string[] split = stringData.Split('|');
+                    for (int i = 0; i < split.Length; i++)
+                    {
+                        dataSplit = split[i].Split(';');
+                        string srvName = dataSplit[0];
+                        int srvTextLen;
+                        int clientCurLen;
+                        int loop;
+                        if (srvName != "Service")
+                        {
+                            InstanceProvider.GetBedrockServerByName(srvName).serverInfo.ConsoleBuffer = InstanceProvider.GetBedrockServerByName(srvName).serverInfo.ConsoleBuffer ?? new ServerLogger(srvName);
+                            ServerLogger srvText = InstanceProvider.GetBedrockServerByName(srvName).serverInfo.ConsoleBuffer;
+                            srvTextLen = srvText.Count();
+                            clientCurLen = int.Parse(dataSplit[1]);
+                            loop = clientCurLen;
+                            while (loop < srvTextLen)
+                            {
+                                srvString.Append($"{srvName};{srvText.FromIndex(loop)};{loop}|");
+                                loop++;
+                            }
+
+                        }
+                        else
+                        {
+                            ServiceLogger srvText = InstanceProvider.ServiceLogger;
+                            srvTextLen = srvText.Count();
+                            clientCurLen = int.Parse(dataSplit[1]);
+                            loop = clientCurLen;
+                            while (loop < srvTextLen)
+                            {
+                                srvString.Append($"{srvName};{srvText.FromIndex(loop)};{loop}|");
+                                loop++;
+                            }
+                        }
+                    }
+                    if (srvString.Length > 1)
+                    {
+                        srvString.Remove(srvString.Length - 1, 1);
+                        SendData(GetBytesFromString(srvString.ToString()), NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.ConsoleLogUpdate);
+                    }
+
+                    break;
+                case NetworkMessageTypes.StartCmdUpdate:
+
+                    InstanceProvider.GetServerInfoByIndex(serverIndex).StartCmds = JsonConvert.DeserializeObject<List<StartCmdEntry>>(stringData);
+                    InstanceProvider.ConfigManager.SaveServerProps(InstanceProvider.GetServerInfoByIndex(serverIndex), true);
+
+                    break;
+                case NetworkMessageTypes.BackupAll:
+
+                    foreach (BedrockServer server in InstanceProvider.BedrockService.bedrockServers)
+                    {
+                        RestartServer((byte)InstanceProvider.BedrockService.bedrockServers.IndexOf(server), true);
+                    }
+                    while (InstanceProvider.BedrockService.bedrockServers[InstanceProvider.BedrockService.bedrockServers.Count - 1].CurrentServerStatus != BedrockServer.ServerStatus.Started)
+                        Thread.Sleep(250);
+                    SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+
+                    break;
+                case NetworkMessageTypes.DelBackups:
+
+                    List<string> backupFileNames = JsonConvert.DeserializeObject<List<string>>(stringData);
+                    InstanceProvider.ConfigManager.DeleteBackupsForServer(serverIndex, backupFileNames);
+
+                    break;
+                case NetworkMessageTypes.EnumBackups:
+
+                    serializeToBytes = GetBytesFromString(JsonConvert.SerializeObject(InstanceProvider.ConfigManager.EnumerateBackupsForServer(serverIndex)));
+                    SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.EnumBackups);
+
+                    break;
+                case NetworkMessageTypes.BackupRollback:
+
+                    InstanceProvider.ConfigManager.RollbackToBackup(serverIndex, stringData);
+                    SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+
+                    break;
+                case NetworkMessageTypes.CheckUpdates:
+
+                    if (Updater.CheckUpdates().Result)
+                    {
+                        if (Updater.VersionChanged)
+                        {
+                            SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.CheckUpdates);
+                            break;
+                        }
+                    }
+                    SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+
+                    break;
+                case NetworkMessageTypes.AddNewServer:
+
+                    List<Property> propList = JsonConvert.DeserializeObject<List<Property>>(stringData);
+                    Property serverNameProp = propList.First(p => p.KeyName == "server-name");
+                    ServerInfo newServer = new ServerInfo
+                    {
+                        ServerName = serverNameProp.Value,
+                        ServerPropList = propList,
+                        FileName = $@"{serverNameProp.Value}.conf"
+                    };
+                    newServer.ServerPath.Value = $@"{serversPath}\{serverNameProp.Value}";
+                    newServer.ServerExeName.Value = $"BDS_{serverNameProp.Value}.exe";
+                    InstanceProvider.ConfigManager.SaveServerProps(newServer, true);
+                    InstanceProvider.BedrockService.InitializeNewServer(newServer);
+                    serializeToBytes = GetBytesFromString(JsonConvert.SerializeObject((InstanceProvider.HostInfo)));
+                    SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
+                    SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+
+
+                    break;
+                case NetworkMessageTypes.RemoveServer:
+
+                    InstanceProvider.GetBedrockServerByIndex(serverIndex).CurrentServerStatus = BedrockServer.ServerStatus.Stopping;
+                    while (InstanceProvider.GetBedrockServerByIndex(serverIndex).CurrentServerStatus != BedrockServer.ServerStatus.Stopped)
+                        Thread.Sleep(200);
+                    InstanceProvider.ConfigManager.RemoveServerConfigs(InstanceProvider.GetBedrockServerByIndex(serverIndex).serverInfo, flag);
+                    InstanceProvider.HostInfo.ServerList.Remove(InstanceProvider.GetServerInfoByIndex(serverIndex));
+                    serializeToBytes = GetBytesFromString(JsonConvert.SerializeObject(InstanceProvider.HostInfo));
+                    SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
+                    SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+
+                    break;
+            }
+
         }
 
         private void DisconnectClient()
@@ -514,6 +544,6 @@ namespace BedrockService.Service.Networking
 
         private string GetOffsetString(byte[] array) => Encoding.UTF8.GetString(array, 5, array.Length - 5);
 
-        private byte[] GetBytes(string input) => Encoding.UTF8.GetBytes(input);
+        private byte[] GetBytesFromString(string input) => Encoding.UTF8.GetBytes(input);
     }
 }
