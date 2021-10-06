@@ -2,6 +2,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using BedrockService.Service.Utilities;
 
 namespace BedrockService.Service.Server.PackParser
 {
@@ -33,13 +34,7 @@ namespace BedrockService.Service.Server.PackParser
 
         public MinecraftPackParser(byte[] fileContents)
         {
-            if (!PackExtractDirectory.Exists)
-                PackExtractDirectory.Create();
-            else
-                foreach (FileInfo file in PackExtractDirectory.GetFiles("*", SearchOption.AllDirectories))
-                    file.Delete();
-            foreach (DirectoryInfo directory in PackExtractDirectory.GetDirectories())
-                directory.Delete(true);
+            FileUtils.ClearTempDir();
             using (MemoryStream fileStream = new MemoryStream(fileContents, 5, fileContents.Length - 5))
             {
                 using (ZipArchive zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read))
@@ -52,14 +47,9 @@ namespace BedrockService.Service.Server.PackParser
 
         public MinecraftPackParser(string[] files)
         {
-            if (!PackExtractDirectory.Exists)
-                PackExtractDirectory.Create();
+            FileUtils.ClearTempDir();
             if (Directory.Exists($@"{PackExtractDirectory.FullName}\ZipTemp"))
                 Directory.CreateDirectory($@"{PackExtractDirectory.FullName}\ZipTemp");
-            foreach (FileInfo file in PackExtractDirectory.GetFiles("*", SearchOption.AllDirectories))
-                file.Delete();
-            foreach (DirectoryInfo directory in PackExtractDirectory.GetDirectories())
-                directory.Delete(true);
             foreach (string file in files)
             {
                 FileInfo fInfo = new FileInfo(file);

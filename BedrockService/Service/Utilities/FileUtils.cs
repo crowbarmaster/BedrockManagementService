@@ -28,5 +28,16 @@ namespace BedrockService.Service.Utilities
             if (removeSourceFolder)
                 source.Delete(true);
         }
+
+        public static void ClearTempDir()
+        {
+            DirectoryInfo tempDirectory = new DirectoryInfo($@"{Program.ServiceDirectory}\Temp");
+            if (!tempDirectory.Exists)
+                tempDirectory.Create();
+            foreach (FileInfo file in tempDirectory.GetFiles("*", SearchOption.AllDirectories))
+                file.Delete();
+            foreach (DirectoryInfo directory in tempDirectory.GetDirectories())
+                directory.Delete(true);
+        }
     }
 }
