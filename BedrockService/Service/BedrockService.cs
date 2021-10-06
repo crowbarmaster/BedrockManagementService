@@ -148,7 +148,7 @@ namespace BedrockService.Service
         {
             BedrockServer brs = new BedrockServer(server);
             bedrockServers.Add(brs);
-            InstanceProvider.HostInfo.Servers.Add(server);
+            InstanceProvider.HostInfo.ServerList.Add(server);
             if (ValidSettingsCheck())
             {
                 brs.CurrentServerStatus = BedrockServer.ServerStatus.Starting;

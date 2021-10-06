@@ -12,7 +12,7 @@ namespace BedrockService.Service.Server.HostInfoClasses
         public string ServerVersion { get; set; }
 
         public List<string> ServiceLog = new List<string>();
-        public List<ServerInfo> Servers = new List<ServerInfo>();
+        public List<ServerInfo> ServerList = new List<ServerInfo>();
         public List<Property> Globals = new List<Property>();
 
         public void SetGlobalsDefault()
@@ -79,14 +79,14 @@ namespace BedrockService.Service.Server.HostInfoClasses
 
         public ServerInfo GetServerInfo(string serverName)
         {
-            return Servers.FirstOrDefault(srv => srv.ServerName == serverName);
+            return ServerList.FirstOrDefault(srv => srv.ServerName == serverName);
         }
 
-        public List<ServerInfo> GetServerInfos() => Servers;
+        public List<ServerInfo> GetServerInfos() => ServerList;
 
-        public ServerInfo GetServerInfoByIndex(byte serverIndex) => serverIndex != 0xFF ? Servers[serverIndex] : null;
+        public ServerInfo GetServerInfoByIndex(byte serverIndex) => serverIndex != 0xFF ? ServerList[serverIndex] : null;
 
-        public void ClearServerInfos() => Servers = new List<ServerInfo>();
+        public void ClearServerInfos() => ServerList = new List<ServerInfo>();
 
         public List<Property> GetGlobals() => Globals;
 

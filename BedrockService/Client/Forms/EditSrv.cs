@@ -110,7 +110,7 @@ namespace BedrockService.Client.Forms
                 foreach (DataGridViewRow viewRow in dataGrid.SelectedRows)
                     removeBackups.Add((string)viewRow.Cells[0].Value);
             byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(removeBackups));
-           FormManager.GetTCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, (byte)FormManager.GetMainWindow.connectedHost.Servers.IndexOf(FormManager.GetMainWindow.selectedServer), NetworkMessageTypes.DelBackups);
+           FormManager.GetTCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, (byte)FormManager.GetMainWindow.connectedHost.ServerList.IndexOf(FormManager.GetMainWindow.selectedServer), NetworkMessageTypes.DelBackups);
 
         }
     }

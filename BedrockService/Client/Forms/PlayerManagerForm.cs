@@ -63,7 +63,7 @@ namespace BedrockService.Client.Forms
                 }
             }
             byte[] sendBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(modifiedPlayers));
-            FormManager.GetTCPClient.SendData(sendBytes, Service.Networking.NetworkMessageSource.Client, Service.Networking.NetworkMessageDestination.Server, (byte)FormManager.GetMainWindow.connectedHost.Servers.IndexOf(Server), Service.Networking.NetworkMessageTypes.PlayersUpdate);
+            FormManager.GetTCPClient.SendData(sendBytes, Service.Networking.NetworkMessageSource.Client, Service.Networking.NetworkMessageDestination.Server, (byte)FormManager.GetMainWindow.connectedHost.ServerList.IndexOf(Server), Service.Networking.NetworkMessageTypes.PlayersUpdate);
             FormManager.GetMainWindow.WaitForCallbackInvoked();
             Close();
             Dispose();
