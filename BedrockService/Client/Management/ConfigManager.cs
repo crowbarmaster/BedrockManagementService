@@ -84,7 +84,7 @@ namespace BedrockService.Client.Management
             fileContent.Append("# hosts\n\n");
             foreach(HostInfo host in HostConnectList)
             {
-                fileContent.Append($"HostEntry={host.Address}:{host.GetGlobalValue("ClientPort")}\n");
+                fileContent.Append($"HostEntry={host.HostName};{host.Address}:{host.GetGlobalValue("ClientPort")}\n");
             }
             fileContent.Append("\n# Settings\n");
             fileContent.Append($"NBTStudioPath={NBTStudioPath}");
