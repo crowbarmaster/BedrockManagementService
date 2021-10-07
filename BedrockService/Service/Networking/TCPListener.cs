@@ -20,7 +20,7 @@ namespace BedrockService.Service.Networking
     public class TCPListener
     {
         public TcpClient client;
-        private TcpListener InListener;
+        private TcpListener inListener;
         private NetworkStream stream;
         private bool keepalive;
         private bool heartbeatRecieved = false;
@@ -31,10 +31,10 @@ namespace BedrockService.Service.Networking
         public void StartListening(int port)
         {
             IPAddress addr = IPAddress.Parse("0.0.0.0");
-            InListener = InstanceProvider.InitTCPListener(addr, port);
+            inListener = InstanceProvider.InitTCPListener(addr, port);
             try
             {
-                InListener.Start();
+                inListener.Start();
             }
             catch
             {
@@ -47,7 +47,7 @@ namespace BedrockService.Service.Networking
             {
                 try
                 {
-                    client = InListener.AcceptTcpClient();
+                    client = inListener.AcceptTcpClient();
                     stream = client.GetStream();
                     InstanceProvider.InitClientService(new ThreadStart(IncomingListener)).Start();
                     InstanceProvider.InitHeartbeatThread(new ThreadStart(SendBackHeatbeatSignal)).Start();
@@ -271,7 +271,7 @@ namespace BedrockService.Service.Networking
                     }
                     InstanceProvider.ConfigManager.SaveRegisteredPlayers(InstanceProvider.GetServerInfoByIndex(serverIndex));
                     InstanceProvider.ConfigManager.LoadConfigs();
-                    InstanceProvider.ConfigManager.LoadRegisteredPlayers(InstanceProvider.GetServerInfoByIndex(serverIndex));
+                    //InstanceProvider.ConfigManager.LoadRegisteredPlayers(InstanceProvider.GetServerInfoByIndex(serverIndex));
                     SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
 
                     break;
