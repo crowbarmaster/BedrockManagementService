@@ -125,7 +125,7 @@ namespace BedrockService.Service.Networking
                     TypeNameHandling = TypeNameHandling.All
                 };
                 byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(configurator.EnumerateBackupsForServer(serverIndex), indented, settings));
-               messageSender.SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.EnumBackups);
+                messageSender.SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.EnumBackups);
 
             }
         }

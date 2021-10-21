@@ -2,7 +2,6 @@
 using BedrockService.Service.Logging;
 using BedrockService.Service.Management;
 using BedrockService.Service.Networking;
-using BedrockService.Service.Networking.NetworkMessageClasses;
 using BedrockService.Shared.Classes;
 using BedrockService.Shared.Interfaces;
 using Microsoft.Extensions.DependencyInjection;

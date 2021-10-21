@@ -1,5 +1,4 @@
 ﻿using BedrockService.Client.Management;
-using BedrockService.Shared;
 using BedrockService.Shared.Classes;
 using Newtonsoft.Json;
 using System;
@@ -69,12 +68,12 @@ namespace BedrockService.Client.Forms
             {
                 if (dataGrid.SelectedRows.Count == 0)
                 {
-                    if(dataGrid.SelectedCells.Count == 1)
+                    if (dataGrid.SelectedCells.Count == 1)
                     {
                         dataGrid.SelectedCells[0].OwningRow.Selected = true;
                     }
                 }
-                    if (dataGrid.SelectedRows.Count < 2)
+                if (dataGrid.SelectedRows.Count < 2)
                     RollbackFolderName = (string)dataGrid.CurrentRow.Cells[0].Value;
                 DialogResult = DialogResult.OK;
                 Close();

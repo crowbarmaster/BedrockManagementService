@@ -3,7 +3,6 @@ using BedrockService.Service.Core.Threads;
 using BedrockService.Service.Networking.NetworkMessageClasses;
 using BedrockService.Shared.Classes;
 using BedrockService.Shared.Interfaces;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Net;

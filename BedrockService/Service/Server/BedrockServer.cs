@@ -2,8 +2,9 @@
 using BedrockService.Service.Core.Threads;
 using BedrockService.Service.Management;
 using BedrockService.Service.Server.Management;
-using BedrockService.Shared.Utilities;
+using BedrockService.Shared.Classes;
 using BedrockService.Shared.Interfaces;
+using BedrockService.Shared.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,7 +13,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Topshelf;
-using BedrockService.Shared.Classes;
 
 namespace BedrockService.Service.Server
 {

@@ -1,6 +1,7 @@
 ﻿using BedrockService.Service.Server;
-using BedrockService.Shared.Utilities;
+using BedrockService.Shared.Classes;
 using BedrockService.Shared.Interfaces;
+using BedrockService.Shared.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +9,6 @@ using System.IO.Compression;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using BedrockService.Shared.Classes;
 
 namespace BedrockService.Service.Management
 {

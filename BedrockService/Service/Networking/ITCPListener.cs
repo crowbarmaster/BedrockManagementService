@@ -1,6 +1,5 @@
 ﻿using BedrockService.Service.Networking.NetworkMessageClasses;
 using BedrockService.Shared.Classes;
-using BedrockService.Shared.Interfaces;
 using System.Collections.Generic;
 
 namespace BedrockService.Service.Networking

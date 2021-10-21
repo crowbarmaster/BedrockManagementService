@@ -1,5 +1,4 @@
-﻿using BedrockService.Shared;
-using BedrockService.Shared.Interfaces;
+﻿using BedrockService.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.IO;

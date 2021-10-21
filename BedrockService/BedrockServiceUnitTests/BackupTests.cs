@@ -2,7 +2,7 @@
 using BedrockService.Service.Core;
 using BedrockService.Service.Management;
 using BedrockService.Service.Networking;
-using BedrockService.Shared;
+using BedrockService.Shared.Classes;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;

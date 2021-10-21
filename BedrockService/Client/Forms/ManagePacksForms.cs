@@ -1,5 +1,4 @@
 ﻿using BedrockService.Client.Management;
-using BedrockService.Shared;
 using BedrockService.Shared.Classes;
 using BedrockService.Shared.Interfaces;
 using BedrockService.Shared.PackParser;

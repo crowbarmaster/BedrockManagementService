@@ -1,11 +1,10 @@
-﻿using System;
+﻿using BedrockService.Shared.Classes;
+using BedrockService.Shared.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
-using BedrockService.Shared;
-using BedrockService.Shared.Classes;
-using BedrockService.Shared.Interfaces;
 
 namespace BedrockService.Client.Management
 {

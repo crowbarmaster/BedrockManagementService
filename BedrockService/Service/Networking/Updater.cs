@@ -1,5 +1,5 @@
-﻿using BedrockService.Shared.Utilities;
-using BedrockService.Shared.Interfaces;
+﻿using BedrockService.Shared.Interfaces;
+using BedrockService.Shared.Utilities;
 using System;
 using System.IO;
 using System.IO.Compression;

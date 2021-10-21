@@ -1,5 +1,4 @@
 ﻿using BedrockService.Client.Management;
-using BedrockService.Shared;
 using BedrockService.Shared.Classes;
 using BedrockService.Shared.Interfaces;
 using BedrockService.Shared.PackParser;
@@ -8,7 +7,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
