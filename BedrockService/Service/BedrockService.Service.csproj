@@ -71,6 +71,15 @@
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.5.0.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection, Version=5.0.0.2, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.5.0.2\lib\net461\Microsoft.Extensions.DependencyInjection.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=5.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.5.0.0\lib\net461\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+    </Reference>
     <Reference Include="NCrontab.Signed, Version=3.3.2.0, Culture=neutral, PublicKeyToken=5247b4370afff365, processorArchitecture=MSIL">
       <HintPath>..\packages\NCrontab.Signed.3.3.2\lib\net35\NCrontab.Signed.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
@@ -78,6 +87,9 @@
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="StructureMap, Version=4.7.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\StructureMap.4.7.1\lib\net45\StructureMap.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -90,6 +102,9 @@
       <Private>True</Private>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
     <Reference Include="System.Runtime.InteropServices.RuntimeInformation, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Runtime.InteropServices.RuntimeInformation.4.3.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
       <Private>True</Private>
@@ -97,6 +112,9 @@
     </Reference>
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -110,27 +128,34 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="InstanceProvider.cs" />
-    <Compile Include="Networking\Enums.cs" />
+    <Compile Include="Core\Interfaces\IBedrockService.cs" />
+    <Compile Include="Core\Interfaces\IServiceThread.cs" />
+    <Compile Include="Core\Threads\ServerProcessThread.cs" />
+    <Compile Include="Core\Threads\TCPThread.cs" />
+    <Compile Include="Core\Threads\ClientServiceThread.cs" />
+    <Compile Include="Core\Threads\HeartbeatThread.cs" />
+    <Compile Include="Core\Threads\WatchdogThread.cs" />
+    <Compile Include="Logging\ServiceLogger.cs" />
+    <Compile Include="Management\IConfigurator.cs" />
+    <Compile Include="Networking\IUpdater.cs" />
+    <Compile Include="Networking\MessageInterfaces\IFlaggedMessageParser.cs" />
+    <Compile Include="Networking\MessageInterfaces\IMessageParser.cs" />
+    <Compile Include="Networking\NetworkStrategyLookup.cs" />
+    <Compile Include="Core\Interfaces\IService.cs" />
+    <Compile Include="Networking\ITCPListener.cs" />
+    <Compile Include="Networking\MessageInterfaces\IMessageSender.cs" />
     <Compile Include="Server\BedrockServer.cs" />
-    <Compile Include="BedrockService.cs" />
+    <Compile Include="Core\BedrockService.cs" />
     <Compile Include="Management\ConfigManager.cs" />
-    <Compile Include="Server\HostInfoClasses\HostInfo.cs" />
-    <Compile Include="Server\PackParser\MinecraftKnownPacksClass.cs" />
-    <Compile Include="Server\PackParser\MinecraftPackParser.cs" />
-    <Compile Include="Server\PackParser\MinecraftPackManifestJsonClass.cs" />
-    <Compile Include="Server\HostInfoClasses\Player.cs" />
-    <Compile Include="Server\HostInfoClasses\Property.cs" />
-    <Compile Include="Server\HostInfoClasses\ServerInfo.cs" />
-    <Compile Include="Server\HostInfoClasses\StartCmdEntry.cs" />
+    <Compile Include="Server\IBedrockServer.cs" />
+    <Compile Include="Server\Management\IPlayerManager.cs" />
     <Compile Include="Server\Management\PlayerManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Server\Logging\ServerLogger.cs" />
-    <Compile Include="Logging\ServiceLogger.cs" />
     <Compile Include="Networking\TCPListener.cs" />
     <Compile Include="Networking\Updater.cs" />
-    <Compile Include="Utilities\FileUtils.cs" />
+    <Compile Include="Core\Service.cs" />
+    <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Configs\Default.conf" />
@@ -153,5 +178,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\BedrockService.Shared\BedrockService.Shared.csproj">
+      <Project>{f146d5e8-ef1f-4785-9150-182631f059b7}</Project>
+      <Name>BedrockService.Shared</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

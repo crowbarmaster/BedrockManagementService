@@ -1,4 +1,7 @@
-﻿using BedrockService.Service.Server.HostInfoClasses;
+﻿using BedrockService.Client.Management;
+using BedrockService.Shared;
+using BedrockService.Shared.Classes;
+using BedrockService.Shared.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
@@ -11,9 +14,9 @@ namespace BedrockService.Client.Forms
         public AddNewServerForm()
         {
             InitializeComponent();
-            ServerInfo server = new ServerInfo();
-            server.InitDefaults("Default");
-            DefaultProps = server.ServerPropList;
+            IServerConfiguration server = new ServerInfo(null);
+            server.InitializeDefaults();
+            DefaultProps = server.GetAllProps();
         }
 
         private void editPropsBtn_Click(object sender, System.EventArgs e)

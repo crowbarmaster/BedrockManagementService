@@ -1,5 +1,6 @@
 ﻿using BedrockService.Client.Management;
-using BedrockService.Service.Server.HostInfoClasses;
+using BedrockService.Shared.Classes;
+using BedrockService.Shared.Interfaces;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -11,17 +12,17 @@ namespace BedrockService.Client.Forms
 {
     public partial class PlayerManagerForm : Form
     {
-        private readonly ServerInfo Server;
+        private readonly IServerConfiguration Server;
         private readonly string[] RegisteredPlayerColumnArray = new string[8] { "XUID:", "Username:", "Permission:", "Whitelisted:", "Ignores max players:", "First connected on:", "Last connected on:", "Time spent in game:" };
-        private List<Player> playersFound = new List<Player>();
-        private List<Player> modifiedPlayers = new List<Player>();
-        private Player playerToEdit;
+        private List<IPlayer> playersFound = new List<IPlayer>();
+        private List<IPlayer> modifiedPlayers = new List<IPlayer>();
+        private IPlayer playerToEdit;
 
-        public PlayerManagerForm(ServerInfo server)
+        public PlayerManagerForm(IServerConfiguration server)
         {
             InitializeComponent();
             Server = server;
-            playersFound = Server.KnownPlayers;
+            playersFound = Server.GetPlayerList();
 
             gridView.Columns.Clear();
             gridView.Rows.Clear();
@@ -42,10 +43,18 @@ namespace BedrockService.Client.Forms
         private void RefreshGridContents()
         {
             gridView.Rows.Clear();
-            foreach (Player player in playersFound)
+            foreach (IPlayer player in playersFound)
             {
-                TimeSpan timeSpent = TimeSpan.FromTicks(long.Parse(player.LastDisconnectTime) - long.Parse(player.LastConnectedTime));
-                string[] list = new string[] { player.XUID, player.Username, player.PermissionLevel, player.Whitelisted.ToString(), player.IgnorePlayerLimits.ToString(), player.FirstConnectedTime, player.LastConnectedTime, timeSpent.ToString("hhmmss") };
+                string[] playerReg = player.GetRegistration();
+                string[] playerTimes = player.GetTimes();
+                string playerFirstConnect = playerTimes[0];
+                string playerConnectTime = playerTimes[1];
+                string playerDisconnectTime = playerTimes[2];
+                string playerWhitelist = playerReg[0];
+                string playerPermission = playerReg[1];
+                string playerIgnoreLimit = playerReg[2];
+                TimeSpan timeSpent = TimeSpan.FromTicks(long.Parse(playerConnectTime) - long.Parse(playerDisconnectTime));
+                string[] list = new string[] { player.GetXUID(), player.GetUsername(), playerPermission, playerWhitelist, playerIgnoreLimit, playerFirstConnect, playerConnectTime, timeSpent.ToString("hhmmss") };
                 gridView.Rows.Add(list);
             }
             gridView.Refresh();
@@ -55,15 +64,17 @@ namespace BedrockService.Client.Forms
         {
             if (modifiedPlayers.Count > 0)
             {
-                foreach (Player player in modifiedPlayers)
+                foreach (IPlayer player in modifiedPlayers)
                 {
-                    Player replacedPlayer = Server.KnownPlayers.First(x => x.XUID == player.XUID);
-                    Server.KnownPlayers.Remove(replacedPlayer);
-                    Server.KnownPlayers.Add(player);
+                    Server.AddUpdatePlayer(player);
                 }
             }
-            byte[] sendBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(modifiedPlayers));
-            FormManager.GetTCPClient.SendData(sendBytes, Service.Networking.NetworkMessageSource.Client, Service.Networking.NetworkMessageDestination.Server, (byte)FormManager.GetMainWindow.connectedHost.ServerList.IndexOf(Server), Service.Networking.NetworkMessageTypes.PlayersUpdate);
+            JsonSerializerSettings settings = new JsonSerializerSettings()
+            {
+                TypeNameHandling = TypeNameHandling.All
+            };
+            byte[] sendBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(modifiedPlayers, Formatting.Indented, settings));
+            FormManager.GetTCPClient.SendData(sendBytes, NetworkMessageSource.Client, NetworkMessageDestination.Server, FormManager.GetMainWindow.connectedHost.GetServerIndex(Server), NetworkMessageTypes.PlayersUpdate);
             FormManager.GetMainWindow.WaitForCallbackInvoked();
             Close();
             Dispose();
@@ -71,9 +82,9 @@ namespace BedrockService.Client.Forms
 
         private void searchEntryBox_TextChanged(object sender, EventArgs e)
         {
-            playersFound = Server.KnownPlayers;
+            playersFound = Server.GetPlayerList();
             string curText = searchEntryBox.Text;
-            List<Player> tempList = new List<Player>();
+            List<IPlayer> tempList = new List<IPlayer>();
             string[] splitCommands;
             string cmd;
             string value;
@@ -90,10 +101,10 @@ namespace BedrockService.Client.Forms
                             string[] finalSplit = s.Split(':');
                             cmd = finalSplit[0];
                             value = finalSplit[1];
-                            tempList = new List<Player>();
-                            foreach (Player player in playersFound)
+                            tempList = new List<IPlayer>();
+                            foreach (IPlayer player in playersFound)
                             {
-                                if (player.CommandStringTranslator(cmd).Contains(value))
+                                if (player.SearchForProperty(cmd).Contains(value))
                                 {
                                     tempList.Add(player);
                                 }
@@ -106,9 +117,9 @@ namespace BedrockService.Client.Forms
                 splitCommands = curText.Split(':');
                 cmd = splitCommands[0];
                 value = splitCommands[1];
-                foreach (Player player in playersFound)
+                foreach (IPlayer player in playersFound)
                 {
-                    if (player.CommandStringTranslator(cmd).Contains(value))
+                    if (player.SearchForProperty(cmd).Contains(value))
                     {
                         tempList.Add(player);
                     }
@@ -122,20 +133,23 @@ namespace BedrockService.Client.Forms
         private void gridView_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
         {
             DataGridViewRow focusedRow = gridView.Rows[e.RowIndex];
-            playerToEdit = Server.KnownPlayers.First(p => p.XUID == (string)focusedRow.Cells[0].Value);
+            playerToEdit = Server.GetPlayerByXuid((string)focusedRow.Cells[0].Value);
         }
 
         private void gridView_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
             DataGridViewRow focusedRow = gridView.Rows[e.RowIndex];
-            if ((string)focusedRow.Cells[0].Value != playerToEdit.XUID || (string)focusedRow.Cells[1].Value != playerToEdit.Username || (string)focusedRow.Cells[2].Value != playerToEdit.PermissionLevel || (string)focusedRow.Cells[3].Value != playerToEdit.Whitelisted.ToString() || (string)focusedRow.Cells[4].Value != playerToEdit.IgnorePlayerLimits.ToString())
+            string[] playerReg = playerToEdit.GetRegistration();
+            string[] playerTimes = playerToEdit.GetTimes();
+            string playerFirstConnect = playerTimes[0];
+            string playerConnectTime = playerTimes[1];
+            string playerDisconnectTime = playerTimes[2];
+            string playerWhitelist = playerReg[0];
+            string playerPermission = playerReg[1];
+            string playerIgnoreLimit = playerReg[2];
+            if ((string)focusedRow.Cells[0].Value != playerToEdit.GetXUID() || (string)focusedRow.Cells[1].Value != playerToEdit.GetUsername() || (string)focusedRow.Cells[2].Value != playerPermission || (string)focusedRow.Cells[3].Value != playerWhitelist || (string)focusedRow.Cells[4].Value != playerIgnoreLimit)
             {
-                playerToEdit.XUID = (string)focusedRow.Cells[0].Value;
-                playerToEdit.Username = (string)focusedRow.Cells[1].Value;
-                playerToEdit.PermissionLevel = (string)focusedRow.Cells[2].Value;
-                playerToEdit.Whitelisted = bool.Parse((string)focusedRow.Cells[3].Value);
-                playerToEdit.IgnorePlayerLimits = bool.Parse((string)focusedRow.Cells[4].Value);
-                playerToEdit.FromConfig = true;
+                playerToEdit = new Player((string)focusedRow.Cells[0].Value, (string)focusedRow.Cells[1].Value, playerFirstConnect, playerConnectTime, playerDisconnectTime, bool.Parse((string)focusedRow.Cells[3].Value), (string)focusedRow.Cells[2].Value, bool.Parse((string)focusedRow.Cells[4].Value), true);
                 modifiedPlayers.Add(playerToEdit);
             }
         }
@@ -146,8 +160,8 @@ namespace BedrockService.Client.Forms
             {
                 if (form.ShowDialog() == DialogResult.OK)
                 {
-                    Server.KnownPlayers.Add(form.AddPlayer);
-                    modifiedPlayers.Add(form.AddPlayer);
+                    Server.GetPlayerList().Add(form.PlayerToAdd);
+                    modifiedPlayers.Add(form.PlayerToAdd);
                     RefreshGridContents();
                 }
             }

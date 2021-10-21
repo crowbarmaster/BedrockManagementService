@@ -1,10 +1,11 @@
-﻿using BedrockService.Service.Server.HostInfoClasses;
-using BedrockService.Service.Server.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using BedrockService.Shared;
+using BedrockService.Shared.Classes;
+using BedrockService.Shared.Interfaces;
 
 namespace BedrockService.Client.Management
 {
@@ -14,7 +15,7 @@ namespace BedrockService.Client.Management
         public static bool EnableFlag;
         public static bool Working = false;
         public static List<string> ServiceLogs = new List<string>();
-        private static HostInfo connectedHost;
+        private static IServiceConfiguration connectedHost;
 
         private static void LogManagerTask()
         {
@@ -24,14 +25,14 @@ namespace BedrockService.Client.Management
                 {
                     Working = true;
                     StringBuilder sendString = new StringBuilder();
-                    foreach (ServerInfo server in connectedHost.GetServerInfos())
+                    foreach (ServerInfo server in connectedHost.GetAllServerInfos())
                     {
-                        server.ConsoleBuffer = server.ConsoleBuffer ?? new ServerLogger(server.ServerName);
-                        sendString.Append($"{server.ServerName};{server.ConsoleBuffer.Count()}|");
+                        server.ConsoleBuffer = server.ConsoleBuffer ?? new List<string>();
+                        sendString.Append($"{server.ServerName};{server.ConsoleBuffer.Count}|");
                     }
-                    sendString.Append($"Service;{connectedHost.ServiceLog.Count}");
+                    sendString.Append($"Service;{connectedHost.GetLog().Count}");
                     byte[] stringsToBytes = Encoding.UTF8.GetBytes(sendString.ToString());
-                    FormManager.GetTCPClient.SendData(stringsToBytes, Service.Networking.NetworkMessageSource.Client, Service.Networking.NetworkMessageDestination.Service, Service.Networking.NetworkMessageTypes.ConsoleLogUpdate);
+                    FormManager.GetTCPClient.SendData(stringsToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.ConsoleLogUpdate);
                     Thread.Sleep(200);
                     int currentLogBoxLength = 0;
 
@@ -43,13 +44,13 @@ namespace BedrockService.Client.Management
                     {
                         UpdateLogBoxInvoked("");
                     }
-                    if (FormManager.GetMainWindow.ShowsSvcLog && connectedHost.ServiceLog.Count != currentLogBoxLength)
+                    if (FormManager.GetMainWindow.ShowsSvcLog && connectedHost.GetLog().Count != currentLogBoxLength)
                     {
-                        UpdateLogBoxInvoked(connectedHost.ServiceLogToString());
+                        UpdateLogBoxInvoked(string.Join("\r\n", connectedHost.GetLog()));
                     }
-                    else if (FormManager.GetMainWindow.selectedServer.ConsoleBuffer != null && FormManager.GetMainWindow.selectedServer.ConsoleBuffer.Count() != currentLogBoxLength)
+                    else if (FormManager.GetMainWindow.selectedServer.GetLog() != null && FormManager.GetMainWindow.selectedServer.GetLog().Count != currentLogBoxLength)
                     {
-                        UpdateLogBoxInvoked(FormManager.GetMainWindow.selectedServer.ConsoleBuffer.ToString());
+                        UpdateLogBoxInvoked(string.Join("", FormManager.GetMainWindow.selectedServer.GetLog()));
                     }
 
                 }
@@ -60,7 +61,7 @@ namespace BedrockService.Client.Management
             }
         }
 
-        public static bool InitLogThread(HostInfo host)
+        public static bool InitLogThread(IServiceConfiguration host)
         {
             connectedHost = host;
             return StartLogThread();

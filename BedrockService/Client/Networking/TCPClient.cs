@@ -1,8 +1,8 @@
 ﻿using BedrockService.Client.Management;
-using BedrockService.Service.Networking;
-using BedrockService.Service.Server.HostInfoClasses;
-using BedrockService.Service.Server.Logging;
-using BedrockService.Service.Server.PackParser;
+using BedrockService.Shared;
+using BedrockService.Shared.Classes;
+using BedrockService.Shared.Interfaces;
+using BedrockService.Shared.PackParser;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -32,9 +32,9 @@ namespace BedrockService.Client.Networking
         private int heartbeatFailTimeoutLimit = 250;
         private bool heartbeatRecieved;
 
-        public bool ConnectHost(HostInfo host)
+        public bool ConnectHost(IClientSideServiceConfiguration host)
         {
-            if (EstablishConnection(host.Address, int.Parse(host.GetGlobalValue("ClientPort"))))
+            if (EstablishConnection(host.GetAddress(), int.Parse(host.GetPort())))
             {
                 SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Connect);
                 return true;
@@ -91,7 +91,7 @@ namespace BedrockService.Client.Networking
                 try
                 {
                     byte[] buffer = new byte[4];
-                    while (OpenedTcpClient != null && OpenedTcpClient.Client.Available != 0)
+                    while (OpenedTcpClient.Client.Available > 0)
                     {
                         int byteCount = stream.Read(buffer, 0, 4);
                         int expectedLen = BitConverter.ToInt32(buffer, 0);
@@ -108,6 +108,10 @@ namespace BedrockService.Client.Networking
                         if (destination != NetworkMessageDestination.Client)
                             continue;
                         int srvCurLen = 0;
+                        JsonSerializerSettings settings = new JsonSerializerSettings()
+                        {
+                            TypeNameHandling = TypeNameHandling.All
+                        };
                         switch (source)
                         {
                             case NetworkMessageSource.Service:
@@ -116,19 +120,19 @@ namespace BedrockService.Client.Networking
                                     case NetworkMessageTypes.Connect:
                                         try
                                         {
-                                                Console.WriteLine("Connection to Host successful!");
-                                                FormManager.GetMainWindow.connectedHost = null;
-                                                FormManager.GetMainWindow.connectedHost = JsonConvert.DeserializeObject<HostInfo>(data);
-                                                FormManager.GetMainWindow.RefreshServerContents();
-                                                heartbeatFailTimeout = 0;
-                                                if (HeartbeatThread == null || !HeartbeatThread.IsAlive)
-                                                    HeartbeatThread = new Thread(new ThreadStart(SendHeatbeatSignal))
-                                                    {
-                                                        IsBackground = true,
-                                                        Name = "HeartBeatThread"
-                                                    };
-                                                HeartbeatThread.Start();
-                                            
+                                            Console.WriteLine("Connection to Host successful!");
+                                            FormManager.GetMainWindow.connectedHost = null;
+                                            FormManager.GetMainWindow.connectedHost = JsonConvert.DeserializeObject<IServiceConfiguration>(data, settings);
+                                            FormManager.GetMainWindow.RefreshServerContents();
+                                            heartbeatFailTimeout = 0;
+                                            if (HeartbeatThread == null || !HeartbeatThread.IsAlive)
+                                                HeartbeatThread = new Thread(new ThreadStart(SendHeatbeatSignal))
+                                                {
+                                                    IsBackground = true,
+                                                    Name = "HeartBeatThread"
+                                                };
+                                            HeartbeatThread.Start();
+
                                         }
                                         catch (Exception e)
                                         {
@@ -149,7 +153,7 @@ namespace BedrockService.Client.Networking
 
                                     case NetworkMessageTypes.EnumBackups:
 
-                                        BackupList = JsonConvert.DeserializeObject<List<Property>>(data);
+                                        BackupList = JsonConvert.DeserializeObject<List<Property>>(data, settings);
                                         EnumBackupsArrived = true;
 
                                         break;
@@ -179,20 +183,19 @@ namespace BedrockService.Client.Networking
                                             srvCurLen = int.Parse(srvSplit[2]);
                                             if (srvName != "Service")
                                             {
-                                                ServerInfo bedrockServer = FormManager.GetMainWindow.connectedHost.GetServerInfos().First(srv => srv.ServerName == srvName);
-                                                bedrockServer.ConsoleBuffer = bedrockServer.ConsoleBuffer ?? new ServerLogger(bedrockServer.ServerName);
-                                                int curCount = bedrockServer.ConsoleBuffer.Count();
+                                                IServerConfiguration bedrockServer = FormManager.GetMainWindow.connectedHost.GetServerInfoByName(srvName);
+                                                int curCount = bedrockServer.GetLog().Count;
                                                 if (curCount == srvCurLen)
                                                 {
-                                                    bedrockServer.ConsoleBuffer.Append(srvText);
+                                                    bedrockServer.GetLog().Add(srvText);
                                                 }
                                             }
                                             else
                                             {
-                                                int curCount = FormManager.GetMainWindow.connectedHost.ServiceLog.Count;
+                                                int curCount = FormManager.GetMainWindow.connectedHost.GetLog().Count;
                                                 if (curCount == srvCurLen)
                                                 {
-                                                    FormManager.GetMainWindow.connectedHost.ServiceLog.Add(srvText);
+                                                    FormManager.GetMainWindow.connectedHost.GetLog().Add(srvText);
                                                 }
                                             }
                                         }
@@ -218,8 +221,8 @@ namespace BedrockService.Client.Networking
                                         break;
                                     case NetworkMessageTypes.PlayersRequest:
 
-                                        List<Player> fetchedPlayers = JsonConvert.DeserializeObject<List<Player>>(data);
-                                        FormManager.GetMainWindow.connectedHost.ServerList[serverIndex].KnownPlayers = fetchedPlayers;
+                                        List<IPlayer> fetchedPlayers = JsonConvert.DeserializeObject<List<IPlayer>>(data, settings);
+                                        FormManager.GetMainWindow.connectedHost.GetServerInfoByIndex(serverIndex).SetPlayerList(fetchedPlayers);
                                         PlayerInfoArrived = true;
 
                                         break;

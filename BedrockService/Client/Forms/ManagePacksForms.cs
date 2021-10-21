@@ -1,6 +1,8 @@
 ﻿using BedrockService.Client.Management;
-using BedrockService.Service.Networking;
-using BedrockService.Service.Server.PackParser;
+using BedrockService.Shared;
+using BedrockService.Shared.Classes;
+using BedrockService.Shared.Interfaces;
+using BedrockService.Shared.PackParser;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -15,9 +17,13 @@ namespace BedrockService.Client.Forms
     public partial class ManagePacksForms : Form
     {
         private byte ServerIndex = 0x00;
+        private ILogger Logger;
+        private IProcessInfo ProcessInfo;
         private DirectoryInfo PackExtractDir = new DirectoryInfo(@"C:\RBPacks");
-        public ManagePacksForms(byte serverIndex)
+        public ManagePacksForms(byte serverIndex, ILogger logger, IProcessInfo processInfo)
         {
+            Logger = logger;
+            ProcessInfo = processInfo;
             ServerIndex = serverIndex;
             InitializeComponent();
             //FormManager.GetTCPClient.SendData(File.ReadAllBytes($@"E:\testRB.zip"), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.PackFile);
@@ -58,7 +64,11 @@ namespace BedrockService.Client.Forms
             {
                 List<MinecraftPackContainer> temp = new List<MinecraftPackContainer>();
                 temp.Add((MinecraftPackContainer)serverListBox.SelectedItem);
-                FormManager.GetTCPClient.SendData(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(temp)), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.RemovePack);
+                JsonSerializerSettings settings = new JsonSerializerSettings()
+                {
+                    TypeNameHandling = TypeNameHandling.All
+                };
+                FormManager.GetTCPClient.SendData(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(temp, Formatting.Indented, settings)), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.RemovePack);
                 serverListBox.Items.Remove(temp[0]);
             }
 
@@ -69,7 +79,11 @@ namespace BedrockService.Client.Forms
             List<MinecraftPackContainer> temp = new List<MinecraftPackContainer>();
             foreach (object item in serverListBox.Items)
                 temp.Add((MinecraftPackContainer)item);
-            FormManager.GetTCPClient.SendData(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(temp)), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.RemovePack);
+            JsonSerializerSettings settings = new JsonSerializerSettings()
+            {
+                TypeNameHandling = TypeNameHandling.All
+            };
+            FormManager.GetTCPClient.SendData(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(temp, Formatting.Indented, settings)), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.RemovePack);
             serverListBox.Items.Clear();
         }
 
@@ -99,7 +113,7 @@ namespace BedrockService.Client.Forms
             openFileDialog.Multiselect = true;
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                MinecraftPackParser parser = new MinecraftPackParser(openFileDialog.FileNames);
+                MinecraftPackParser parser = new MinecraftPackParser(openFileDialog.FileNames, Logger, ProcessInfo);
                 PackExtractDir = parser.PackExtractDirectory;
                 parsedPacksListBox.Items.Clear();
                 foreach (MinecraftPackContainer container in parser.FoundPacks)

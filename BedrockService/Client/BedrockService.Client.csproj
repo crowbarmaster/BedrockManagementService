@@ -108,6 +108,7 @@
     <Compile Include="Forms\MainWindow.Designer.cs">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </Compile>
+    <Compile Include="Management\ClientLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Networking\TCPClient.cs" />
     <EmbeddedResource Include="Forms\AddNewServerForm.resx">
@@ -166,13 +167,13 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Service\BedrockService.Service.csproj">
-      <Project>{13b2b5a8-71e9-49f4-9bfb-3c3b3c0a054c}</Project>
-      <Name>BedrockService.Service</Name>
-    </ProjectReference>
+    <Folder Include="Utilities\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Utilities\" />
+    <ProjectReference Include="..\BedrockService.Shared\BedrockService.Shared.csproj">
+      <Project>{f146d5e8-ef1f-4785-9150-182631f059b7}</Project>
+      <Name>BedrockService.Shared</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

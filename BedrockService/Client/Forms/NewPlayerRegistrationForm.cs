@@ -1,4 +1,5 @@
-﻿using BedrockService.Service.Server.HostInfoClasses;
+﻿using BedrockService.Shared.Classes;
+using BedrockService.Shared.Interfaces;
 using System;
 using System.Windows.Forms;
 
@@ -6,7 +7,7 @@ namespace BedrockService.Client.Forms
 {
     public partial class NewPlayerRegistrationForm : Form
     {
-        public Player AddPlayer;
+        public IPlayer PlayerToAdd;
         public NewPlayerRegistrationForm()
         {
             InitializeComponent();
@@ -16,14 +17,7 @@ namespace BedrockService.Client.Forms
         {
             if (usernameTextBox.TextLength > 0 && xuidTextBox.TextLength == 16)
             {
-                Player player = new Player(xuidTextBox.Text, usernameTextBox.Text, "");
-                player.PermissionLevel = (string)permissionComboBox.SelectedItem;
-                player.Whitelisted = whitelistedChkBox.Checked;
-                player.IgnorePlayerLimits = ignoreLimitChkBox.Checked;
-                player.FirstConnectedTime = DateTime.Now.Ticks.ToString();
-                player.LastConnectedTime = player.FirstConnectedTime;
-                player.LastDisconnectTime = player.FirstConnectedTime;
-                AddPlayer = player;
+                PlayerToAdd = new Player(xuidTextBox.Text, usernameTextBox.Text, DateTime.Now.Ticks.ToString(), "0", "0", whitelistedChkBox.Checked, permissionComboBox.SelectedItem.ToString(), ignoreLimitChkBox.Checked, false);
                 DialogResult = DialogResult.OK;
                 Close();
             }

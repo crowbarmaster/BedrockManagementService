@@ -1,6 +1,6 @@
 ﻿using BedrockService.Client.Management;
-using BedrockService.Service.Networking;
-using BedrockService.Service.Server.HostInfoClasses;
+using BedrockService.Shared;
+using BedrockService.Shared.Classes;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -67,7 +67,14 @@ namespace BedrockService.Client.Forms
         {
             if (DelBackupBtn.Enabled)
             {
-                if (dataGrid.SelectedRows.Count < 2)
+                if (dataGrid.SelectedRows.Count == 0)
+                {
+                    if(dataGrid.SelectedCells.Count == 1)
+                    {
+                        dataGrid.SelectedCells[0].OwningRow.Selected = true;
+                    }
+                }
+                    if (dataGrid.SelectedRows.Count < 2)
                     RollbackFolderName = (string)dataGrid.CurrentRow.Cells[0].Value;
                 DialogResult = DialogResult.OK;
                 Close();
@@ -105,13 +112,23 @@ namespace BedrockService.Client.Forms
 
         private void DelBackupBtn_Click(object sender, EventArgs e)
         {
+            if (dataGrid.SelectedRows.Count == 0)
+            {
+                if (dataGrid.SelectedCells.Count == 1)
+                {
+                    dataGrid.SelectedCells[0].OwningRow.Selected = true;
+                }
+            }
             List<string> removeBackups = new List<string>();
             if (dataGrid.SelectedRows.Count > 0)
                 foreach (DataGridViewRow viewRow in dataGrid.SelectedRows)
                     removeBackups.Add((string)viewRow.Cells[0].Value);
-            byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(removeBackups));
-           FormManager.GetTCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, (byte)FormManager.GetMainWindow.connectedHost.ServerList.IndexOf(FormManager.GetMainWindow.selectedServer), NetworkMessageTypes.DelBackups);
-
+            JsonSerializerSettings settings = new JsonSerializerSettings()
+            {
+                TypeNameHandling = TypeNameHandling.All
+            };
+            byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(removeBackups, Formatting.Indented, settings));
+            FormManager.GetTCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, FormManager.GetMainWindow.connectedHost.GetServerIndex(FormManager.GetMainWindow.selectedServer), NetworkMessageTypes.DelBackups);
         }
     }
 }

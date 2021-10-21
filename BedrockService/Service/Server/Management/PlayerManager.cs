@@ -1,104 +1,85 @@
-﻿using BedrockService.Service.Server.HostInfoClasses;
+﻿using BedrockService.Shared.Classes;
+using BedrockService.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace BedrockService.Service.Server.Management
 {
-    public class PlayerManager
+    public class PlayerManager : IPlayerManager
     {
-        public void PlayerConnected(string username, string xuid, ServerInfo serverInstance)
+        readonly IServerConfiguration serverConfiguration;
+        readonly ILogger logger;
+
+        public PlayerManager(IServerConfiguration serverConfiguration, ILogger logger)
         {
-            Player playerFound = serverInstance.KnownPlayers.FirstOrDefault(ply => ply.XUID == xuid);
+            this.serverConfiguration = serverConfiguration;
+            this.logger = logger;
+        }
+
+        public void ProcessConfiguration(string[] entries)
+        {
+            foreach (string entry in entries)
+            {
+                if (entry.StartsWith("#") || string.IsNullOrWhiteSpace(entry))
+                    continue;
+                string[] split = entry.Split(',');
+                logger.AppendLine($"Server \"{serverConfiguration.GetServerName()}\" Loaded registered player: {split[1]}");
+                IPlayer playerFound = serverConfiguration.GetPlayerByXuid(split[0]);
+                if (playerFound == null)
+                {
+                    serverConfiguration.AddUpdatePlayer(new Player(split[0], split[1], DateTime.Now.Ticks.ToString(), "0", "0", split[3].ToLower() == "true", split[2], split[4].ToLower() == "true", true));
+                    continue;
+                }
+                UpdatePlayerFromCfg(split[0], split[1], split[2], split[3], split[4]);
+            }
+
+        }
+
+        public void PlayerConnected(string username, string xuid)
+        {
+            IPlayer playerFound = serverConfiguration.GetPlayerByXuid(xuid);
             if (playerFound != null)
             {
-                playerFound.LastConnectedTime = DateTime.Now.Ticks.ToString();
-                if (playerFound.FirstConnectedTime == null)
-                {
-                    playerFound.FirstConnectedTime = playerFound.LastConnectedTime;
-                }
-                InstanceProvider.ConfigManager.SaveKnownPlayerDatabase(serverInstance);
+                serverConfiguration.AddUpdatePlayer(new Player(username, xuid, DateTime.Now.Ticks.ToString(), "0", "0", false, serverConfiguration.GetProp("default-player-permission-level").ToString(), false, false));
             }
             else
             {
-                playerFound = new Player(xuid, username, serverInstance.ServerPropList.FirstOrDefault(k => k.KeyName == "default-player-permission-level").Value)
-                {
-                    FirstConnectedTime = DateTime.Now.Ticks.ToString()
-                };
-                playerFound.LastConnectedTime = playerFound.FirstConnectedTime;
-                serverInstance.KnownPlayers.Add(playerFound);
-                InstanceProvider.ConfigManager.SaveKnownPlayerDatabase(serverInstance);
+                serverConfiguration.AddUpdatePlayer(playerFound);
             }
-
         }
 
-        public void PlayerDisconnected(string xuid, ServerInfo serverInstance)
+        public void PlayerDisconnected(string xuid)
         {
-            Player playerFound = serverInstance.KnownPlayers.FirstOrDefault(ply => ply.XUID == xuid);
-            playerFound.LastDisconnectTime = DateTime.Now.Ticks.ToString();
-            InstanceProvider.ConfigManager.SaveKnownPlayerDatabase(serverInstance);
+            IPlayer playerFound = serverConfiguration.GetPlayerByXuid(xuid);
+            string[] oldTimes = playerFound.GetTimes();
+            playerFound.UpdateTimes(oldTimes[1], DateTime.Now.Ticks.ToString());
         }
 
-        public void UpdatePlayerFromCfg(string xuid, string username, string permission, string whitelisted, string ignoreMaxPlayerLimit, ServerInfo serverInstance)
+        public void UpdatePlayerFromCfg(string xuid, string username, string permission, string whitelisted, string ignoreMaxPlayerLimit)
         {
-            Player playerFound = serverInstance.KnownPlayers.FirstOrDefault(ply => ply.XUID == xuid);
-            if (playerFound != null)
+            IPlayer playerFound = serverConfiguration.GetPlayerByXuid(xuid);
+            if (playerFound == null)
             {
-                playerFound.PermissionLevel = permission;
-                playerFound.Whitelisted = bool.Parse(whitelisted);
-                playerFound.IgnorePlayerLimits = bool.Parse(ignoreMaxPlayerLimit);
-                playerFound.FromConfig = true;
+                playerFound = new Player(serverConfiguration.GetProp("default-player-permission-level").ToString());
+                playerFound.Initialize(xuid, username);
             }
-            else
-            {
-                playerFound = new Player(xuid, username, serverInstance.ServerPropList.FirstOrDefault(k => k.KeyName == "default-player-permission-level").Value)
-                {
-                    PermissionLevel = permission,
-                    Whitelisted = bool.Parse(whitelisted),
-                    IgnorePlayerLimits = bool.Parse(ignoreMaxPlayerLimit),
-                    FromConfig = true
-                };
-                serverInstance.KnownPlayers.Add(playerFound);
-            }
+            playerFound.UpdateRegistration(permission, whitelisted, ignoreMaxPlayerLimit);
         }
 
-        public List<Player> ListKnownConfiguredPlayers(ServerInfo serverInstance)
+        public IPlayer GetPlayerByXUID(string xuid) => serverConfiguration.GetPlayerByXuid(xuid);
+
+        public void SetPlayer(IPlayer player)
         {
-            List<Player> tempList = new List<Player>();
-            if (serverInstance.KnownPlayers.Count > 0)
+            try
             {
-                foreach (Player player in serverInstance.KnownPlayers)
-                {
-                    if (player.FromConfig)
-                        tempList.Add(player);
-                }
+                serverConfiguration.GetPlayerList()[serverConfiguration.GetPlayerList().IndexOf(player)] = player;
             }
-            return tempList;
+            catch
+            {
+                serverConfiguration.GetPlayerList().Add(player);
+            }
         }
 
-        public List<Player> SearchPlayers(string cmd, string arg, string stringToMatch, ServerInfo serverInstance)
-        {
-            List<Player> tempList = new List<Player>();
-            foreach (Player player in serverInstance.KnownPlayers)
-            {
-                switch (cmd)
-                {
-                    case "ByName":
-                        if (player.Username.Contains(stringToMatch))
-                        {
-                            tempList.Add(player);
-                        }
-                        break;
-                    case "ByPermLevel":
-                        if (player.PermissionLevel == arg)
-                        {
-                            tempList.Add(player);
-                        }
-                        break;
-                }
-            }
-            return tempList;
-        }
-
+        public List<IPlayer> GetPlayers() => serverConfiguration.GetPlayerList();
     }
 }
