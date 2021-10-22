@@ -31,9 +31,9 @@ namespace BedrockService.Service
             services.AddSingleton<ITCPListener, TCPListener>();
             services.AddSingleton<ILogger, ServiceLogger>();
             services.AddSingleton<NetworkStrategyLookup>();
-            services.AddTransient<IConfigurator, ConfigManager>();
+            services.AddSingleton<IConfigurator, ConfigManager>();
             services.AddSingleton<IBedrockService, Core.BedrockService>();
-            services.AddTransient<IUpdater, Updater>();
+            services.AddSingleton<IUpdater, Updater>();
         }
     }
 }

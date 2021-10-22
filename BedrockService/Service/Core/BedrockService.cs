@@ -242,7 +242,7 @@ namespace BedrockService.Service.Core
                     {
                         if (Updater.CheckVersionChanged() || !File.Exists(server.GetProp("ServerPath") + "\\bedrock_server.exe"))
                         {
-                            Updater.ReplaceBuild(server).Wait();
+                            Configurator.ReplaceServerBuild(server).Wait();
                         }
                         if (server.GetProp("ServerExeName").ToString() != "bedrock_server.exe" && File.Exists(server.GetProp("ServerPath") + "\\bedrock_server.exe") && !File.Exists(server.GetProp("ServerPath") + "\\" + server.GetProp("ServerExeName")))
                         {

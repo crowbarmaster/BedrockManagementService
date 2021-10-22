@@ -1,4 +1,5 @@
-﻿using BedrockService.Shared.Classes;
+﻿using BedrockService.Client.Management;
+using BedrockService.Shared.Classes;
 using BedrockService.Shared.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace BedrockService.Client.Forms
         public AddNewServerForm()
         {
             InitializeComponent();
-            IServerConfiguration server = new ServerInfo(null);
+            IServerConfiguration server = new ServerInfo(null, FormManager.GetMainWindow.connectedHost.GetProp("ServersPath").ToString());
             server.InitializeDefaults();
             DefaultProps = server.GetAllProps();
         }

@@ -306,7 +306,7 @@ namespace BedrockService.Service.Networking
                     {
                     }
                 }
-                configurator.SaveRegisteredPlayers(serviceConfiguration.GetServerInfoByIndex(serverIndex));
+                configurator.SaveKnownPlayerDatabase(serviceConfiguration.GetServerInfoByIndex(serverIndex));
                 configurator.LoadAllConfigurations().Wait();
                 messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
 
@@ -493,7 +493,7 @@ namespace BedrockService.Service.Networking
                 };
                 List<Property> propList = JsonConvert.DeserializeObject<List<Property>>(stringData, settings);
                 Property serverNameProp = propList.First(p => p.KeyName == "server-name");
-                ServerInfo newServer = new ServerInfo(null)
+                ServerInfo newServer = new ServerInfo(null, serviceConfiguration.GetProp("ServersPath").ToString())
                 {
                     ServerName = serverNameProp.ToString(),
                     ServerPropList = propList,

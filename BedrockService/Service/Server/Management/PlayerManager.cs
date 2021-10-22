@@ -18,34 +18,19 @@ namespace BedrockService.Service.Server.Management
 
         public void ProcessConfiguration(string[] entries)
         {
-            foreach (string entry in entries)
-            {
-                if (entry.StartsWith("#") || string.IsNullOrWhiteSpace(entry))
-                    continue;
-                string[] split = entry.Split(',');
-                logger.AppendLine($"Server \"{serverConfiguration.GetServerName()}\" Loaded registered player: {split[1]}");
-                IPlayer playerFound = serverConfiguration.GetPlayerByXuid(split[0]);
-                if (playerFound == null)
-                {
-                    serverConfiguration.AddUpdatePlayer(new Player(split[0], split[1], DateTime.Now.Ticks.ToString(), "0", "0", split[3].ToLower() == "true", split[2], split[4].ToLower() == "true", true));
-                    continue;
-                }
-                UpdatePlayerFromCfg(split[0], split[1], split[2], split[3], split[4]);
-            }
+
 
         }
 
         public void PlayerConnected(string username, string xuid)
         {
             IPlayer playerFound = serverConfiguration.GetPlayerByXuid(xuid);
-            if (playerFound != null)
+            if (playerFound == null)
             {
-                serverConfiguration.AddUpdatePlayer(new Player(username, xuid, DateTime.Now.Ticks.ToString(), "0", "0", false, serverConfiguration.GetProp("default-player-permission-level").ToString(), false, false));
+                serverConfiguration.AddUpdatePlayer(new Player(xuid, username, DateTime.Now.Ticks.ToString(), "0", "0", false, serverConfiguration.GetProp("default-player-permission-level").ToString(), false, false));
+                return;
             }
-            else
-            {
-                serverConfiguration.AddUpdatePlayer(playerFound);
-            }
+            serverConfiguration.AddUpdatePlayer(playerFound);
         }
 
         public void PlayerDisconnected(string xuid)
@@ -66,7 +51,12 @@ namespace BedrockService.Service.Server.Management
             playerFound.UpdateRegistration(permission, whitelisted, ignoreMaxPlayerLimit);
         }
 
-        public IPlayer GetPlayerByXUID(string xuid) => serverConfiguration.GetPlayerByXuid(xuid);
+        public IPlayer GetPlayerByXUID(string xuid)
+        {
+            if (GetPlayers().Count > 0)
+                return serverConfiguration.GetPlayerByXuid(xuid);
+            return null;
+        }
 
         public void SetPlayer(IPlayer player)
         {

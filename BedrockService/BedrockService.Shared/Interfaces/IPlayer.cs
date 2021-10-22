@@ -10,6 +10,9 @@
         string GetXUID();
         string[] GetTimes();
         string[] GetRegistration();
+        bool IsPlayerWhitelisted();
+        bool PlayerIgnoresLimit();
+        string GetPermissionLevel();
         bool IsDefaultRegistration();
         string ToString(string format);
     }

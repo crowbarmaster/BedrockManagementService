@@ -104,6 +104,12 @@ namespace BedrockService.Shared.Classes
             }
             return null;
         }
+
+        public bool IsPlayerWhitelisted() => Whitelisted;
+
+        public bool PlayerIgnoresLimit() => IgnorePlayerLimits;
+
+        public string GetPermissionLevel() => PermissionLevel;
     }
 
 }

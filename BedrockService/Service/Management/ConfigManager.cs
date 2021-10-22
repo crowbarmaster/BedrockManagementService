@@ -45,31 +45,26 @@ namespace BedrockService.Service.Management
                     Directory.CreateDirectory($@"{configDir}\Backups");
                 if (File.Exists($@"{configDir}\..\bedrock_ver.ini"))
                     loadedVersion = File.ReadAllText($@"{configDir}\..\bedrock_ver.ini");
-                bool loading = true;
                 ServerInfo serverInfo;
-                while (loading)
+                LoadGlobals();
+                string[] files = Directory.GetFiles(configDir, "*.conf");
+                foreach (string file in files)
                 {
-                    ServiceConfiguration.ProcessConfiguration(File.ReadAllLines(globalFile));
-                    string[] files = Directory.GetFiles(configDir, "*.conf");
-                    foreach (string file in files)
-                    {
-                        FileInfo FInfo = new FileInfo(file);
-                        if (FInfo.Name == "Globals.conf")
-                            continue;
-                        string[] fileEntries = File.ReadAllLines(file);
-                        serverInfo = new ServerInfo(fileEntries);
-                        ServiceConfiguration.AddNewServerInfo(serverInfo);
-                    }
-                    if (ServiceConfiguration.GetAllServerInfos().Count != 0)
-                    {
-                        break;
-                    }
-
-                    serverInfo = new ServerInfo(null);
+                    FileInfo FInfo = new FileInfo(file);
+                    if (FInfo.Name == "Globals.conf")
+                        continue;
+                    string[] fileEntries = File.ReadAllLines(file);
+                    serverInfo = new ServerInfo(fileEntries, ServiceConfiguration.GetProp("ServersPath").ToString());
+                    LoadPlayerDatabase(serverInfo);
+                    LoadRegisteredPlayers(serverInfo);
+                    ServiceConfiguration.AddNewServerInfo(serverInfo);
+                }
+                if (ServiceConfiguration.GetAllServerInfos().Count == 0)
+                {
+                    serverInfo = new ServerInfo(null, ServiceConfiguration.GetProp("ServersPath").ToString());
                     serverInfo.InitializeDefaults();
                     SaveServerProps(serverInfo, true);
                 }
-                return;
             });
         }
 
@@ -88,7 +83,7 @@ namespace BedrockService.Service.Management
             File.WriteAllLines(globalFile, output);
         }
 
-        public void LoadRegisteredPlayers(IBedrockServer server)
+        public void LoadRegisteredPlayers(IServerConfiguration server)
         {
             string serverName = server.GetServerName();
             string filePath = $@"{configDir}\RegisteredPlayers\{serverName}.preg";
@@ -97,23 +92,40 @@ namespace BedrockService.Service.Management
                 File.Create(filePath).Close();
                 return;
             }
-            server.GetPlayerManager().ProcessConfiguration(File.ReadAllLines($@"{configDir}\RegisteredPlayers\{serverName}.preg"));
+            foreach (string entry in File.ReadLines(filePath))
+            {
+                if (entry.StartsWith("#") || string.IsNullOrWhiteSpace(entry))
+                    continue;
+                string[] split = entry.Split(',');
+                Logger.AppendLine($"Server \"{server.GetServerName()}\" Loaded registered player: {split[1]}");
+                IPlayer playerFound = server.GetPlayerByXuid(split[0]);
+                if (playerFound == null)
+                {
+                    server.AddUpdatePlayer(new Player(split[0], split[1], DateTime.Now.Ticks.ToString(), "0", "0", split[3].ToLower() == "true", split[2], split[4].ToLower() == "true", true));
+                    continue;
+                }
+                string[] playerTimes = playerFound.GetTimes();
+                server.AddUpdatePlayer(new Player(split[0], split[1], playerTimes[0], playerTimes[1], playerTimes[2], split[3].ToLower() == "true", split[2], split[4].ToLower() == "true", true));
+            }
         }
 
         private void LoadGlobals()
         {
-            ServiceConfiguration.InitializeDefaults();
             if (File.Exists(globalFile))
             {
                 Logger.AppendLine("Loading Globals...");
-                string[] fileEntries = File.ReadAllLines(globalFile);
-                IServiceConfiguration serviceConfig = ServiceConfiguration;
-                serviceConfig.ProcessConfiguration(fileEntries);
+                ServiceConfiguration.ProcessConfiguration(File.ReadAllLines(globalFile));
+                ServiceConfiguration.SetServerVersion(loadedVersion);
                 return;
             }
             ServiceConfiguration.InitializeDefaults();
             Logger.AppendLine("Globals.conf was not found. Loaded defaults and saved to file.");
             SaveGlobalFile();
+        }
+
+        private int RoundOff(int i)
+        {
+            return ((int)Math.Round(i / 10.0)) * 10;
         }
 
         public async Task ReplaceServerBuild(IServerConfiguration server)
@@ -124,19 +136,38 @@ namespace BedrockService.Service.Management
                 {
                     if (!Directory.Exists(server.GetProp("ServerPath").ToString()))
                         Directory.CreateDirectory(server.GetProp("ServerPath").ToString());
-                    else if (File.Exists($@"{ProcessInfo.GetDirectory()}\Server\MCSFiles\stock_filelist.ini"))
-                    {
-                        new FileUtils(ProcessInfo.GetDirectory()).DeleteFilelist(File.ReadAllLines($@"{ProcessInfo.GetDirectory()}\Server\MCSFiles\stock_filelist.ini"), server.GetProp("ServerPath").ToString());
-                    }
-                    else
-                    {
-                        new FileUtils(ProcessInfo.GetDirectory()).DeleteFilesRecursively(new DirectoryInfo(server.GetProp("ServerPath").ToString()), false);
-                    }
                     while (ServiceConfiguration.GetServerVersion() == null || ServiceConfiguration.GetServerVersion() == "None")
                     {
                         Thread.Sleep(150);
                     }
-                    ZipFile.ExtractToDirectory($@"{ProcessInfo.GetDirectory()}\Server\MCSFiles\Update_{ServiceConfiguration.GetServerVersion()}.zip", ProcessInfo.GetDirectory());
+                    using (ZipArchive archive = ZipFile.OpenRead($@"{ProcessInfo.GetDirectory()}\Server\MCSFiles\Update_{ ServiceConfiguration.GetServerVersion()}.zip"))
+                    {
+                        int fileCount = archive.Entries.Count;
+                        for(int i=0; i<fileCount; i++)
+                        {
+                            if(i%(RoundOff(fileCount)/6) == 0)
+                            {
+                                Logger.AppendLine($"Extracting server files for server {server.GetServerName()}, {Math.Round((double)i / (double)fileCount, 2) * 100}% completed...");
+                            }
+                            if (!archive.Entries[i].FullName.EndsWith("/"))
+                            {
+                                if (File.Exists($@"{server.GetProp("ServerPath")}\{archive.Entries[i].FullName.Replace('/', '\\')}"))
+                                {
+                                    File.Delete($@"{server.GetProp("ServerPath")}\{archive.Entries[i].FullName.Replace('/', '\\')}");
+                                }
+                                archive.Entries[i].ExtractToFile($@"{server.GetProp("ServerPath")}\{archive.Entries[i].FullName.Replace('/', '\\')}");
+                            }
+                            else
+                            {
+                                if (!Directory.Exists($@"{server.GetProp("ServerPath")}\{archive.Entries[i].FullName.Replace('/', '\\')}"))
+                                {
+                                    Directory.CreateDirectory($@"{server.GetProp("ServerPath")}\{archive.Entries[i].FullName.Replace('/', '\\')}");
+                                }
+                            }
+                        }
+                        Logger.AppendLine($"Extraction of files for {server.GetServerName()} completed.");
+                    }
+                    //ZipFile.ExtractToDirectory($@"{ProcessInfo.GetDirectory()}\Server\MCSFiles\Update_{ServiceConfiguration.GetServerVersion()}.zip", server.GetProp("ServerPath").ToString());
                     File.Copy(server.GetProp("ServerPath").ToString() + "\\bedrock_server.exe", server.GetProp("ServerPath").ToString() + "\\" + server.GetProp("ServerExeName").ToString(), true);
                 }
                 catch (Exception e)
@@ -153,6 +184,21 @@ namespace BedrockService.Service.Management
             {
                 File.Create(filePath).Close();
                 return;
+            }
+            foreach (string entry in File.ReadLines(filePath))
+            {
+                if (entry.StartsWith("#") || string.IsNullOrWhiteSpace(entry))
+                    continue;
+                string[] split = entry.Split(',');
+                Logger.AppendLine($"Server \"{server.GetServerName()}\" loaded known player: {split[1]}");
+                IPlayer playerFound = server.GetPlayerByXuid(split[0]);
+                if (playerFound == null)
+                {
+                    server.AddUpdatePlayer(new Player(split[0], split[1], split[2], split[3], split[4], false, server.GetProp("default-player-permission-level").ToString(), false, false));
+                    continue;
+                }
+                string[] playerTimes = playerFound.GetTimes();
+                server.AddUpdatePlayer(new Player(split[0], split[1], playerTimes[0], playerTimes[1], playerTimes[2], playerFound.IsPlayerWhitelisted(), playerFound.GetPermissionLevel(), playerFound.PlayerIgnoresLimit(), true));
             }
         }
 
@@ -173,10 +219,6 @@ namespace BedrockService.Service.Management
                 writer.Flush();
                 writer.Close();
             }
-        }
-
-        public void SaveRegisteredPlayers(IServerConfiguration server)
-        {
             lock (FileLock)
             {
                 string filePath = $@"{configDir}\RegisteredPlayers\{server.GetServerName()}.preg";

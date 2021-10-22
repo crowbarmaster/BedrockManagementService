@@ -59,14 +59,26 @@ namespace BedrockService.Service.Server
         public void StartControl()
         {
             ServerThread = new ServerProcessThread(new ThreadStart(RunServer));
-            CurrentServerStatus = ServerStatus.Started;
         }
 
-        public bool StopControl()
+        public async Task AwaitServerStop()
+        {
+            await Task.Run(() =>
+            {
+                CurrentServerStatus = ServerStatus.Stopping;
+                while(CurrentServerStatus != ServerStatus.Stopped)
+                {
+                    Thread.Sleep(250);
+                }
+                return;
+            });
+        }
+
+        public void StopControl()
         {
             if (process != null)
             {
-                Logger.AppendLine("Sending Stop to Bedrock . Process.HasExited = " + process.HasExited.ToString());
+                Logger.AppendLine("Sending Stop to Bedrock. Process.HasExited = " + process.HasExited.ToString());
 
                 process.CancelOutputRead();
 
@@ -76,7 +88,6 @@ namespace BedrockService.Service.Server
             ServerThread.CloseThread();
             process = null;
             CurrentServerStatus = ServerStatus.Stopped;
-            return true;
         }
 
         public void StartWatchdog(HostControl hostControl)
@@ -101,42 +112,42 @@ namespace BedrockService.Service.Server
                 {
                     backupDir.Create();
                 }
-                int dirCount = backupDir.GetDirectories().Length; // this line creates a new int with a value derived from the number of directories found in the backups folder.
-                try // use a try catch any time you know an error could occur.
+                int dirCount = backupDir.GetDirectories().Length;
+                try
                 {
-                    if (dirCount >= int.Parse(serviceConfiguration.GetProp("MaxBackupCount").ToString())) // Compare the directory count with the value set in the config. Values from config are stored as strings, and therfore must be converted to integer first for compare.
+                    if (dirCount >= int.Parse(serviceConfiguration.GetProp("MaxBackupCount").ToString()))
                     {
-                        Regex reg = new Regex(@"Backup_(.*)$"); // Creates a new Regex class with our pattern loaded.
+                        Regex reg = new Regex(@"Backup_(.*)$");
 
-                        List<long> Dates = new List<long>(); // creates a new list long integer array named Dates, and initializes it.
-                        foreach (DirectoryInfo dir in backupDir.GetDirectories()) // Loop through the array of directories in backup folder. In this "foreach" loop, we name each entry in the array "dir" and then do something to it.
+                        List<long> Dates = new List<long>();
+                        foreach (DirectoryInfo dir in backupDir.GetDirectories())
                         {
-                            if (reg.IsMatch(dir.Name)) // Using regex.IsMatch will return true if the pattern matches the name of the folder we are working with. 
+                            if (reg.IsMatch(dir.Name))
                             {
-                                Match match = reg.Match(dir.Name); // creates an instance of the match to work with.
-                                Dates.Add(Convert.ToInt64(match.Groups[1].Value)); // if it was a match, we then pull the number we saved in the (.*) part of the pattern from the groups method in the match. Groups saves the entire match first, followed by anthing saved in parentheses. Because we need to compare dates, we must convert the string to an integer.
+                                Match match = reg.Match(dir.Name);
+                                Dates.Add(Convert.ToInt64(match.Groups[1].Value));
                             }
                         }
-                        long OldestDate = 0; // Create a new int to store the oldest date in.
-                        foreach (long date in Dates) // for each date in the Dates array....
+                        long OldestDate = 0;
+                        foreach (long date in Dates)
                         {
-                            if (OldestDate == 0) // if this is the first entry in Dates, OldestDate will still be 0. Set it to a date so compare can happen.
+                            if (OldestDate == 0)
                             {
-                                OldestDate = date; // OldestDate now equals date.
+                                OldestDate = date;
                             }
-                            else if (date < OldestDate) // If now the next entry in Dates is a smaller number than the previously set OldestDate, reset OldestDate to date.
+                            else if (date < OldestDate)
                             {
-                                OldestDate = date; // OldestDate now equals date.
+                                OldestDate = date;
                             }
                         }
-                        Directory.Delete($@"{backupDir}\Backup_{OldestDate}", true); // After running through all directories, this string $@"{backupDir}\Backup_{OldestDate}" should now represent the folder that has the lowest/oldest date. Delete it. Supply the "true" after the directory string to enable recusive mode, removing all files and folders.
+                        Directory.Delete($@"{backupDir}\Backup_{OldestDate}", true);
                     }
                 }
-                catch (Exception e) // catch all exceptions here.
+                catch (Exception e)
                 {
-                    if (e.GetType() == typeof(FormatException)) // if the exception is equal a type of FormatException, Do the following... if this was a IOException, they would not match.
+                    if (e.GetType() == typeof(FormatException))
                     {
-                        Logger.AppendLine("Error in Config! MaxBackupCount must be nothing but a number!"); // this exception will be thrown if the string could not become a number (i.e. of there was a letter in the mix).
+                        Logger.AppendLine("Error in Config! MaxBackupCount must be nothing but a number!");
                     }
                 }
 
@@ -363,6 +374,7 @@ namespace BedrockService.Service.Server
                         string xuid = dataMsg.Substring(xuidStart, dataMsg.Length - xuidStart);
                         Console.WriteLine($"Player {username} connected with XUID: {xuid}");
                         playerManager.PlayerConnected(username, xuid);
+                        Configurator.SaveKnownPlayerDatabase(ServerConfiguration);
                     }
                     if (dataMsg.StartsWith("[INFO] Player disconnected"))
                     {
@@ -374,6 +386,7 @@ namespace BedrockService.Service.Server
                         string xuid = dataMsg.Substring(xuidStart, dataMsg.Length - xuidStart);
                         Console.WriteLine($"Player {username} disconnected with XUID: {xuid}");
                         playerManager.PlayerDisconnected(xuid);
+                        Configurator.SaveKnownPlayerDatabase(ServerConfiguration);
                     }
                     if (dataMsg.Contains("Failed to load Vanilla"))
                     {
@@ -382,6 +395,21 @@ namespace BedrockService.Service.Server
                             Thread.Sleep(200);
                         if (Configurator.ReplaceServerBuild(ServerConfiguration).Wait(30000))
                             CurrentServerStatus = ServerStatus.Starting;
+                    }
+                    if(dataMsg.Contains("Version "))
+                    {
+                        int msgStartIndex = dataMsg.IndexOf(']') + 2;
+                        string focusedMsg = dataMsg.Substring(msgStartIndex, dataMsg.Length - msgStartIndex);
+                        int versionIndex = focusedMsg.IndexOf(' ') + 1;
+                        string versionString = focusedMsg.Substring(versionIndex, focusedMsg.Length - versionIndex);
+                        string currentVersion = serviceConfiguration.GetServerVersion();
+                        if (currentVersion != versionString)
+                        {
+                            Logger.AppendLine($"Server {GetServerName()} version found out-of-date! Now updating!");
+                            AwaitServerStop().Wait();
+                            Configurator.ReplaceServerBuild(ServerConfiguration).Wait();
+                            StartControl();
+                        }
                     }
                 }
             }
@@ -407,7 +435,7 @@ namespace BedrockService.Service.Server
                 if (CurrentServerStatus == ServerStatus.Started)
                 {
                     CurrentServerStatus = ServerStatus.Stopping;
-                    while (CurrentServerStatus == ServerStatus.Stopping)
+                    while (CurrentServerStatus != ServerStatus.Stopped)
                     {
                         Thread.Sleep(100);
                     }

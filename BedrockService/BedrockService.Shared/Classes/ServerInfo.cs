@@ -16,8 +16,9 @@ namespace BedrockService.Shared.Classes
         public List<Property> ServerPropList = new List<Property>();
         public List<StartCmdEntry> StartCmds = new List<StartCmdEntry>();
 
-        public ServerInfo(string[] configEntries)
+        public ServerInfo(string[] configEntries, string coreServersPath)
         {
+            serversPath = coreServersPath;
             InitializeDefaults();
             ProcessConfiguration(configEntries);
         }
