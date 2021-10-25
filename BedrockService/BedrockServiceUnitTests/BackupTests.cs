@@ -7,7 +7,7 @@ using BedrockService.Shared.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-
+using System.Windows.Forms;
 using Topshelf;
 
 namespace BedrockServiceUnitTests
@@ -25,11 +25,11 @@ namespace BedrockServiceUnitTests
             serviceProvider.GetRequiredService<IConfigurator>().LoadAllConfigurations().Wait();
             serviceProvider.GetRequiredService<IUpdater>().CheckUpdates().Wait();
             IService service = serviceProvider.GetRequiredService<IService>();
-            ILogger Logger = serviceProvider.GetRequiredService<ILogger>();
-            IProcessInfo ProcessInfo = serviceProvider.GetRequiredService<IProcessInfo>();
-            service.Run();
             NetworkStrategyLookup networkStrategyLookup = serviceProvider.GetRequiredService<NetworkStrategyLookup>();
-            networkStrategyLookup.StandardMessageLookup[NetworkMessageTypes.BackupAll].ParseMessage(null, 0xFF);
+            IBedrockService bedrockService = serviceProvider.GetRequiredService<IBedrockService>();
+            bedrockService.Start(null);
+            BedrockService.Client.Management.FormManager.GetMainWindow.PerformBackupTests();
+            
         }
     }
 }

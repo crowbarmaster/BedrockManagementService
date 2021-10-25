@@ -69,6 +69,7 @@
     <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
     </Reference>
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="Topshelf, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
       <HintPath>..\packages\Topshelf.4.3.0\lib\net452\Topshelf.dll</HintPath>
     </Reference>
@@ -84,6 +85,10 @@
     <ProjectReference Include="..\BedrockService.Shared\BedrockService.Shared.csproj">
       <Project>{F146D5E8-EF1F-4785-9150-182631F059B7}</Project>
       <Name>BedrockService.Shared</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Client\BedrockService.Client.csproj">
+      <Project>{a2daf70a-925a-4f4b-b7ee-caace75d6740}</Project>
+      <Name>BedrockService.Client</Name>
     </ProjectReference>
     <ProjectReference Include="..\Service\BedrockService.Service.csproj">
       <Project>{13b2b5a8-71e9-49f4-9bfb-3c3b3c0a054c}</Project>
