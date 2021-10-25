@@ -61,7 +61,6 @@
     <Compile Include="Interfaces\IProcessInfo.cs" />
     <Compile Include="Classes\NetworkEnums.cs" />
     <Compile Include="PackParser\MinecraftKnownPacksClass.cs" />
-    <Compile Include="PackParser\MinecraftPackManifestJsonClass.cs" />
     <Compile Include="PackParser\MinecraftPackParser.cs" />
     <Compile Include="Classes\Player.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
