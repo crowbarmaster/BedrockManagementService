@@ -6,15 +6,25 @@ namespace BedrockService.Shared.Classes
 {
     public class Player : IPlayer
     {
+        [JsonProperty]
         private string Username { get; set; }
+        [JsonProperty]
         private string XUID { get; set; }
+        [JsonProperty]
         private string PermissionLevel;
+        [JsonProperty]
         private string FirstConnectedTime { get; set; }
+        [JsonProperty]
         private string LastConnectedTime { get; set; }
+        [JsonProperty]
         private string LastDisconnectTime { get; set; }
+        [JsonProperty]
         private string ServerDefaultPerm { get; set; }
+        [JsonProperty]
         private bool Whitelisted { get; set; }
+        [JsonProperty]
         private bool IgnorePlayerLimits { get; set; }
+        [JsonProperty]
         private bool FromConfig { get; set; }
 
         [JsonConstructor]
