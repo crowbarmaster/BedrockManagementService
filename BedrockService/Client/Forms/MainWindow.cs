@@ -100,9 +100,8 @@ namespace BedrockService.Client.Forms
 
 
         [STAThread]
-        static void Main()
+        public static void Main()
         {
-            ConfigManager.LoadConfigs();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.ApplicationExit += OnExit;
@@ -136,6 +135,7 @@ namespace BedrockService.Client.Forms
 
         public void InitForm()
         {
+            ConfigManager.LoadConfigs();
             foreach (IClientSideServiceConfiguration host in ConfigManager.HostConnectList)
             {
                 HostListBox.Items.Add(host.GetHostName());
@@ -443,6 +443,28 @@ namespace BedrockService.Client.Forms
             FollowTail = true;
         }
 
+        public void PerformBackupTests()
+        {
+            HostListBox.SelectedIndex = 0;
+            Connect_Click(null, null);
+            GlobBackup_Click(null, null);
+            while (ServerBusy)
+            {
+                Thread.Sleep(250);
+            }
+            ServerSelectBox.SelectedIndex = 0;
+            FormManager.GetTCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.EnumBackups);
+            while (!FormManager.GetTCPClient.EnumBackupsArrived)
+                Thread.Sleep(100);
+            FormManager.GetTCPClient.EnumBackupsArrived = false;
+            JsonSerializerSettings settings = new JsonSerializerSettings()
+            {
+                TypeNameHandling = TypeNameHandling.All
+            };
+            byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new string[] { FormManager.GetTCPClient.BackupList[0].ToString() }, Formatting.Indented, settings));
+            FormManager.GetTCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, FormManager.GetMainWindow.connectedHost.GetServerIndex(FormManager.GetMainWindow.selectedServer), NetworkMessageTypes.DelBackups);
+        }
+
         private void ComponentEnableManager()
         {
             Connect.Enabled = connectedHost == null;
@@ -530,7 +552,6 @@ namespace BedrockService.Client.Forms
         {
             EditSrv editDialog = new EditSrv();
             editDialog.EnableBackupManager();
-
             FormManager.GetTCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.EnumBackups);
             while (!FormManager.GetTCPClient.EnumBackupsArrived)
                 Thread.Sleep(100);
@@ -583,7 +604,7 @@ namespace BedrockService.Client.Forms
             }
             using (Process nbtStudioProcess = new Process())
             {
-                string tempPath = $@"{Path.GetTempPath()}\level.dat";
+                string tempPath = $@"{Path.GetTempPath()}level.dat";
                 nbtStudioProcess.StartInfo = new ProcessStartInfo(ConfigManager.NBTStudioPath, tempPath);
                 nbtStudioProcess.Start();
                 nbtStudioProcess.WaitForExit();

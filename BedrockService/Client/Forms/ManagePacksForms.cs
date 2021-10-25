@@ -18,14 +18,14 @@ namespace BedrockService.Client.Forms
         private byte ServerIndex = 0x00;
         private ILogger Logger;
         private IProcessInfo ProcessInfo;
-        private DirectoryInfo PackExtractDir = new DirectoryInfo(@"C:\RBPacks");
+        private DirectoryInfo PackExtractDir;
         public ManagePacksForms(byte serverIndex, ILogger logger, IProcessInfo processInfo)
         {
             Logger = logger;
+            PackExtractDir = new DirectoryInfo($@"{processInfo.GetDirectory()}\Temp");
             ProcessInfo = processInfo;
             ServerIndex = serverIndex;
             InitializeComponent();
-            //FormManager.GetTCPClient.SendData(File.ReadAllBytes($@"E:\testRB.zip"), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.PackFile);
         }
 
         public void PopulateServerPacks(List<MinecraftPackParser> packList)
@@ -112,8 +112,7 @@ namespace BedrockService.Client.Forms
             openFileDialog.Multiselect = true;
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                MinecraftPackParser parser = new MinecraftPackParser(openFileDialog.FileNames, Logger, ProcessInfo);
-                PackExtractDir = parser.PackExtractDirectory;
+                MinecraftPackParser parser = new MinecraftPackParser(openFileDialog.FileNames, PackExtractDir, Logger, ProcessInfo);
                 parsedPacksListBox.Items.Clear();
                 foreach (MinecraftPackContainer container in parser.FoundPacks)
                     parsedPacksListBox.Items.Add(container);
