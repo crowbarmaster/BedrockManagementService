@@ -1,7 +1,9 @@
-﻿using BedrockService.Service.Management;
+﻿using BedrockService.Service.Core.Interfaces;
+using BedrockService.Service.Management;
 using BedrockService.Service.Networking;
 using BedrockService.Service.Server;
 using BedrockService.Shared.Interfaces;
+using BedrockService.Service.Core.Threads;
 using NCrontab;
 using System;
 using System.Collections.Generic;
@@ -27,6 +29,8 @@ namespace BedrockService.Service.Core
         private readonly IProcessInfo ProcessInfo;
         private readonly IConfigurator Configurator;
         private readonly IUpdater Updater;
+        private readonly ITCPListener tCPListener;
+        private IServiceThread tcpThread;
         private readonly CrontabSchedule shed;
         private readonly CrontabSchedule updaterCron;
         private HostControl hostControl;
@@ -34,13 +38,15 @@ namespace BedrockService.Service.Core
         private System.Timers.Timer updaterTimer;
         private System.Timers.Timer cronTimer;
 
-        public BedrockService(IConfigurator configurator, IUpdater updater, ILogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo)
+        public BedrockService(IConfigurator configurator, IUpdater updater, ILogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ITCPListener tCPListener)
         {
+            this.tCPListener = tCPListener;
             Configurator = configurator;
             ServiceConfiguration = serviceConfiguration;
             ProcessInfo = serviceProcessInfo;
             Updater = updater;
             Logger = logger;
+            tcpThread = new TCPThread(new ThreadStart(tCPListener.StartListening));
             shed = CrontabSchedule.TryParse(serviceConfiguration.GetProp("BackupCron").ToString());
             updaterCron = CrontabSchedule.TryParse(serviceConfiguration.GetProp("UpdateCron").ToString());
             Initialize();
@@ -55,7 +61,8 @@ namespace BedrockService.Service.Core
 
                 foreach (var brs in bedrockServers)
                 {
-                    this.hostControl.RequestAdditionalTime(TimeSpan.FromSeconds(30));
+                    if(hostControl != null)
+                        this.hostControl.RequestAdditionalTime(TimeSpan.FromSeconds(30));
                     brs.SetServerStatus(BedrockServer.ServerStatus.Starting);
                     brs.StartWatchdog(this.hostControl);
                 }
@@ -79,12 +86,28 @@ namespace BedrockService.Service.Core
                     while (brs.GetServerStatus() == BedrockServer.ServerStatus.Stopping && !Program.IsExiting)
                         Thread.Sleep(100);
                 }
+                tcpThread.CloseThread();
+                tcpThread = null;
                 return true;
             }
             catch (Exception e)
             {
                 Logger.AppendLine($"Error Stopping BedrockServiceWrapper {e.StackTrace}");
                 return false;
+            }
+        }
+
+        public void RestartService()
+        {
+            try
+            {
+                Stop(hostControl);
+                Configurator.LoadAllConfigurations().Wait();
+                Start(hostControl);
+            }
+            catch (Exception e)
+            {
+                Logger.AppendLine($"Error Stopping BedrockServiceWrapper {e.StackTrace}");
             }
         }
 
@@ -226,7 +249,9 @@ namespace BedrockService.Service.Core
                         {
                             if (server != compareServer)
                             {
-                                if (server.GetProp("ServerExeName").Equals(compareServer.GetProp("ServerExeName")) || server.GetProp("ServerPath").Equals(compareServer.GetProp("ServerPath")) || server.GetProp("server-port").Equals(compareServer.GetProp("server-port")) || server.GetProp("server-portv6").Equals(compareServer.GetProp("server-portv6")) || server.GetProp("server-name").Equals(compareServer.GetProp("server-name")))
+                                if (server.GetProp("server-port").Equals(compareServer.GetProp("server-port")) ||
+                                    server.GetProp("server-portv6").Equals(compareServer.GetProp("server-portv6")) ||
+                                    server.GetProp("server-name").Equals(compareServer.GetProp("server-name")))
                                 {
                                     Logger.AppendLine($"Duplicate server settings between servers {server.GetFileName()} and {compareServer.GetFileName()}.");
                                     dupedSettingsFound = true;

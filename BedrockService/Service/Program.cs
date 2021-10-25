@@ -26,6 +26,7 @@ namespace BedrockService.Service
             IService service = serviceProvider.GetRequiredService<IService>();
             ILogger Logger = serviceProvider.GetRequiredService<ILogger>();
             IProcessInfo ProcessInfo = serviceProvider.GetRequiredService<IProcessInfo>();
+            _ = serviceProvider.GetRequiredService<NetworkStrategyLookup>();
             if (args.Length == 0 || Environment.UserInteractive)
             {
                 isConsoleMode = true;
@@ -48,7 +49,7 @@ namespace BedrockService.Service
             {
                 isDebugEnabled = args[0].ToLower() == "-debug";
             }
-
+            service.InitializeHost().Wait();
             TopshelfExitCode rc = service.Run();
             var exitCode = (int)Convert.ChangeType(rc, rc.GetTypeCode());
             if (isDebugEnabled)

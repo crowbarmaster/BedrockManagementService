@@ -30,25 +30,28 @@ namespace BedrockService.Service.Networking
                 {NetworkMessageTypes.BackupAll, new ServerBackupAll(messageSender, service) },
                 {NetworkMessageTypes.EnumBackups, new EnumBackups(configurator, messageSender) },
                 {NetworkMessageTypes.Backup, new ServerBackup(messageSender, service) },
-                {NetworkMessageTypes.PropUpdate, new ServerPropUpdate(serviceConfiguration, messageSender, service) },
+                {NetworkMessageTypes.PropUpdate, new ServerPropUpdate(configurator, serviceConfiguration, messageSender, service) },
                 {NetworkMessageTypes.Restart, new ServerRestart(messageSender, service) },
                 {NetworkMessageTypes.Command, new ServerCommand(messageSender, service, logger) },
-                {NetworkMessageTypes.PackList, new PackList(messageSender, processInfo, serviceConfiguration) },
+                {NetworkMessageTypes.PackList, new PackList(messageSender, processInfo, serviceConfiguration, logger) },
                 {NetworkMessageTypes.RemovePack, new RemovePack(messageSender, processInfo, serviceConfiguration) },
                 {NetworkMessageTypes.PlayersUpdate, new PlayersUpdate(configurator, messageSender, serviceConfiguration) },
-                {NetworkMessageTypes.PackFile, new PackFile(configurator, messageSender, serviceConfiguration, processInfo) },
+                {NetworkMessageTypes.PackFile, new PackFile(configurator, messageSender, serviceConfiguration, processInfo, logger) },
                 {NetworkMessageTypes.Connect, new Connect(messageSender, serviceConfiguration) },
                 {NetworkMessageTypes.StartCmdUpdate, new StartCmdUpdate(configurator, messageSender, serviceConfiguration) },
                 {NetworkMessageTypes.CheckUpdates, new CheckUpdates(configurator, messageSender, serviceConfiguration, updater) },
                 {NetworkMessageTypes.BackupRollback, new BackupRollback(configurator, messageSender) },
                 {NetworkMessageTypes.AddNewServer, new AddNewServer(configurator, messageSender, processInfo, serviceConfiguration, logger, service) },
                 {NetworkMessageTypes.ConsoleLogUpdate, new ConsoleLogUpdate(messageSender, serviceConfiguration, service) },
-                {NetworkMessageTypes.PlayersRequest, new PlayerRequest(messageSender, serviceConfiguration) }
+                {NetworkMessageTypes.PlayersRequest, new PlayerRequest(messageSender, serviceConfiguration) },
+                {NetworkMessageTypes.LevelEditRequest, new LevelEditRequest(messageSender, serviceConfiguration) },
+                {NetworkMessageTypes.LevelEditFile, new LevelEditFile(configurator, messageSender, serviceConfiguration, service) }
             };
             FlaggedMessageLookup = new Dictionary<NetworkMessageTypes, IFlaggedMessageParser>()
             {
                 {NetworkMessageTypes.RemoveServer, new RemoveServer(configurator, messageSender, serviceConfiguration, logger, service) },
             };
+            messageSender.SetStrategyDictionaries(StandardMessageLookup, FlaggedMessageLookup);
         }
 
         class DeleteBackups : IMessageParser
@@ -85,7 +88,8 @@ namespace BedrockService.Service.Networking
 
             public void ParseMessage(byte[] data, byte serverIndex)
             {
-                service.GetBedrockServerByIndex(serverIndex).RestartServer(true);
+                foreach (IBedrockServer server in service.GetAllServers())
+                    server.RestartServer(true);
                 messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
             }
         }
@@ -135,9 +139,11 @@ namespace BedrockService.Service.Networking
             IServiceConfiguration serviceConfiguration;
             IMessageSender messageSender;
             IBedrockService bedrockService;
+            IConfigurator configurator;
 
-            public ServerPropUpdate(IServiceConfiguration serviceConfiguration, IMessageSender messageSender, IBedrockService bedrockService)
+            public ServerPropUpdate(IConfigurator configurator, IServiceConfiguration serviceConfiguration, IMessageSender messageSender, IBedrockService bedrockService)
             {
+                this.configurator = configurator;
                 this.serviceConfiguration = serviceConfiguration;
                 this.messageSender = messageSender;
                 this.bedrockService = bedrockService;
@@ -151,7 +157,15 @@ namespace BedrockService.Service.Networking
                 };
                 string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
                 List<Property> propList = JsonConvert.DeserializeObject<List<Property>>(stringData, settings);
-                Property prop = propList.First(p => p.KeyName == "server-name");
+                Property prop = propList.FirstOrDefault(p => p.KeyName == "server-name");
+                if(prop == null)
+                {
+                    serviceConfiguration.SetAllProps(propList);
+                    configurator.SaveGlobalFile();
+                    bedrockService.RestartService();
+                    messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+                    return;
+                }
                 serviceConfiguration.GetServerInfoByIndex(serverIndex).SetAllProps(propList);
                 bedrockService.GetBedrockServerByIndex(serverIndex).SetServerStatus(BedrockServer.ServerStatus.Stopping);
                 while (bedrockService.GetBedrockServerByIndex(serverIndex).GetServerStatus() == BedrockServer.ServerStatus.Stopping)
@@ -207,9 +221,11 @@ namespace BedrockService.Service.Networking
             IMessageSender messageSender;
             IServiceConfiguration serviceConfiguration;
             IProcessInfo processInfo;
+            ILogger logger;
 
-            public PackList(IMessageSender messageSender, IProcessInfo processInfo, IServiceConfiguration serviceConfiguration)
+            public PackList(IMessageSender messageSender, IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, ILogger logger)
             {
+                this.logger = logger;
                 this.messageSender = messageSender;
                 this.serviceConfiguration = serviceConfiguration;
                 this.processInfo = processInfo;
@@ -222,8 +238,13 @@ namespace BedrockService.Service.Networking
                 MinecraftKnownPacksClass knownPacks = new MinecraftKnownPacksClass($@"{serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath")}\valid_known_packs.json", $@"{processInfo.GetDirectory()}\Server\stock_packs.json");
                 List<MinecraftPackParser> list = new List<MinecraftPackParser>();
                 foreach (MinecraftKnownPacksClass.KnownPack pack in knownPacks.KnownPacks)
-                    list.Add(new MinecraftPackParser($@"{serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath")}\{pack.path.Replace(@"/", @"\")}"));
-                messageSender.SendData(Encoding.UTF8.GetBytes(JArray.FromObject(list).ToString()), NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.PackList);
+                {
+                    MinecraftPackParser currentParser = new MinecraftPackParser(logger, processInfo);
+                    currentParser.ParseDirectory(new DirectoryInfo($@"{serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath")}\{pack.path.Replace(@"/", @"\")}"));
+                    list.Add(currentParser);
+                }
+                string arrayString = JArray.FromObject(list).ToString();
+                messageSender.SendData(Encoding.UTF8.GetBytes(arrayString), NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.PackList);
             }
         }
 
@@ -269,7 +290,7 @@ namespace BedrockService.Service.Networking
             public void ParseMessage(byte[] data, byte serverIndex)
             {
                 IServerConfiguration server = serviceConfiguration.GetServerInfoByIndex(serverIndex);
-                string pathToLevelDat = $@"{serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath")}\{server.GetProp("server-name")}\worlds\{server.GetProp("level-name")}\level.dat";
+                string pathToLevelDat = $@"{serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath")}\worlds\{server.GetProp("level-name")}\level.dat";
                 byte[] levelDatToBytes = File.ReadAllBytes(pathToLevelDat);
                 messageSender.SendData(levelDatToBytes, NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.LevelEditFile);
             }
@@ -295,8 +316,8 @@ namespace BedrockService.Service.Networking
                 {
                     TypeNameHandling = TypeNameHandling.All
                 };
-                List<Player> fetchedPlayers = JsonConvert.DeserializeObject<List<Player>>(stringData, settings);
-                foreach (Player player in fetchedPlayers)
+                List<IPlayer> fetchedPlayers = JsonConvert.DeserializeObject<List<IPlayer>>(stringData, settings);
+                foreach (IPlayer player in fetchedPlayers)
                 {
                     try
                     {
@@ -307,7 +328,6 @@ namespace BedrockService.Service.Networking
                     }
                 }
                 configurator.SaveKnownPlayerDatabase(serviceConfiguration.GetServerInfoByIndex(serverIndex));
-                configurator.LoadAllConfigurations().Wait();
                 messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
 
             }
@@ -319,9 +339,11 @@ namespace BedrockService.Service.Networking
             IServiceConfiguration serviceConfiguration;
             IConfigurator configurator;
             IProcessInfo serviceProcessInfo;
+            ILogger logger;
 
-            public PackFile(IConfigurator configurator, IMessageSender messageSender, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo)
+            public PackFile(IConfigurator configurator, IMessageSender messageSender, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ILogger logger)
             {
+                this.logger = logger;
                 this.serviceProcessInfo = serviceProcessInfo;
                 this.configurator = configurator;
                 this.messageSender = messageSender;
@@ -330,7 +352,7 @@ namespace BedrockService.Service.Networking
 
             public void ParseMessage(byte[] data, byte serverIndex)
             {
-                MinecraftPackParser archiveParser = new MinecraftPackParser(Encoding.UTF8.GetString(data, 5, data.Length - 5));
+                MinecraftPackParser archiveParser = new MinecraftPackParser(data, logger, serviceProcessInfo);
                 foreach (MinecraftPackContainer container in archiveParser.FoundPacks)
                 {
                     string serverPath = serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath").ToString();
@@ -575,9 +597,17 @@ namespace BedrockService.Service.Networking
                     int srvTextLen;
                     int clientCurLen;
                     int loop;
+                    ILogger srvText;
                     if (srvName != "Service")
                     {
-                        ILogger srvText = service.GetBedrockServerByName(srvName).GetLogger();
+                        try
+                        {
+                        srvText = service.GetBedrockServerByName(srvName).GetLogger();
+                        }
+                        catch(NullReferenceException e)
+                        {
+                            break;
+                        }
                         srvTextLen = srvText.Count();
                         clientCurLen = int.Parse(dataSplit[1]);
                         loop = clientCurLen;

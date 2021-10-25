@@ -5,6 +5,7 @@ using BedrockService.Service.Server;
 using BedrockService.Shared.Interfaces;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Topshelf;
 using Topshelf.Runtime;
 
@@ -13,52 +14,60 @@ namespace BedrockService.Service.Core
     public class Service : IService
     {
         private IBedrockService BedrockService { get; }
-        private readonly Host host;
-        private readonly IServiceThread tcpThread;
+        private Host host;
+        private readonly IServiceConfiguration serviceConfiguration;
+        private readonly ILogger logger;
 
-        public Service(ILogger logger, IBedrockService bedrockService, IServiceConfiguration serviceConfiguration, ITCPListener tCPListener, NetworkStrategyLookup lookup)
+        public Service(ILogger logger, IBedrockService bedrockService, IServiceConfiguration serviceConfiguration)
         {
+            this.logger = logger;
+            this.serviceConfiguration = serviceConfiguration;
             BedrockService = bedrockService;
-            tCPListener.SetStrategyDictionaries(lookup.StandardMessageLookup, lookup.FlaggedMessageLookup);
-            tcpThread = new TCPThread(new ThreadStart(tCPListener.StartListening));
-            host = HostFactory.New(x =>
+        }
+
+        public async Task InitializeHost()
+        {
+            await Task.Run(() =>
             {
-                x.SetStartTimeout(TimeSpan.FromSeconds(10));
-                x.SetStopTimeout(TimeSpan.FromSeconds(10));
-                x.UseAssemblyInfoForServiceInfo();
-                x.Service(settings => BedrockService, s =>
+                host = HostFactory.New(x =>
                 {
-                    s.BeforeStartingService(_ => logger.AppendLine("Starting service..."));
-                    s.BeforeStoppingService(_ =>
+                    x.SetStartTimeout(TimeSpan.FromSeconds(10));
+                    x.SetStopTimeout(TimeSpan.FromSeconds(10));
+                    x.UseAssemblyInfoForServiceInfo();
+                    x.Service(settings => BedrockService, s =>
                     {
-                        logger.AppendLine("Stopping service...");
-                        foreach (BedrockServer server in BedrockService.GetAllServers())
+                        s.BeforeStartingService(_ => logger.AppendLine("Starting service..."));
+                        s.BeforeStoppingService(_ =>
                         {
-                            server.CurrentServerStatus = BedrockServer.ServerStatus.Stopping;
-                            while (server.CurrentServerStatus != BedrockServer.ServerStatus.Stopped)
-                                Thread.Sleep(100);
-                        }
-                        tcpThread.CloseThread();
+                            logger.AppendLine("Stopping service...");
+                            foreach (BedrockServer server in BedrockService.GetAllServers())
+                            {
+                                server.CurrentServerStatus = BedrockServer.ServerStatus.Stopping;
+                                while (server.CurrentServerStatus != BedrockServer.ServerStatus.Stopped)
+                                    Thread.Sleep(100);
+                            }
+                        });
+                    });
+
+                    x.RunAsLocalSystem();
+                    x.SetDescription("Windows Service Wrapper for Windows Bedrock Server");
+                    x.SetDisplayName("BedrockService");
+                    x.SetServiceName("BedrockService");
+                    x.UnhandledExceptionPolicy = UnhandledExceptionPolicyCode.LogErrorOnly;
+
+                    x.EnableServiceRecovery(src =>
+                    {
+                        src.RestartService(delayInMinutes: 0);
+                        src.RestartService(delayInMinutes: 1);
+                        src.SetResetPeriod(days: 1);
+                    });
+
+                    x.OnException((ex) =>
+                    {
+                        logger.AppendLine("Exception occured Main : " + ex.Message);
                     });
                 });
 
-                x.RunAsLocalSystem();
-                x.SetDescription("Windows Service Wrapper for Windows Bedrock Server");
-                x.SetDisplayName("BedrockService");
-                x.SetServiceName("BedrockService");
-                x.UnhandledExceptionPolicy = UnhandledExceptionPolicyCode.LogErrorOnly;
-
-                x.EnableServiceRecovery(src =>
-                {
-                    src.RestartService(delayInMinutes: 0);
-                    src.RestartService(delayInMinutes: 1);
-                    src.SetResetPeriod(days: 1);
-                });
-
-                x.OnException((ex) =>
-                {
-                    logger.AppendLine("Exception occured Main : " + ex.Message);
-                });
             });
         }
 

@@ -16,5 +16,7 @@ namespace BedrockService.Service.Core
         List<IBedrockServer> GetAllServers();
 
         void InitializeNewServer(IServerConfiguration serverConfiguration);
+
+        void RestartService();
     }
 }

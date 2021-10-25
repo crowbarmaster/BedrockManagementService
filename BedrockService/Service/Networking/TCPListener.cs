@@ -18,8 +18,8 @@ namespace BedrockService.Service.Networking
         private NetworkStream stream;
         private readonly IServiceConfiguration serviceConfiguration;
         private readonly ILogger logger;
-        IServiceThread clientThread;
-        IServiceThread heartbeatThread;
+        private IServiceThread clientThread;
+        private IServiceThread heartbeatThread;
         private bool heartbeatRecieved = false;
         private bool firstHeartbeatRecieved = false;
         private bool keepAlive = false;
@@ -32,8 +32,6 @@ namespace BedrockService.Service.Networking
         {
             this.logger = logger;
             this.serviceConfiguration = serviceConfiguration;
-            //StandardMessageLookup = lookup.StandardMessageLookup;
-            // FlaggedMessageLookup = lookup.FlaggedMessageLookup;
         }
 
         public void SetStrategyDictionaries(Dictionary<NetworkMessageTypes, IMessageParser> standard, Dictionary<NetworkMessageTypes, IFlaggedMessageParser> flagged)
@@ -58,7 +56,7 @@ namespace BedrockService.Service.Networking
                 Environment.Exit(1);
             }
 
-            while (!Program.IsExiting)
+            while (keepAlive)
             {
                 try
                 {
@@ -73,16 +71,17 @@ namespace BedrockService.Service.Networking
                     logger.AppendLine(e.ToString());
                 }
             }
-            //listener.Stop();
+            inListener.Stop();
         }
 
         public void StopListening()
         {
             clientThread.CloseThread();
+            stream.Close();
             client.Close();
+            inListener.Stop();
+            inListener = null;
         }
-
-        public void SetHeartbeatReply() => heartbeatRecieved = true;
 
         public void SendData(byte[] bytes, NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type, NetworkMessageFlags status)
         {
@@ -121,7 +120,7 @@ namespace BedrockService.Service.Networking
 
         private void IncomingListener()
         {
-            logger.AppendLine("Established connection! Listening for incoming packets!");
+            logger.AppendLine("Packet listener thread started.");
             int AvailBytes = 0;
             int byteCount = 0;
             NetworkMessageSource msgSource = 0;
@@ -223,9 +222,6 @@ namespace BedrockService.Service.Networking
                                 return;
                             }
                         }
-                        //DisconnectClient();
-                        logger.AppendLine("HeartBeatSender exited gracefully.");
-                        return;
                     }
                 }
                 heartbeatRecieved = false;

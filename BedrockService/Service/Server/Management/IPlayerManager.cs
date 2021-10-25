@@ -10,7 +10,6 @@ namespace BedrockService.Service.Server.Management
         List<IPlayer> GetPlayers();
         void PlayerConnected(string username, string xuid);
         void PlayerDisconnected(string xuid);
-        void ProcessConfiguration(string[] entries);
         void UpdatePlayerFromCfg(string xuid, string username, string permission, string whitelisted, string ignoreMaxPlayerLimit);
     }
 }

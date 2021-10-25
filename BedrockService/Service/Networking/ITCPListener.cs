@@ -10,8 +10,6 @@ namespace BedrockService.Service.Networking
 
         void StopListening();
 
-        void SetHeartbeatReply();
-
         void SetStrategyDictionaries(Dictionary<NetworkMessageTypes, IMessageParser> standard, Dictionary<NetworkMessageTypes, IFlaggedMessageParser> flagged);
     }
 }

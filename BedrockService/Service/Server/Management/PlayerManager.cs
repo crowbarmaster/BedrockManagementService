@@ -16,12 +16,6 @@ namespace BedrockService.Service.Server.Management
             this.logger = logger;
         }
 
-        public void ProcessConfiguration(string[] entries)
-        {
-
-
-        }
-
         public void PlayerConnected(string username, string xuid)
         {
             IPlayer playerFound = serverConfiguration.GetPlayerByXuid(xuid);
@@ -30,6 +24,7 @@ namespace BedrockService.Service.Server.Management
                 serverConfiguration.AddUpdatePlayer(new Player(xuid, username, DateTime.Now.Ticks.ToString(), "0", "0", false, serverConfiguration.GetProp("default-player-permission-level").ToString(), false, false));
                 return;
             }
+            playerFound.UpdateTimes(DateTime.Now.Ticks.ToString(), playerFound.GetTimes()[2]);
             serverConfiguration.AddUpdatePlayer(playerFound);
         }
 
@@ -38,6 +33,7 @@ namespace BedrockService.Service.Server.Management
             IPlayer playerFound = serverConfiguration.GetPlayerByXuid(xuid);
             string[] oldTimes = playerFound.GetTimes();
             playerFound.UpdateTimes(oldTimes[1], DateTime.Now.Ticks.ToString());
+            serverConfiguration.AddUpdatePlayer(playerFound);
         }
 
         public void UpdatePlayerFromCfg(string xuid, string username, string permission, string whitelisted, string ignoreMaxPlayerLimit)

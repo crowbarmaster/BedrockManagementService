@@ -47,6 +47,7 @@ namespace BedrockService.Service.Management
                     loadedVersion = File.ReadAllText($@"{configDir}\..\bedrock_ver.ini");
                 ServerInfo serverInfo;
                 LoadGlobals();
+                ServiceConfiguration.GetAllServerInfos().Clear();
                 string[] files = Directory.GetFiles(configDir, "*.conf");
                 foreach (string file in files)
                 {
@@ -214,7 +215,7 @@ namespace BedrockService.Service.Management
                 TextWriter writer = new StreamWriter(filePath);
                 foreach (Player entry in server.GetPlayerList())
                 {
-                    writer.WriteLine(entry.ToString("K"));
+                    writer.WriteLine(entry.ToString("Known"));
                 }
                 writer.Flush();
                 writer.Close();
@@ -234,7 +235,7 @@ namespace BedrockService.Service.Management
                 foreach (IPlayer player in server.GetPlayerList())
                 {
                     if (!player.IsDefaultRegistration())
-                        writer.WriteLine(player.ToString("R"));
+                        writer.WriteLine(player.ToString("Registered"));
                 }
                 writer.Flush();
                 writer.Close();

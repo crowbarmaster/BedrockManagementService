@@ -9,6 +9,7 @@ namespace BedrockService.Service.Core.Threads
 
         public TCPThread(ThreadStart threadStart)
         {
+            clientService = null;
             clientService = new Thread(threadStart)
             {
                 Name = "TCPListener",
