@@ -122,7 +122,6 @@ namespace BedrockService.Client.Forms
             LogManager.InitLogThread(connectedHost);
             HostInfoLabel.Text = $"Connected to host:";
             ServerSelectBox.Items.Clear();
-
             foreach (ServerInfo server in connectedHost.GetAllServerInfos())
                 ServerSelectBox.Items.Add(server.ServerName);
 
@@ -151,6 +150,8 @@ namespace BedrockService.Client.Forms
             {
                 HostInfoLabel.Invoke((MethodInvoker)delegate { HostInfoLabel.Text = "Lost connection to host!"; });
                 ServerInfoBox.Invoke((MethodInvoker)delegate { ServerInfoBox.Text = "Lost connection to host!"; });
+                ServerBusy = false;
+                ComponentEnableManager();
             }
             catch (InvalidOperationException) { }
 
@@ -185,7 +186,6 @@ namespace BedrockService.Client.Forms
                 Console.WriteLine("Sending disconnect msg...");
                 FormManager.GetTCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Disconnect);
                 Console.WriteLine("Closing connection...");
-                Thread.Sleep(500);
                 FormManager.GetTCPClient.CloseConnection();
                 selectedServer = null;
                 connectedHost = null;
@@ -202,7 +202,7 @@ namespace BedrockService.Client.Forms
                     {
                         while (connectedHost == null && FormManager.GetTCPClient.Connected)
                         {
-                            Thread.Sleep(100);
+                            WaitForCallback().Wait();
                             ConnectTimeout++;
                             if (ConnectTimeout > ConnectTimeoutLimit)
                             {
@@ -254,7 +254,6 @@ namespace BedrockService.Client.Forms
         {
             FormManager.GetTCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.Backup);
             WaitForCallback();
-            Thread.Sleep(500);
         }
 
         private void EditCfg_Click(object sender, EventArgs e)
@@ -332,8 +331,7 @@ namespace BedrockService.Client.Forms
         private void PlayerManager_Click(object sender, EventArgs e)
         {
             FormManager.GetTCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PlayersRequest);
-            while (!FormManager.GetTCPClient.PlayerInfoArrived)
-                Thread.Sleep(100);
+            WaitForCallback().Wait();
             FormManager.GetTCPClient.PlayerInfoArrived = false;
             PlayerManagerForm form = new PlayerManagerForm(selectedServer);
             form.Show();
@@ -448,14 +446,10 @@ namespace BedrockService.Client.Forms
             HostListBox.SelectedIndex = 0;
             Connect_Click(null, null);
             GlobBackup_Click(null, null);
-            while (ServerBusy)
-            {
-                Thread.Sleep(250);
-            }
+            WaitForCallback();
             ServerSelectBox.SelectedIndex = 0;
             FormManager.GetTCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.EnumBackups);
-            while (!FormManager.GetTCPClient.EnumBackupsArrived)
-                Thread.Sleep(100);
+            WaitForCallback().Wait();
             FormManager.GetTCPClient.EnumBackupsArrived = false;
             JsonSerializerSettings settings = new JsonSerializerSettings()
             {
@@ -489,14 +483,18 @@ namespace BedrockService.Client.Forms
             SvcLog.Enabled = (connectedHost != null && selectedServer != null && !ServerBusy);
         }
 
-        private void WaitForCallback()
+        private async Task WaitForCallback()
         {
-            Task.Run(delegate
+            await Task.Run(delegate
             {
                 ServerBusy = true;
                 Invoke((MethodInvoker)delegate { ComponentEnableManager(); });
                 while (ServerBusy)
+                {
                     Thread.Sleep(150);
+                    if (FormManager.GetTCPClient.EnumBackupsArrived || FormManager.GetTCPClient.RecievedPacks != null || FormManager.GetTCPClient.PlayerInfoArrived || FormManager.GetTCPClient.Connected)
+                        ServerBusy = false;
+                }
                 Invoke((MethodInvoker)delegate { ComponentEnableManager(); });
             });
         }
@@ -553,8 +551,7 @@ namespace BedrockService.Client.Forms
             EditSrv editDialog = new EditSrv();
             editDialog.EnableBackupManager();
             FormManager.GetTCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.EnumBackups);
-            while (!FormManager.GetTCPClient.EnumBackupsArrived)
-                Thread.Sleep(100);
+            WaitForCallback().Wait();
             FormManager.GetTCPClient.EnumBackupsArrived = false;
             editDialog.PopulateBoxes(FormManager.GetTCPClient.BackupList);
             if (editDialog.ShowDialog() == DialogResult.OK)
@@ -569,10 +566,7 @@ namespace BedrockService.Client.Forms
         private void ManPacks_Click(object sender, EventArgs e)
         {
             FormManager.GetTCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PackList);
-            while (FormManager.GetTCPClient.RecievedPacks == null)
-            {
-                Thread.Sleep(150);
-            }
+            WaitForCallback().Wait();
             using (ManagePacksForms form = new ManagePacksForms(connectedHost.GetServerIndex(selectedServer), Logger, processInfo))
             {
                 form.PopulateServerPacks(FormManager.GetTCPClient.RecievedPacks);
@@ -598,10 +592,7 @@ namespace BedrockService.Client.Forms
                 }
             ServerBusy = true;
             FormManager.GetTCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.LevelEditRequest);
-            while (ServerBusy)
-            {
-                Thread.Sleep(100);
-            }
+            WaitForCallback().Wait();
             using (Process nbtStudioProcess = new Process())
             {
                 string tempPath = $@"{Path.GetTempPath()}level.dat";

@@ -29,6 +29,7 @@ namespace BedrockService.Client.Networking
         private int heartbeatFailTimeout;
         private int heartbeatFailTimeoutLimit = 250;
         private bool heartbeatRecieved;
+        private bool keepAlive;
 
         public bool ConnectHost(IClientSideServiceConfiguration host)
         {
@@ -48,7 +49,7 @@ namespace BedrockService.Client.Networking
                 EnableRead = false;
                 OpenedTcpClient = new TcpClient(addr, port);
                 stream = OpenedTcpClient.GetStream();
-                Connected = true;
+                keepAlive = true;
                 ClientReciever = new Thread(new ThreadStart(ReceiveListener));
                 ClientReciever.Name = "ClientPacketReviever";
                 ClientReciever.IsBackground = true;
@@ -59,7 +60,7 @@ namespace BedrockService.Client.Networking
                 Console.WriteLine("Could not connect to Server");
                 return false;
             }
-            return Connected;
+            return keepAlive;
         }
 
         public void CloseConnection()
@@ -70,10 +71,12 @@ namespace BedrockService.Client.Networking
                     stream.Dispose();
                 stream = null;
                 Connected = false;
+                keepAlive = false;
             }
             catch (NullReferenceException)
             {
                 Connected = false;
+                keepAlive = false;
             }
             catch (Exception e)
             {
@@ -84,7 +87,7 @@ namespace BedrockService.Client.Networking
         public void ReceiveListener()
         {
             List<byte[]> byteBlocks = new List<byte[]>();
-            while (Connected)
+            while (keepAlive)
             {
                 try
                 {
@@ -121,6 +124,7 @@ namespace BedrockService.Client.Networking
                                             Console.WriteLine("Connection to Host successful!");
                                             FormManager.GetMainWindow.connectedHost = null;
                                             FormManager.GetMainWindow.connectedHost = JsonConvert.DeserializeObject<IServiceConfiguration>(data, settings);
+                                            Connected = true;
                                             FormManager.GetMainWindow.RefreshServerContents();
                                             heartbeatFailTimeout = 0;
                                             if (HeartbeatThread == null || !HeartbeatThread.IsAlive)
@@ -249,11 +253,11 @@ namespace BedrockService.Client.Networking
         public void SendHeatbeatSignal()
         {
             Console.WriteLine("HeartbeatThread started.");
-            while (HeartbeatThread != null && HeartbeatThread.IsAlive)
+            while (keepAlive)
             {
                 heartbeatRecieved = false;
                 SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Heartbeat);
-                while (!heartbeatRecieved)
+                while (!heartbeatRecieved && keepAlive)
                 {
                     Thread.Sleep(100);
                     heartbeatFailTimeout++;
@@ -282,7 +286,7 @@ namespace BedrockService.Client.Networking
             compiled[7] = (byte)type;
             compiled[8] = (byte)status;
             Buffer.BlockCopy(bytes, 0, compiled, 9, bytes.Length);
-            if (Connected)
+            if (keepAlive)
             {
                 try
                 {
