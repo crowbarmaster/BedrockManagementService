@@ -27,6 +27,7 @@ namespace BedrockService.Service.Networking
         private readonly int heartbeatFailTimeoutLimit = 200;
         private Dictionary<NetworkMessageTypes, IMessageParser> StandardMessageLookup;
         private Dictionary<NetworkMessageTypes, IFlaggedMessageParser> FlaggedMessageLookup;
+        private IPAddress addr = IPAddress.Parse("0.0.0.0");
 
         public TCPListener(IServiceConfiguration serviceConfiguration, ILogger logger)
         {
@@ -42,7 +43,6 @@ namespace BedrockService.Service.Networking
 
         public void StartListening()
         {
-            IPAddress addr = IPAddress.Parse("0.0.0.0");
             inListener = new TcpListener(addr, int.Parse(serviceConfiguration.GetProp("ClientPort").ToString()));
             try
             {
@@ -56,7 +56,7 @@ namespace BedrockService.Service.Networking
                 Environment.Exit(1);
             }
 
-            while (keepAlive)
+            while (true)
             {
                 try
                 {
@@ -71,16 +71,15 @@ namespace BedrockService.Service.Networking
                     logger.AppendLine(e.ToString());
                 }
             }
-            inListener.Stop();
         }
 
-        public void StopListening()
+        public void ResetListener()
         {
-            clientThread.CloseThread();
-            stream.Close();
-            client.Close();
-            inListener.Stop();
-            inListener = null;
+            keepAlive = false;
+            while (heartbeatThread.IsAlive())
+            {
+                Thread.Sleep(300);
+            }
         }
 
         public void SendData(byte[] bytes, NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type, NetworkMessageFlags status)
@@ -120,6 +119,7 @@ namespace BedrockService.Service.Networking
 
         private void IncomingListener()
         {
+            keepAlive = true;
             logger.AppendLine("Packet listener thread started.");
             int AvailBytes = 0;
             int byteCount = 0;
@@ -153,7 +153,7 @@ namespace BedrockService.Service.Networking
                         }
                         if (msgType == NetworkMessageTypes.Disconnect)
                         {
-                            StopListening();
+                            ResetListener();
                         }
                         if (msgType < NetworkMessageTypes.Heartbeat)
                         {
@@ -191,7 +191,11 @@ namespace BedrockService.Service.Networking
                 {
                     logger.AppendLine($"Error: {e.Message} {e.StackTrace}");
                 }
-                AvailBytes = client.Client.Available;
+                try
+                {
+                    AvailBytes = client.Client.Available;
+                }
+                catch { }
                 if (!clientThread.IsAlive())
                     clientThread.CloseThread();
             }
@@ -200,10 +204,10 @@ namespace BedrockService.Service.Networking
         private void SendBackHeatbeatSignal()
         {
             logger.AppendLine("HeartBeatSender started.");
-            while (heartbeatThread.IsAlive())
+            while (keepAlive)
             {
                 heartbeatRecieved = false;
-                while (!heartbeatRecieved)
+                while (!heartbeatRecieved && keepAlive)
                 {
                     Thread.Sleep(100);
                     heartbeatFailTimeout++;
@@ -227,7 +231,17 @@ namespace BedrockService.Service.Networking
                 heartbeatRecieved = false;
                 heartbeatFailTimeout = 0;
                 SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Heartbeat);
-                Thread.Sleep(3000);
+                int timeWaited = 0;
+                while (timeWaited < 3000)
+                {
+                    Thread.Sleep(100);
+                    timeWaited += 100;
+                    if (!keepAlive)
+                    {
+                        logger.AppendLine("HeartBeatSender exited.");
+                        return;
+                    }
+                }
             }
             logger.AppendLine("HeartBeatSender exited.");
         }

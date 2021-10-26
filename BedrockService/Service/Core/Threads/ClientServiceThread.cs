@@ -19,11 +19,15 @@ namespace BedrockService.Service.Core.Threads
 
         public void CloseThread()
         {
-            if (IsAlive())
+            try
             {
-                clientService.Abort();
+                if (IsAlive())
+                {
+                    clientService.Abort();
+                }
+                clientService = null;
             }
-            clientService = null;
+            catch (ThreadAbortException) { }
         }
 
         public bool IsAlive()

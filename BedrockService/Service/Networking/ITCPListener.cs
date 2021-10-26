@@ -8,7 +8,7 @@ namespace BedrockService.Service.Networking
     {
         void StartListening();
 
-        void StopListening();
+        void ResetListener();
 
         void SetStrategyDictionaries(Dictionary<NetworkMessageTypes, IMessageParser> standard, Dictionary<NetworkMessageTypes, IFlaggedMessageParser> flagged);
     }

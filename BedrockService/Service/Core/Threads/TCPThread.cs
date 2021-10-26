@@ -1,5 +1,6 @@
 ﻿using BedrockService.Service.Core.Interfaces;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace BedrockService.Service.Core.Threads
 {
@@ -20,10 +21,13 @@ namespace BedrockService.Service.Core.Threads
 
         public void CloseThread()
         {
-            if (IsAlive())
+            Task.Run(() => 
             {
-                clientService.Abort();
-            }
+                if (IsAlive())
+                {
+                    clientService.Abort();
+                }
+            });
             clientService = null;
         }
 

@@ -8,6 +8,7 @@ namespace BedrockService.Service.Server
     public interface IBedrockServer
     {
         void StartWatchdog(HostControl hostControl);
+        void StopWatchdog();
         string GetServerName();
         void WriteToStandardIn(string command);
         bool RestartServer(bool shouldPerformBackup);

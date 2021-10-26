@@ -101,9 +101,25 @@ namespace BedrockService.Service.Core
         {
             try
             {
-                Stop(hostControl);
+                foreach (var brs in bedrockServers)
+                {
+                    brs.SetServerStatus(BedrockServer.ServerStatus.Stopping);
+                    while (brs.GetServerStatus() == BedrockServer.ServerStatus.Stopping && !Program.IsExiting)
+                        Thread.Sleep(100);
+                }
+                try
+                {
+                    tCPListener.ResetListener();
+                }
+                catch (ThreadAbortException) { }
+                //tcpThread.CloseThread();
                 Configurator.LoadAllConfigurations().Wait();
-                Start(hostControl);
+                tcpThread = new TCPThread(new ThreadStart(tCPListener.StartListening));
+                Initialize();
+                foreach (var brs in bedrockServers)
+                {
+                    brs.SetServerStatus(BedrockServer.ServerStatus.Starting);
+                }
             }
             catch (Exception e)
             {

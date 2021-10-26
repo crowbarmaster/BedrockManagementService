@@ -168,6 +168,13 @@ namespace BedrockService.Service.Server
             }
         }
 
+        public void StopWatchdog()
+        {
+            if(WatchdogThread != null)
+                WatchdogThread.CloseThread();
+            WatchdogThread = null;
+        }
+
         public ServerStatus GetServerStatus() => CurrentServerStatus;
 
         public void SetServerStatus(ServerStatus newStatus) => CurrentServerStatus = newStatus;
