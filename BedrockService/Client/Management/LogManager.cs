@@ -24,7 +24,7 @@ namespace BedrockService.Client.Management
                 {
                     Working = true;
                     StringBuilder sendString = new StringBuilder();
-                    foreach (ServerInfo server in connectedHost.GetAllServerInfos())
+                    foreach (ServerInfo server in connectedHost.GetServerList())
                     {
                         server.ConsoleBuffer = server.ConsoleBuffer ?? new List<string>();
                         sendString.Append($"{server.ServerName};{server.ConsoleBuffer.Count}|");
