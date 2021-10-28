@@ -72,13 +72,14 @@ namespace BedrockService.Service.Networking
                     return true;
                 }
                 Logger.AppendLine($"New version detected! Now fetching from {downloadPath}...");
+                if (!FetchBuild(downloadPath, fetchedVersion).Wait(60000))
+                {
+                    Logger.AppendLine("Fetching build timed out. If this is a new service instance, please restart service!");
+                    return false;
+                }
                 VersionChanged = true;
                 File.WriteAllText($@"{ProcessInfo.GetDirectory()}\Server\bedrock_ver.ini", fetchedVersion);
                 ServiceConfiguration.SetServerVersion(fetchedVersion);
-                if (!FetchBuild(downloadPath, fetchedVersion).Wait(2000))
-                {
-                    Logger.AppendLine("Fetching build timed out. If this is a new service instance, please restart service!");
-                }
                 GenerateFileList(fetchedVersion);
                 return true;
 
