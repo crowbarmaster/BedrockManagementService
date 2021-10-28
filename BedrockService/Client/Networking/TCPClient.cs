@@ -27,7 +27,9 @@ namespace BedrockService.Client.Networking
         public Thread ClientReciever;
         public Thread HeartbeatThread;
         private int heartbeatFailTimeout;
-        private int heartbeatFailTimeoutLimit = 250;
+        private int streamWriteFailTimeout;
+        private const int heartbeatFailTimeoutLimit = 250;
+        private const int streamWriteFailLimit = 10;
         private bool heartbeatRecieved;
         private bool keepAlive;
 
