@@ -10,7 +10,7 @@ namespace BedrockService.Shared.Interfaces
 
         byte GetServerIndex(IServerConfiguration server);
 
-        List<IServerConfiguration> GetAllServerInfos();
+        List<IServerConfiguration> GetServerList();
 
         void SetAllServerInfos(List<IServerConfiguration> newInfos);
 

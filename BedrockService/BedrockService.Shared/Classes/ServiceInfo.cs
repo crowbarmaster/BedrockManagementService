@@ -126,7 +126,7 @@ namespace BedrockService.Shared.Classes
             ServerList[ServerList.IndexOf(newInfo.GetServerInfo())] = newInfo.GetServerInfo();
         }
 
-        public List<IServerConfiguration> GetAllServerInfos() => ServerList;
+        public List<IServerConfiguration> GetServerList() => ServerList;
 
         public void SetAllServerInfos(List<IServerConfiguration> newInfos)
         {
