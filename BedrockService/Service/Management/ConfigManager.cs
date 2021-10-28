@@ -47,7 +47,7 @@ namespace BedrockService.Service.Management
                     loadedVersion = File.ReadAllText($@"{configDir}\..\bedrock_ver.ini");
                 ServerInfo serverInfo;
                 LoadGlobals();
-                ServiceConfiguration.GetAllServerInfos().Clear();
+                ServiceConfiguration.GetServerList().Clear();
                 string[] files = Directory.GetFiles(configDir, "*.conf");
                 foreach (string file in files)
                 {
@@ -60,7 +60,7 @@ namespace BedrockService.Service.Management
                     LoadRegisteredPlayers(serverInfo);
                     ServiceConfiguration.AddNewServerInfo(serverInfo);
                 }
-                if (ServiceConfiguration.GetAllServerInfos().Count == 0)
+                if (ServiceConfiguration.GetServerList().Count == 0)
                 {
                     serverInfo = new ServerInfo(null, ServiceConfiguration.GetProp("ServersPath").ToString());
                     serverInfo.InitializeDefaults();
