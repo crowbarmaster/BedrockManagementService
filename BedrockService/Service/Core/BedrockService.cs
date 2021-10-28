@@ -46,7 +46,6 @@ namespace BedrockService.Service.Core
             ProcessInfo = serviceProcessInfo;
             Updater = updater;
             Logger = logger;
-            tcpThread = new TCPThread(new ThreadStart(tCPListener.StartListening));
             shed = CrontabSchedule.TryParse(serviceConfiguration.GetProp("BackupCron").ToString());
             updaterCron = CrontabSchedule.TryParse(serviceConfiguration.GetProp("UpdateCron").ToString());
             Initialize();
@@ -101,11 +100,15 @@ namespace BedrockService.Service.Core
         {
             try
             {
-                foreach (var brs in bedrockServers)
+                foreach (IBedrockServer brs in bedrockServers)
                 {
                     brs.SetServerStatus(BedrockServer.ServerStatus.Stopping);
                     while (brs.GetServerStatus() == BedrockServer.ServerStatus.Stopping && !Program.IsExiting)
                         Thread.Sleep(100);
+                }
+                foreach (IBedrockServer brs in bedrockServers)
+                {
+                    brs.StopWatchdog();
                 }
                 try
                 {
@@ -114,12 +117,12 @@ namespace BedrockService.Service.Core
                 catch (ThreadAbortException) { }
                 //tcpThread.CloseThread();
                 Configurator.LoadAllConfigurations().Wait();
-                tcpThread = new TCPThread(new ThreadStart(tCPListener.StartListening));
                 Initialize();
                 foreach (var brs in bedrockServers)
                 {
                     brs.SetServerStatus(BedrockServer.ServerStatus.Starting);
                 }
+                Start(hostControl);
             }
             catch (Exception e)
             {
@@ -153,7 +156,7 @@ namespace BedrockService.Service.Core
 
         private void Initialize()
         {
-            bedrockServers = new List<IBedrockServer>();
+            bedrockServers.Clear();
             if (ServiceConfiguration.GetProp("BackupEnabled").ToString() == "true" && shed != null)
             {
                 cronTimer = new System.Timers.Timer((shed.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
@@ -169,7 +172,8 @@ namespace BedrockService.Service.Core
             }
             try
             {
-                foreach (IServerConfiguration server in ServiceConfiguration.GetAllServerInfos())
+                List<IServerConfiguration> temp = ServiceConfiguration.GetServerList();
+                foreach (IServerConfiguration server in temp)
                 {
                     IBedrockServer bedrockServer = new BedrockServer(server, Configurator, Logger, ServiceConfiguration, ProcessInfo);
                     bedrockServers.Add(bedrockServer);
@@ -253,15 +257,15 @@ namespace BedrockService.Service.Core
             bool dupedSettingsFound = false;
             while (validating)
             {
-                if (ServiceConfiguration.GetAllServerInfos().Count() < 1)
+                if (ServiceConfiguration.GetServerList().Count() < 1)
                 {
                     throw new Exception("No Servers Configured");
                 }
                 else
                 {
-                    foreach (IServerConfiguration server in ServiceConfiguration.GetAllServerInfos())
+                    foreach (IServerConfiguration server in ServiceConfiguration.GetServerList())
                     {
-                        foreach (IServerConfiguration compareServer in ServiceConfiguration.GetAllServerInfos())
+                        foreach (IServerConfiguration compareServer in ServiceConfiguration.GetServerList())
                         {
                             if (server != compareServer)
                             {
@@ -279,7 +283,7 @@ namespace BedrockService.Service.Core
                     {
                         throw new Exception("Duplicate settings found! Check logs.");
                     }
-                    foreach (var server in ServiceConfiguration.GetAllServerInfos())
+                    foreach (var server in ServiceConfiguration.GetServerList())
                     {
                         if (Updater.CheckVersionChanged() || !File.Exists(server.GetProp("ServerPath") + "\\bedrock_server.exe"))
                         {
