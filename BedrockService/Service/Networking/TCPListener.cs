@@ -18,6 +18,7 @@ namespace BedrockService.Service.Networking
         private NetworkStream stream;
         private readonly IServiceConfiguration serviceConfiguration;
         private readonly ILogger logger;
+        private IServiceThread tcpThread;
         private IServiceThread clientThread;
         private IServiceThread heartbeatThread;
         private bool heartbeatRecieved = false;
@@ -28,11 +29,20 @@ namespace BedrockService.Service.Networking
         private Dictionary<NetworkMessageTypes, IMessageParser> StandardMessageLookup;
         private Dictionary<NetworkMessageTypes, IFlaggedMessageParser> FlaggedMessageLookup;
         private IPAddress addr = IPAddress.Parse("0.0.0.0");
+        private System.Timers.Timer reconnectTimer = new System.Timers.Timer(500.0);
 
         public TCPListener(IServiceConfiguration serviceConfiguration, ILogger logger)
         {
             this.logger = logger;
             this.serviceConfiguration = serviceConfiguration;
+            reconnectTimer.Elapsed += ReconnectTimer_Elapsed;
+            tcpThread = new TCPThread(new ThreadStart(StartListening));
+        }
+
+        private void ReconnectTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            reconnectTimer.Stop();
+            tcpThread = new TCPThread(new ThreadStart(StartListening));
         }
 
         public void SetStrategyDictionaries(Dictionary<NetworkMessageTypes, IMessageParser> standard, Dictionary<NetworkMessageTypes, IFlaggedMessageParser> flagged)
@@ -49,11 +59,11 @@ namespace BedrockService.Service.Networking
                 inListener.Start();
                 keepAlive = true;
             }
-            catch
+            catch(SocketException e)
             {
-                logger.AppendLine("Error! Port is occupied and cannot be opened... Program will be killed!");
+                logger.AppendLine($"Error! {e.Message}");
                 Thread.Sleep(2000);
-                Environment.Exit(1);
+                //Environment.Exit(1);
             }
 
             while (true)
@@ -66,6 +76,9 @@ namespace BedrockService.Service.Networking
                     heartbeatThread = new HeartbeatThread(new ThreadStart(SendBackHeatbeatSignal));
                 }
                 catch (ThreadStateException) { }
+                catch (NullReferenceException) { }
+                catch (InvalidOperationException) { }
+                catch (SocketException) { }
                 catch (Exception e)
                 {
                     logger.AppendLine(e.ToString());
@@ -80,6 +93,13 @@ namespace BedrockService.Service.Networking
             {
                 Thread.Sleep(300);
             }
+            stream.Close();
+            stream.Dispose();
+            client.Client.Blocking = false;
+            inListener.Stop();
+            tcpThread.CloseThread();
+            tcpThread = null;
+            StartListening();
         }
 
         public void SendData(byte[] bytes, NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type, NetworkMessageFlags status)
@@ -133,8 +153,7 @@ namespace BedrockService.Service.Networking
                 try
                 {
                     byte[] buffer = new byte[4];
-                    AvailBytes = client.Client.Available;
-                    while (AvailBytes != 0) // Recieve data from client.
+                    while (client.Client.Available != 0) // Recieve data from client.
                     {
                         byteCount = stream.Read(buffer, 0, 4);
                         int expectedLen = BitConverter.ToInt32(buffer, 0);
@@ -162,7 +181,6 @@ namespace BedrockService.Service.Networking
                             else
                                 FlaggedMessageLookup[msgType].ParseMessage(buffer, serverIndex, msgFlag);
                         }
-                        AvailBytes = client.Client.Available;
                     }
                     Thread.Sleep(200);
                 }
