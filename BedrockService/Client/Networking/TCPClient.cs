@@ -31,14 +31,13 @@ namespace BedrockService.Client.Networking
         private bool heartbeatRecieved;
         private bool keepAlive;
 
-        public bool ConnectHost(IClientSideServiceConfiguration host)
+        public void ConnectHost(IClientSideServiceConfiguration host)
         {
             if (EstablishConnection(host.GetAddress(), int.Parse(host.GetPort())))
             {
                 SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Connect);
-                return true;
+                return;
             }
-            return false;
         }
 
         public bool EstablishConnection(string addr, int port)
@@ -58,6 +57,9 @@ namespace BedrockService.Client.Networking
             catch
             {
                 Console.WriteLine("Could not connect to Server");
+                if(ClientReciever != null)
+                    ClientReciever.Abort();
+                ClientReciever = null;
                 return false;
             }
             return keepAlive;
@@ -149,7 +151,6 @@ namespace BedrockService.Client.Networking
                                             HeartbeatThread.IsBackground = true;
                                             HeartbeatThread.Name = "HeartBeatThread";
                                             HeartbeatThread.Start();
-                                            Thread.Sleep(500);
                                         }
                                         break;
 
