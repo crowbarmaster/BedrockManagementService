@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BedrockServiceUnitTests", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BedrockService.Shared", "BedrockService.Shared\BedrockService.Shared.csproj", "{F146D5E8-EF1F-4785-9150-182631F059B7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientUnitTests", "ClientUnitTests\ClientUnitTests.csproj", "{550B6A98-60C3-4765-BFED-2CAA0AFFAEBB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,10 @@ Global
 		{F146D5E8-EF1F-4785-9150-182631F059B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F146D5E8-EF1F-4785-9150-182631F059B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F146D5E8-EF1F-4785-9150-182631F059B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{550B6A98-60C3-4765-BFED-2CAA0AFFAEBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{550B6A98-60C3-4765-BFED-2CAA0AFFAEBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{550B6A98-60C3-4765-BFED-2CAA0AFFAEBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{550B6A98-60C3-4765-BFED-2CAA0AFFAEBB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
