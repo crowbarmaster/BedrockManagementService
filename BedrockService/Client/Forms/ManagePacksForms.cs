@@ -67,7 +67,7 @@ namespace BedrockService.Client.Forms
                 {
                     TypeNameHandling = TypeNameHandling.All
                 };
-                FormManager.GetTCPClient.SendData(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(temp, Formatting.Indented, settings)), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.RemovePack);
+                FormManager.TCPClient.SendData(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(temp, Formatting.Indented, settings)), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.RemovePack);
                 serverListBox.Items.Remove(temp[0]);
             }
 
@@ -82,7 +82,7 @@ namespace BedrockService.Client.Forms
             {
                 TypeNameHandling = TypeNameHandling.All
             };
-            FormManager.GetTCPClient.SendData(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(temp, Formatting.Indented, settings)), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.RemovePack);
+            FormManager.TCPClient.SendData(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(temp, Formatting.Indented, settings)), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.RemovePack);
             serverListBox.Items.Clear();
         }
 
@@ -128,7 +128,7 @@ namespace BedrockService.Client.Forms
                 container.PackContentLocation = new DirectoryInfo($@"{PackExtractDir.FullName}\ZipTemp\{container.PackContentLocation.Name}");
             }
             ZipFile.CreateFromDirectory($@"{PackExtractDir.FullName}\ZipTemp", $@"{PackExtractDir.FullName}\SendZip.zip");
-            FormManager.GetTCPClient.SendData(File.ReadAllBytes($@"{PackExtractDir.FullName}\SendZip.zip"), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.PackFile);
+            FormManager.TCPClient.SendData(File.ReadAllBytes($@"{PackExtractDir.FullName}\SendZip.zip"), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.PackFile);
             parsedPacksListBox.Items.Clear();
         }
     }

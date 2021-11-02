@@ -7,14 +7,21 @@ using System.Text;
 
 namespace BedrockService.Client.Management
 {
-    class ConfigManager
+    public class ConfigManager
     {
-        public static string ConfigDir = $@"{Directory.GetCurrentDirectory()}\Client\Configs";
-        public static string ConfigFile = $@"{ConfigDir}\Config.conf";
-        public static List<IClientSideServiceConfiguration> HostConnectList = new List<IClientSideServiceConfiguration>();
-        public static string NBTStudioPath = "";
+        public string ConfigDir = $@"{Directory.GetCurrentDirectory()}\Client\Configs";
+        public string ConfigFile;
+        public List<IClientSideServiceConfiguration> HostConnectList = new List<IClientSideServiceConfiguration>();
+        public string NBTStudioPath = "";
+        private readonly ILogger Logger;
 
-        public static void LoadConfigs()
+        public ConfigManager(ILogger logger)
+        {
+            Logger = logger;
+            ConfigFile = $@"{ConfigDir}\Config.conf";
+        }
+
+        public void LoadConfigs()
         {
             if (!Directory.Exists(ConfigDir))
             {
@@ -22,7 +29,7 @@ namespace BedrockService.Client.Management
             }
             if (!File.Exists(ConfigFile))
             {
-                Console.WriteLine("Config file missing! Regenerating default file...");
+                Logger.AppendLine("Config file missing! Regenerating default file...");
                 CreateDefaultConfig();
                 LoadConfigs();
                 return;
@@ -48,7 +55,7 @@ namespace BedrockService.Client.Management
             }
         }
 
-        public static void CreateDefaultConfig()
+        public void CreateDefaultConfig()
         {
             string[] Config = new string[]
             {
@@ -65,7 +72,7 @@ namespace BedrockService.Client.Management
             File.WriteAllText(ConfigFile, builder.ToString());
         }
 
-        public static void SaveConfigFile()
+        public void SaveConfigFile()
         {
             StringBuilder fileContent = new StringBuilder();
             fileContent.Append("# hosts\n\n");

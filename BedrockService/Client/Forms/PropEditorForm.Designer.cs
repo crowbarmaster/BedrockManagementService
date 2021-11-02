@@ -1,7 +1,7 @@
 ﻿
 namespace BedrockService.Client.Forms
 {
-    partial class EditSrv
+    partial class PropEditorForm
     {
         /// <summary>
         /// Required designer variable.

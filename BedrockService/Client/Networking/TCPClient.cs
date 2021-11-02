@@ -32,6 +32,12 @@ namespace BedrockService.Client.Networking
         private const int streamWriteFailLimit = 10;
         private bool heartbeatRecieved;
         private bool keepAlive;
+        private readonly ILogger Logger;
+
+        public TCPClient (ILogger logger)
+        {
+            Logger = logger;
+        }
 
         public void ConnectHost(IClientSideServiceConfiguration host)
         {
@@ -44,7 +50,7 @@ namespace BedrockService.Client.Networking
 
         public bool EstablishConnection(string addr, int port)
         {
-            Console.WriteLine("Connecting to Server");
+            Logger.AppendLine("Connecting to Server");
             try
             {
                 EnableRead = false;
@@ -58,7 +64,7 @@ namespace BedrockService.Client.Networking
             }
             catch
             {
-                Console.WriteLine("Could not connect to Server");
+                Logger.AppendLine("Could not connect to Server");
                 if(ClientReciever != null)
                     ClientReciever.Abort();
                 ClientReciever = null;
@@ -84,7 +90,7 @@ namespace BedrockService.Client.Networking
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Error closing connection: {e.StackTrace}");
+                Logger.AppendLine($"Error closing connection: {e.StackTrace}");
             }
         }
 
@@ -125,11 +131,11 @@ namespace BedrockService.Client.Networking
                                     case NetworkMessageTypes.Connect:
                                         try
                                         {
-                                            Console.WriteLine("Connection to Host successful!");
-                                            FormManager.GetMainWindow.connectedHost = null;
-                                            FormManager.GetMainWindow.connectedHost = JsonConvert.DeserializeObject<IServiceConfiguration>(data, settings);
+                                            Logger.AppendLine("Connection to Host successful!");
+                                            FormManager.MainWindow.connectedHost = null;
+                                            FormManager.MainWindow.connectedHost = JsonConvert.DeserializeObject<IServiceConfiguration>(data, settings);
                                             Connected = true;
-                                            FormManager.GetMainWindow.RefreshServerContents();
+                                            FormManager.MainWindow.RefreshServerContents();
                                             heartbeatFailTimeout = 0;
                                             if (HeartbeatThread == null || !HeartbeatThread.IsAlive)
                                                 HeartbeatThread = new Thread(new ThreadStart(SendHeatbeatSignal))
@@ -142,7 +148,7 @@ namespace BedrockService.Client.Networking
                                         }
                                         catch (Exception e)
                                         {
-                                            Console.WriteLine($"Error: ConnectMan reported error: {e.Message}\n{e.StackTrace}");
+                                            Logger.AppendLine($"Error: ConnectMan reported error: {e.Message}\n{e.StackTrace}");
                                         }
                                         break;
                                     case NetworkMessageTypes.Heartbeat:
@@ -188,7 +194,7 @@ namespace BedrockService.Client.Networking
                                             srvCurLen = int.Parse(srvSplit[2]);
                                             if (srvName != "Service")
                                             {
-                                                IServerConfiguration bedrockServer = FormManager.GetMainWindow.connectedHost.GetServerInfoByName(srvName);
+                                                IServerConfiguration bedrockServer = FormManager.MainWindow.connectedHost.GetServerInfoByName(srvName);
                                                 int curCount = bedrockServer.GetLog().Count;
                                                 if (curCount == srvCurLen)
                                                 {
@@ -197,17 +203,17 @@ namespace BedrockService.Client.Networking
                                             }
                                             else
                                             {
-                                                int curCount = FormManager.GetMainWindow.connectedHost.GetLog().Count;
+                                                int curCount = FormManager.MainWindow.connectedHost.GetLog().Count;
                                                 if (curCount == srvCurLen)
                                                 {
-                                                    FormManager.GetMainWindow.connectedHost.GetLog().Add(srvText);
+                                                    FormManager.MainWindow.connectedHost.GetLog().Add(srvText);
                                                 }
                                             }
                                         }
                                         break;
                                     case NetworkMessageTypes.Backup:
 
-                                        Console.WriteLine(msgStatus.ToString());
+                                        Logger.AppendLine(msgStatus.ToString());
 
                                         break;
                                     case NetworkMessageTypes.UICallback:
@@ -227,7 +233,7 @@ namespace BedrockService.Client.Networking
                                     case NetworkMessageTypes.PlayersRequest:
 
                                         List<IPlayer> fetchedPlayers = JsonConvert.DeserializeObject<List<IPlayer>>(data, settings);
-                                        FormManager.GetMainWindow.connectedHost.GetServerInfoByIndex(serverIndex).SetPlayerList(fetchedPlayers);
+                                        FormManager.MainWindow.connectedHost.GetServerInfoByIndex(serverIndex).SetPlayerList(fetchedPlayers);
                                         PlayerInfoArrived = true;
 
                                         break;
@@ -247,7 +253,7 @@ namespace BedrockService.Client.Networking
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"TCPClient error! Stacktrace: {e.Message}\n{e.StackTrace}");
+                    Logger.AppendLine($"TCPClient error! Stacktrace: {e.Message}\n{e.StackTrace}");
                 }
                 Thread.Sleep(200);
             }
@@ -255,7 +261,7 @@ namespace BedrockService.Client.Networking
 
         public void SendHeatbeatSignal()
         {
-            Console.WriteLine("HeartbeatThread started.");
+            Logger.AppendLine("HeartbeatThread started.");
             while (keepAlive)
             {
                 heartbeatRecieved = false;
@@ -266,12 +272,12 @@ namespace BedrockService.Client.Networking
                     heartbeatFailTimeout++;
                     if (heartbeatFailTimeout > heartbeatFailTimeoutLimit)
                     {
-                        FormManager.GetMainWindow.HeartbeatFailDisconnect();
+                        FormManager.MainWindow.HeartbeatFailDisconnect();
                         HeartbeatThread.Abort();
                         heartbeatFailTimeout = 0;
                     }
                 }
-                // Console.WriteLine("ThumpThump");
+                // Logger.AppendLine("ThumpThump");
                 heartbeatRecieved = false;
                 heartbeatFailTimeout = 0;
                 Thread.Sleep(3000);
@@ -300,7 +306,7 @@ namespace BedrockService.Client.Networking
                 }
                 catch
                 {
-                    Console.WriteLine("Error writing to network stream!");
+                    Logger.AppendLine("Error writing to network stream!");
                     return false;
                 }
             }
@@ -337,6 +343,6 @@ namespace BedrockService.Client.Networking
 
         private string GetOffsetString(byte[] array) => Encoding.UTF8.GetString(array, 5, array.Length - 5);
 
-        private void UnlockUI() => FormManager.GetMainWindow.ServerBusy = false;
+        private void UnlockUI() => FormManager.MainWindow.ServerBusy = false;
     }
 }

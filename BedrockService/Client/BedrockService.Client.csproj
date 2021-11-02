@@ -75,6 +75,12 @@
     <Compile Include="Forms\AddNewServerForm.Designer.cs">
       <DependentUpon>AddNewServerForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\ClientConfigForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ClientConfigForm.Designer.cs">
+      <DependentUpon>ClientConfigForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\ManagePacksForms.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -96,11 +102,11 @@
     <Compile Include="Management\FormManager.cs" />
     <Compile Include="Management\LogManager.cs" />
     <Compile Include="Management\ConfigManager.cs" />
-    <Compile Include="Forms\EditSrv.cs">
+    <Compile Include="Forms\PropEditorForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\EditSrv.Designer.cs">
-      <DependentUpon>EditSrv.cs</DependentUpon>
+    <Compile Include="Forms\PropEditorForm.Designer.cs">
+      <DependentUpon>PropEditorForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\MainWindow.cs">
       <SubType>Form</SubType>
@@ -114,6 +120,9 @@
     <EmbeddedResource Include="Forms\AddNewServerForm.resx">
       <DependentUpon>AddNewServerForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ClientConfigForm.resx">
+      <DependentUpon>ClientConfigForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\ManagePacksForms.resx">
       <DependentUpon>ManagePacksForms.cs</DependentUpon>
     </EmbeddedResource>
@@ -123,8 +132,8 @@
     <EmbeddedResource Include="Forms\PlayerManagerForm.resx">
       <DependentUpon>PlayerManagerForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\EditSrv.resx">
-      <DependentUpon>EditSrv.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\PropEditorForm.resx">
+      <DependentUpon>PropEditorForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>

@@ -8,14 +8,14 @@ using System.Windows.Forms;
 
 namespace BedrockService.Client.Forms
 {
-    public partial class EditSrv : Form
+    public partial class PropEditorForm : Form
     {
         DataGridView dataGrid;
         public List<Property> workingProps;
         public List<StartCmdEntry> startCmds;
         public string RollbackFolderName = "";
 
-        public EditSrv()
+        public PropEditorForm()
         {
             InitializeComponent();
             dataGrid = gridView;
@@ -127,7 +127,7 @@ namespace BedrockService.Client.Forms
                 TypeNameHandling = TypeNameHandling.All
             };
             byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(removeBackups, Formatting.Indented, settings));
-            FormManager.GetTCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, FormManager.GetMainWindow.connectedHost.GetServerIndex(FormManager.GetMainWindow.selectedServer), NetworkMessageTypes.DelBackups);
+            FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, FormManager.MainWindow.connectedHost.GetServerIndex(FormManager.MainWindow.selectedServer), NetworkMessageTypes.DelBackups);
         }
     }
 }

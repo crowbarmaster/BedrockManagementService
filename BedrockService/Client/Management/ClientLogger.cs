@@ -27,7 +27,7 @@ namespace BedrockService.Client.Management
         {
             string addText = $"Client: {text}\r\n";
             Log.Add(addText);
-            LogWriter.WriteLine(text);
+            LogWriter.WriteLine(addText);
             LogWriter.Flush();
             Console.WriteLine(text);
         }
