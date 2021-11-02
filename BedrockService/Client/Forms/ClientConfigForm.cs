@@ -35,8 +35,8 @@ namespace BedrockService.Client.Forms
         {
             using(OpenFileDialog fileDialog = new OpenFileDialog())
             {
-                fileDialog.Filter = "EXE Files|.exe";
-                fileDialog.FileName = "nbtStudio.exe";
+                fileDialog.Filter = "EXE Files|*.exe";
+                fileDialog.FileName = "NbtStudio.exe";
                 fileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
                 if(fileDialog.ShowDialog() == DialogResult.OK)
                 {
