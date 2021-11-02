@@ -12,7 +12,7 @@ namespace BedrockService.Client.Management
         public string ConfigDir = $@"{Directory.GetCurrentDirectory()}\Client\Configs";
         public string ConfigFile;
         public List<IClientSideServiceConfiguration> HostConnectList = new List<IClientSideServiceConfiguration>();
-        public string NBTStudioPath = "";
+        public string NBTStudioPath;
         private readonly ILogger Logger;
 
         public ConfigManager(ILogger logger)
@@ -23,6 +23,7 @@ namespace BedrockService.Client.Management
 
         public void LoadConfigs()
         {
+            HostConnectList.Clear();
             if (!Directory.Exists(ConfigDir))
             {
                 Directory.CreateDirectory(ConfigDir);
@@ -44,7 +45,7 @@ namespace BedrockService.Client.Management
                     {
                         string[] hostSplit = entrySplit[1].Split(';');
                         string[] addressSplit = hostSplit[1].Split(':');
-                        IClientSideServiceConfiguration hostToList = new ClientSideServiceConfiguration(hostSplit[0], addressSplit[0], addressSplit[1], $@"Host {entrySplit[0]} @ {addressSplit[0]}:{addressSplit[1]}");
+                        IClientSideServiceConfiguration hostToList = new ClientSideServiceConfiguration(hostSplit[0], addressSplit[0], addressSplit[1]);
                         HostConnectList.Add(hostToList);
                     }
                     if (entrySplit[0] == "NBTStudioPath")

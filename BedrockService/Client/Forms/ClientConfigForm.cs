@@ -1,4 +1,5 @@
 ﻿using BedrockService.Client.Management;
+using BedrockService.Shared.Classes;
 using BedrockService.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -15,15 +16,21 @@ namespace BedrockService.Client.Forms
 {
     public partial class ClientConfigForm : Form
     {
+        private List<IClientSideServiceConfiguration> _clientConfigs;
         private readonly ConfigManager _configManager;
-        public ClientConfigForm(List<IClientSideServiceConfiguration> configs, ConfigManager configManager)
+        public ClientConfigForm(ConfigManager configManager)
         {
             InitializeComponent();
-            foreach(IClientSideServiceConfiguration config in configs)
+            _configManager = configManager;
+            _clientConfigs = _configManager.HostConnectList;
+            if (!string.IsNullOrEmpty(_configManager.NBTStudioPath))
+            {
+                nbtPathLabel.Text = $"NBT Studio path: {_configManager.NBTStudioPath}";
+            }
+            foreach (IClientSideServiceConfiguration config in _clientConfigs)
             {
                 serverGridView.Rows.Add(new string[3] { config.GetHostName(), config.GetAddress(), config.GetPort() });
             }
-            _configManager = configManager;
         }
 
         public void SimulateTests()
@@ -48,7 +55,19 @@ namespace BedrockService.Client.Forms
 
         private void saveBtn_Click(object sender, EventArgs e)
         {
+            List<IClientSideServiceConfiguration> newConfigs = new List<IClientSideServiceConfiguration>();
+            foreach(DataGridViewRow row in serverGridView.Rows)
+            {
+                if (!string.IsNullOrEmpty((string)row.Cells[0].Value))
+                {
+                    newConfigs.Add(new ClientSideServiceConfiguration((string)row.Cells[0].Value, (string)row.Cells[1].Value, (string)row.Cells[2].Value));
+                }
+            }
+            _configManager.HostConnectList = newConfigs;
 
+            _configManager.SaveConfigFile();
+            DialogResult = DialogResult.OK;
+            Close();
         }
     }
 }

@@ -89,7 +89,8 @@
             // 
             // LogBox
             // 
-            this.LogBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.LogBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.LogBox.Location = new System.Drawing.Point(12, 28);
             this.LogBox.Multiline = true;
@@ -102,11 +103,12 @@
             // 
             // ServerSelectBox
             // 
-            this.ServerSelectBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.ServerSelectBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.ServerSelectBox.FormattingEnabled = true;
             this.ServerSelectBox.Location = new System.Drawing.Point(808, 96);
             this.ServerSelectBox.Name = "ServerSelectBox";
-            this.ServerSelectBox.Size = new System.Drawing.Size(170, 82);
+            this.ServerSelectBox.Size = new System.Drawing.Size(170, 95);
             this.ServerSelectBox.TabIndex = 4;
             this.ServerSelectBox.SelectedIndexChanged += new System.EventHandler(this.ServerSelectBox_SelectedIndexChanged);
             // 
@@ -124,7 +126,7 @@
             // 
             // EditGlobals
             // 
-            this.EditGlobals.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.EditGlobals.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.EditGlobals.Enabled = false;
             this.EditGlobals.Location = new System.Drawing.Point(808, 266);
             this.EditGlobals.Name = "EditGlobals";
@@ -136,7 +138,7 @@
             // 
             // removeSrvBtn
             // 
-            this.removeSrvBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.removeSrvBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.removeSrvBtn.Enabled = false;
             this.removeSrvBtn.Location = new System.Drawing.Point(808, 353);
             this.removeSrvBtn.Name = "removeSrvBtn";
@@ -148,7 +150,7 @@
             // 
             // ChkUpdates
             // 
-            this.ChkUpdates.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.ChkUpdates.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.ChkUpdates.Enabled = false;
             this.ChkUpdates.Location = new System.Drawing.Point(808, 294);
             this.ChkUpdates.Name = "ChkUpdates";
@@ -160,7 +162,7 @@
             // 
             // GlobBackup
             // 
-            this.GlobBackup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.GlobBackup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.GlobBackup.Enabled = false;
             this.GlobBackup.Location = new System.Drawing.Point(808, 237);
             this.GlobBackup.Name = "GlobBackup";
@@ -172,7 +174,7 @@
             // 
             // cmdTextBox
             // 
-            this.cmdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdTextBox.Enabled = false;
             this.cmdTextBox.Location = new System.Drawing.Point(446, 429);
             this.cmdTextBox.Name = "cmdTextBox";
@@ -182,7 +184,7 @@
             // 
             // SendCmd
             // 
-            this.SendCmd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.SendCmd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.SendCmd.Enabled = false;
             this.SendCmd.Location = new System.Drawing.Point(808, 426);
             this.SendCmd.Name = "SendCmd";
@@ -194,7 +196,7 @@
             // 
             // EditCfg
             // 
-            this.EditCfg.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.EditCfg.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.EditCfg.Enabled = false;
             this.EditCfg.Location = new System.Drawing.Point(622, 208);
             this.EditCfg.Name = "EditCfg";
@@ -206,7 +208,7 @@
             // 
             // PlayerManagerBtn
             // 
-            this.PlayerManagerBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.PlayerManagerBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.PlayerManagerBtn.Enabled = false;
             this.PlayerManagerBtn.Location = new System.Drawing.Point(622, 382);
             this.PlayerManagerBtn.Name = "PlayerManagerBtn";
@@ -218,7 +220,7 @@
             // 
             // EditStCmd
             // 
-            this.EditStCmd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.EditStCmd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.EditStCmd.Enabled = false;
             this.EditStCmd.Location = new System.Drawing.Point(622, 237);
             this.EditStCmd.Name = "EditStCmd";
@@ -230,7 +232,7 @@
             // 
             // ManPacks
             // 
-            this.ManPacks.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.ManPacks.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.ManPacks.Enabled = false;
             this.ManPacks.Location = new System.Drawing.Point(622, 353);
             this.ManPacks.Name = "ManPacks";
@@ -242,7 +244,7 @@
             // 
             // SingBackup
             // 
-            this.SingBackup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.SingBackup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.SingBackup.Enabled = false;
             this.SingBackup.Location = new System.Drawing.Point(622, 266);
             this.SingBackup.Name = "SingBackup";
@@ -254,7 +256,7 @@
             // 
             // RestartSrv
             // 
-            this.RestartSrv.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.RestartSrv.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.RestartSrv.Enabled = false;
             this.RestartSrv.Location = new System.Drawing.Point(622, 294);
             this.RestartSrv.Name = "RestartSrv";
@@ -266,7 +268,7 @@
             // 
             // BackupManagerBtn
             // 
-            this.BackupManagerBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.BackupManagerBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.BackupManagerBtn.Enabled = false;
             this.BackupManagerBtn.Location = new System.Drawing.Point(622, 324);
             this.BackupManagerBtn.Name = "BackupManagerBtn";
@@ -278,6 +280,7 @@
             // 
             // SvcLog
             // 
+            this.SvcLog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.SvcLog.Enabled = false;
             this.SvcLog.Location = new System.Drawing.Point(17, 395);
             this.SvcLog.Name = "SvcLog";
@@ -290,7 +293,8 @@
             // 
             // ServerInfoBox
             // 
-            this.ServerInfoBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.ServerInfoBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.ServerInfoBox.Location = new System.Drawing.Point(622, 96);
             this.ServerInfoBox.Multiline = true;
             this.ServerInfoBox.Name = "ServerInfoBox";
@@ -300,7 +304,7 @@
             // 
             // newSrvBtn
             // 
-            this.newSrvBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.newSrvBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.newSrvBtn.Enabled = false;
             this.newSrvBtn.Location = new System.Drawing.Point(808, 208);
             this.newSrvBtn.Name = "newSrvBtn";
@@ -312,7 +316,7 @@
             // 
             // scrollLockChkBox
             // 
-            this.scrollLockChkBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.scrollLockChkBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.scrollLockChkBox.Enabled = false;
             this.scrollLockChkBox.Location = new System.Drawing.Point(464, 395);
             this.scrollLockChkBox.Name = "scrollLockChkBox";
@@ -326,7 +330,7 @@
             // 
             // nbtStudioBtn
             // 
-            this.nbtStudioBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.nbtStudioBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.nbtStudioBtn.Enabled = false;
             this.nbtStudioBtn.Location = new System.Drawing.Point(808, 324);
             this.nbtStudioBtn.Name = "nbtStudioBtn";
@@ -338,9 +342,8 @@
             // 
             // clientConfigBtn
             // 
-            this.clientConfigBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.clientConfigBtn.Enabled = false;
-            this.clientConfigBtn.Location = new System.Drawing.Point(808, 384);
+            this.clientConfigBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.clientConfigBtn.Location = new System.Drawing.Point(808, 382);
             this.clientConfigBtn.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.clientConfigBtn.Name = "clientConfigBtn";
             this.clientConfigBtn.Size = new System.Drawing.Size(170, 23);

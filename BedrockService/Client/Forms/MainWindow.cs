@@ -30,14 +30,14 @@ namespace BedrockService.Client.Forms
         private bool FollowTail = false;
         private const int ConnectTimeoutLimit = 3;
         private System.Timers.Timer connectTimer = new System.Timers.Timer(100.0);
-        private LogManager LogManager;
-        private ConfigManager ConfigManager;
+        private readonly LogManager _logManager;
+        private readonly ConfigManager _configManager;
         public MainWindow(IProcessInfo processInfo, ILogger logger)
         {
             this.processInfo = processInfo;
             Logger = logger;
-            LogManager = new LogManager(Logger);
-            ConfigManager = new ConfigManager(Logger);
+            _logManager = new LogManager(Logger);
+            _configManager = new ConfigManager(Logger);
             InitializeComponent();
             InitForm();
             SvcLog.CheckedChanged += SvcLog_CheckedChanged;
@@ -50,7 +50,7 @@ namespace BedrockService.Client.Forms
             {
                 if (connectTimer.Interval == 100.0)
                     connectTimer.Interval = 5000.0;
-                Invoke((MethodInvoker)delegate { FormManager.TCPClient.ConnectHost(ConfigManager.HostConnectList.FirstOrDefault(host => host.GetHostName() == (string)HostListBox.SelectedItem)); });
+                Invoke((MethodInvoker)delegate { FormManager.TCPClient.ConnectHost(_configManager.HostConnectList.FirstOrDefault(host => host.GetHostName() == (string)HostListBox.SelectedItem)); });
                 if (connectedHost != null && FormManager.TCPClient.Connected)
                 {
                     ServerBusy = false;
@@ -164,7 +164,7 @@ namespace BedrockService.Client.Forms
             ServerSelectBox.Items.Clear();
             if(connectedHost != null)
             {
-                LogManager.InitLogThread(connectedHost);
+                _logManager.InitLogThread(connectedHost);
                 foreach (ServerInfo server in connectedHost.GetServerList())
                     ServerSelectBox.Items.Add(server.ServerName);
                 if(ServerSelectBox.Items.Count > 0)
@@ -179,10 +179,15 @@ namespace BedrockService.Client.Forms
 
         public void InitForm()
         {
-            ConfigManager.LoadConfigs();
-            foreach (IClientSideServiceConfiguration host in ConfigManager.HostConnectList)
+            _configManager.LoadConfigs();
+            HostListBox.Items.Clear();
+            foreach (IClientSideServiceConfiguration host in _configManager.HostConnectList)
             {
                 HostListBox.Items.Add(host.GetHostName());
+            }
+            if(HostListBox.Items.Count > 0)
+            {
+                HostListBox.SelectedIndex = 0;
             }
             HostListBox.Refresh();
             FormClosing += MainWindow_FormClosing;
@@ -226,7 +231,7 @@ namespace BedrockService.Client.Forms
         private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
             Logger.AppendLine("Stopping log thread...");
-            if (LogManager.StopLogThread())
+            if (_logManager.StopLogThread())
             {
                 Logger.AppendLine("Sending disconnect msg...");
                 FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Disconnect);
@@ -354,7 +359,7 @@ namespace BedrockService.Client.Forms
 
         private void Disconn_Click(object sender, EventArgs e)
         {
-            if (LogManager.StopLogThread())
+            if (_logManager.StopLogThread())
             {
                 try
                 {
@@ -594,7 +599,7 @@ namespace BedrockService.Client.Forms
 
         private void nbtStudioBtn_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(ConfigManager.NBTStudioPath))
+            if (string.IsNullOrEmpty(_configManager.NBTStudioPath))
                 using (OpenFileDialog openFile = new OpenFileDialog())
                 {
                     openFile.FileName = "NBTStudio.exe";
@@ -602,8 +607,8 @@ namespace BedrockService.Client.Forms
                     openFile.Filter = "NBTStudio.exe|NBTStudio.exe";
                     if (openFile.ShowDialog() == DialogResult.OK)
                     {
-                        ConfigManager.NBTStudioPath = openFile.FileName;
-                        ConfigManager.SaveConfigFile();
+                        _configManager.NBTStudioPath = openFile.FileName;
+                        _configManager.SaveConfigFile();
                     }
                 }
             ServerBusy = true;
@@ -612,7 +617,7 @@ namespace BedrockService.Client.Forms
             using (Process nbtStudioProcess = new Process())
             {
                 string tempPath = $@"{Path.GetTempPath()}level.dat";
-                nbtStudioProcess.StartInfo = new ProcessStartInfo(ConfigManager.NBTStudioPath, tempPath);
+                nbtStudioProcess.StartInfo = new ProcessStartInfo(_configManager.NBTStudioPath, tempPath);
                 nbtStudioProcess.Start();
                 nbtStudioProcess.WaitForExit();
                 FormManager.TCPClient.SendData(File.ReadAllBytes(tempPath), NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.LevelEditFile);
@@ -624,7 +629,7 @@ namespace BedrockService.Client.Forms
         {
             if(HostListBox.SelectedIndex != -1)
             {
-                clientSideServiceConfiguration = ConfigManager.HostConnectList.FirstOrDefault(host => host.GetHostName() == (string)HostListBox.SelectedItem);
+                clientSideServiceConfiguration = _configManager.HostConnectList.FirstOrDefault(host => host.GetHostName() == (string)HostListBox.SelectedItem);
             }
         }
 
@@ -635,7 +640,14 @@ namespace BedrockService.Client.Forms
 
         private void clientConfigBtn_Click(object sender, EventArgs e)
         {
-
+            using (ClientConfigForm form = new ClientConfigForm(_configManager))
+            {
+                if(form.ShowDialog() == DialogResult.OK)
+                {
+                    form.Close();
+                    InitForm();
+                }
+            }
         }
     }
 }
