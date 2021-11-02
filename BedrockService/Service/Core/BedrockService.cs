@@ -24,74 +24,73 @@ namespace BedrockService.Service.Core
             Started,
             Stopping
         }
-        private readonly IServiceConfiguration ServiceConfiguration;
-        private readonly ILogger Logger;
-        private readonly IProcessInfo ProcessInfo;
-        private readonly IConfigurator Configurator;
-        private readonly IUpdater Updater;
-        private readonly ITCPListener tCPListener;
-        private IServiceThread tcpThread;
-        private readonly CrontabSchedule shed;
-        private readonly CrontabSchedule updaterCron;
-        private HostControl hostControl;
-        private List<IBedrockServer> bedrockServers = new List<IBedrockServer>();
-        private System.Timers.Timer updaterTimer;
-        private System.Timers.Timer cronTimer;
+        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ILogger _logger;
+        private readonly IProcessInfo _processInfo;
+        private readonly IConfigurator _configurator;
+        private readonly IUpdater _updater;
+        private readonly ITCPListener _tCPListener;
+        private readonly IServiceThread _tcpThread;
+        private readonly CrontabSchedule _shed;
+        private readonly CrontabSchedule _updaterCron;
+        private HostControl _hostControl;
+        private List<IBedrockServer> _bedrockServers = new List<IBedrockServer>();
+        private System.Timers.Timer _updaterTimer;
+        private System.Timers.Timer _cronTimer;
 
         public BedrockService(IConfigurator configurator, IUpdater updater, ILogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ITCPListener tCPListener)
         {
-            this.tCPListener = tCPListener;
-            Configurator = configurator;
-            ServiceConfiguration = serviceConfiguration;
-            ProcessInfo = serviceProcessInfo;
-            Updater = updater;
-            Logger = logger;
-            shed = CrontabSchedule.TryParse(serviceConfiguration.GetProp("BackupCron").ToString());
-            updaterCron = CrontabSchedule.TryParse(serviceConfiguration.GetProp("UpdateCron").ToString());
+            this._tCPListener = tCPListener;
+            _configurator = configurator;
+            _serviceConfiguration = serviceConfiguration;
+            _processInfo = serviceProcessInfo;
+            _updater = updater;
+            _logger = logger;
+            _shed = CrontabSchedule.TryParse(serviceConfiguration.GetProp("BackupCron").ToString());
+            _updaterCron = CrontabSchedule.TryParse(serviceConfiguration.GetProp("UpdateCron").ToString());
             Initialize();
         }
 
         public bool Start(HostControl hostControl)
         {
-            this.hostControl = hostControl;
+            this._hostControl = hostControl;
             try
             {
                 ValidSettingsCheck();
 
-                foreach (var brs in bedrockServers)
+                foreach (var brs in _bedrockServers)
                 {
                     if(hostControl != null)
-                        this.hostControl.RequestAdditionalTime(TimeSpan.FromSeconds(30));
+                        this._hostControl.RequestAdditionalTime(TimeSpan.FromSeconds(30));
                     brs.SetServerStatus(BedrockServer.ServerStatus.Starting);
-                    brs.StartWatchdog(this.hostControl);
+                    brs.StartWatchdog(this._hostControl);
                 }
                 return true;
             }
             catch (Exception e)
             {
-                Logger.AppendLine($"Error Starting BedrockServiceWrapper {e.StackTrace}");
+                _logger.AppendLine($"Error Starting BedrockServiceWrapper {e.StackTrace}");
                 return false;
             }
         }
 
         public bool Stop(HostControl hostControl)
         {
-            this.hostControl = hostControl;
+            this._hostControl = hostControl;
             try
             {
-                foreach (var brs in bedrockServers)
+                foreach (var brs in _bedrockServers)
                 {
                     brs.SetServerStatus(BedrockServer.ServerStatus.Stopping);
                     while (brs.GetServerStatus() == BedrockServer.ServerStatus.Stopping && !Program.IsExiting)
                         Thread.Sleep(100);
                 }
-                tcpThread.CloseThread();
-                tcpThread = null;
+                _tcpThread.CloseThread();
                 return true;
             }
             catch (Exception e)
             {
-                Logger.AppendLine($"Error Stopping BedrockServiceWrapper {e.StackTrace}");
+                _logger.AppendLine($"Error Stopping BedrockServiceWrapper {e.StackTrace}");
                 return false;
             }
         }
@@ -100,88 +99,88 @@ namespace BedrockService.Service.Core
         {
             try
             {
-                foreach (IBedrockServer brs in bedrockServers)
+                foreach (IBedrockServer brs in _bedrockServers)
                 {
                     brs.SetServerStatus(BedrockServer.ServerStatus.Stopping);
                     while (brs.GetServerStatus() == BedrockServer.ServerStatus.Stopping && !Program.IsExiting)
                         Thread.Sleep(100);
                 }
-                foreach (IBedrockServer brs in bedrockServers)
+                foreach (IBedrockServer brs in _bedrockServers)
                 {
                     brs.StopWatchdog();
                 }
                 try
                 {
-                    tCPListener.ResetListener();
+                    _tCPListener.ResetListener();
                 }
                 catch (ThreadAbortException) { }
                 //tcpThread.CloseThread();
-                Configurator.LoadAllConfigurations().Wait();
+                _configurator.LoadAllConfigurations().Wait();
                 Initialize();
-                foreach (var brs in bedrockServers)
+                foreach (var brs in _bedrockServers)
                 {
                     brs.SetServerStatus(BedrockServer.ServerStatus.Starting);
                 }
-                Start(hostControl);
+                Start(_hostControl);
             }
             catch (Exception e)
             {
-                Logger.AppendLine($"Error Stopping BedrockServiceWrapper {e.StackTrace}");
+                _logger.AppendLine($"Error Stopping BedrockServiceWrapper {e.StackTrace}");
             }
         }
 
         public IBedrockServer GetBedrockServerByIndex(int serverIndex)
         {
-            return bedrockServers[serverIndex];
+            return _bedrockServers[serverIndex];
         }
 
         public IBedrockServer GetBedrockServerByName(string name)
         {
-            return bedrockServers.FirstOrDefault(brs => brs.GetServerName() == name);
+            return _bedrockServers.FirstOrDefault(brs => brs.GetServerName() == name);
         }
 
-        public List<IBedrockServer> GetAllServers() => bedrockServers;
+        public List<IBedrockServer> GetAllServers() => _bedrockServers;
 
         public void InitializeNewServer(IServerConfiguration server)
         {
-            IBedrockServer bedrockServer = new BedrockServer(server, Configurator, Logger, ServiceConfiguration, ProcessInfo);
-            bedrockServers.Add(bedrockServer);
-            ServiceConfiguration.AddNewServerInfo(server);
+            IBedrockServer bedrockServer = new BedrockServer(server, _configurator, _logger, _serviceConfiguration, _processInfo);
+            _bedrockServers.Add(bedrockServer);
+            _serviceConfiguration.AddNewServerInfo(server);
             if (ValidSettingsCheck())
             {
                 bedrockServer.SetServerStatus(BedrockServer.ServerStatus.Starting);
-                bedrockServer.StartWatchdog(hostControl);
+                bedrockServer.StartWatchdog(_hostControl);
             }
         }
 
         private void Initialize()
         {
-            bedrockServers.Clear();
-            if (ServiceConfiguration.GetProp("BackupEnabled").ToString() == "true" && shed != null)
+            _bedrockServers.Clear();
+            if (_serviceConfiguration.GetProp("BackupEnabled").ToString() == "true" && _shed != null)
             {
-                cronTimer = new System.Timers.Timer((shed.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
-                cronTimer.Elapsed += CronTimer_Elapsed;
-                cronTimer.Start();
+                _cronTimer = new System.Timers.Timer((_shed.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
+                _cronTimer.Elapsed += CronTimer_Elapsed;
+                _cronTimer.Start();
             }
-            if (ServiceConfiguration.GetProp("CheckUpdates").ToString() == "true" && updaterCron != null)
+            if (_serviceConfiguration.GetProp("CheckUpdates").ToString() == "true" && _updaterCron != null)
             {
-                updaterTimer = new System.Timers.Timer((updaterCron.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
-                updaterTimer.Elapsed += UpdateTimer_Elapsed;
-                Logger.AppendLine($"Updates Enabled, will be checked in: {((float)updaterTimer.Interval / 1000)} seconds.");
-                updaterTimer.Start();
+                _updaterTimer = new System.Timers.Timer((_updaterCron.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
+                _updaterTimer.Elapsed += UpdateTimer_Elapsed;
+                _logger.AppendLine($"Updates Enabled, will be checked in: {((float)_updaterTimer.Interval / 1000)} seconds.");
+                _updaterTimer.Start();
             }
             try
             {
-                List<IServerConfiguration> temp = ServiceConfiguration.GetServerList();
+                List<IServerConfiguration> temp = _serviceConfiguration.GetServerList();
                 foreach (IServerConfiguration server in temp)
                 {
-                    IBedrockServer bedrockServer = new BedrockServer(server, Configurator, Logger, ServiceConfiguration, ProcessInfo);
-                    bedrockServers.Add(bedrockServer);
+                    IBedrockServer bedrockServer = new BedrockServer(server, _configurator, _logger, _serviceConfiguration, _processInfo);
+                    _bedrockServers.Add(bedrockServer);
                 }
             }
             catch (Exception e)
             {
-                Logger.AppendLine($"Error Instantiating BedrockServiceWrapper: {e.StackTrace}");
+                _logger.AppendLine($"Error Instantiating BedrockServiceWrapper: {e.StackTrace}");
             }
         }
 
@@ -189,23 +188,23 @@ namespace BedrockService.Service.Core
         {
             try
             {
-                if (cronTimer != null)
+                if (_cronTimer != null)
                 {
-                    cronTimer.Stop();
-                    cronTimer = null;
+                    _cronTimer.Stop();
+                    _cronTimer = null;
                 }
-                if (ServiceConfiguration.GetProp("BackupEnabled").ToString() == "true" && shed != null)
+                if (_serviceConfiguration.GetProp("BackupEnabled").ToString() == "true" && _shed != null)
                 {
                     Backup();
 
-                    cronTimer = new System.Timers.Timer((shed.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
-                    cronTimer.Elapsed += CronTimer_Elapsed;
-                    cronTimer.Start();
+                    _cronTimer = new System.Timers.Timer((_shed.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
+                    _cronTimer.Elapsed += CronTimer_Elapsed;
+                    _cronTimer.Start();
                 }
             }
             catch (Exception ex)
             {
-                Logger.AppendLine($"Error in BackupTimer_Elapsed {ex}");
+                _logger.AppendLine($"Error in BackupTimer_Elapsed {ex}");
             }
         }
 
@@ -213,42 +212,42 @@ namespace BedrockService.Service.Core
         {
             try
             {
-                if (updaterTimer != null)
+                if (_updaterTimer != null)
                 {
-                    updaterTimer.Stop();
-                    updaterTimer = null;
+                    _updaterTimer.Stop();
+                    _updaterTimer = null;
                 }
-                Updater.CheckUpdates().Wait();
-                if (ServiceConfiguration.GetProp("CheckUpdates").ToString() == "true" && Updater != null)
+                _updater.CheckUpdates().Wait();
+                if (_serviceConfiguration.GetProp("CheckUpdates").ToString() == "true" && _updater != null)
                 {
-                    if (Updater.CheckVersionChanged())
+                    if (_updater.CheckVersionChanged())
                     {
-                        Logger.AppendLine("Version change detected! Restarting server(s) to apply update...");
-                        if (Stop(hostControl))
+                        _logger.AppendLine("Version change detected! Restarting server(s) to apply update...");
+                        foreach(IBedrockServer server in _bedrockServers)
                         {
-                            Start(hostControl);
+                            server.RestartServer(false);
                         }
                     }
 
-                    updaterTimer = new System.Timers.Timer((updaterCron.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
-                    updaterTimer.Elapsed += UpdateTimer_Elapsed;
-                    updaterTimer.Start();
+                    _updaterTimer = new System.Timers.Timer((_updaterCron.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
+                    _updaterTimer.Elapsed += UpdateTimer_Elapsed;
+                    _updaterTimer.Start();
                 }
             }
             catch (Exception ex)
             {
-                Logger.AppendLine($"Error in UpdateTimer_Elapsed {ex}");
+                _logger.AppendLine($"Error in UpdateTimer_Elapsed {ex}");
             }
         }
 
         private void Backup()
         {
-            Logger.AppendLine("Service started backup manager.");
-            foreach (var brs in bedrockServers)
+            _logger.AppendLine("Service started backup manager.");
+            foreach (var brs in _bedrockServers)
             {
                 brs.RestartServer(true);
             }
-            Logger.AppendLine("Backups have been completed.");
+            _logger.AppendLine("Backups have been completed.");
         }
 
         private bool ValidSettingsCheck()
@@ -257,15 +256,15 @@ namespace BedrockService.Service.Core
             bool dupedSettingsFound = false;
             while (validating)
             {
-                if (ServiceConfiguration.GetServerList().Count() < 1)
+                if (_serviceConfiguration.GetServerList().Count() < 1)
                 {
                     throw new Exception("No Servers Configured");
                 }
                 else
                 {
-                    foreach (IServerConfiguration server in ServiceConfiguration.GetServerList())
+                    foreach (IServerConfiguration server in _serviceConfiguration.GetServerList())
                     {
-                        foreach (IServerConfiguration compareServer in ServiceConfiguration.GetServerList())
+                        foreach (IServerConfiguration compareServer in _serviceConfiguration.GetServerList())
                         {
                             if (server != compareServer)
                             {
@@ -273,7 +272,7 @@ namespace BedrockService.Service.Core
                                     server.GetProp("server-portv6").Equals(compareServer.GetProp("server-portv6")) ||
                                     server.GetProp("server-name").Equals(compareServer.GetProp("server-name")))
                                 {
-                                    Logger.AppendLine($"Duplicate server settings between servers {server.GetFileName()} and {compareServer.GetFileName()}.");
+                                    _logger.AppendLine($"Duplicate server settings between servers {server.GetFileName()} and {compareServer.GetFileName()}.");
                                     dupedSettingsFound = true;
                                 }
                             }
@@ -283,19 +282,19 @@ namespace BedrockService.Service.Core
                     {
                         throw new Exception("Duplicate settings found! Check logs.");
                     }
-                    foreach (var server in ServiceConfiguration.GetServerList())
+                    foreach (var server in _serviceConfiguration.GetServerList())
                     {
-                        if (Updater.CheckVersionChanged() || !File.Exists(server.GetProp("ServerPath") + "\\bedrock_server.exe"))
+                        if (_updater.CheckVersionChanged() || !File.Exists(server.GetProp("ServerPath") + "\\bedrock_server.exe"))
                         {
-                            Configurator.ReplaceServerBuild(server).Wait();
+                            _configurator.ReplaceServerBuild(server).Wait();
                         }
                         if (server.GetProp("ServerExeName").ToString() != "bedrock_server.exe" && File.Exists(server.GetProp("ServerPath") + "\\bedrock_server.exe") && !File.Exists(server.GetProp("ServerPath") + "\\" + server.GetProp("ServerExeName")))
                         {
                             File.Copy(server.GetProp("ServerPath") + "\\bedrock_server.exe", server.GetProp("ServerPath") + "\\" + server.GetProp("ServerExeName"));
                         }
                     }
-                    if (Updater.CheckVersionChanged())
-                        Updater.MarkUpToDate();
+                    if (_updater.CheckVersionChanged())
+                        _updater.MarkUpToDate();
                     else
                     {
                         validating = false;
@@ -307,7 +306,7 @@ namespace BedrockService.Service.Core
 
         public void RemoveBedrockServerByIndex(int serverIndex)
         {
-            bedrockServers.RemoveAt(serverIndex);
+            _bedrockServers.RemoveAt(serverIndex);
         }
     }
 }

@@ -5,16 +5,16 @@ namespace BedrockService.Service.Core.Threads
 {
     class ClientServiceThread : IServiceThread
     {
-        Thread clientService;
+        private Thread _clientService;
 
         public ClientServiceThread(ThreadStart methodToRun)
         {
-            clientService = new Thread(methodToRun)
+            _clientService = new Thread(methodToRun)
             {
                 Name = "ClientService",
                 IsBackground = true
             };
-            clientService.Start();
+            _clientService.Start();
         }
 
         public void CloseThread()
@@ -23,16 +23,16 @@ namespace BedrockService.Service.Core.Threads
             {
                 if (IsAlive())
                 {
-                    clientService.Abort();
+                    _clientService.Abort();
                 }
-                clientService = null;
+                _clientService = null;
             }
             catch (ThreadAbortException) { }
         }
 
         public bool IsAlive()
         {
-            return clientService != null && clientService.IsAlive;
+            return _clientService != null && _clientService.IsAlive;
         }
     }
 }

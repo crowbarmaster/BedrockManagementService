@@ -6,17 +6,17 @@ namespace BedrockService.Service.Core.Threads
 {
     class TCPThread : IServiceThread
     {
-        Thread clientService;
+        private Thread _clientService;
 
         public TCPThread(ThreadStart threadStart)
         {
-            clientService = null;
-            clientService = new Thread(threadStart)
+            _clientService = null;
+            _clientService = new Thread(threadStart)
             {
                 Name = "TCPListener",
                 IsBackground = true
             };
-            clientService.Start();
+            _clientService.Start();
         }
 
         public void CloseThread()
@@ -25,15 +25,15 @@ namespace BedrockService.Service.Core.Threads
             {
                 if (IsAlive())
                 {
-                    clientService.Abort();
+                    _clientService.Abort();
                 }
             });
-            clientService = null;
+            _clientService = null;
         }
 
         public bool IsAlive()
         {
-            return clientService != null && clientService.IsAlive;
+            return _clientService != null && _clientService.IsAlive;
         }
     }
 }

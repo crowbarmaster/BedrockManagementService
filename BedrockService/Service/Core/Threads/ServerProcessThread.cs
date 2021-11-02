@@ -5,31 +5,31 @@ namespace BedrockService.Service.Core.Threads
 {
     class ServerProcessThread : IServiceThread
     {
-        Thread networkListenerThread;
+        private Thread _networkListenerThread;
 
         public ServerProcessThread(ThreadStart methodToRun)
         {
-            networkListenerThread = new Thread(methodToRun)
+            _networkListenerThread = new Thread(methodToRun)
             {
                 Name = "ServerThread",
                 IsBackground = true
             };
-            networkListenerThread.Start();
+            _networkListenerThread.Start();
         }
 
         public void CloseThread()
         {
             if (IsAlive())
             {
-                networkListenerThread.Abort();
+                _networkListenerThread.Abort();
             }
-            networkListenerThread = null;
+            _networkListenerThread = null;
         }
 
 
         public bool IsAlive()
         {
-            return networkListenerThread != null && networkListenerThread.IsAlive;
+            return _networkListenerThread != null && _networkListenerThread.IsAlive;
         }
     }
 }

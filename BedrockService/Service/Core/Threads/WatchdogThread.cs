@@ -5,27 +5,27 @@ namespace BedrockService.Service.Core.Threads
 {
     class WatchdogThread : IServiceThread
     {
-        Thread thread;
+        private Thread _thread;
 
         public WatchdogThread(ThreadStart parameterizedThreadStart)
         {
-            thread = new Thread(parameterizedThreadStart)
+            _thread = new Thread(parameterizedThreadStart)
             {
                 Name = "WatchdogThread",
                 IsBackground = true
             };
-            thread.Start();
+            _thread.Start();
         }
 
         public void CloseThread()
         {
-            thread.Abort();
-            thread = null;
+            _thread.Abort();
+            _thread = null;
         }
 
         public bool IsAlive()
         {
-            return thread != null && thread.IsAlive;
+            return _thread != null && _thread.IsAlive;
         }
     }
 

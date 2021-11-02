@@ -165,7 +165,6 @@
     <Compile Include="Networking\TCPListener.cs" />
     <Compile Include="Networking\Updater.cs" />
     <Compile Include="Core\Service.cs" />
-    <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Configs\Default.conf" />

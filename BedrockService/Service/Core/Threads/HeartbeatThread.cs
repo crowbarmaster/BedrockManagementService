@@ -5,27 +5,27 @@ namespace BedrockService.Service.Core.Threads
 {
     class HeartbeatThread : IServiceThread
     {
-        Thread heartbeatThread;
+        private Thread _heartbeatThread;
 
         public HeartbeatThread(ThreadStart parameterizedThreadStart)
         {
-            heartbeatThread = new Thread(parameterizedThreadStart)
+            _heartbeatThread = new Thread(parameterizedThreadStart)
             {
                 Name = "HeartbeatThread",
                 IsBackground = true
             };
-            heartbeatThread.Start();
+            _heartbeatThread.Start();
         }
 
         public void CloseThread()
         {
-            heartbeatThread.Abort();
-            heartbeatThread = null;
+            _heartbeatThread.Abort();
+            _heartbeatThread = null;
         }
 
         public bool IsAlive()
         {
-            return heartbeatThread != null && heartbeatThread.IsAlive;
+            return _heartbeatThread != null && _heartbeatThread.IsAlive;
         }
     }
 }
