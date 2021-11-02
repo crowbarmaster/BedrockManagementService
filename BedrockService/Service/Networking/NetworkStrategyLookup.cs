@@ -41,7 +41,7 @@ namespace BedrockService.Service.Networking
                 {NetworkMessageTypes.StartCmdUpdate, new StartCmdUpdate(configurator, messageSender, serviceConfiguration) },
                 {NetworkMessageTypes.CheckUpdates, new CheckUpdates(configurator, messageSender, serviceConfiguration, updater) },
                 {NetworkMessageTypes.BackupRollback, new BackupRollback(configurator, messageSender) },
-                {NetworkMessageTypes.AddNewServer, new AddNewServer(configurator, messageSender, processInfo, serviceConfiguration, logger, service) },
+                {NetworkMessageTypes.AddNewServer, new AddNewServer(configurator, messageSender, serviceConfiguration, service) },
                 {NetworkMessageTypes.ConsoleLogUpdate, new ConsoleLogUpdate(messageSender, serviceConfiguration, service) },
                 {NetworkMessageTypes.PlayersRequest, new PlayerRequest(messageSender, serviceConfiguration) },
                 {NetworkMessageTypes.LevelEditRequest, new LevelEditRequest(messageSender, serviceConfiguration) },
@@ -492,15 +492,11 @@ namespace BedrockService.Service.Networking
             IMessageSender messageSender;
             IServiceConfiguration serviceConfiguration;
             IConfigurator configurator;
-            ILogger logger;
             IBedrockService bedrockService;
-            IProcessInfo processInfo;
-
-            public AddNewServer(IConfigurator configurator, IMessageSender messageSender, IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, ILogger logger, IBedrockService bedrockService)
+             
+            public AddNewServer(IConfigurator configurator, IMessageSender messageSender, IServiceConfiguration serviceConfiguration, IBedrockService bedrockService)
             {
-                this.processInfo = processInfo;
                 this.bedrockService = bedrockService;
-                this.logger = logger;
                 this.configurator = configurator;
                 this.messageSender = messageSender;
                 this.serviceConfiguration = serviceConfiguration;
@@ -525,7 +521,7 @@ namespace BedrockService.Service.Networking
                     },
                     ServerExeName = new Property("ServerExeName", "")
                     {
-                        Value = $"BDS_{serverNameProp}.exe"
+                        Value = $"BedrockService.{serverNameProp}.exe"
                     },
                     FileName = $@"{serverNameProp}.conf"
                 };
