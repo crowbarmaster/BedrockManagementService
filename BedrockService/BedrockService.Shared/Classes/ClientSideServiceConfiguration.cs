@@ -9,12 +9,12 @@ namespace BedrockService.Shared.Classes
         private readonly string port;
         private readonly string displayName;
 
-        public ClientSideServiceConfiguration(string hostName, string address, string port, string displayName)
+        public ClientSideServiceConfiguration(string hostName, string address, string port)
         {
             this.hostName = hostName;
             this.address = address;
             this.port = port;
-            this.displayName = displayName;
+            displayName = $@"{hostName}@{address}:{port}";
         }
 
         public string GetHostName() => hostName;
