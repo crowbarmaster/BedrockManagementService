@@ -28,7 +28,7 @@ namespace BedrockServiceUnitTests
             NetworkStrategyLookup networkStrategyLookup = serviceProvider.GetRequiredService<NetworkStrategyLookup>();
             IBedrockService bedrockService = serviceProvider.GetRequiredService<IBedrockService>();
             bedrockService.Start(null);
-            BedrockService.Client.Management.FormManager.GetMainWindow.PerformBackupTests();
+            BedrockService.Client.Management.FormManager.MainWindow.PerformBackupTests();
             
         }
     }
