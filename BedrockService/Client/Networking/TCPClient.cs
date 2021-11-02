@@ -26,17 +26,15 @@ namespace BedrockService.Client.Networking
         public List<MinecraftPackParser> RecievedPacks;
         public Thread ClientReciever;
         public Thread HeartbeatThread;
-        private int heartbeatFailTimeout;
-        private int streamWriteFailTimeout;
-        private const int heartbeatFailTimeoutLimit = 250;
-        private const int streamWriteFailLimit = 10;
-        private bool heartbeatRecieved;
-        private bool keepAlive;
-        private readonly ILogger Logger;
+        private int _heartbeatFailTimeout;
+        private const int _heartbeatFailTimeoutLimit = 250;
+        private bool _heartbeatRecieved;
+        private bool _keepAlive;
+        private readonly ILogger _logger;
 
         public TCPClient (ILogger logger)
         {
-            Logger = logger;
+            _logger = logger;
         }
 
         public void ConnectHost(IClientSideServiceConfiguration host)
@@ -50,13 +48,13 @@ namespace BedrockService.Client.Networking
 
         public bool EstablishConnection(string addr, int port)
         {
-            Logger.AppendLine("Connecting to Server");
+            _logger.AppendLine("Connecting to Server");
             try
             {
                 EnableRead = false;
                 OpenedTcpClient = new TcpClient(addr, port);
                 stream = OpenedTcpClient.GetStream();
-                keepAlive = true;
+                _keepAlive = true;
                 ClientReciever = new Thread(new ThreadStart(ReceiveListener));
                 ClientReciever.Name = "ClientPacketReviever";
                 ClientReciever.IsBackground = true;
@@ -64,13 +62,13 @@ namespace BedrockService.Client.Networking
             }
             catch
             {
-                Logger.AppendLine("Could not connect to Server");
+                _logger.AppendLine("Could not connect to Server");
                 if(ClientReciever != null)
                     ClientReciever.Abort();
                 ClientReciever = null;
                 return false;
             }
-            return keepAlive;
+            return _keepAlive;
         }
 
         public void CloseConnection()
@@ -81,23 +79,23 @@ namespace BedrockService.Client.Networking
                     stream.Dispose();
                 stream = null;
                 Connected = false;
-                keepAlive = false;
+                _keepAlive = false;
             }
             catch (NullReferenceException)
             {
                 Connected = false;
-                keepAlive = false;
+                _keepAlive = false;
             }
             catch (Exception e)
             {
-                Logger.AppendLine($"Error closing connection: {e.StackTrace}");
+                _logger.AppendLine($"Error closing connection: {e.StackTrace}");
             }
         }
 
         public void ReceiveListener()
         {
             List<byte[]> byteBlocks = new List<byte[]>();
-            while (keepAlive)
+            while (_keepAlive)
             {
                 try
                 {
@@ -131,12 +129,12 @@ namespace BedrockService.Client.Networking
                                     case NetworkMessageTypes.Connect:
                                         try
                                         {
-                                            Logger.AppendLine("Connection to Host successful!");
+                                            _logger.AppendLine("Connection to Host successful!");
                                             FormManager.MainWindow.connectedHost = null;
                                             FormManager.MainWindow.connectedHost = JsonConvert.DeserializeObject<IServiceConfiguration>(data, settings);
                                             Connected = true;
                                             FormManager.MainWindow.RefreshServerContents();
-                                            heartbeatFailTimeout = 0;
+                                            _heartbeatFailTimeout = 0;
                                             if (HeartbeatThread == null || !HeartbeatThread.IsAlive)
                                                 HeartbeatThread = new Thread(new ThreadStart(SendHeatbeatSignal))
                                                 {
@@ -148,11 +146,11 @@ namespace BedrockService.Client.Networking
                                         }
                                         catch (Exception e)
                                         {
-                                            Logger.AppendLine($"Error: ConnectMan reported error: {e.Message}\n{e.StackTrace}");
+                                            _logger.AppendLine($"Error: ConnectMan reported error: {e.Message}\n{e.StackTrace}");
                                         }
                                         break;
                                     case NetworkMessageTypes.Heartbeat:
-                                        heartbeatRecieved = true;
+                                        _heartbeatRecieved = true;
                                         if (!HeartbeatThread.IsAlive)
                                         {
                                             HeartbeatThread = new Thread(new ThreadStart(SendHeatbeatSignal));
@@ -213,7 +211,7 @@ namespace BedrockService.Client.Networking
                                         break;
                                     case NetworkMessageTypes.Backup:
 
-                                        Logger.AppendLine(msgStatus.ToString());
+                                        _logger.AppendLine(msgStatus.ToString());
 
                                         break;
                                     case NetworkMessageTypes.UICallback:
@@ -253,7 +251,7 @@ namespace BedrockService.Client.Networking
                 }
                 catch (Exception e)
                 {
-                    Logger.AppendLine($"TCPClient error! Stacktrace: {e.Message}\n{e.StackTrace}");
+                    _logger.AppendLine($"TCPClient error! Stacktrace: {e.Message}\n{e.StackTrace}");
                 }
                 Thread.Sleep(200);
             }
@@ -261,25 +259,25 @@ namespace BedrockService.Client.Networking
 
         public void SendHeatbeatSignal()
         {
-            Logger.AppendLine("HeartbeatThread started.");
-            while (keepAlive)
+            _logger.AppendLine("HeartbeatThread started.");
+            while (_keepAlive)
             {
-                heartbeatRecieved = false;
+                _heartbeatRecieved = false;
                 SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Heartbeat);
-                while (!heartbeatRecieved && keepAlive)
+                while (!_heartbeatRecieved && _keepAlive)
                 {
                     Thread.Sleep(100);
-                    heartbeatFailTimeout++;
-                    if (heartbeatFailTimeout > heartbeatFailTimeoutLimit)
+                    _heartbeatFailTimeout++;
+                    if (_heartbeatFailTimeout > _heartbeatFailTimeoutLimit)
                     {
                         FormManager.MainWindow.HeartbeatFailDisconnect();
                         HeartbeatThread.Abort();
-                        heartbeatFailTimeout = 0;
+                        _heartbeatFailTimeout = 0;
                     }
                 }
                 // Logger.AppendLine("ThumpThump");
-                heartbeatRecieved = false;
-                heartbeatFailTimeout = 0;
+                _heartbeatRecieved = false;
+                _heartbeatFailTimeout = 0;
                 Thread.Sleep(3000);
             }
         }
@@ -295,7 +293,7 @@ namespace BedrockService.Client.Networking
             compiled[7] = (byte)type;
             compiled[8] = (byte)status;
             Buffer.BlockCopy(bytes, 0, compiled, 9, bytes.Length);
-            if (keepAlive)
+            if (_keepAlive)
             {
                 try
                 {
@@ -306,7 +304,7 @@ namespace BedrockService.Client.Networking
                 }
                 catch
                 {
-                    Logger.AppendLine("Error writing to network stream!");
+                    _logger.AppendLine("Error writing to network stream!");
                     return false;
                 }
             }
