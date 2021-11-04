@@ -8,7 +8,7 @@ namespace BedrockService.Shared.PackParser
     public class MinecraftKnownPacksClass
     {
         public List<KnownPack> KnownPacks = new List<KnownPack>();
-        private List<KnownPack> stockPacks = new List<KnownPack>();
+        private readonly List<KnownPack> _stockPacks = new List<KnownPack>();
         public class KnownPack
         {
             public int file_version { get; set; }
@@ -28,9 +28,9 @@ namespace BedrockService.Shared.PackParser
         public MinecraftKnownPacksClass(string serverFile, string stockFile)
         {
             KnownPacks = ParseJsonArray(serverFile);
-            stockPacks = ParseJsonArray(stockFile);
+            _stockPacks = ParseJsonArray(stockFile);
             KnownPacks.RemoveAt(0); // Strip file version entry.
-            foreach (KnownPack pack in stockPacks)
+            foreach (KnownPack pack in _stockPacks)
             {
                 KnownPack packToRemove = new KnownPack();
                 if (pack.uuid == null)
@@ -49,7 +49,7 @@ namespace BedrockService.Shared.PackParser
             if (pack.ManifestType == "resources")
                 Directory.Delete($@"{serverPath}\resource_packs\{ pack.FolderName}", true);
             KnownPacks.Remove(KnownPacks.First(p => p.uuid != null || p.uuid == pack.JsonManifest.header.uuid));
-            List<KnownPack> packsToWrite = new List<KnownPack>(stockPacks);
+            List<KnownPack> packsToWrite = new List<KnownPack>(_stockPacks);
             if (KnownPacks.Count > 0)
                 packsToWrite.AddRange(KnownPacks);
             File.WriteAllText($@"{serverPath}\valid_known_packs.json", JArray.FromObject(packsToWrite).ToString());

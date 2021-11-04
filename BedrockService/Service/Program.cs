@@ -16,18 +16,18 @@ namespace BedrockService.Service
     class Program
     {
         public static bool IsExiting = false;
-        private static bool isDebugEnabled = false;
-        private static bool isConsoleMode = false;
-        private static readonly IServiceCollection services = new ServiceCollection();
+        private static bool _isDebugEnabled = false;
+        private static bool _isConsoleMode = false;
+        private static readonly IServiceCollection _services = new ServiceCollection();
 
         static void Main(string[] args)
         {
             if (args.Length > 0)
             {
-                isDebugEnabled = args[0].ToLower() == "-debug";
+                _isDebugEnabled = args[0].ToLower() == "-debug";
             }
-            ConfigureServices(services);
-            IServiceProvider serviceProvider = services.BuildServiceProvider();
+            ConfigureServices(_services);
+            IServiceProvider serviceProvider = _services.BuildServiceProvider();
             serviceProvider.GetRequiredService<IConfigurator>().LoadAllConfigurations().Wait();
             serviceProvider.GetRequiredService<IUpdater>().CheckUpdates().Wait();
             IService service = serviceProvider.GetRequiredService<IService>();
@@ -36,7 +36,7 @@ namespace BedrockService.Service
             serviceProvider.GetRequiredService<NetworkStrategyLookup>();
             if (args.Length == 0 || Environment.UserInteractive)
             {
-                isConsoleMode = true;
+                _isConsoleMode = true;
                 Logger.AppendLine("BedrockService startup detected in Console mode.");
             }
             else
@@ -55,7 +55,7 @@ namespace BedrockService.Service
             service.InitializeHost().Wait();
             TopshelfExitCode rc = service.Run();
             var exitCode = (int)Convert.ChangeType(rc, rc.GetTypeCode());
-            if (isDebugEnabled)
+            if (_isDebugEnabled)
             {
                 Console.Write("Program is force-quitting. Press any key to exit.");
                 Console.Out.Flush();
@@ -65,7 +65,7 @@ namespace BedrockService.Service
         }
         private static void ConfigureServices(IServiceCollection services)
         {
-            IProcessInfo processInfo = new ServiceProcessInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Path.GetFileName(Assembly.GetExecutingAssembly().Location), Process.GetCurrentProcess().Id, isDebugEnabled, isConsoleMode);
+            IProcessInfo processInfo = new ServiceProcessInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Path.GetFileName(Assembly.GetExecutingAssembly().Location), Process.GetCurrentProcess().Id, _isDebugEnabled, _isConsoleMode);
             services.AddSingleton(processInfo);
             services.AddSingleton<IService, Core.Service>();
             services.AddSingleton<IServiceConfiguration, ServiceInfo>();

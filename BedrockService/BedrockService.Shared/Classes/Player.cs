@@ -28,7 +28,7 @@ namespace BedrockService.Shared.Classes
         private bool FromConfig { get; set; }
 
         [JsonConstructor]
-        public Player(string xuid, string username, string firstConn, string lastConn, string lastDiscon, bool whtlist, string perm, bool ignoreLimit, bool fromCfg)
+        public Player(string xuid, string username, string firstConn, string lastConn, string lastDiscon, bool whtlist, string perm, bool ignoreLimit)
         {
             Username = username;
             XUID = xuid;
@@ -38,7 +38,6 @@ namespace BedrockService.Shared.Classes
             Whitelisted = whtlist;
             PermissionLevel = perm;
             IgnorePlayerLimits = ignoreLimit;
-            FromConfig = fromCfg;
         }
 
         public Player(string serverDefaultPermission)
@@ -110,7 +109,7 @@ namespace BedrockService.Shared.Classes
             }
             if (format == "Registered")
             {
-                return $"{XUID},{Username},{Whitelisted},{PermissionLevel},{IgnorePlayerLimits}";
+                return $"{XUID},{Username},{PermissionLevel},{Whitelisted},{IgnorePlayerLimits}";
             }
             return null;
         }

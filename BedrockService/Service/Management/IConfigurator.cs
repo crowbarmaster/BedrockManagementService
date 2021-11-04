@@ -16,7 +16,6 @@ namespace BedrockService.Service.Management
         void LoadRegisteredPlayers(IServerConfiguration server);
         void RemoveServerConfigs(IServerConfiguration serverInfo, NetworkMessageFlags flag);
         Task ReplaceServerBuild(IServerConfiguration server);
-        bool RollbackToBackup(byte serverIndex, string folderName);
         Task SaveConfiguration(IConfiguration configuration);
         void SaveGlobalFile();
         void SaveKnownPlayerDatabase(IServerConfiguration server);

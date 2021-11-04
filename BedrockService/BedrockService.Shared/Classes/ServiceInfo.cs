@@ -16,13 +16,13 @@ namespace BedrockService.Shared.Classes
         private List<string> serviceLog = new List<string>();
         [JsonProperty]
         private List<IServerConfiguration> ServerList = new List<IServerConfiguration>();
-        private IProcessInfo ProcessInfo;
         [JsonProperty]
         private List<Property> globals = new List<Property>();
+        private readonly IProcessInfo _processInfo;
 
         public ServiceInfo(IProcessInfo processInfo)
         {
-            ProcessInfo = processInfo;
+            _processInfo = processInfo;
             InitializeDefaults();
         }
 
@@ -57,7 +57,7 @@ namespace BedrockService.Shared.Classes
                     if (split[0] == "BackupPath")
                     {
                         if (split[1] == "Default")
-                            split[1] = $@"{ProcessInfo.GetDirectory()}\Server\Backups";
+                            split[1] = $@"{_processInfo.GetDirectory()}\Server\Backups";
                     }
                     if (!SetProp(split[0], split[1]))
                     {

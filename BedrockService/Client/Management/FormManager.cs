@@ -10,8 +10,8 @@ namespace BedrockService.Client.Management
 {
     public sealed class FormManager
     {
-        private static IProcessInfo processInfo = new ServiceProcessInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Path.GetFileName(Assembly.GetExecutingAssembly().Location), Process.GetCurrentProcess().Id, false, true);
-        private static ILogger Logger = new ClientLogger(processInfo);
+        private static readonly IProcessInfo processInfo = new ServiceProcessInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Path.GetFileName(Assembly.GetExecutingAssembly().Location), Process.GetCurrentProcess().Id, false, true);
+        private static readonly ILogger Logger = new ClientLogger(processInfo);
         private static MainWindow main;
         private static TCPClient client;
         public static MainWindow MainWindow

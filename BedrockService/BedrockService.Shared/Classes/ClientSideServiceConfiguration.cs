@@ -4,25 +4,25 @@ namespace BedrockService.Shared.Classes
 {
     public class ClientSideServiceConfiguration : IClientSideServiceConfiguration
     {
-        private readonly string hostName;
-        private readonly string address;
-        private readonly string port;
-        private readonly string displayName;
+        private readonly string _hostName;
+        private readonly string _address;
+        private readonly string _port;
+        private readonly string _displayName;
 
         public ClientSideServiceConfiguration(string hostName, string address, string port)
         {
-            this.hostName = hostName;
-            this.address = address;
-            this.port = port;
-            displayName = $@"{hostName}@{address}:{port}";
+            this._hostName = hostName;
+            this._address = address;
+            this._port = port;
+            _displayName = $@"{hostName}@{address}:{port}";
         }
 
-        public string GetHostName() => hostName;
+        public string GetHostName() => _hostName;
 
-        public string GetAddress() => address;
+        public string GetAddress() => _address;
 
-        public string GetPort() => port;
+        public string GetPort() => _port;
 
-        public string GetDisplayName() => displayName;
+        public string GetDisplayName() => _displayName;
     }
 }

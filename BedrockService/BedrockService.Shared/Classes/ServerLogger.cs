@@ -10,47 +10,47 @@ namespace BedrockService.Shared.Classes
     {
         private StringBuilder OutString = new StringBuilder();
         [NonSerialized]
-        private StreamWriter LogWriter;
-        private bool LogToFile = false;
-        private bool LogToConsole = false;
-        private readonly string parent;
-        private readonly string LogDir;
-        private readonly IServerConfiguration serverConfiguration;
+        private readonly StreamWriter _logWriter;
+        private readonly bool _logToFile = false;
+        private readonly bool _logToConsole = false;
+        private readonly string _parent;
+        private readonly string _logDir;
+        private readonly IServerConfiguration _serverConfiguration;
 
         public ServerLogger(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, IServerConfiguration serverConfiguration, string parent)
         {
-            this.serverConfiguration = serverConfiguration;
-            LogDir = $@"{processInfo.GetDirectory()}\Server\Logs";
-            LogToFile = bool.Parse(serviceConfiguration.GetProp("LogServersToFile").ToString());
-            this.parent = parent;
-            LogToConsole = true;
-            if (LogToFile)
+            _serverConfiguration = serverConfiguration;
+            _logDir = $@"{processInfo.GetDirectory()}\Server\Logs";
+            _logToFile = bool.Parse(serviceConfiguration.GetProp("LogServersToFile").ToString());
+            _parent = parent;
+            _logToConsole = true;
+            if (_logToFile)
             {
-                if (!Directory.Exists(LogDir))
-                    Directory.CreateDirectory(LogDir);
-                LogWriter = new StreamWriter($@"{LogDir}\ServerLog_{parent}_{DateTime.Now:yyyymmddhhmmss}.log", true);
+                if (!Directory.Exists(_logDir))
+                    Directory.CreateDirectory(_logDir);
+                _logWriter = new StreamWriter($@"{_logDir}\ServerLog_{parent}_{DateTime.Now:yyyymmddhhmmss}.log", true);
             }
         }
 
         [JsonConstructor]
         public ServerLogger(string serverName)
         {
-            parent = serverName;
-            LogToFile = false;
-            LogToConsole = false;
+            _parent = serverName;
+            _logToFile = false;
+            _logToConsole = false;
         }
 
         public void AppendLine(string text)
         {
             try
             {
-                serverConfiguration.GetLog().Add(text);
-                if (LogToFile && LogWriter != null)
+                _serverConfiguration.GetLog().Add(text);
+                if (_logToFile && _logWriter != null)
                 {
-                    LogWriter.WriteLine(text);
-                    LogWriter.Flush();
+                    _logWriter.WriteLine(text);
+                    _logWriter.Flush();
                 }
-                if (LogToConsole)
+                if (_logToConsole)
                     Console.WriteLine(text);
             }
             catch
@@ -62,13 +62,13 @@ namespace BedrockService.Shared.Classes
         {
             try
             {
-                serverConfiguration.GetLog().Add(text);
-                if (LogToFile && LogWriter != null)
+                _serverConfiguration.GetLog().Add(text);
+                if (_logToFile && _logWriter != null)
                 {
-                    LogWriter.Write(text);
-                    LogWriter.Flush();
+                    _logWriter.Write(text);
+                    _logWriter.Flush();
                 }
-                if (LogToConsole)
+                if (_logToConsole)
                 {
                     Console.Write(text);
                     Console.Out.Flush();
@@ -81,18 +81,18 @@ namespace BedrockService.Shared.Classes
 
         public int Count()
         {
-            return serverConfiguration.GetLog().Count;
+            return _serverConfiguration.GetLog().Count;
         }
 
         public string FromIndex(int index)
         {
-            return serverConfiguration.GetLog()[index];
+            return _serverConfiguration.GetLog()[index];
         }
 
         public override string ToString()
         {
             OutString = new StringBuilder();
-            foreach (string s in serverConfiguration.GetLog())
+            foreach (string s in _serverConfiguration.GetLog())
             {
                 OutString.Append(s);
             }

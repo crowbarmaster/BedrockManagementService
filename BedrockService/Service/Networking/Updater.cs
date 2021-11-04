@@ -12,32 +12,31 @@ namespace BedrockService.Service.Networking
 {
     public class Updater : IUpdater
     {
-        private readonly ILogger Logger;
-        private readonly IServiceConfiguration ServiceConfiguration;
-        private readonly IProcessInfo ProcessInfo;
-        public bool VersionChanged = false;
-        private string version;
-        public string[] FileList;
+        private bool _versionChanged = false;
+        private readonly ILogger _logger;
+        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly IProcessInfo _processInfo;
+        private readonly string _version;
 
         public Updater(IProcessInfo processInfo, ILogger logger, IServiceConfiguration serviceConfiguration)
         {
-            ServiceConfiguration = serviceConfiguration;
-            ProcessInfo = processInfo;
-            Logger = logger;
-            version = "None";
+            _serviceConfiguration = serviceConfiguration;
+            _processInfo = processInfo;
+            _logger = logger;
+            _version = "None";
             if (!File.Exists($@"{processInfo.GetDirectory()}\Server\bedrock_ver.ini"))
             {
                 logger.AppendLine("Version ini file missing, creating and fetching build...");
                 File.Create($@"{processInfo.GetDirectory()}\Server\bedrock_ver.ini").Close();
             }
-            version = File.ReadAllText($@"{processInfo.GetDirectory()}\Server\bedrock_ver.ini");
+            _version = File.ReadAllText($@"{processInfo.GetDirectory()}\Server\bedrock_ver.ini");
         }
 
         public async Task CheckUpdates()
         {
             await Task.Run(async () =>
             {
-                Logger.AppendLine("Checking MCS Version and fetching update if needed...");
+                _logger.AppendLine("Checking MCS Version and fetching update if needed...");
                 HttpClient client = new HttpClient();
                 client.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/apng,*/*;q=0.8");
                 client.DefaultRequestHeaders.Add("Accept-Language", "en-GB,en;q=0.9,en-US;q=0.8");
@@ -59,27 +58,27 @@ namespace BedrockService.Service.Networking
                 Match m = regex.Match(content);
                 if (!m.Success)
                 {
-                    Logger.AppendLine("Checking for updates failed. Check website functionality!");
+                    _logger.AppendLine("Checking for updates failed. Check website functionality!");
                     return false;
                 }
                 string downloadPath = m.Groups[0].Value;
                 string fetchedVersion = m.Groups[2].Value;
                 client.Dispose();
 
-                if (version == fetchedVersion)
+                if (_version == fetchedVersion)
                 {
-                    Logger.AppendLine($"Current version \"{fetchedVersion}\" is up to date!");
+                    _logger.AppendLine($"Current version \"{fetchedVersion}\" is up to date!");
                     return true;
                 }
-                Logger.AppendLine($"New version detected! Now fetching from {downloadPath}...");
+                _logger.AppendLine($"New version detected! Now fetching from {downloadPath}...");
                 if (!FetchBuild(downloadPath, fetchedVersion).Wait(60000))
                 {
-                    Logger.AppendLine("Fetching build timed out. If this is a new service instance, please restart service!");
+                    _logger.AppendLine("Fetching build timed out. If this is a new service instance, please restart service!");
                     return false;
                 }
-                VersionChanged = true;
-                File.WriteAllText($@"{ProcessInfo.GetDirectory()}\Server\bedrock_ver.ini", fetchedVersion);
-                ServiceConfiguration.SetServerVersion(fetchedVersion);
+                _versionChanged = true;
+                File.WriteAllText($@"{_processInfo.GetDirectory()}\Server\bedrock_ver.ini", fetchedVersion);
+                _serviceConfiguration.SetServerVersion(fetchedVersion);
                 GenerateFileList(fetchedVersion);
                 return true;
 
@@ -89,10 +88,10 @@ namespace BedrockService.Service.Networking
 
         public async Task FetchBuild(string path, string version)
         {
-            string ZipDir = $@"{ProcessInfo.GetDirectory()}\Server\MCSFiles\Update_{version}.zip";
-            if (!Directory.Exists($@"{ProcessInfo.GetDirectory()}\Server\MCSFiles"))
+            string ZipDir = $@"{_processInfo.GetDirectory()}\Server\MCSFiles\Update_{version}.zip";
+            if (!Directory.Exists($@"{_processInfo.GetDirectory()}\Server\MCSFiles"))
             {
-                Directory.CreateDirectory($@"{ProcessInfo.GetDirectory()}\Server\MCSFiles");
+                Directory.CreateDirectory($@"{_processInfo.GetDirectory()}\Server\MCSFiles");
             }
             if (File.Exists(ZipDir))
             {
@@ -103,7 +102,7 @@ namespace BedrockService.Service.Networking
             //    logger.AppendLine("You have not accepted the license. Please visit the readme for more info!");
             //    return;
             //}
-            Logger.AppendLine("Now downloading latest build of Minecraft Bedrock Server. Please wait...");
+            _logger.AppendLine("Now downloading latest build of Minecraft Bedrock Server. Please wait...");
             using (var httpClient = new HttpClient())
             {
                 using (var request = new HttpRequestMessage(HttpMethod.Get, path))
@@ -116,7 +115,7 @@ namespace BedrockService.Service.Networking
                         }
                         catch (Exception e)
                         {
-                            Logger.AppendLine($"Download zip resulted in error: {e.StackTrace}");
+                            _logger.AppendLine($"Download zip resulted in error: {e.StackTrace}");
                         }
                         httpClient.Dispose();
                         request.Dispose();
@@ -128,9 +127,9 @@ namespace BedrockService.Service.Networking
 
         }
 
-        public bool CheckVersionChanged() => VersionChanged;
+        public bool CheckVersionChanged() => _versionChanged;
 
-        public void MarkUpToDate() => VersionChanged = false;
+        public void MarkUpToDate() => _versionChanged = false;
 
         public async Task ReplaceBuild(IServerConfiguration server)
         {
@@ -140,17 +139,17 @@ namespace BedrockService.Service.Networking
                 {
                     if (!Directory.Exists(server.GetProp("ServerPath").ToString()))
                         Directory.CreateDirectory(server.GetProp("ServerPath").ToString());
-                    else if (File.Exists($@"{ProcessInfo.GetDirectory()}\Server\MCSFiles\stock_filelist.ini"))
-                        new FileUtils(ProcessInfo.GetDirectory()).DeleteFilelist(File.ReadAllLines($@"{ProcessInfo.GetDirectory()}\Server\MCSFiles\stock_filelist.ini"), server.GetProp("ServerPath").ToString());
+                    else if (File.Exists($@"{_processInfo.GetDirectory()}\Server\MCSFiles\stock_filelist.ini"))
+                        new FileUtils(_processInfo.GetDirectory()).DeleteFilelist(File.ReadAllLines($@"{_processInfo.GetDirectory()}\Server\MCSFiles\stock_filelist.ini"), server.GetProp("ServerPath").ToString());
                     else
-                        new FileUtils(ProcessInfo.GetDirectory()).DeleteFilesRecursively(new DirectoryInfo(server.GetProp("ServerPath").ToString()), false);
+                        new FileUtils(_processInfo.GetDirectory()).DeleteFilesRecursively(new DirectoryInfo(server.GetProp("ServerPath").ToString()), false);
 
-                    ZipFile.ExtractToDirectory($@"{ProcessInfo.GetDirectory()}\Server\MCSFiles\Update_{version}.zip", server.GetProp("ServerPath").ToString());
+                    ZipFile.ExtractToDirectory($@"{_processInfo.GetDirectory()}\Server\MCSFiles\Update_{_version}.zip", server.GetProp("ServerPath").ToString());
                     File.Copy(server.GetProp("ServerPath") + "\\bedrock_server.exe", server.GetProp("ServerPath") + "\\" + server.GetProp("ServerExeName"), true);
                 }
                 catch (Exception e)
                 {
-                    Logger.AppendLine($"ERROR: Got an exception deleting entire directory! {e.Message}");
+                    _logger.AppendLine($"ERROR: Got an exception deleting entire directory! {e.Message}");
                 }
 
 
@@ -166,7 +165,7 @@ namespace BedrockService.Service.Networking
             }
             catch (HttpRequestException)
             {
-                Logger.AppendLine($"Error! Updater timed out, could not fetch current build!");
+                _logger.AppendLine($"Error! Updater timed out, could not fetch current build!");
             }
             catch (TaskCanceledException)
             {
@@ -175,21 +174,21 @@ namespace BedrockService.Service.Networking
             }
             catch (Exception e)
             {
-                Logger.AppendLine($"Updater resulted in error: {e.Message}\n{e.InnerException}\n{e.StackTrace}");
+                _logger.AppendLine($"Updater resulted in error: {e.Message}\n{e.InnerException}\n{e.StackTrace}");
             }
             return null;
         }
 
         private void GenerateFileList(string version)
         {
-            using (ZipArchive zip = ZipFile.OpenRead($@"{ProcessInfo.GetDirectory()}\Server\MCSFiles\Update_{version}.zip"))
+            using (ZipArchive zip = ZipFile.OpenRead($@"{_processInfo.GetDirectory()}\Server\MCSFiles\Update_{version}.zip"))
             {
                 string[] fileList = new string[zip.Entries.Count];
                 for (int i = 0; i < zip.Entries.Count; i++)
                 {
                     fileList[i] = zip.Entries[i].FullName.Replace('/', '\\');
                 }
-                File.WriteAllLines($@"{ProcessInfo.GetDirectory()}\Server\MCSFiles\stock_filelist.ini", fileList);
+                File.WriteAllLines($@"{_processInfo.GetDirectory()}\Server\MCSFiles\stock_filelist.ini", fileList);
             }
         }
     }

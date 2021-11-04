@@ -25,7 +25,7 @@ namespace ClientUnitTests
             clientSideServiceConfigurations.Add(new ClientSideServiceConfiguration("test2", "4ddr3552", "3456"));
             clientSideServiceConfigurations.Add(new ClientSideServiceConfiguration("test3", "address3", "5678"));
 
-            using (ClientConfigForm form = new ClientConfigForm(clientSideServiceConfigurations, new ConfigManager(new ClientLogger(new ServiceProcessInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Path.GetFileName(Assembly.GetExecutingAssembly().Location), Process.GetCurrentProcess().Id, false, true)))))
+            using (ClientConfigForm form = new ClientConfigForm(new ConfigManager(new ClientLogger(new ServiceProcessInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Path.GetFileName(Assembly.GetExecutingAssembly().Location), Process.GetCurrentProcess().Id, false, true)))))
             {
                 form.Show();
                 System.Timers.Timer timer = new System.Timers.Timer(6000);

@@ -6,10 +6,10 @@ namespace BedrockService.Shared.Utilities
 {
     public class FileUtils
     {
-        string servicePath;
+        readonly string _servicePath;
         public FileUtils(string servicePath)
         {
-            this.servicePath = servicePath;
+            this._servicePath = servicePath;
         }
         public void CopyFilesRecursively(DirectoryInfo source, DirectoryInfo target)
         {
@@ -33,7 +33,7 @@ namespace BedrockService.Shared.Utilities
 
         public void ClearTempDir()
         {
-            DirectoryInfo tempDirectory = new DirectoryInfo($@"{servicePath}\Temp");
+            DirectoryInfo tempDirectory = new DirectoryInfo($@"{_servicePath}\Temp");
             if (!tempDirectory.Exists)
                 tempDirectory.Create();
             foreach (FileInfo file in tempDirectory.GetFiles("*", SearchOption.AllDirectories))

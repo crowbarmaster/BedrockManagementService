@@ -10,7 +10,7 @@ namespace BedrockService.Client.Forms
 {
     public partial class PropEditorForm : Form
     {
-        DataGridView dataGrid;
+        readonly DataGridView dataGrid;
         public List<Property> workingProps;
         public List<StartCmdEntry> startCmds;
         public string RollbackFolderName = "";

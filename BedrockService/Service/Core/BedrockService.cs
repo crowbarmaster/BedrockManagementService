@@ -34,13 +34,13 @@ namespace BedrockService.Service.Core
         private readonly CrontabSchedule _shed;
         private readonly CrontabSchedule _updaterCron;
         private HostControl _hostControl;
-        private List<IBedrockServer> _bedrockServers = new List<IBedrockServer>();
+        private readonly List<IBedrockServer> _bedrockServers = new List<IBedrockServer>();
         private System.Timers.Timer _updaterTimer;
         private System.Timers.Timer _cronTimer;
 
         public BedrockService(IConfigurator configurator, IUpdater updater, ILogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ITCPListener tCPListener)
         {
-            this._tCPListener = tCPListener;
+            _tCPListener = tCPListener;
             _configurator = configurator;
             _serviceConfiguration = serviceConfiguration;
             _processInfo = serviceProcessInfo;
@@ -53,7 +53,7 @@ namespace BedrockService.Service.Core
 
         public bool Start(HostControl hostControl)
         {
-            this._hostControl = hostControl;
+            _hostControl = hostControl;
             try
             {
                 ValidSettingsCheck();
@@ -61,9 +61,9 @@ namespace BedrockService.Service.Core
                 foreach (var brs in _bedrockServers)
                 {
                     if(hostControl != null)
-                        this._hostControl.RequestAdditionalTime(TimeSpan.FromSeconds(30));
+                        _hostControl.RequestAdditionalTime(TimeSpan.FromSeconds(30));
                     brs.SetServerStatus(BedrockServer.ServerStatus.Starting);
-                    brs.StartWatchdog(this._hostControl);
+                    brs.StartWatchdog(_hostControl);
                 }
                 return true;
             }
@@ -76,7 +76,7 @@ namespace BedrockService.Service.Core
 
         public bool Stop(HostControl hostControl)
         {
-            this._hostControl = hostControl;
+            _hostControl = hostControl;
             try
             {
                 foreach (var brs in _bedrockServers)
@@ -114,7 +114,6 @@ namespace BedrockService.Service.Core
                     _tCPListener.ResetListener();
                 }
                 catch (ThreadAbortException) { }
-                //tcpThread.CloseThread();
                 _configurator.LoadAllConfigurations().Wait();
                 Initialize();
                 foreach (var brs in _bedrockServers)

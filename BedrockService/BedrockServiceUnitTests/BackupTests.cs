@@ -19,13 +19,9 @@ namespace BedrockServiceUnitTests
         public void TestAllFunctions()
         {
             IServiceCollection services = new ServiceCollection();
-            Startup startup = new Startup(false, false);
-            startup.ConfigureServices(services);
             IServiceProvider serviceProvider = services.BuildServiceProvider();
             serviceProvider.GetRequiredService<IConfigurator>().LoadAllConfigurations().Wait();
             serviceProvider.GetRequiredService<IUpdater>().CheckUpdates().Wait();
-            IService service = serviceProvider.GetRequiredService<IService>();
-            NetworkStrategyLookup networkStrategyLookup = serviceProvider.GetRequiredService<NetworkStrategyLookup>();
             IBedrockService bedrockService = serviceProvider.GetRequiredService<IBedrockService>();
             bedrockService.Start(null);
             BedrockService.Client.Management.FormManager.MainWindow.PerformBackupTests();

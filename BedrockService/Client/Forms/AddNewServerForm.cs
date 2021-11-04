@@ -10,8 +10,8 @@ namespace BedrockService.Client.Forms
     public partial class AddNewServerForm : Form
     {
         public List<Property> DefaultProps = new List<Property>();
-        private List<IServerConfiguration> serverConfigurations;
-        private IClientSideServiceConfiguration serviceConfiguration;
+        private readonly List<IServerConfiguration> serverConfigurations;
+        private readonly IClientSideServiceConfiguration serviceConfiguration;
         public AddNewServerForm(IClientSideServiceConfiguration serviceConfiguration, List<IServerConfiguration> serverConfigurations)
         {
             this.serviceConfiguration = serviceConfiguration;

@@ -146,7 +146,7 @@
             this.removeSrvBtn.TabIndex = 9;
             this.removeSrvBtn.Text = "Remove selected server";
             this.removeSrvBtn.UseVisualStyleBackColor = true;
-            this.removeSrvBtn.Click += new System.EventHandler(this.removeSrvBtn_Click);
+            this.removeSrvBtn.Click += new System.EventHandler(this.RemoveSrvBtn_Click);
             // 
             // ChkUpdates
             // 

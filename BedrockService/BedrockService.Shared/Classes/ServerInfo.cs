@@ -82,8 +82,9 @@ namespace BedrockService.Shared.Classes
                     {
                         case "server-name":
                             ServerName = split[1];
-                            ServerPath.SetValue($@"{serversPath}\{split[1]}");
-                            ServerExeName.SetValue($"BedrockService.{split[1]}.exe");
+                            ServerPath.SetValue($@"{serversPath}\{ServerName}");
+                            ServerExeName.SetValue($"BedrockService.{ServerName}.exe");
+                            FileName = $@"{ServerName}.conf";
                             break;
 
                         case "AddStartCmd":

@@ -14,17 +14,18 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace BedrockService.Service.Networking
 {
     public class NetworkStrategyLookup
     {
-        public Dictionary<NetworkMessageTypes, IMessageParser> StandardMessageLookup;
-        public Dictionary<NetworkMessageTypes, IFlaggedMessageParser> FlaggedMessageLookup;
+        private readonly Dictionary<NetworkMessageTypes, IMessageParser> _standardMessageLookup;
+        private readonly Dictionary<NetworkMessageTypes, IFlaggedMessageParser> _flaggedMessageLookup;
 
         public NetworkStrategyLookup(ITCPListener messageSender, IBedrockService service, ILogger logger, IConfigurator configurator, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, IUpdater updater)
         {
-            StandardMessageLookup = new Dictionary<NetworkMessageTypes, IMessageParser>()
+            _standardMessageLookup = new Dictionary<NetworkMessageTypes, IMessageParser>()
             {
                 {NetworkMessageTypes.DelBackups, new DeleteBackups(configurator) },
                 {NetworkMessageTypes.BackupAll, new ServerBackupAll(messageSender, service) },
@@ -35,32 +36,32 @@ namespace BedrockService.Service.Networking
                 {NetworkMessageTypes.Command, new ServerCommand(messageSender, service, logger) },
                 {NetworkMessageTypes.PackList, new PackList(messageSender, processInfo, serviceConfiguration, logger) },
                 {NetworkMessageTypes.RemovePack, new RemovePack(messageSender, processInfo, serviceConfiguration) },
-                {NetworkMessageTypes.PlayersUpdate, new PlayersUpdate(configurator, messageSender, serviceConfiguration) },
-                {NetworkMessageTypes.PackFile, new PackFile(configurator, messageSender, serviceConfiguration, processInfo, logger) },
+                {NetworkMessageTypes.PackFile, new PackFile(serviceConfiguration, processInfo, logger) },
                 {NetworkMessageTypes.Connect, new Connect(messageSender, serviceConfiguration) },
-                {NetworkMessageTypes.StartCmdUpdate, new StartCmdUpdate(configurator, messageSender, serviceConfiguration) },
-                {NetworkMessageTypes.CheckUpdates, new CheckUpdates(configurator, messageSender, serviceConfiguration, updater) },
-                {NetworkMessageTypes.BackupRollback, new BackupRollback(configurator, messageSender) },
+                {NetworkMessageTypes.StartCmdUpdate, new StartCmdUpdate(configurator, serviceConfiguration) },
+                {NetworkMessageTypes.CheckUpdates, new CheckUpdates(messageSender, updater) },
+                {NetworkMessageTypes.BackupRollback, new BackupRollback(messageSender, service) },
                 {NetworkMessageTypes.AddNewServer, new AddNewServer(configurator, messageSender, serviceConfiguration, service) },
                 {NetworkMessageTypes.ConsoleLogUpdate, new ConsoleLogUpdate(messageSender, serviceConfiguration, service) },
                 {NetworkMessageTypes.PlayersRequest, new PlayerRequest(messageSender, serviceConfiguration) },
+                {NetworkMessageTypes.PlayersUpdate, new PlayersUpdate(configurator, messageSender, serviceConfiguration, service) },
                 {NetworkMessageTypes.LevelEditRequest, new LevelEditRequest(messageSender, serviceConfiguration) },
-                {NetworkMessageTypes.LevelEditFile, new LevelEditFile(configurator, messageSender, serviceConfiguration, service) }
+                {NetworkMessageTypes.LevelEditFile, new LevelEditFile(serviceConfiguration, service) }
             };
-            FlaggedMessageLookup = new Dictionary<NetworkMessageTypes, IFlaggedMessageParser>()
+            _flaggedMessageLookup = new Dictionary<NetworkMessageTypes, IFlaggedMessageParser>()
             {
-                {NetworkMessageTypes.RemoveServer, new RemoveServer(configurator, messageSender, serviceConfiguration, logger, service) },
+                {NetworkMessageTypes.RemoveServer, new RemoveServer(configurator, messageSender, serviceConfiguration, service) },
             };
-            messageSender.SetStrategyDictionaries(StandardMessageLookup, FlaggedMessageLookup);
+            messageSender.SetStrategyDictionaries(_standardMessageLookup, _flaggedMessageLookup);
         }
 
         class DeleteBackups : IMessageParser
         {
-            private IConfigurator configurator;
+            private readonly IConfigurator _configurator;
 
             public DeleteBackups(IConfigurator configurator)
             {
-                this.configurator = configurator;
+                _configurator = configurator;
             }
 
             public void ParseMessage(byte[] data, byte serverIndex)
@@ -71,54 +72,54 @@ namespace BedrockService.Service.Networking
                 };
                 string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
                 List<string> backupFileNames = JsonConvert.DeserializeObject<List<string>>(stringData, settings);
-                configurator.DeleteBackupsForServer(serverIndex, backupFileNames);
+                _configurator.DeleteBackupsForServer(serverIndex, backupFileNames);
             }
         }
 
         class ServerBackupAll : IMessageParser
         {
-            private IMessageSender messageSender;
-            private IBedrockService service;
+            private readonly IMessageSender _messageSender;
+            private readonly IBedrockService _service;
 
             public ServerBackupAll(IMessageSender messageSender, IBedrockService service)
             {
-                this.messageSender = messageSender;
-                this.service = service;
+                _messageSender = messageSender;
+                _service = service;
             }
 
             public void ParseMessage(byte[] data, byte serverIndex)
             {
-                foreach (IBedrockServer server in service.GetAllServers())
+                foreach (IBedrockServer server in _service.GetAllServers())
                     server.RestartServer(true);
-                messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+                _messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
             }
         }
 
         class ServerBackup : IMessageParser
         {
-            private IMessageSender messageSender;
-            private IBedrockService service;
+            private readonly IMessageSender _messageSender;
+            private readonly IBedrockService _service;
             public ServerBackup(IMessageSender messageSender, IBedrockService service)
             {
-                this.messageSender = messageSender;
-                this.service = service;
+                _messageSender = messageSender;
+                _service = service;
             }
 
             public void ParseMessage(byte[] data, byte serverIndex)
             {
-                service.GetBedrockServerByIndex(serverIndex).RestartServer(true);
-                messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+                _service.GetBedrockServerByIndex(serverIndex).RestartServer(true);
+                _messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
             }
         }
 
         class EnumBackups : IMessageParser
         {
-            private readonly IConfigurator configurator;
-            private readonly IMessageSender messageSender;
+            private readonly IConfigurator _configurator;
+            private readonly IMessageSender _messageSender;
             public EnumBackups(IConfigurator configurator, IMessageSender messageSender)
             {
-                this.configurator = configurator;
-                this.messageSender = messageSender;
+                _configurator = configurator;
+                _messageSender = messageSender;
             }
 
             public void ParseMessage(byte[] data, byte serverIndex)
@@ -128,25 +129,25 @@ namespace BedrockService.Service.Networking
                 {
                     TypeNameHandling = TypeNameHandling.All
                 };
-                byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(configurator.EnumerateBackupsForServer(serverIndex), indented, settings));
-                messageSender.SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.EnumBackups);
+                byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_configurator.EnumerateBackupsForServer(serverIndex), indented, settings));
+                _messageSender.SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.EnumBackups);
 
             }
         }
 
         class ServerPropUpdate : IMessageParser
         {
-            IServiceConfiguration serviceConfiguration;
-            IMessageSender messageSender;
-            IBedrockService bedrockService;
-            IConfigurator configurator;
+            private readonly IServiceConfiguration _serviceConfiguration;
+            private readonly IMessageSender _messageSender;
+            private readonly IBedrockService _bedrockService;
+            private readonly IConfigurator _configurator;
 
             public ServerPropUpdate(IConfigurator configurator, IServiceConfiguration serviceConfiguration, IMessageSender messageSender, IBedrockService bedrockService)
             {
-                this.configurator = configurator;
-                this.serviceConfiguration = serviceConfiguration;
-                this.messageSender = messageSender;
-                this.bedrockService = bedrockService;
+                _configurator = configurator;
+                _serviceConfiguration = serviceConfiguration;
+                _messageSender = messageSender;
+                _bedrockService = bedrockService;
             }
 
             public void ParseMessage(byte[] data, byte serverIndex)
@@ -160,153 +161,155 @@ namespace BedrockService.Service.Networking
                 Property prop = propList.FirstOrDefault(p => p.KeyName == "server-name");
                 if(prop == null)
                 {
-                    serviceConfiguration.SetAllProps(propList);
-                    configurator.SaveGlobalFile();
-                    bedrockService.RestartService();
-                    messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+                    _serviceConfiguration.SetAllProps(propList);
+                    _configurator.SaveGlobalFile();
+                    _bedrockService.RestartService();
+                    _messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
                     return;
                 }
-                serviceConfiguration.GetServerInfoByIndex(serverIndex).SetAllProps(propList);
-                bedrockService.GetBedrockServerByIndex(serverIndex).SetServerStatus(BedrockServer.ServerStatus.Stopping);
-                while (bedrockService.GetBedrockServerByIndex(serverIndex).GetServerStatus() == BedrockServer.ServerStatus.Stopping)
+                _serviceConfiguration.GetServerInfoByIndex(serverIndex).SetAllProps(propList);
+                _bedrockService.GetBedrockServerByIndex(serverIndex).SetServerStatus(BedrockServer.ServerStatus.Stopping);
+                while (_bedrockService.GetBedrockServerByIndex(serverIndex).GetServerStatus() == BedrockServer.ServerStatus.Stopping)
                 {
                     Thread.Sleep(100);
                 }
-                bedrockService.GetBedrockServerByIndex(serverIndex).SetServerStatus(BedrockServer.ServerStatus.Starting);
-                messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+                _bedrockService.GetBedrockServerByIndex(serverIndex).SetServerStatus(BedrockServer.ServerStatus.Starting);
+                _messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
             }
         }
 
         class ServerRestart : IMessageParser
         {
-            private IMessageSender messageSender;
-            private IBedrockService service;
+            private readonly IMessageSender _messageSender;
+            private readonly IBedrockService _service;
             public ServerRestart(IMessageSender messageSender, IBedrockService service)
             {
-                this.messageSender = messageSender;
-                this.service = service;
+                _messageSender = messageSender;
+                _service = service;
             }
 
             public void ParseMessage(byte[] data, byte serverIndex)
             {
-                service.GetBedrockServerByIndex(serverIndex).RestartServer(false);
-                messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+                _service.GetBedrockServerByIndex(serverIndex).RestartServer(false);
+                _messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
             }
         }
 
         class ServerCommand : IMessageParser
         {
-            IBedrockService service;
-            ILogger logger;
-            IMessageSender messageSender;
+            private readonly IBedrockService _service;
+            private readonly ILogger _logger;
+            private readonly IMessageSender _messageSender;
 
             public ServerCommand(IMessageSender messageSender, IBedrockService service, ILogger logger)
             {
-                this.messageSender = messageSender;
-                this.service = service;
-                this.logger = logger;
+                _messageSender = messageSender;
+                _service = service;
+                _logger = logger;
             }
 
             public void ParseMessage(byte[] data, byte serverIndex)
             {
                 string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
-                service.GetBedrockServerByIndex(serverIndex).WriteToStandardIn(stringData);
-                logger.AppendLine($"Sent command {stringData} to stdInput stream");
-                messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+                _service.GetBedrockServerByIndex(serverIndex).WriteToStandardIn(stringData);
+                _logger.AppendLine($"Sent command {stringData} to stdInput stream");
+                _messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
             }
         }
 
         class PackList : IMessageParser
         {
-            IMessageSender messageSender;
-            IServiceConfiguration serviceConfiguration;
-            IProcessInfo processInfo;
-            ILogger logger;
+            private readonly IMessageSender _messageSender;
+            private readonly IServiceConfiguration _serviceConfiguration;
+            private readonly IProcessInfo _processInfo;
+            private readonly ILogger _logger;
 
             public PackList(IMessageSender messageSender, IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, ILogger logger)
             {
-                this.logger = logger;
-                this.messageSender = messageSender;
-                this.serviceConfiguration = serviceConfiguration;
-                this.processInfo = processInfo;
+                _logger = logger;
+                _messageSender = messageSender;
+                _serviceConfiguration = serviceConfiguration;
+                _processInfo = processInfo;
             }
 
             public void ParseMessage(byte[] data, byte serverIndex)
             {
-                if (!File.Exists($@"{processInfo.GetDirectory()}\Server\stock_packs.json"))
-                    File.Copy($@"{serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath")}\valid_known_packs.json", $@"{processInfo.GetDirectory()}\Server\stock_packs.json");
-                MinecraftKnownPacksClass knownPacks = new MinecraftKnownPacksClass($@"{serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath")}\valid_known_packs.json", $@"{processInfo.GetDirectory()}\Server\stock_packs.json");
+                if (!File.Exists($@"{_processInfo.GetDirectory()}\Server\stock_packs.json"))
+                    File.Copy($@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath")}\valid_known_packs.json", $@"{_processInfo.GetDirectory()}\Server\stock_packs.json");
+                MinecraftKnownPacksClass knownPacks = new MinecraftKnownPacksClass($@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath")}\valid_known_packs.json", $@"{_processInfo.GetDirectory()}\Server\stock_packs.json");
                 List<MinecraftPackParser> list = new List<MinecraftPackParser>();
                 foreach (MinecraftKnownPacksClass.KnownPack pack in knownPacks.KnownPacks)
                 {
-                    MinecraftPackParser currentParser = new MinecraftPackParser(logger, processInfo);
-                    currentParser.ParseDirectory(new DirectoryInfo($@"{serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath")}\{pack.path.Replace(@"/", @"\")}"));
+                    MinecraftPackParser currentParser = new MinecraftPackParser(_logger, _processInfo);
+                    currentParser.ParseDirectory(new DirectoryInfo($@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath")}\{pack.path.Replace(@"/", @"\")}"));
                     list.Add(currentParser);
                 }
                 string arrayString = JArray.FromObject(list).ToString();
-                messageSender.SendData(Encoding.UTF8.GetBytes(arrayString), NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.PackList);
+                _messageSender.SendData(Encoding.UTF8.GetBytes(arrayString), NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.PackList);
             }
         }
 
         class RemovePack : IMessageParser
         {
-            IMessageSender messageSender;
-            IServiceConfiguration serviceConfiguration;
-            IProcessInfo processInfo;
+            private readonly IMessageSender _messageSender;
+            private readonly IServiceConfiguration _serviceConfiguration;
+            private readonly IProcessInfo _processInfo;
 
             public RemovePack(IMessageSender messageSender, IProcessInfo processInfo, IServiceConfiguration serviceConfiguration)
             {
-                this.messageSender = messageSender;
-                this.serviceConfiguration = serviceConfiguration;
-                this.processInfo = processInfo;
+                _messageSender = messageSender;
+                _serviceConfiguration = serviceConfiguration;
+                _processInfo = processInfo;
             }
 
             public void ParseMessage(byte[] data, byte serverIndex)
             {
                 string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
-                MinecraftKnownPacksClass knownPacks = new MinecraftKnownPacksClass($@"{serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath")}\valid_known_packs.json", $@"{processInfo.GetDirectory()}\Server\stock_packs.json");
+                MinecraftKnownPacksClass knownPacks = new MinecraftKnownPacksClass($@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath")}\valid_known_packs.json", $@"{_processInfo.GetDirectory()}\Server\stock_packs.json");
                 JsonSerializerSettings settings = new JsonSerializerSettings()
                 {
                     TypeNameHandling = TypeNameHandling.All
                 };
                 List<MinecraftPackContainer> MCContainer = JsonConvert.DeserializeObject<List<MinecraftPackContainer>>(stringData, settings);
                 foreach (MinecraftPackContainer cont in MCContainer)
-                    knownPacks.RemovePackFromServer(serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath").ToString(), cont);
-                messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+                    knownPacks.RemovePackFromServer(_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath").ToString(), cont);
+                _messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
             }
         }
 
         class LevelEditRequest : IMessageParser
         {
-            IMessageSender messageSender;
-            IServiceConfiguration serviceConfiguration;
+            private readonly IMessageSender _messageSender;
+            private readonly IServiceConfiguration _serviceConfiguration;
 
             public LevelEditRequest(IMessageSender messageSender, IServiceConfiguration serviceConfiguration)
             {
-                this.messageSender = messageSender;
-                this.serviceConfiguration = serviceConfiguration;
+                _messageSender = messageSender;
+                _serviceConfiguration = serviceConfiguration;
             }
 
             public void ParseMessage(byte[] data, byte serverIndex)
             {
-                IServerConfiguration server = serviceConfiguration.GetServerInfoByIndex(serverIndex);
-                string pathToLevelDat = $@"{serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath")}\worlds\{server.GetProp("level-name")}\level.dat";
+                IServerConfiguration server = _serviceConfiguration.GetServerInfoByIndex(serverIndex);
+                string pathToLevelDat = $@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath")}\worlds\{server.GetProp("level-name")}\level.dat";
                 byte[] levelDatToBytes = File.ReadAllBytes(pathToLevelDat);
-                messageSender.SendData(levelDatToBytes, NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.LevelEditFile);
+                _messageSender.SendData(levelDatToBytes, NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.LevelEditFile);
             }
         }
 
         class PlayersUpdate : IMessageParser
         {
-            IMessageSender messageSender;
-            IServiceConfiguration serviceConfiguration;
-            IConfigurator configurator;
+            private readonly IMessageSender _messageSender;
+            private readonly IServiceConfiguration _serviceConfiguration;
+            private readonly IConfigurator _configurator;
+            private readonly IBedrockService _service;
 
-            public PlayersUpdate(IConfigurator configurator, IMessageSender messageSender, IServiceConfiguration serviceConfiguration)
+            public PlayersUpdate(IConfigurator configurator, IMessageSender messageSender, IServiceConfiguration serviceConfiguration, IBedrockService service)
             {
-                this.configurator = configurator;
-                this.messageSender = messageSender;
-                this.serviceConfiguration = serviceConfiguration;
+                _service = service;
+                _configurator = configurator;
+                _messageSender = messageSender;
+                _serviceConfiguration = serviceConfiguration;
             }
 
             public void ParseMessage(byte[] data, byte serverIndex)
@@ -321,87 +324,83 @@ namespace BedrockService.Service.Networking
                 {
                     try
                     {
-                        serviceConfiguration.GetServerInfoByIndex(serverIndex).AddUpdatePlayer(player);
+                        _serviceConfiguration.GetServerInfoByIndex(serverIndex).AddUpdatePlayer(player);
                     }
                     catch (Exception)
                     {
                     }
                 }
-                configurator.SaveKnownPlayerDatabase(serviceConfiguration.GetServerInfoByIndex(serverIndex));
-                messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+                _configurator.SaveKnownPlayerDatabase(_serviceConfiguration.GetServerInfoByIndex(serverIndex));
+                _configurator.WriteJSONFiles(_serviceConfiguration.GetServerInfoByIndex(serverIndex));
+                Task.Delay(500).Wait();
+                _service.GetBedrockServerByIndex(serverIndex).WriteToStandardIn("ops reload");
+                _service.GetBedrockServerByIndex(serverIndex).WriteToStandardIn("whitelist reload");
+                _messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
 
             }
         }
 
         class PackFile : IMessageParser
         {
-            IMessageSender messageSender;
-            IServiceConfiguration serviceConfiguration;
-            IConfigurator configurator;
-            IProcessInfo serviceProcessInfo;
-            ILogger logger;
+            private readonly IServiceConfiguration _serviceConfiguration;
+            private readonly IProcessInfo _serviceProcessInfo;
+            private readonly ILogger _logger;
 
-            public PackFile(IConfigurator configurator, IMessageSender messageSender, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ILogger logger)
+            public PackFile(IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ILogger logger)
             {
-                this.logger = logger;
-                this.serviceProcessInfo = serviceProcessInfo;
-                this.configurator = configurator;
-                this.messageSender = messageSender;
-                this.serviceConfiguration = serviceConfiguration;
+                _logger = logger;
+                _serviceProcessInfo = serviceProcessInfo;
+                _serviceConfiguration = serviceConfiguration;
             }
 
             public void ParseMessage(byte[] data, byte serverIndex)
             {
-                MinecraftPackParser archiveParser = new MinecraftPackParser(data, logger, serviceProcessInfo);
+                MinecraftPackParser archiveParser = new MinecraftPackParser(data, _logger, _serviceProcessInfo);
                 foreach (MinecraftPackContainer container in archiveParser.FoundPacks)
                 {
-                    string serverPath = serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath").ToString();
+                    string serverPath = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath").ToString();
                     if (container.ManifestType == "WorldPack")
-                        new FileUtils(serviceProcessInfo.GetDirectory()).CopyFilesRecursively(container.PackContentLocation, new DirectoryInfo($@"{serverPath}\worlds\{container.FolderName}"));
+                        new FileUtils(_serviceProcessInfo.GetDirectory()).CopyFilesRecursively(container.PackContentLocation, new DirectoryInfo($@"{serverPath}\worlds\{container.FolderName}"));
                     if (container.ManifestType == "data")
-                        new FileUtils(serviceProcessInfo.GetDirectory()).CopyFilesRecursively(container.PackContentLocation, new DirectoryInfo($@"{serverPath}\behavior_packs\{container.FolderName}"));
+                        new FileUtils(_serviceProcessInfo.GetDirectory()).CopyFilesRecursively(container.PackContentLocation, new DirectoryInfo($@"{serverPath}\behavior_packs\{container.FolderName}"));
                     if (container.ManifestType == "resources")
-                        new FileUtils(serviceProcessInfo.GetDirectory()).CopyFilesRecursively(container.PackContentLocation, new DirectoryInfo($@"{serverPath}\resource_packs\{container.FolderName}"));
+                        new FileUtils(_serviceProcessInfo.GetDirectory()).CopyFilesRecursively(container.PackContentLocation, new DirectoryInfo($@"{serverPath}\resource_packs\{container.FolderName}"));
                 }
             }
         }
 
         class LevelEditFile : IMessageParser
         {
-            IMessageSender messageSender;
-            IServiceConfiguration serviceConfiguration;
-            IConfigurator configurator;
-            IBedrockService bedrockService;
+            private readonly IServiceConfiguration _serviceConfiguration;
+            private readonly IBedrockService _bedrockService;
 
-            public LevelEditFile(IConfigurator configurator, IMessageSender messageSender, IServiceConfiguration serviceConfiguration, IBedrockService bedrockService)
+            public LevelEditFile(IServiceConfiguration serviceConfiguration, IBedrockService bedrockService)
             {
-                this.bedrockService = bedrockService;
-                this.configurator = configurator;
-                this.messageSender = messageSender;
-                this.serviceConfiguration = serviceConfiguration;
+                _bedrockService = bedrockService;
+                _serviceConfiguration = serviceConfiguration;
             }
 
             public void ParseMessage(byte[] data, byte serverIndex)
             {
                 byte[] stripHeaderFromBuffer = new byte[data.Length - 5];
                 Buffer.BlockCopy(data, 5, stripHeaderFromBuffer, 0, stripHeaderFromBuffer.Length);
-                IServerConfiguration server = serviceConfiguration.GetServerInfoByIndex(serverIndex);
-                string pathToLevelDat = $@"{serviceConfiguration.GetProp("ServersPath")}\{server.GetProp("server-name")}\worlds\{server.GetProp("level-name")}\level.dat";
-                bedrockService.GetBedrockServerByIndex(serverIndex).StopServer().Wait();
+                IServerConfiguration server = _serviceConfiguration.GetServerInfoByIndex(serverIndex);
+                string pathToLevelDat = $@"{_serviceConfiguration.GetProp("ServersPath")}\{server.GetProp("server-name")}\worlds\{server.GetProp("level-name")}\level.dat";
+                _bedrockService.GetBedrockServerByIndex(serverIndex).StopServer().Wait();
                 File.WriteAllBytes(pathToLevelDat, stripHeaderFromBuffer);
-                bedrockService.GetBedrockServerByIndex(serverIndex).SetServerStatus(BedrockServer.ServerStatus.Starting);
+                _bedrockService.GetBedrockServerByIndex(serverIndex).SetServerStatus(BedrockServer.ServerStatus.Starting);
             }
         }
 
         class Connect : IMessageParser
         {
-            IMessageSender messageSender;
-            IServiceConfiguration serviceConfiguration;
+            private readonly IMessageSender _messageSender;
+            private readonly IServiceConfiguration _serviceConfiguration;
 
             public Connect(IMessageSender messageSender, IServiceConfiguration serviceConfiguration)
             {
-                this.messageSender = messageSender;
-                this.serviceConfiguration = serviceConfiguration;
+                _messageSender = messageSender;
+                _serviceConfiguration = serviceConfiguration;
             }
 
             public void ParseMessage(byte[] data, byte serverIndex)
@@ -411,23 +410,21 @@ namespace BedrockService.Service.Networking
                 {
                     TypeNameHandling = TypeNameHandling.All
                 };
-                string jsonString = JsonConvert.SerializeObject(serviceConfiguration, indented, settings);
+                string jsonString = JsonConvert.SerializeObject(_serviceConfiguration, indented, settings);
                 byte[] serializeToBytes = Encoding.UTF8.GetBytes(jsonString);
-                messageSender.SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
+                _messageSender.SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
             }
         }
 
         class StartCmdUpdate : IMessageParser
         {
-            IMessageSender messageSender;
-            IServiceConfiguration serviceConfiguration;
-            IConfigurator configurator;
+            private readonly IServiceConfiguration _serviceConfiguration;
+            private readonly IConfigurator _configurator;
 
-            public StartCmdUpdate(IConfigurator configurator, IMessageSender messageSender, IServiceConfiguration serviceConfiguration)
+            public StartCmdUpdate(IConfigurator configurator, IServiceConfiguration serviceConfiguration)
             {
-                this.configurator = configurator;
-                this.messageSender = messageSender;
-                this.serviceConfiguration = serviceConfiguration;
+                _configurator = configurator;
+                _serviceConfiguration = serviceConfiguration;
             }
 
             public void ParseMessage(byte[] data, byte serverIndex)
@@ -436,70 +433,66 @@ namespace BedrockService.Service.Networking
                 {
                     TypeNameHandling = TypeNameHandling.All
                 };
-                serviceConfiguration.GetServerInfoByIndex(serverIndex).SetStartCommands(JsonConvert.DeserializeObject<List<StartCmdEntry>>(Encoding.UTF8.GetString(data, 5, data.Length - 5), settings));
-                configurator.SaveServerProps(serviceConfiguration.GetServerInfoByIndex(serverIndex), true);
+                _serviceConfiguration.GetServerInfoByIndex(serverIndex).SetStartCommands(JsonConvert.DeserializeObject<List<StartCmdEntry>>(Encoding.UTF8.GetString(data, 5, data.Length - 5), settings));
+                _configurator.SaveServerProps(_serviceConfiguration.GetServerInfoByIndex(serverIndex), true);
             }
         }
 
         class CheckUpdates : IMessageParser
         {
-            IMessageSender messageSender;
-            IServiceConfiguration serviceConfiguration;
-            IConfigurator configurator;
-            IUpdater updater;
+            private readonly IMessageSender _messageSender;
+            private readonly IUpdater _updater;
 
-            public CheckUpdates(IConfigurator configurator, IMessageSender messageSender, IServiceConfiguration serviceConfiguration, IUpdater updater)
+            public CheckUpdates(IMessageSender messageSender, IUpdater updater)
             {
-                this.updater = updater;
-                this.configurator = configurator;
-                this.messageSender = messageSender;
-                this.serviceConfiguration = serviceConfiguration;
+                _updater = updater;
+                _messageSender = messageSender;
             }
 
             public void ParseMessage(byte[] data, byte serverIndex)
             {
-                updater.CheckUpdates().Wait();
-                if (updater.CheckVersionChanged())
+                _updater.CheckUpdates().Wait();
+                if (_updater.CheckVersionChanged())
                 {
-                    messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.CheckUpdates);
+                    _messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.CheckUpdates);
                 }
 
-                messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+                _messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
             }
         }
 
         class BackupRollback : IMessageParser
         {
-            IMessageSender messageSender;
-            IConfigurator configurator;
+            private readonly IMessageSender _messageSender;
+            private readonly IBedrockService _service;
 
-            public BackupRollback(IConfigurator configurator, IMessageSender messageSender)
+            public BackupRollback(IMessageSender messageSender, IBedrockService service)
             {
-                this.configurator = configurator;
-                this.messageSender = messageSender;
+                _service = service;
+                _messageSender = messageSender;
             }
 
             public void ParseMessage(byte[] data, byte serverIndex)
             {
                 string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
-                configurator.RollbackToBackup(serverIndex, stringData);
-                messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+                _service.GetBedrockServerByIndex(serverIndex).RollbackToBackup(serverIndex, stringData);
+                _messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
             }
         }
 
         class AddNewServer : IMessageParser
         {
-            IMessageSender messageSender;
-            IServiceConfiguration serviceConfiguration;
-            IConfigurator configurator;
-            IBedrockService bedrockService;
+            private readonly IMessageSender _messageSender;
+            private readonly IServiceConfiguration _serviceConfiguration;
+            private readonly IConfigurator _configurator;
+            private readonly IBedrockService _bedrockService;
              
             public AddNewServer(IConfigurator configurator, IMessageSender messageSender, IServiceConfiguration serviceConfiguration, IBedrockService bedrockService)
             {
-                this.bedrockService = bedrockService;
-                this.configurator = configurator;
-                this.messageSender = messageSender;
-                this.serviceConfiguration = serviceConfiguration;
+                _bedrockService = bedrockService;
+                _configurator = configurator;
+                _messageSender = messageSender;
+                _serviceConfiguration = serviceConfiguration;
             }
 
             public void ParseMessage(byte[] data, byte serverIndex)
@@ -511,13 +504,13 @@ namespace BedrockService.Service.Networking
                 };
                 List<Property> propList = JsonConvert.DeserializeObject<List<Property>>(stringData, settings);
                 Property serverNameProp = propList.First(p => p.KeyName == "server-name");
-                ServerInfo newServer = new ServerInfo(null, serviceConfiguration.GetProp("ServersPath").ToString())
+                ServerInfo newServer = new ServerInfo(null, _serviceConfiguration.GetProp("ServersPath").ToString())
                 {
                     ServerName = serverNameProp.ToString(),
                     ServerPropList = propList,
                     ServerPath = new Property("ServerPath", "")
                     {
-                        Value = $@"{serviceConfiguration.GetProp("ServersPath")}\{serverNameProp}"
+                        Value = $@"{_serviceConfiguration.GetProp("ServersPath")}\{serverNameProp}"
                     },
                     ServerExeName = new Property("ServerExeName", "")
                     {
@@ -525,60 +518,58 @@ namespace BedrockService.Service.Networking
                     },
                     FileName = $@"{serverNameProp}.conf"
                 };
-                configurator.SaveServerProps(newServer, true);
-                bedrockService.InitializeNewServer(newServer);
+                _configurator.SaveServerProps(newServer, true);
+                _bedrockService.InitializeNewServer(newServer);
 
-                byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(serviceConfiguration, Formatting.Indented, settings));
-                messageSender.SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
-                messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+                byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_serviceConfiguration, Formatting.Indented, settings));
+                _messageSender.SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
+                _messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
 
             }
         }
 
         class RemoveServer : IFlaggedMessageParser
         {
-            IMessageSender messageSender;
-            IServiceConfiguration serviceConfiguration;
-            IConfigurator configurator;
-            ILogger logger;
-            IBedrockService bedrockService;
+            private readonly IMessageSender _messageSender;
+            private readonly IServiceConfiguration _serviceConfiguration;
+            private readonly IConfigurator _configurator;
+            private readonly IBedrockService _bedrockService;
 
-            public RemoveServer(IConfigurator configurator, IMessageSender messageSender, IServiceConfiguration serviceConfiguration, ILogger logger, IBedrockService bedrockService)
+            public RemoveServer(IConfigurator configurator, IMessageSender messageSender, IServiceConfiguration serviceConfiguration, IBedrockService bedrockService)
             {
-                this.bedrockService = bedrockService;
-                this.logger = logger;
-                this.configurator = configurator;
-                this.messageSender = messageSender;
-                this.serviceConfiguration = serviceConfiguration;
+                this._bedrockService = bedrockService;
+                _configurator = configurator;
+                _messageSender = messageSender;
+                _serviceConfiguration = serviceConfiguration;
             }
 
             public void ParseMessage(byte[] data, byte serverIndex, NetworkMessageFlags flag)
             {
-                bedrockService.GetBedrockServerByIndex(serverIndex).StopServer().Wait();
-                configurator.RemoveServerConfigs(serviceConfiguration.GetServerInfoByIndex(serverIndex), flag);
-                bedrockService.RemoveBedrockServerByIndex(serverIndex);
+                _bedrockService.GetBedrockServerByIndex(serverIndex).StopServer().Wait();
+                _configurator.RemoveServerConfigs(_serviceConfiguration.GetServerInfoByIndex(serverIndex), flag);
+                _bedrockService.RemoveBedrockServerByIndex(serverIndex);
                 JsonSerializerSettings settings = new JsonSerializerSettings()
                 {
                     TypeNameHandling = TypeNameHandling.All
                 };
-                byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(serviceConfiguration, Formatting.Indented, settings));
-                messageSender.SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
-                messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+                byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_serviceConfiguration, Formatting.Indented, settings));
+                _messageSender.SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
+                _messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
 
             }
         }
 
         class ConsoleLogUpdate : IMessageParser
         {
-            readonly IMessageSender messageSender;
-            readonly IBedrockService service;
-            readonly IServiceConfiguration serviceConfiguration;
+            private readonly IMessageSender _messageSender;
+            private readonly IBedrockService _service;
+            private readonly IServiceConfiguration _serviceConfiguration;
 
             public ConsoleLogUpdate(IMessageSender messageSender, IServiceConfiguration serviceConfiguration, IBedrockService service)
             {
-                this.service = service;
-                this.messageSender = messageSender;
-                this.serviceConfiguration = serviceConfiguration;
+                _service = service;
+                _messageSender = messageSender;
+                _serviceConfiguration = serviceConfiguration;
             }
 
             public void ParseMessage(byte[] data, byte serverIndex)
@@ -598,9 +589,9 @@ namespace BedrockService.Service.Networking
                     {
                         try
                         {
-                        srvText = service.GetBedrockServerByName(srvName).GetLogger();
+                        srvText = _service.GetBedrockServerByName(srvName).GetLogger();
                         }
-                        catch(NullReferenceException e)
+                        catch(NullReferenceException)
                         {
                             break;
                         }
@@ -616,12 +607,12 @@ namespace BedrockService.Service.Networking
                     }
                     else
                     {
-                        srvTextLen = serviceConfiguration.GetLog().Count;
+                        srvTextLen = _serviceConfiguration.GetLog().Count;
                         clientCurLen = int.Parse(dataSplit[1]);
                         loop = clientCurLen;
                         while (loop < srvTextLen)
                         {
-                            srvString.Append($"{srvName};{serviceConfiguration.GetLog()[loop]};{loop}|");
+                            srvString.Append($"{srvName};{_serviceConfiguration.GetLog()[loop]};{loop}|");
                             loop++;
                         }
                     }
@@ -629,31 +620,31 @@ namespace BedrockService.Service.Networking
                 if (srvString.Length > 1)
                 {
                     srvString.Remove(srvString.Length - 1, 1);
-                    messageSender.SendData(Encoding.UTF8.GetBytes(srvString.ToString()), NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.ConsoleLogUpdate);
+                    _messageSender.SendData(Encoding.UTF8.GetBytes(srvString.ToString()), NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.ConsoleLogUpdate);
                 }
             }
         }
 
         class PlayerRequest : IMessageParser
         {
-            IMessageSender messageSender;
-            IServiceConfiguration serviceConfiguration;
+            private readonly IMessageSender _messageSender;
+            private readonly IServiceConfiguration _serviceConfiguration;
 
             public PlayerRequest(IMessageSender messageSender, IServiceConfiguration serviceConfiguration)
             {
-                this.messageSender = messageSender;
-                this.serviceConfiguration = serviceConfiguration;
+                _messageSender = messageSender;
+                _serviceConfiguration = serviceConfiguration;
             }
 
             public void ParseMessage(byte[] data, byte serverIndex)
             {
-                IServerConfiguration server = serviceConfiguration.GetServerInfoByIndex(serverIndex);
+                IServerConfiguration server = _serviceConfiguration.GetServerInfoByIndex(serverIndex);
                 JsonSerializerSettings settings = new JsonSerializerSettings()
                 {
                     TypeNameHandling = TypeNameHandling.All
                 };
                 byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(server.GetPlayerList(), Formatting.Indented, settings));
-                messageSender.SendData(serializeToBytes, NetworkMessageSource.Server, NetworkMessageDestination.Client, serverIndex, NetworkMessageTypes.PlayersRequest);
+                _messageSender.SendData(serializeToBytes, NetworkMessageSource.Server, NetworkMessageDestination.Client, serverIndex, NetworkMessageTypes.PlayersRequest);
             }
         }
 

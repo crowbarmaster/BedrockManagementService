@@ -21,47 +21,47 @@ namespace BedrockService.Client.Forms
         public IServiceConfiguration connectedHost;
         public IServerConfiguration selectedServer;
         public IClientSideServiceConfiguration clientSideServiceConfiguration;
-        private readonly ILogger Logger;
-        private readonly IProcessInfo processInfo;
         public bool ShowsSvcLog = false;
         public bool ServerBusy = false;
-        private PropEditorForm editDialog;
-        private int ConnectTimeout;
-        private bool FollowTail = false;
-        private const int ConnectTimeoutLimit = 3;
-        private System.Timers.Timer connectTimer = new System.Timers.Timer(100.0);
+        private PropEditorForm _editDialog;
+        private int _connectTimeout;
+        private bool _followTail = false;
+        private const int _connectTimeoutLimit = 3;
+        private readonly ILogger _logger;
+        private readonly IProcessInfo _processInfo;
+        private readonly System.Timers.Timer _connectTimer = new System.Timers.Timer(100.0);
         private readonly LogManager _logManager;
         private readonly ConfigManager _configManager;
         public MainWindow(IProcessInfo processInfo, ILogger logger)
         {
-            this.processInfo = processInfo;
-            Logger = logger;
-            _logManager = new LogManager(Logger);
-            _configManager = new ConfigManager(Logger);
+            _processInfo = processInfo;
+            _logger = logger;
+            _logManager = new LogManager(_logger);
+            _configManager = new ConfigManager(_logger);
             InitializeComponent();
             InitForm();
             SvcLog.CheckedChanged += SvcLog_CheckedChanged;
-            connectTimer.Elapsed += ConnectTimer_Elapsed;
+            _connectTimer.Elapsed += ConnectTimer_Elapsed;
         }
 
         private void ConnectTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (connectTimer.Enabled && !FormManager.TCPClient.Connected)
+            if (_connectTimer.Enabled && !FormManager.TCPClient.Connected)
             {
-                if (connectTimer.Interval == 100.0)
-                    connectTimer.Interval = 5000.0;
+                if (_connectTimer.Interval == 100.0)
+                    _connectTimer.Interval = 5000.0;
                 Invoke((MethodInvoker)delegate { FormManager.TCPClient.ConnectHost(_configManager.HostConnectList.FirstOrDefault(host => host.GetHostName() == (string)HostListBox.SelectedItem)); });
                 if (connectedHost != null && FormManager.TCPClient.Connected)
                 {
                     ServerBusy = false;
                     Invoke((MethodInvoker)delegate { ComponentEnableManager(); });
-                    connectTimer.Enabled = false;
-                    connectTimer.Stop();
-                    connectTimer.Close();
+                    _connectTimer.Enabled = false;
+                    _connectTimer.Stop();
+                    _connectTimer.Close();
                     return;
                 }
-                ConnectTimeout++;
-                if (ConnectTimeout >= ConnectTimeoutLimit)
+                _connectTimeout++;
+                if (_connectTimeout >= _connectTimeoutLimit)
                 {
                     Invoke((MethodInvoker)delegate
                     {
@@ -69,9 +69,9 @@ namespace BedrockService.Client.Forms
                         HostInfoLabel.Text = $"Failed to connect to host!";
                         Connect.Enabled = true;
                         ComponentEnableManager();
-                        connectTimer.Enabled = false;
-                        connectTimer.Stop();
-                        connectTimer.Close();
+                        _connectTimer.Enabled = false;
+                        _connectTimer.Stop();
+                        _connectTimer.Close();
                         return;
                     });
                 }
@@ -214,7 +214,7 @@ namespace BedrockService.Client.Forms
             int curPos = HorizontalScrollPosition;
             LogBox.Text = contents;
             HorizontalScrollPosition = curPos;
-            if (FollowTail)
+            if (_followTail)
                 ScrollToEnd();
         }
 
@@ -230,12 +230,12 @@ namespace BedrockService.Client.Forms
 
         private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
-            Logger.AppendLine("Stopping log thread...");
+            _logger.AppendLine("Stopping log thread...");
             if (_logManager.StopLogThread())
             {
-                Logger.AppendLine("Sending disconnect msg...");
+                _logger.AppendLine("Sending disconnect msg...");
                 FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Disconnect);
-                Logger.AppendLine("Closing connection...");
+                _logger.AppendLine("Closing connection...");
                 FormManager.TCPClient.CloseConnection();
                 selectedServer = null;
                 connectedHost = null;
@@ -246,9 +246,9 @@ namespace BedrockService.Client.Forms
         {
             HostInfoLabel.Text = $"Connecting to host {(string)HostListBox.SelectedItem}...";
             Connect.Enabled = false;
-            ConnectTimeout = 0;
-            connectTimer.Interval = 100.0;
-            connectTimer.Start();
+            _connectTimeout = 0;
+            _connectTimer.Interval = 100.0;
+            _connectTimer.Start();
         }
 
         private void ServerSelectBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -261,8 +261,6 @@ namespace BedrockService.Client.Forms
                     {
                         selectedServer = server;
                         ServerInfoBox.Text = server.GetServerName();
-                        LogBox.Text = string.Join("", server.GetLog());
-                        LogBox.Select(LogBox.Text.Length, 0);
                         ComponentEnableManager();
                     }
                 }
@@ -277,19 +275,19 @@ namespace BedrockService.Client.Forms
 
         private void EditCfg_Click(object sender, EventArgs e)
         {
-            editDialog = new PropEditorForm();
-            editDialog.PopulateBoxes(selectedServer.GetAllProps());
-            if (editDialog.ShowDialog() == DialogResult.OK)
+            _editDialog = new PropEditorForm();
+            _editDialog.PopulateBoxes(selectedServer.GetAllProps());
+            if (_editDialog.ShowDialog() == DialogResult.OK)
             {
                 JsonSerializerSettings settings = new JsonSerializerSettings()
                 {
                     TypeNameHandling = TypeNameHandling.All
                 };
-                byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(editDialog.workingProps, Formatting.Indented, settings));
+                byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_editDialog.workingProps, Formatting.Indented, settings));
                 FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PropUpdate);
-                selectedServer.SetAllProps(editDialog.workingProps);
-                editDialog.Close();
-                editDialog.Dispose();
+                selectedServer.SetAllProps(_editDialog.workingProps);
+                _editDialog.Close();
+                _editDialog.Dispose();
                 RestartSrv_Click(null, null);
             }
         }
@@ -302,19 +300,19 @@ namespace BedrockService.Client.Forms
 
         private void EditGlobals_Click(object sender, EventArgs e)
         {
-            editDialog = new PropEditorForm();
-            editDialog.PopulateBoxes(connectedHost.GetAllProps());
-            if (editDialog.ShowDialog() == DialogResult.OK)
+            _editDialog = new PropEditorForm();
+            _editDialog.PopulateBoxes(connectedHost.GetAllProps());
+            if (_editDialog.ShowDialog() == DialogResult.OK)
             {
                 JsonSerializerSettings settings = new JsonSerializerSettings()
                 {
                     TypeNameHandling = TypeNameHandling.All
                 };
-                byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(editDialog.workingProps, Formatting.Indented, settings));
+                byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_editDialog.workingProps, Formatting.Indented, settings));
                 FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.PropUpdate);
-                connectedHost.SetAllProps(editDialog.workingProps);
-                editDialog.Close();
-                editDialog.Dispose();
+                connectedHost.SetAllProps(_editDialog.workingProps);
+                _editDialog.Close();
+                _editDialog.Dispose();
                 RestartSrv_Click(null, null);
             }
         }
@@ -327,6 +325,10 @@ namespace BedrockService.Client.Forms
 
         private void newSrvBtn_Click(object sender, EventArgs e)
         {
+            if(clientSideServiceConfiguration == null)
+            {
+                clientSideServiceConfiguration = _configManager.HostConnectList.First(host => host.GetHostName() == HostListBox.Text);
+            }
             AddNewServerForm newServerForm = new AddNewServerForm(clientSideServiceConfiguration, connectedHost.GetServerList());
             if (newServerForm.ShowDialog() == DialogResult.OK)
             {
@@ -341,7 +343,7 @@ namespace BedrockService.Client.Forms
             }
         }
 
-        private void removeSrvBtn_Click(object sender, EventArgs e)
+        private void RemoveSrvBtn_Click(object sender, EventArgs e)
         {
             FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.RemoveServer, NetworkMessageFlags.RemoveAll);
             DisableUI();
@@ -350,7 +352,6 @@ namespace BedrockService.Client.Forms
         private void PlayerManager_Click(object sender, EventArgs e)
         {
             FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PlayersRequest);
-            DisableUI();
             WaitForServerData().Wait();
             FormManager.TCPClient.PlayerInfoArrived = false;
             PlayerManagerForm form = new PlayerManagerForm(selectedServer);
@@ -458,7 +459,7 @@ namespace BedrockService.Client.Forms
             SetScrollInfo(LogBox.Handle, (int)ScrollBarDirection.Vertical, ref si, true);
             SendMessage(LogBox.Handle, VerticalScroll, new IntPtr(Thumbtrack + 0x10000 * si.Pos), new IntPtr(0));
 
-            FollowTail = true;
+            _followTail = true;
         }
 
         public void PerformBackupTests()
@@ -546,7 +547,7 @@ namespace BedrockService.Client.Forms
             }
         }
 
-        private void scrollLockChkBox_CheckedChanged(object sender, EventArgs e) => FollowTail = scrollLockChkBox.Checked;
+        private void scrollLockChkBox_CheckedChanged(object sender, EventArgs e) => _followTail = scrollLockChkBox.Checked;
 
         private void cmdTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
@@ -588,7 +589,7 @@ namespace BedrockService.Client.Forms
             FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PackList);
             DisableUI();
             WaitForServerData().Wait();
-            using (ManagePacksForms form = new ManagePacksForms(connectedHost.GetServerIndex(selectedServer), Logger, processInfo))
+            using (ManagePacksForms form = new ManagePacksForms(connectedHost.GetServerIndex(selectedServer), _logger, _processInfo))
             {
                 form.PopulateServerPacks(FormManager.TCPClient.RecievedPacks);
                 if (form.ShowDialog() == DialogResult.OK)

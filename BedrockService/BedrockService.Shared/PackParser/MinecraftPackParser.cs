@@ -53,23 +53,23 @@ namespace BedrockService.Shared.PackParser
 
     public class MinecraftPackParser
     {
-        private IProcessInfo ProcessInfo;
-        private ILogger Logger;
+        private readonly IProcessInfo _processInfo;
+        private readonly ILogger _logger;
         public DirectoryInfo PackExtractDirectory;
         public List<MinecraftPackContainer> FoundPacks = new List<MinecraftPackContainer>();
 
         [JsonConstructor]
         public MinecraftPackParser(ILogger logger, IProcessInfo processInfo)
         {
-            ProcessInfo = processInfo;
-            Logger = logger;
+            _processInfo = processInfo;
+            _logger = logger;
         }
 
         public MinecraftPackParser(byte[] fileContents, ILogger logger, IProcessInfo processInfo)
         {
-            Logger = logger;
+            _logger = logger;
             PackExtractDirectory = new DirectoryInfo($@"{processInfo.GetDirectory()}\Temp");
-            ProcessInfo = processInfo;
+            _processInfo = processInfo;
             new FileUtils(processInfo.GetDirectory()).ClearTempDir();
             using (MemoryStream fileStream = new MemoryStream(fileContents, 5, fileContents.Length - 5))
             {
@@ -84,9 +84,9 @@ namespace BedrockService.Shared.PackParser
         public MinecraftPackParser(string[] files, DirectoryInfo extractDir, ILogger logger, IProcessInfo processInfo)
         {
             PackExtractDirectory = extractDir;
-            Logger = logger;
-            ProcessInfo = processInfo;
-            new FileUtils(ProcessInfo.GetDirectory()).ClearTempDir();
+            _logger = logger;
+            _processInfo = processInfo;
+            new FileUtils(_processInfo.GetDirectory()).ClearTempDir();
             if (Directory.Exists($@"{PackExtractDirectory.FullName}\ZipTemp"))
             {
                 Directory.CreateDirectory($@"{PackExtractDirectory.FullName}\ZipTemp");
@@ -111,7 +111,7 @@ namespace BedrockService.Shared.PackParser
 
         public void ParseDirectory(DirectoryInfo directoryToParse)
         {
-            Logger.AppendLine($"Parsing directory {directoryToParse.Name}");
+            _logger.AppendLine($"Parsing directory {directoryToParse.Name}");
             if (directoryToParse.Exists)
             {
                 foreach (FileInfo file in directoryToParse.GetFiles("*", SearchOption.AllDirectories))
@@ -139,7 +139,7 @@ namespace BedrockService.Shared.PackParser
                             FolderName = file.Directory.Name,
                             IconBytes = iconBytes
                         });
-                        Logger.AppendLine("Pack was detected as MCWorld");
+                        _logger.AppendLine("Pack was detected as MCWorld");
                         return;
                     }
                     if (file.Name == "manifest.json")
@@ -164,7 +164,7 @@ namespace BedrockService.Shared.PackParser
                         };
                         container.JsonManifest = JsonConvert.DeserializeObject<Manifest>(File.ReadAllText(file.FullName), settings);
                         container.ManifestType = container.JsonManifest.modules[0].type;
-                        Logger.AppendLine($"{container.ManifestType} pack found, name: {container.JsonManifest.header.name}, path: {container.PackContentLocation.Name}");
+                        _logger.AppendLine($"{container.ManifestType} pack found, name: {container.JsonManifest.header.name}, path: {container.PackContentLocation.Name}");
                         FoundPacks.Add(container);
                     }
                 }

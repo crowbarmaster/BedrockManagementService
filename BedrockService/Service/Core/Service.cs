@@ -13,64 +13,62 @@ namespace BedrockService.Service.Core
 {
     public class Service : IService
     {
-        private IBedrockService BedrockService { get; }
-        private Host host;
-        private readonly IServiceConfiguration serviceConfiguration;
-        private readonly ILogger logger;
+        private readonly IBedrockService _bedrockService;
+        private Host _host;
+        private readonly ILogger _logger;
 
-        public Service(ILogger logger, IBedrockService bedrockService, IServiceConfiguration serviceConfiguration)
+        public Service(ILogger logger, IBedrockService bedrockService)
         {
-            this.logger = logger;
-            this.serviceConfiguration = serviceConfiguration;
-            BedrockService = bedrockService;
+            _logger = logger;
+            _bedrockService = bedrockService;
         }
 
         public async Task InitializeHost()
         {
             await Task.Run(() =>
             {
-                host = HostFactory.New(x =>
+                _host = HostFactory.New(hostConfig =>
                 {
-                    x.SetStartTimeout(TimeSpan.FromSeconds(10));
-                    x.SetStopTimeout(TimeSpan.FromSeconds(10));
-                    x.UseAssemblyInfoForServiceInfo();
-                    x.Service(settings => BedrockService, s =>
+                    hostConfig.SetStartTimeout(TimeSpan.FromSeconds(10));
+                    hostConfig.SetStopTimeout(TimeSpan.FromSeconds(10));
+                    hostConfig.UseAssemblyInfoForServiceInfo();
+                    hostConfig.Service(settings => _bedrockService, s =>
                     {
-                        s.BeforeStartingService(_ => logger.AppendLine("Starting service..."));
+                        s.BeforeStartingService(_ => _logger.AppendLine("Starting service..."));
                         s.BeforeStoppingService(_ =>
                         {
-                            logger.AppendLine("Stopping service...");
-                            foreach (BedrockServer server in BedrockService.GetAllServers())
+                            _logger.AppendLine("Stopping service...");
+                            foreach (IBedrockServer server in _bedrockService.GetAllServers())
                             {
-                                server.CurrentServerStatus = BedrockServer.ServerStatus.Stopping;
-                                while (server.CurrentServerStatus != BedrockServer.ServerStatus.Stopped)
+                                server.SetServerStatus(BedrockServer.ServerStatus.Stopping);
+                                while (server.GetServerStatus() != BedrockServer.ServerStatus.Stopped)
                                     Thread.Sleep(100);
                             }
                         });
                     });
 
-                    x.RunAsLocalSystem();
-                    x.SetDescription("Windows Service Wrapper for Windows Bedrock Server");
-                    x.SetDisplayName("BedrockService");
-                    x.SetServiceName("BedrockService");
-                    x.UnhandledExceptionPolicy = UnhandledExceptionPolicyCode.LogErrorOnly;
+                    hostConfig.RunAsLocalSystem();
+                    hostConfig.SetDescription("Windows Service Wrapper for Windows Bedrock Server");
+                    hostConfig.SetDisplayName("BedrockService");
+                    hostConfig.SetServiceName("BedrockService");
+                    hostConfig.UnhandledExceptionPolicy = UnhandledExceptionPolicyCode.LogErrorOnly;
 
-                    x.EnableServiceRecovery(src =>
+                    hostConfig.EnableServiceRecovery(src =>
                     {
                         src.RestartService(delayInMinutes: 0);
                         src.RestartService(delayInMinutes: 1);
                         src.SetResetPeriod(days: 1);
                     });
 
-                    x.OnException((ex) =>
+                    hostConfig.OnException((ex) =>
                     {
-                        logger.AppendLine("Exception occured Main : " + ex.Message);
+                        _logger.AppendLine("Exception occured Main : " + ex.Message);
                     });
                 });
 
             });
         }
 
-        public TopshelfExitCode Run() => host.Run();
+        public TopshelfExitCode Run() => _host.Run();
     }
 }

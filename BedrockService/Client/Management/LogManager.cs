@@ -15,7 +15,7 @@ namespace BedrockService.Client.Management
         public bool Working = false;
         public List<string> ServiceLogs = new List<string>();
         private IServiceConfiguration connectedHost;
-        private ILogger Logger;
+        private readonly ILogger Logger;
 
         public LogManager(ILogger logger)
         {
@@ -41,19 +41,19 @@ namespace BedrockService.Client.Management
                     Thread.Sleep(200);
                     int currentLogBoxLength = 0;
 
-                    FormManager.MainWindow.LogBox.Invoke((MethodInvoker)delegate
-                    {
-                        currentLogBoxLength = FormManager.MainWindow.LogBox.TextLength;
-                    });
                     if (FormManager.MainWindow.selectedServer == null)
                     {
                         UpdateLogBoxInvoked("");
                     }
+                    FormManager.MainWindow.LogBox.Invoke((MethodInvoker)delegate
+                    {
+                        currentLogBoxLength = FormManager.MainWindow.LogBox.TextLength;
+                    });
                     if (FormManager.MainWindow.ShowsSvcLog && connectedHost.GetLog().Count != currentLogBoxLength)
                     {
                         UpdateLogBoxInvoked(string.Join("\r\n", connectedHost.GetLog()));
                     }
-                    else if (FormManager.MainWindow.selectedServer.GetLog() != null && FormManager.MainWindow.selectedServer.GetLog().Count != currentLogBoxLength)
+                    else if (!FormManager.MainWindow.ShowsSvcLog && FormManager.MainWindow.selectedServer.GetLog() != null && FormManager.MainWindow.selectedServer.GetLog().Count != currentLogBoxLength)
                     {
                         UpdateLogBoxInvoked(string.Join("", FormManager.MainWindow.selectedServer.GetLog()));
                     }

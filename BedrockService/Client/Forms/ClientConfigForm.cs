@@ -16,7 +16,7 @@ namespace BedrockService.Client.Forms
 {
     public partial class ClientConfigForm : Form
     {
-        private List<IClientSideServiceConfiguration> _clientConfigs;
+        private readonly List<IClientSideServiceConfiguration> _clientConfigs;
         private readonly ConfigManager _configManager;
         public ClientConfigForm(ConfigManager configManager)
         {

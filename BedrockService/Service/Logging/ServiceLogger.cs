@@ -8,49 +8,49 @@ namespace BedrockService.Service.Logging
 {
     public class ServiceLogger : ILogger
     {
-        IServiceConfiguration serviceConfiguration;
-        private StringBuilder OutString = new StringBuilder();
+        private readonly IServiceConfiguration _serviceConfiguration;
+        private StringBuilder _outputString = new StringBuilder();
         [NonSerialized]
-        private StreamWriter LogWriter;
-        private bool LogToFile = false;
-        private bool LogToConsole = false;
-        private readonly string parent = "Service";
-        private readonly string LogDir;
+        private readonly StreamWriter _logWriter;
+        private readonly bool _logToFile = false;
+        private readonly bool _logToConsole = false;
+        private readonly string _parent = "Service";
+        private readonly string _logPath;
 
         public ServiceLogger(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration)
         {
-            this.serviceConfiguration = serviceConfiguration;
-            LogDir = $@"{processInfo.GetDirectory()}\Service\Logs";
-            LogToFile = bool.Parse(serviceConfiguration.GetProp("LogServiceToFile").ToString());
-            LogToConsole = true;
-            if (LogToFile)
+            _serviceConfiguration = serviceConfiguration;
+            _logPath = $@"{processInfo.GetDirectory()}\Service\Logs";
+            _logToFile = bool.Parse(serviceConfiguration.GetProp("LogServiceToFile").ToString());
+            _logToConsole = true;
+            if (_logToFile)
             {
-                if (!Directory.Exists(LogDir))
-                    Directory.CreateDirectory(LogDir);
-                LogWriter = new StreamWriter($@"{LogDir}\ServiceLog_{parent}_{DateTime.Now:yyyymmddhhmmss}.log", true);
+                if (!Directory.Exists(_logPath))
+                    Directory.CreateDirectory(_logPath);
+                _logWriter = new StreamWriter($@"{_logPath}\ServiceLog_{_parent}_{DateTime.Now:yyyymmddhhmmss}.log", true);
             }
         }
 
         [JsonConstructor]
         public ServiceLogger(IServiceConfiguration serviceConfiguration, string serverName)
         {
-            this.serviceConfiguration = serviceConfiguration;
-            parent = serverName;
-            LogToFile = false;
-            LogToConsole = false;
+            _serviceConfiguration = serviceConfiguration;
+            _parent = serverName;
+            _logToFile = false;
+            _logToConsole = false;
         }
 
         public void AppendLine(string text)
         {
             try
             {
-                serviceConfiguration.GetLog().Add(text);
-                if (LogToFile && LogWriter != null)
+                _serviceConfiguration.GetLog().Add(text);
+                if (_logToFile && _logWriter != null)
                 {
-                    LogWriter.WriteLine(text);
-                    LogWriter.Flush();
+                    _logWriter.WriteLine(text);
+                    _logWriter.Flush();
                 }
-                if (LogToConsole)
+                if (_logToConsole)
                     Console.WriteLine(text);
             }
             catch
@@ -62,13 +62,13 @@ namespace BedrockService.Service.Logging
         {
             try
             {
-                serviceConfiguration.GetLog().Add(text);
-                if (LogToFile && LogWriter != null)
+                _serviceConfiguration.GetLog().Add(text);
+                if (_logToFile && _logWriter != null)
                 {
-                    LogWriter.Write(text);
-                    LogWriter.Flush();
+                    _logWriter.Write(text);
+                    _logWriter.Flush();
                 }
-                if (LogToConsole)
+                if (_logToConsole)
                 {
                     Console.Write(text);
                     Console.Out.Flush();
@@ -81,22 +81,22 @@ namespace BedrockService.Service.Logging
 
         public int Count()
         {
-            return serviceConfiguration.GetLog().Count;
+            return _serviceConfiguration.GetLog().Count;
         }
 
         public string FromIndex(int index)
         {
-            return serviceConfiguration.GetLog()[index];
+            return _serviceConfiguration.GetLog()[index];
         }
 
         public override string ToString()
         {
-            OutString = new StringBuilder();
-            foreach (string s in serviceConfiguration.GetLog())
+            _outputString = new StringBuilder();
+            foreach (string s in _serviceConfiguration.GetLog())
             {
-                OutString.Append(s);
+                _outputString.Append(s);
             }
-            return OutString.ToString();
+            return _outputString.ToString();
         }
     }
 }
