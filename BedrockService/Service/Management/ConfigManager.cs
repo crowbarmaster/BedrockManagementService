@@ -63,6 +63,7 @@ namespace BedrockService.Service.Management
                     serverInfo = new ServerInfo(null, _serviceConfiguration.GetProp("ServersPath").ToString());
                     serverInfo.InitializeDefaults();
                     SaveServerProps(serverInfo, true);
+                    _serviceConfiguration.AddNewServerInfo(serverInfo);
                 }
             });
         }
