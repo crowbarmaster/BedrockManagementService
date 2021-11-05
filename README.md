@@ -5,19 +5,18 @@
 
 BedrockService started as a fork from Ravetroll's BedrockService, using TopShelf for multiple servers and a hidden server instance. This worked okay, but still required manual updates, lacked a way to add server instances while live, and using a WPF Console to merely monitor and send server commands was not enough for my wishes. It still would require you to interact with the server files directly, and if your server is remote, this can become a pain. My main goals for this project are as follows:
 
-* A multiple server service run in the background. [Implemented, needs testing]
+* A multiple server service run in the background. [Implemented]
 * Add/remove/modify/monitor servers from the GUI remotely. [Implemented]
-* Both Service and individual server persistence over failure (AKA WatchDog). [implemented; needs further testing]
+* Both Service and individual server persistence over failure (AKA WatchDog). [Implemented; needs further testing]
 * Zero interaction with actual Minecraft server files and configs; all handled with service configuration. [Mostly implemented]
-* Automatic server updates and deployment, all while leaving the configuration and added packs/worlds intact. [implemented]
-* Automatic backup system, with the ability to manage backups and rollback via GUI. [implemented; needs further testing]
+* Automatic server updates and deployment, all while leaving the configuration and added packs/worlds intact. [Implemented]
+* Automatic backup system, with the ability to manage backups and rollback via GUI. [Implemented; needs further testing]
 * Complete control of players, track known players, manage player permission and whitelist statuses and more. [Partially implemented, needs further testing]
 * Pack manager to add/remove packs and worlds from servers via GUI. [Partially implemented, needs further testing]
 
 TODO:
-* Implement a way to modify level information. Not sure if I want to use an existing lib yet, or just add a couple static methods to change a few values (Ex. enabling experimental gameplay).
 * Block more bad behavior in the GUI.
-* Plans to add more information to the player manager. Implement sending commands to the running server to coincide with updated player settings (Ex. /op, /whitelist), currently servers require a restart before updated players can be recognized.
+* Plans to add more information to the player manager.
 * Pack manager still needs a way to determine installed MCWorld packs, most likely adding a service-specific configuration file to come.
 * Implement a way to ignore updates to enable old version persistence, as well as possibly allowing initial deployment of various versions.
 * Client needs debug information written to file.
@@ -66,7 +65,7 @@ Default configurations are not shipped with the application. Please follow the q
 * Batch Folder - Contains a few batch files useful for installing/stating/stopping and removing the service from Windows Services. To use these please copy/move to BedrockService.Service.exe directory!
 * BedrockService.Service.exe - core service executable.
 
-All configuration files use a key=value layout. (Ex. ServersPath=C:\MCBedrockService). The parser will ignore any lines beginning with a "#" sign and empty lines for comments.
+All configuration files use a key=value layout. (Ex. ServersPath=C:\MCBedrockService). The parser will ignore any lines beginning with a "#" sign for comments and empty lines.
 
 Globals.conf:
 
