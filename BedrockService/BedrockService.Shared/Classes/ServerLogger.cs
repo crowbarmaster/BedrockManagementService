@@ -6,7 +6,7 @@ using System.Text;
 
 namespace BedrockService.Shared.Classes
 {
-    public class ServerLogger : ILogger
+    public class ServerLogger : IBedrockLogger
     {
         private StringBuilder OutString = new StringBuilder();
         [NonSerialized]

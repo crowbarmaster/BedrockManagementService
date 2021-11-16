@@ -27,12 +27,12 @@ namespace BedrockService.Client.Forms
         private int _connectTimeout;
         private bool _followTail = false;
         private const int _connectTimeoutLimit = 3;
-        private readonly ILogger _logger;
+        private readonly IBedrockLogger _logger;
         private readonly IProcessInfo _processInfo;
         private readonly System.Timers.Timer _connectTimer = new System.Timers.Timer(100.0);
         private readonly LogManager _logManager;
         private readonly ConfigManager _configManager;
-        public MainWindow(IProcessInfo processInfo, ILogger logger)
+        public MainWindow(IProcessInfo processInfo, IBedrockLogger logger)
         {
             _processInfo = processInfo;
             _logger = logger;

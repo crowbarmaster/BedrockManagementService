@@ -54,18 +54,18 @@ namespace BedrockService.Shared.PackParser
     public class MinecraftPackParser
     {
         private readonly IProcessInfo _processInfo;
-        private readonly ILogger _logger;
+        private readonly IBedrockLogger _logger;
         public DirectoryInfo PackExtractDirectory;
         public List<MinecraftPackContainer> FoundPacks = new List<MinecraftPackContainer>();
 
         [JsonConstructor]
-        public MinecraftPackParser(ILogger logger, IProcessInfo processInfo)
+        public MinecraftPackParser(IBedrockLogger logger, IProcessInfo processInfo)
         {
             _processInfo = processInfo;
             _logger = logger;
         }
 
-        public MinecraftPackParser(byte[] fileContents, ILogger logger, IProcessInfo processInfo)
+        public MinecraftPackParser(byte[] fileContents, IBedrockLogger logger, IProcessInfo processInfo)
         {
             _logger = logger;
             PackExtractDirectory = new DirectoryInfo($@"{processInfo.GetDirectory()}\Temp");
@@ -81,7 +81,7 @@ namespace BedrockService.Shared.PackParser
             ParseDirectory(PackExtractDirectory);
         }
 
-        public MinecraftPackParser(string[] files, DirectoryInfo extractDir, ILogger logger, IProcessInfo processInfo)
+        public MinecraftPackParser(string[] files, DirectoryInfo extractDir, IBedrockLogger logger, IProcessInfo processInfo)
         {
             PackExtractDirectory = extractDir;
             _logger = logger;

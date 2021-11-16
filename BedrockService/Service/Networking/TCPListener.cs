@@ -8,6 +8,9 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.IO;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 
 namespace BedrockService.Service.Networking
 {
@@ -17,7 +20,7 @@ namespace BedrockService.Service.Networking
         private TcpListener _inListener;
         private NetworkStream _stream;
         private readonly IServiceConfiguration _serviceConfiguration;
-        private readonly ILogger _logger;
+        private readonly IBedrockLogger _logger;
         private IServiceThread _tcpThread;
         private IServiceThread _clientThread;
         private IServiceThread _heartbeatThread;
@@ -30,8 +33,9 @@ namespace BedrockService.Service.Networking
         private Dictionary<NetworkMessageTypes, IFlaggedMessageParser> _flaggedMessageLookup;
         private readonly IPAddress _ipAddress = IPAddress.Parse("0.0.0.0");
         private readonly System.Timers.Timer _reconnectTimer = new System.Timers.Timer(500.0);
+        private CommsKeyContainer _keyContainer;
 
-        public TCPListener(IServiceConfiguration serviceConfiguration, ILogger logger)
+        public TCPListener(IServiceConfiguration serviceConfiguration, IBedrockLogger logger)
         {
             _logger = logger;
             _serviceConfiguration = serviceConfiguration;
@@ -113,6 +117,7 @@ namespace BedrockService.Service.Networking
             byteHeader[7] = (byte)type;
             byteHeader[8] = (byte)status;
             Buffer.BlockCopy(bytesToSend, 0, byteHeader, 9, bytesToSend.Length);
+            
             if (_clientThread.IsAlive())
             {
                 try
@@ -262,6 +267,30 @@ namespace BedrockService.Service.Networking
                 }
             }
             _logger.AppendLine("HeartBeatSender exited.");
+        }
+
+        public void SetKeyContainer(CommsKeyContainer keyContainer)
+        {
+            _keyContainer = keyContainer;
+        }
+
+        public bool VerifyClientData(byte[] certificate)
+        {
+            if(certificate != null)
+            {
+                byte[] decrypted;
+                using(RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
+                {
+                    rsa.ImportParameters(_keyContainer.LocalPrivateKey.GetPrivateKey());
+                    
+                }
+                using(RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
+                {
+                    rsa.ImportParameters(_keyContainer.RemotePublicKey.GetPrivateKey());
+
+                }
+            }
+            return true;
         }
     }
 }

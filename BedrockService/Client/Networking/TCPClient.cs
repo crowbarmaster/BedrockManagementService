@@ -30,9 +30,9 @@ namespace BedrockService.Client.Networking
         private const int _heartbeatFailTimeoutLimit = 250;
         private bool _heartbeatRecieved;
         private bool _keepAlive;
-        private readonly ILogger _logger;
+        private readonly IBedrockLogger _logger;
 
-        public TCPClient (ILogger logger)
+        public TCPClient (IBedrockLogger logger)
         {
             _logger = logger;
         }

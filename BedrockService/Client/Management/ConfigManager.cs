@@ -13,9 +13,9 @@ namespace BedrockService.Client.Management
         public string ConfigFile;
         public List<IClientSideServiceConfiguration> HostConnectList = new List<IClientSideServiceConfiguration>();
         public string NBTStudioPath;
-        private readonly ILogger Logger;
+        private readonly IBedrockLogger Logger;
 
-        public ConfigManager(ILogger logger)
+        public ConfigManager(IBedrockLogger logger)
         {
             Logger = logger;
             ConfigFile = $@"{ConfigDir}\Config.conf";

@@ -16,10 +16,10 @@ namespace BedrockService.Client.Forms
     public partial class ManagePacksForms : Form
     {
         private readonly byte ServerIndex = 0x00;
-        private readonly ILogger Logger;
+        private readonly IBedrockLogger Logger;
         private readonly IProcessInfo ProcessInfo;
         private readonly DirectoryInfo PackExtractDir;
-        public ManagePacksForms(byte serverIndex, ILogger logger, IProcessInfo processInfo)
+        public ManagePacksForms(byte serverIndex, IBedrockLogger logger, IProcessInfo processInfo)
         {
             Logger = logger;
             PackExtractDir = new DirectoryInfo($@"{processInfo.GetDirectory()}\Temp");

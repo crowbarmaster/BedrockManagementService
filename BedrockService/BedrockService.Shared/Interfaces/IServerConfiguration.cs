@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace BedrockService.Shared.Interfaces
 {
-    public interface IServerConfiguration : IConfiguration
+    public interface IServerConfiguration : IBedrockConfiguration
     {
         string GetServerName();
 

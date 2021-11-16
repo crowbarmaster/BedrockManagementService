@@ -6,7 +6,7 @@ using System.Text;
 
 namespace BedrockService.Client.Management
 {
-    public class ClientLogger : ILogger
+    public class ClientLogger : IBedrockLogger
     {
         public List<string> Log = new List<string>();
         public StringBuilder OutString = new StringBuilder();

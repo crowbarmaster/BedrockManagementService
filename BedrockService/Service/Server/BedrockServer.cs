@@ -28,8 +28,8 @@ namespace BedrockService.Service.Server
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IPlayerManager _playerManager;
         private readonly IConfigurator _configurator;
-        private readonly ILogger _logger;
-        private readonly ILogger _serverLogger;
+        private readonly IBedrockLogger _logger;
+        private readonly IBedrockLogger _serverLogger;
         private readonly string _servicePath;
         private const string _startupMessage = "[INFO] Server started.";
         public enum ServerStatus
@@ -40,7 +40,7 @@ namespace BedrockService.Service.Server
             Started
         }
 
-        public BedrockServer(IServerConfiguration serverConfiguration, IConfigurator configurator, ILogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo)
+        public BedrockServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo)
         {
             _serverConfiguration = serverConfiguration;
             _serviceConfiguration = serviceConfiguration;
@@ -445,7 +445,7 @@ namespace BedrockService.Service.Server
             return false;
         }
 
-        public ILogger GetLogger() => _serverLogger;
+        public IBedrockLogger GetLogger() => _serverLogger;
 
         public IPlayerManager GetPlayerManager() => _playerManager;
 

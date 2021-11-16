@@ -9,6 +9,9 @@ using System.IO.Compression;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace BedrockService.Service.Management
 {
@@ -16,27 +19,37 @@ namespace BedrockService.Service.Management
     {
         private readonly string _configDir;
         private readonly string _globalFile;
+        private readonly string _clientKeyPath;
+        private readonly string _commsKeyPath;
         private string _loadedVersion;
         private static readonly object _fileLock = new object();
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IProcessInfo _processInfo;
-        private readonly ILogger _logger;
+        private readonly IBedrockLogger _logger;
+        private CommsKeyContainer _keyContainer;
+        private RSAParameters _serviceKey;
+        private RSAParameters _clientKey;
 
-        public ConfigManager(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, ILogger logger)
+        public ConfigManager(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, IBedrockLogger logger)
         {
             _processInfo = processInfo;
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
             _configDir = $@"{_processInfo.GetDirectory()}\Server\Configs";
             _globalFile = $@"{_processInfo.GetDirectory()}\Service\Globals.conf";
+            _clientKeyPath = $@"{_processInfo.GetDirectory()}\Client\ClientKey.dat";
+            _commsKeyPath = $@"{_processInfo.GetDirectory()}\Service\CommsKey.dat";
         }
 
         public async Task LoadAllConfigurations()
         {
             await Task.Run(() =>
             {
+                BinaryFormatter formatter = new BinaryFormatter();
                 if (!Directory.Exists(_configDir))
                     Directory.CreateDirectory(_configDir);
+                if (!Directory.Exists($@"{_processInfo.GetDirectory()}\Client"))
+                    Directory.CreateDirectory($@"{_processInfo.GetDirectory()}\Client");
                 if (!Directory.Exists($@"{_configDir}\KnownPlayers\Backups"))
                     Directory.CreateDirectory($@"{_configDir}\KnownPlayers\Backups");
                 if (!Directory.Exists($@"{_configDir}\RegisteredPlayers\Backups"))
@@ -45,6 +58,44 @@ namespace BedrockService.Service.Management
                     Directory.CreateDirectory($@"{_configDir}\Backups");
                 if (File.Exists($@"{_configDir}\..\bedrock_ver.ini"))
                     _loadedVersion = File.ReadAllText($@"{_configDir}\..\bedrock_ver.ini");
+                if(!File.Exists(_commsKeyPath))
+                {
+                    RSACryptoServiceProvider rsa = new RSACryptoServiceProvider(2048);
+                    using (AesCryptoServiceProvider aes = new AesCryptoServiceProvider())
+                    {
+                        CommsKeyContainer serviceKeys = new CommsKeyContainer();
+                        CommsKeyContainer clientKeys = new CommsKeyContainer();
+                        serviceKeys.LocalPrivateKey.SetPrivateKey(rsa.ExportParameters(true));
+                        clientKeys.RemotePublicKey.SetPublicKey(rsa.ExportParameters(false));
+                        rsa = new RSACryptoServiceProvider(2048);
+                        clientKeys.LocalPrivateKey.SetPrivateKey(rsa.ExportParameters(true));
+                        serviceKeys.RemotePublicKey.SetPublicKey(rsa.ExportParameters(false));
+                        aes.GenerateKey();
+                        aes.GenerateIV();
+                        serviceKeys.AesKey = aes.Key;
+                        clientKeys.AesKey = aes.Key;
+                        serviceKeys.AesIV = aes.IV;
+                        clientKeys.AesIV = aes.IV;
+                        formatter.Serialize(File.Create(_clientKeyPath), clientKeys);
+                        formatter.Serialize(File.Create(_commsKeyPath), serviceKeys);
+                    }
+                    rsa.Clear();
+                    rsa.Dispose();
+                }
+                else
+                {
+                    try
+                    {
+                        _keyContainer = (CommsKeyContainer)formatter.Deserialize(File.Open(_commsKeyPath, FileMode.Open));
+                        _serviceKey = _keyContainer.LocalPrivateKey.GetPrivateKey();
+                        _clientKey = _keyContainer.RemotePublicKey.GetPrivateKey();
+                    }
+                    catch
+                    {
+                        _logger.AppendLine("Error loading Encryption keys!");
+                    }
+                }
+
                 ServerInfo serverInfo;
                 LoadGlobals();
                 _serviceConfiguration.GetServerList().Clear();
@@ -475,12 +526,14 @@ namespace BedrockService.Service.Management
             catch { return false; }
         }
 
-        public Task LoadConfiguration(IConfiguration configuration)
+        public CommsKeyContainer GetKeyContainer() => _keyContainer;
+
+        public Task LoadConfiguration(IBedrockConfiguration configuration)
         {
             throw new NotImplementedException();
         }
 
-        public Task SaveConfiguration(IConfiguration configuration)
+        public Task SaveConfiguration(IBedrockConfiguration configuration)
         {
             throw new NotImplementedException();
         }

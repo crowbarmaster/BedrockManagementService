@@ -15,9 +15,9 @@ namespace BedrockService.Service.Core
     {
         private readonly IBedrockService _bedrockService;
         private Host _host;
-        private readonly ILogger _logger;
+        private readonly IBedrockLogger _logger;
 
-        public Service(ILogger logger, IBedrockService bedrockService)
+        public Service(IBedrockLogger logger, IBedrockService bedrockService, NetworkStrategyLookup lookup)
         {
             _logger = logger;
             _bedrockService = bedrockService;
@@ -69,6 +69,18 @@ namespace BedrockService.Service.Core
             });
         }
 
-        public TopshelfExitCode Run() => _host.Run();
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            return Task.Run(() =>
+            {
+                InitializeHost().Wait();
+                _host.Run();
+            });
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            return Task.Delay(100);
+        }
     }
 }

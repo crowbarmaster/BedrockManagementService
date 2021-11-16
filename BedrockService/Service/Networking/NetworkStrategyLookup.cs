@@ -15,6 +15,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 
 namespace BedrockService.Service.Networking
 {
@@ -23,7 +25,7 @@ namespace BedrockService.Service.Networking
         private readonly Dictionary<NetworkMessageTypes, IMessageParser> _standardMessageLookup;
         private readonly Dictionary<NetworkMessageTypes, IFlaggedMessageParser> _flaggedMessageLookup;
 
-        public NetworkStrategyLookup(ITCPListener messageSender, IBedrockService service, ILogger logger, IConfigurator configurator, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, IUpdater updater)
+        public NetworkStrategyLookup(ITCPListener messageSender, IBedrockService service, IBedrockLogger logger, IConfigurator configurator, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, IUpdater updater)
         {
             _standardMessageLookup = new Dictionary<NetworkMessageTypes, IMessageParser>()
             {
@@ -198,10 +200,10 @@ namespace BedrockService.Service.Networking
         class ServerCommand : IMessageParser
         {
             private readonly IBedrockService _service;
-            private readonly ILogger _logger;
+            private readonly IBedrockLogger _logger;
             private readonly IMessageSender _messageSender;
 
-            public ServerCommand(IMessageSender messageSender, IBedrockService service, ILogger logger)
+            public ServerCommand(IMessageSender messageSender, IBedrockService service, IBedrockLogger logger)
             {
                 _messageSender = messageSender;
                 _service = service;
@@ -222,9 +224,9 @@ namespace BedrockService.Service.Networking
             private readonly IMessageSender _messageSender;
             private readonly IServiceConfiguration _serviceConfiguration;
             private readonly IProcessInfo _processInfo;
-            private readonly ILogger _logger;
+            private readonly IBedrockLogger _logger;
 
-            public PackList(IMessageSender messageSender, IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, ILogger logger)
+            public PackList(IMessageSender messageSender, IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, IBedrockLogger logger)
             {
                 _logger = logger;
                 _messageSender = messageSender;
@@ -344,9 +346,9 @@ namespace BedrockService.Service.Networking
         {
             private readonly IServiceConfiguration _serviceConfiguration;
             private readonly IProcessInfo _serviceProcessInfo;
-            private readonly ILogger _logger;
+            private readonly IBedrockLogger _logger;
 
-            public PackFile(IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ILogger logger)
+            public PackFile(IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, IBedrockLogger logger)
             {
                 _logger = logger;
                 _serviceProcessInfo = serviceProcessInfo;
@@ -394,12 +396,12 @@ namespace BedrockService.Service.Networking
 
         class Connect : IMessageParser
         {
-            private readonly IMessageSender _messageSender;
+            private readonly IMessageSender _iTCPListener;
             private readonly IServiceConfiguration _serviceConfiguration;
 
-            public Connect(IMessageSender messageSender, IServiceConfiguration serviceConfiguration)
+            public Connect(ITCPListener iTCPListener, IServiceConfiguration serviceConfiguration)
             {
-                _messageSender = messageSender;
+                _iTCPListener = iTCPListener;
                 _serviceConfiguration = serviceConfiguration;
             }
 
@@ -412,7 +414,7 @@ namespace BedrockService.Service.Networking
                 };
                 string jsonString = JsonConvert.SerializeObject(_serviceConfiguration, indented, settings);
                 byte[] serializeToBytes = Encoding.UTF8.GetBytes(jsonString);
-                _messageSender.SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
+                _iTCPListener.SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
             }
         }
 
@@ -584,7 +586,7 @@ namespace BedrockService.Service.Networking
                     int srvTextLen;
                     int clientCurLen;
                     int loop;
-                    ILogger srvText;
+                    IBedrockLogger srvText;
                     if (srvName != "Service")
                     {
                         try

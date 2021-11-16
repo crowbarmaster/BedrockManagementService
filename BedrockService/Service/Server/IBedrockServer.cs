@@ -17,6 +17,6 @@ namespace BedrockService.Service.Server
         BedrockServer.ServerStatus GetServerStatus();
         void SetServerStatus(BedrockServer.ServerStatus newStatus);
         IPlayerManager GetPlayerManager();
-        ILogger GetLogger();
+        IBedrockLogger GetLogger();
     }
 }

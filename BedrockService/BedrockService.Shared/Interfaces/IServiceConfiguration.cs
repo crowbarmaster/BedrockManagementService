@@ -2,7 +2,7 @@
 
 namespace BedrockService.Shared.Interfaces
 {
-    public interface IServiceConfiguration : IConfiguration
+    public interface IServiceConfiguration : IBedrockConfiguration
     {
         IServerConfiguration GetServerInfoByName(string serverName);
 

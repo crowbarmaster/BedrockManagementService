@@ -15,9 +15,9 @@ namespace BedrockService.Client.Management
         public bool Working = false;
         public List<string> ServiceLogs = new List<string>();
         private IServiceConfiguration connectedHost;
-        private readonly ILogger Logger;
+        private readonly IBedrockLogger Logger;
 
-        public LogManager(ILogger logger)
+        public LogManager(IBedrockLogger logger)
         {
             Logger = logger;
         }

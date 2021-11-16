@@ -25,12 +25,11 @@ namespace BedrockService.Service.Core
             Stopping
         }
         private readonly IServiceConfiguration _serviceConfiguration;
-        private readonly ILogger _logger;
+        private readonly IBedrockLogger _logger;
         private readonly IProcessInfo _processInfo;
         private readonly IConfigurator _configurator;
         private readonly IUpdater _updater;
         private readonly ITCPListener _tCPListener;
-        private readonly IServiceThread _tcpThread;
         private readonly CrontabSchedule _shed;
         private readonly CrontabSchedule _updaterCron;
         private HostControl _hostControl;
@@ -38,17 +37,20 @@ namespace BedrockService.Service.Core
         private System.Timers.Timer _updaterTimer;
         private System.Timers.Timer _cronTimer;
 
-        public BedrockService(IConfigurator configurator, IUpdater updater, ILogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ITCPListener tCPListener)
+        public BedrockService(IConfigurator configurator, IUpdater updater, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ITCPListener tCPListener)
         {
             _tCPListener = tCPListener;
             _configurator = configurator;
+            _configurator.LoadAllConfigurations().Wait();
             _serviceConfiguration = serviceConfiguration;
             _processInfo = serviceProcessInfo;
             _updater = updater;
+            _updater.CheckUpdates().Wait();
             _logger = logger;
             _shed = CrontabSchedule.TryParse(serviceConfiguration.GetProp("BackupCron").ToString());
             _updaterCron = CrontabSchedule.TryParse(serviceConfiguration.GetProp("UpdateCron").ToString());
             Initialize();
+            _tCPListener.SetKeyContainer(_configurator.GetKeyContainer());
         }
 
         public bool Start(HostControl hostControl)
@@ -85,7 +87,6 @@ namespace BedrockService.Service.Core
                     while (brs.GetServerStatus() == BedrockServer.ServerStatus.Stopping && !Program.IsExiting)
                         Thread.Sleep(100);
                 }
-                _tcpThread.CloseThread();
                 return true;
             }
             catch (Exception e)

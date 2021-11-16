@@ -8,9 +8,9 @@ namespace BedrockService.Service.Server.Management
     public class PlayerManager : IPlayerManager
     {
         readonly IServerConfiguration _serverConfiguration;
-        readonly ILogger _logger;
+        readonly IBedrockLogger _logger;
 
-        public PlayerManager(IServerConfiguration serverConfiguration, ILogger logger)
+        public PlayerManager(IServerConfiguration serverConfiguration, IBedrockLogger logger)
         {
             this._serverConfiguration = serverConfiguration;
             this._logger = logger;

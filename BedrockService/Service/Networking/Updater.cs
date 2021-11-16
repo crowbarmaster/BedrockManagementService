@@ -13,12 +13,12 @@ namespace BedrockService.Service.Networking
     public class Updater : IUpdater
     {
         private bool _versionChanged = false;
-        private readonly ILogger _logger;
+        private readonly IBedrockLogger _logger;
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IProcessInfo _processInfo;
         private readonly string _version;
 
-        public Updater(IProcessInfo processInfo, ILogger logger, IServiceConfiguration serviceConfiguration)
+        public Updater(IProcessInfo processInfo, IBedrockLogger logger, IServiceConfiguration serviceConfiguration)
         {
             _serviceConfiguration = serviceConfiguration;
             _processInfo = processInfo;
