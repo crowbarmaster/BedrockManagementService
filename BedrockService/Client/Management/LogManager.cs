@@ -55,7 +55,7 @@ namespace BedrockService.Client.Management
                     {
                         UpdateLogBoxInvoked(string.Join("\r\n", connectedHost.GetLog()));
                     }
-                    else if (!FormManager.MainWindow.ShowsSvcLog && FormManager.MainWindow.selectedServer.GetLog() != null && FormManager.MainWindow.selectedServer.GetLog().Count != currentLogBoxLength)
+                    else if (!FormManager.MainWindow.ShowsSvcLog && FormManager.MainWindow.selectedServer != null && FormManager.MainWindow.selectedServer.GetLog() != null && FormManager.MainWindow.selectedServer.GetLog().Count != currentLogBoxLength)
                     {
                         UpdateLogBoxInvoked(string.Join("", FormManager.MainWindow.selectedServer.GetLog()));
                     }
