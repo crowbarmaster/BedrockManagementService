@@ -45,12 +45,12 @@ namespace BedrockService.Client.Forms
 
         private void ConnectTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (_connectTimer.Enabled && !FormManager.TCPClient.Connected)
+            if (_connectTimer.Enabled && !FormManager.TCPClient.EstablishedLink)
             {
                 if (_connectTimer.Interval == 100.0)
                     _connectTimer.Interval = 5000.0;
                 Invoke((MethodInvoker)delegate { FormManager.TCPClient.ConnectHost(_configManager.HostConnectList.FirstOrDefault(host => host.GetHostName() == (string)HostListBox.SelectedItem)); });
-                if (connectedHost != null && FormManager.TCPClient.Connected)
+                if (connectedHost != null && FormManager.TCPClient.EstablishedLink)
                 {
                     ServerBusy = false;
                     Invoke((MethodInvoker)delegate { ComponentEnableManager(); });
