@@ -19,7 +19,6 @@ namespace BedrockService.Client.Forms
             {
                 PlayerToAdd = new Player(xuidTextBox.Text, usernameTextBox.Text, DateTime.Now.Ticks.ToString(), "0", "0", whitelistedChkBox.Checked, permissionComboBox.SelectedItem.ToString(), ignoreLimitChkBox.Checked);
                 DialogResult = DialogResult.OK;
-                Close();
             }
         }
     }

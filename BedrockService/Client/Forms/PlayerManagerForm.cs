@@ -163,6 +163,7 @@ namespace BedrockService.Client.Forms
                     _server.GetPlayerList().Add(form.PlayerToAdd);
                     modifiedPlayers.Add(form.PlayerToAdd);
                     RefreshGridContents();
+                    form.Close();
                 }
             }
         }
