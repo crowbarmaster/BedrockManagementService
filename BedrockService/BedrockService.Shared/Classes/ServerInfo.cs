@@ -52,9 +52,11 @@ namespace BedrockService.Shared.Classes
             ServerPropList.Add(new Property("compression-threshold", "1"));
             ServerPropList.Add(new Property("server-authoritative-movement", "server-auth"));
             ServerPropList.Add(new Property("player-movement-score-threshold", "20"));
+            ServerPropList.Add(new Property("player-movement-action-direction-threshold", "0.85"));
             ServerPropList.Add(new Property("player-movement-distance-threshold", "0.3"));
             ServerPropList.Add(new Property("player-movement-duration-threshold-in-ms", "500"));
             ServerPropList.Add(new Property("correct-player-movement", "false"));
+            ServerPropList.Add(new Property("server-authoritative-block-breaking", "false"));
         }
 
 
