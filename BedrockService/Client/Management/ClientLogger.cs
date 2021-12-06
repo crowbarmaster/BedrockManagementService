@@ -29,7 +29,7 @@ namespace BedrockService.Client.Management
             Log.Add(addText);
             LogWriter.WriteLine(addText);
             LogWriter.Flush();
-            Console.WriteLine(text);
+            System.Diagnostics.Debug.WriteLine(text);
         }
 
         public void AppendText(string text) => AppendLine(text);
