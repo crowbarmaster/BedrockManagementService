@@ -1,22 +1,12 @@
-﻿using BedrockService.Service.Core;
-using BedrockService.Service.Management;
-using BedrockService.Service.Networking.NetworkMessageClasses;
+﻿using BedrockService.Service.Core.Interfaces;
+using BedrockService.Service.Networking.MessageInterfaces;
 using BedrockService.Service.Server;
-using BedrockService.Shared.Classes;
-using BedrockService.Shared.Interfaces;
 using BedrockService.Shared.PackParser;
 using BedrockService.Shared.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 
 namespace BedrockService.Service.Networking
 {
@@ -161,7 +151,7 @@ namespace BedrockService.Service.Networking
                 string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
                 List<Property> propList = JsonConvert.DeserializeObject<List<Property>>(stringData, settings);
                 Property prop = propList.FirstOrDefault(p => p.KeyName == "server-name");
-                if(prop == null)
+                if (prop == null)
                 {
                     _serviceConfiguration.SetAllProps(propList);
                     _configurator.SaveGlobalFile();
@@ -488,7 +478,7 @@ namespace BedrockService.Service.Networking
             private readonly IServiceConfiguration _serviceConfiguration;
             private readonly IConfigurator _configurator;
             private readonly IBedrockService _bedrockService;
-             
+
             public AddNewServer(IConfigurator configurator, IMessageSender messageSender, IServiceConfiguration serviceConfiguration, IBedrockService bedrockService)
             {
                 _bedrockService = bedrockService;
@@ -591,9 +581,9 @@ namespace BedrockService.Service.Networking
                     {
                         try
                         {
-                        srvText = _service.GetBedrockServerByName(srvName).GetLogger();
+                            srvText = _service.GetBedrockServerByName(srvName).GetLogger();
                         }
-                        catch(NullReferenceException)
+                        catch (NullReferenceException)
                         {
                             break;
                         }

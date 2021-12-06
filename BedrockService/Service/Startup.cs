@@ -3,26 +3,9 @@
 // This file will need updated according to the specific scenario of the application being upgraded.
 // For more information on ASP.NET Core startup files, see https://docs.microsoft.com/aspnet/core/fundamentals/startup
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
-using BedrockService.Service.Core;
-using BedrockService.Service.Logging;
-using BedrockService.Service.Management;
-using BedrockService.Service.Networking;
-using BedrockService.Shared.Classes;
-using BedrockService.Shared.Interfaces;
+using BedrockService.Service.Core.Interfaces;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace BedrockService.Service
 {
@@ -82,7 +65,7 @@ namespace BedrockService.Service
         }
 
         private void ConfigureMvcOptions(MvcOptions mvcOptions)
-        { 
+        {
         }
     }
 }

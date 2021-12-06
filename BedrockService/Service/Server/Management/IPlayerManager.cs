@@ -1,7 +1,4 @@
-﻿using BedrockService.Shared.Interfaces;
-using System.Collections.Generic;
-
-namespace BedrockService.Service.Server.Management
+﻿namespace BedrockService.Service.Server.Management
 {
     public interface IPlayerManager
     {

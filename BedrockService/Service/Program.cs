@@ -3,25 +3,25 @@
 // This file may need updated according to the specific scenario of the application being upgraded.
 // For more information on ASP.NET Core hosting, see https://docs.microsoft.com/aspnet/core/fundamentals/host/web-host
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
-using BedrockService.Service.Core;
-using BedrockService.Service.Logging;
-using BedrockService.Service.Management;
-using BedrockService.Service.Networking;
-using BedrockService.Shared.Classes;
-using BedrockService.Shared.Interfaces;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Topshelf;
+global using BedrockService.Service.Core;
+global using BedrockService.Service.Logging;
+global using BedrockService.Service.Management;
+global using BedrockService.Service.Networking;
+global using BedrockService.Shared.Classes;
+global using BedrockService.Shared.Interfaces;
+global using Microsoft.AspNetCore.Hosting;
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Hosting;
+global using System;
+global using System.Collections.Generic;
+global using System.Diagnostics;
+global using System.IO;
+global using System.Linq;
+global using System.Reflection;
+global using System.Threading.Tasks;
+global using Topshelf;
+using BedrockService.Service.Core.Interfaces;
 
 namespace BedrockService.Service
 {

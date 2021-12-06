@@ -1,6 +1,4 @@
-﻿using BedrockService.Shared.Classes;
-
-namespace BedrockService.Service.Networking.NetworkMessageClasses
+﻿namespace BedrockService.Service.Networking.MessageInterfaces
 {
     public interface IFlaggedMessageParser
     {

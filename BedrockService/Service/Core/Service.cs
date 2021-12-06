@@ -1,12 +1,6 @@
 ﻿using BedrockService.Service.Core.Interfaces;
-using BedrockService.Service.Core.Threads;
-using BedrockService.Service.Networking;
 using BedrockService.Service.Server;
-using BedrockService.Shared.Interfaces;
-using System;
 using System.Threading;
-using System.Threading.Tasks;
-using Topshelf;
 using Topshelf.Runtime;
 
 namespace BedrockService.Service.Core
@@ -14,7 +8,7 @@ namespace BedrockService.Service.Core
     public class Service : IService
     {
         private readonly IBedrockService _bedrockService;
-        private Host _host;
+        private Topshelf.Host _host;
         private readonly IBedrockLogger _logger;
 
         public Service(IBedrockLogger logger, IBedrockService bedrockService, NetworkStrategyLookup lookup)

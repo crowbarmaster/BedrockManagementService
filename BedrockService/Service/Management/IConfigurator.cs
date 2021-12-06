@@ -1,10 +1,4 @@
-﻿using BedrockService.Service.Server;
-using BedrockService.Shared.Classes;
-using BedrockService.Shared.Interfaces;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
-namespace BedrockService.Service.Management
+﻿namespace BedrockService.Service.Management
 {
     public interface IConfigurator
     {

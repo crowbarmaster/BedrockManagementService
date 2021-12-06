@@ -1,7 +1,4 @@
-﻿using BedrockService.Shared.Interfaces;
-using System.Threading.Tasks;
-
-namespace BedrockService.Service.Networking
+﻿namespace BedrockService.Service.Networking
 {
     public interface IUpdater
     {

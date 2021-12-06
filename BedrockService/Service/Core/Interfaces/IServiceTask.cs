@@ -1,8 +1,8 @@
 ﻿namespace BedrockService.Service.Core.Interfaces
 {
-    public interface IServiceThread
+    public interface IServiceTask
     {
         bool IsAlive();
-        void CloseThread();
+        void CancelTask();
     }
 }

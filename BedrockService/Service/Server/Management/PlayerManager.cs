@@ -1,9 +1,4 @@
-﻿using BedrockService.Shared.Classes;
-using BedrockService.Shared.Interfaces;
-using System;
-using System.Collections.Generic;
-
-namespace BedrockService.Service.Server.Management
+﻿namespace BedrockService.Service.Server.Management
 {
     public class PlayerManager : IPlayerManager
     {

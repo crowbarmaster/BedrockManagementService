@@ -1,9 +1,6 @@
 ﻿using BedrockService.Service.Server;
-using BedrockService.Shared.Interfaces;
-using System.Collections.Generic;
-using Topshelf;
 
-namespace BedrockService.Service.Core
+namespace BedrockService.Service.Core.Interfaces
 {
     public interface IBedrockService : ServiceControl
     {

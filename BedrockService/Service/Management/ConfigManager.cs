@@ -1,17 +1,9 @@
-﻿using BedrockService.Service.Server;
-using BedrockService.Shared.Classes;
-using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.Utilities;
-using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using BedrockService.Shared.Utilities;
 using System.IO.Compression;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Runtime.Serialization.Formatters.Binary;
 
 namespace BedrockService.Service.Management
 {
@@ -58,7 +50,7 @@ namespace BedrockService.Service.Management
                     Directory.CreateDirectory($@"{_configDir}\Backups");
                 if (File.Exists($@"{_configDir}\..\bedrock_ver.ini"))
                     _loadedVersion = File.ReadAllText($@"{_configDir}\..\bedrock_ver.ini");
-                if(!File.Exists(_commsKeyPath))
+                if (!File.Exists(_commsKeyPath))
                 {
                     RSACryptoServiceProvider rsa = new RSACryptoServiceProvider(2048);
                     using (AesCryptoServiceProvider aes = new AesCryptoServiceProvider())
@@ -194,9 +186,9 @@ namespace BedrockService.Service.Management
                     using (ZipArchive archive = ZipFile.OpenRead($@"{_processInfo.GetDirectory()}\Server\MCSFiles\Update_{ _serviceConfiguration.GetServerVersion()}.zip"))
                     {
                         int fileCount = archive.Entries.Count;
-                        for(int i=0; i<fileCount; i++)
+                        for (int i = 0; i < fileCount; i++)
                         {
-                            if(i%(RoundOff(fileCount)/6) == 0)
+                            if (i % (RoundOff(fileCount) / 6) == 0)
                             {
                                 _logger.AppendLine($"Extracting server files for server {server.GetServerName()}, {Math.Round((double)i / (double)fileCount, 2) * 100}% completed...");
                             }

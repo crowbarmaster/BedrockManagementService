@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.Hosting;
-using System.Threading.Tasks;
-
-namespace BedrockService.Service.Core
+﻿namespace BedrockService.Service.Core.Interfaces
 {
     public interface IService : IHostedService
     {

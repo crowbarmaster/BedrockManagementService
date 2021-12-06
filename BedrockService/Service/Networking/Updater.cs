@@ -1,12 +1,8 @@
-﻿using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.Utilities;
-using System;
-using System.IO;
+﻿using BedrockService.Shared.Utilities;
 using System.IO.Compression;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace BedrockService.Service.Networking
 {
@@ -24,6 +20,7 @@ namespace BedrockService.Service.Networking
             _processInfo = processInfo;
             _logger = logger;
             _version = "None";
+            if (!Directory.Exists($@"{processInfo.GetDirectory()}\Server")) { Directory.CreateDirectory($@"{processInfo.GetDirectory()}\Server"); }
             if (!File.Exists($@"{processInfo.GetDirectory()}\Server\bedrock_ver.ini"))
             {
                 logger.AppendLine("Version ini file missing, creating and fetching build...");

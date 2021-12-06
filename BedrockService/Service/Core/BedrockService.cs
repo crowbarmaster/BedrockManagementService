@@ -1,17 +1,8 @@
 ﻿using BedrockService.Service.Core.Interfaces;
-using BedrockService.Service.Management;
-using BedrockService.Service.Networking;
 using BedrockService.Service.Server;
-using BedrockService.Shared.Interfaces;
-using BedrockService.Service.Core.Threads;
 using NCrontab;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Timers;
-using Topshelf;
 
 namespace BedrockService.Service.Core
 {
@@ -62,7 +53,7 @@ namespace BedrockService.Service.Core
 
                 foreach (var brs in _bedrockServers)
                 {
-                    if(hostControl != null)
+                    if (hostControl != null)
                         _hostControl.RequestAdditionalTime(TimeSpan.FromSeconds(30));
                     brs.SetServerStatus(BedrockServer.ServerStatus.Starting);
                     brs.StartWatchdog(_hostControl);
@@ -223,7 +214,7 @@ namespace BedrockService.Service.Core
                     if (_updater.CheckVersionChanged())
                     {
                         _logger.AppendLine("Version change detected! Restarting server(s) to apply update...");
-                        foreach(IBedrockServer server in _bedrockServers)
+                        foreach (IBedrockServer server in _bedrockServers)
                         {
                             server.RestartServer(false);
                         }

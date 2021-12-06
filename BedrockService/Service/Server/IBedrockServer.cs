@@ -1,7 +1,4 @@
 ﻿using BedrockService.Service.Server.Management;
-using BedrockService.Shared.Interfaces;
-using System.Threading.Tasks;
-using Topshelf;
 
 namespace BedrockService.Service.Server
 {

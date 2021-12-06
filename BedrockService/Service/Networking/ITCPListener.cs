@@ -1,12 +1,11 @@
-﻿using BedrockService.Service.Networking.NetworkMessageClasses;
-using BedrockService.Shared.Classes;
-using System.Collections.Generic;
+﻿using BedrockService.Service.Networking.MessageInterfaces;
+using System.Threading;
 
 namespace BedrockService.Service.Networking
 {
     public interface ITCPListener : IMessageSender
     {
-        void StartListening();
+        void StartListening(CancellationToken token);
 
         void ResetListener();
 
