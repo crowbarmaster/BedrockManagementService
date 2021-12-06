@@ -262,7 +262,7 @@ namespace BedrockService.Client.Networking
                         _heartbeatFailTimeout = 0;
                     }
                 }
-                _logger.AppendLine("ThumpThump");
+                //_logger.AppendLine("ThumpThump");
                 _heartbeatRecieved = false;
                 _heartbeatFailTimeout = 0;
                 Thread.Sleep(3000);
