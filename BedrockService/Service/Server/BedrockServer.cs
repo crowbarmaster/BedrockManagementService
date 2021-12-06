@@ -1,25 +1,16 @@
 ﻿using BedrockService.Service.Core.Interfaces;
-using BedrockService.Service.Core.Threads;
-using BedrockService.Service.Management;
+using BedrockService.Service.Core.Tasks;
 using BedrockService.Service.Server.Management;
-using BedrockService.Shared.Classes;
-using BedrockService.Shared.Interfaces;
 using BedrockService.Shared.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
-using Topshelf;
 
 namespace BedrockService.Service.Server
 {
     public class BedrockServer : IBedrockServer
     {
-        private IServiceThread _serverThread;
-        private IServiceThread _watchdogThread;
+        private IServiceTask _serverThread;
+        private IServiceTask _watchdogThread;
         private StreamWriter _stdInStream;
         private Process _serverProcess;
         private HostControl _hostController;
@@ -31,7 +22,7 @@ namespace BedrockService.Service.Server
         private readonly IBedrockLogger _logger;
         private readonly IBedrockLogger _serverLogger;
         private readonly string _servicePath;
-        private const string _startupMessage = "[INFO] Server started.";
+        private const string _startupMessage = "INFO] Server started.";
         public enum ServerStatus
         {
             Stopped,
@@ -58,7 +49,7 @@ namespace BedrockService.Service.Server
 
         public void StartControl()
         {
-            _serverThread = new ServerProcessThread(new ThreadStart(RunServer));
+            _serverThread = new ServerProcessTask(new Action<CancellationToken>(RunServer));
         }
 
         public void StopControl()
@@ -72,7 +63,7 @@ namespace BedrockService.Service.Server
                 _stdInStream.WriteLine("stop");
                 while (!_serverProcess.HasExited) { }
             }
-            _serverThread.CloseThread();
+            _serverThread.CancelTask();
             _serverProcess = null;
             _currentServerStatus = ServerStatus.Stopped;
         }
@@ -82,7 +73,7 @@ namespace BedrockService.Service.Server
             _hostController = hostControl;
             if (_watchdogThread == null)
             {
-                _watchdogThread = new WatchdogThread(new ThreadStart(ApplicationWatchdogMonitor));
+                _watchdogThread = new WatchdogTask(new Action<CancellationToken>(ApplicationWatchdogMonitor));
             }
         }
 
@@ -157,8 +148,8 @@ namespace BedrockService.Service.Server
 
         public void StopWatchdog()
         {
-            if(_watchdogThread != null)
-                _watchdogThread.CloseThread();
+            if (_watchdogThread != null)
+                _watchdogThread.CancelTask();
             _watchdogThread = null;
         }
 
@@ -166,7 +157,7 @@ namespace BedrockService.Service.Server
 
         public void SetServerStatus(ServerStatus newStatus) => _currentServerStatus = newStatus;
 
-        private void ApplicationWatchdogMonitor()
+        private void ApplicationWatchdogMonitor(CancellationToken token)
         {
             while (_watchdogThread.IsAlive())
             {
@@ -241,7 +232,7 @@ namespace BedrockService.Service.Server
 
         public string GetServerName() => _serverConfiguration.GetServerName();
 
-        private void RunServer()
+        private void RunServer(CancellationToken token)
         {
             string exeName = _serverConfiguration.GetProp("ServerExeName").ToString();
             string appName = exeName.Substring(0, exeName.Length - 4);
@@ -338,7 +329,7 @@ namespace BedrockService.Service.Server
 
         private void StdOutToLog(object sender, DataReceivedEventArgs e)
         {
-            if (e.Data != null && !e.Data.Contains("[INFO] Running AutoCompaction..."))
+            if (e.Data != null && !e.Data.Contains("INFO] Running AutoCompaction..."))
             {
                 string dataMsg = e.Data;
                 string logFileText = "NO LOG FILE! - ";
@@ -390,7 +381,7 @@ namespace BedrockService.Service.Server
                         if (_configurator.ReplaceServerBuild(_serverConfiguration).Wait(30000))
                             _currentServerStatus = ServerStatus.Starting;
                     }
-                    if(dataMsg.Contains("Version "))
+                    if (dataMsg.Contains("Version "))
                     {
                         int msgStartIndex = dataMsg.IndexOf(']') + 2;
                         string focusedMsg = dataMsg.Substring(msgStartIndex, dataMsg.Length - msgStartIndex);
@@ -451,15 +442,15 @@ namespace BedrockService.Service.Server
 
         public Task StopServer()
         {
-           return Task.Run(() =>
-            {
-                _currentServerStatus = ServerStatus.Stopping;
-                while (_currentServerStatus != ServerStatus.Stopped)
-                {
-                    Thread.Sleep(100);
-                }
+            return Task.Run(() =>
+             {
+                 _currentServerStatus = ServerStatus.Stopping;
+                 while (_currentServerStatus != ServerStatus.Stopped)
+                 {
+                     Thread.Sleep(100);
+                 }
 
-            });
+             });
         }
     }
 }

@@ -1,16 +1,10 @@
 ﻿using BedrockService.Service.Core.Interfaces;
-using BedrockService.Service.Core.Threads;
-using BedrockService.Service.Networking.NetworkMessageClasses;
-using BedrockService.Shared.Classes;
-using BedrockService.Shared.Interfaces;
-using System;
-using System.Collections.Generic;
+using BedrockService.Service.Core.Tasks;
+using BedrockService.Service.Networking.MessageInterfaces;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
-using System.IO;
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 
 namespace BedrockService.Service.Networking
 {
@@ -21,9 +15,9 @@ namespace BedrockService.Service.Networking
         private NetworkStream _stream;
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IBedrockLogger _logger;
-        private IServiceThread _tcpThread;
-        private IServiceThread _clientThread;
-        private IServiceThread _heartbeatThread;
+        private IServiceTask _tcpThread;
+        private IServiceTask _clientThread;
+        private IServiceTask _heartbeatThread;
         private bool _heartbeatRecieved = false;
         private bool _firstHeartbeatRecieved = false;
         private bool _keepAlive = false;
@@ -40,13 +34,13 @@ namespace BedrockService.Service.Networking
             _logger = logger;
             _serviceConfiguration = serviceConfiguration;
             _reconnectTimer.Elapsed += ReconnectTimer_Elapsed;
-            _tcpThread = new TCPThread(new ThreadStart(StartListening));
+            _tcpThread = new TCPListenerTask(new Action<CancellationToken>(StartListening));
         }
 
         private void ReconnectTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             _reconnectTimer.Stop();
-            _tcpThread = new TCPThread(new ThreadStart(StartListening));
+            _tcpThread = new TCPListenerTask(new Action<CancellationToken>(StartListening));
         }
 
         public void SetStrategyDictionaries(Dictionary<NetworkMessageTypes, IMessageParser> standard, Dictionary<NetworkMessageTypes, IFlaggedMessageParser> flagged)
@@ -55,7 +49,7 @@ namespace BedrockService.Service.Networking
             _flaggedMessageLookup = flagged;
         }
 
-        public void StartListening()
+        public void StartListening(CancellationToken token)
         {
             _inListener = new TcpListener(_ipAddress, int.Parse(_serviceConfiguration.GetProp("ClientPort").ToString()));
             try
@@ -63,7 +57,7 @@ namespace BedrockService.Service.Networking
                 _inListener.Start();
                 _keepAlive = true;
             }
-            catch(SocketException e)
+            catch (SocketException e)
             {
                 _logger.AppendLine($"Error! {e.Message}");
                 Thread.Sleep(2000);
@@ -76,8 +70,8 @@ namespace BedrockService.Service.Networking
                 {
                     _client = _inListener.AcceptTcpClient();
                     _stream = _client.GetStream();
-                    _clientThread = new ClientServiceThread(new ThreadStart(IncomingListener));
-                    _heartbeatThread = new HeartbeatThread(new ThreadStart(SendBackHeatbeatSignal));
+                    _clientThread = new ClientServiceTask(new Action<CancellationToken>(IncomingListener));
+                    _heartbeatThread = new HeartbeatTask(new Action<CancellationToken>(SendBackHeatbeatSignal));
                 }
                 catch (ThreadStateException) { }
                 catch (NullReferenceException) { }
@@ -101,9 +95,9 @@ namespace BedrockService.Service.Networking
             _stream.Dispose();
             _client.Client.Blocking = false;
             _inListener.Stop();
-            _tcpThread.CloseThread();
+            _tcpThread.CancelTask();
             _tcpThread = null;
-            StartListening();
+            _tcpThread = new TCPListenerTask(new Action<CancellationToken>(StartListening));
         }
 
         public void SendData(byte[] bytesToSend, NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type, NetworkMessageFlags status)
@@ -117,7 +111,7 @@ namespace BedrockService.Service.Networking
             byteHeader[7] = (byte)type;
             byteHeader[8] = (byte)status;
             Buffer.BlockCopy(bytesToSend, 0, byteHeader, 9, bytesToSend.Length);
-            
+
             if (_clientThread.IsAlive())
             {
                 try
@@ -142,7 +136,7 @@ namespace BedrockService.Service.Networking
 
         public void SendData(NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type, NetworkMessageFlags status) => SendData(new byte[0], source, destination, 0xFF, type, status);
 
-        private void IncomingListener()
+        private void IncomingListener(CancellationToken token)
         {
             _keepAlive = true;
             _logger.AppendLine("Packet listener thread started.");
@@ -220,11 +214,11 @@ namespace BedrockService.Service.Networking
                 }
                 catch { }
                 if (!_clientThread.IsAlive())
-                    _clientThread.CloseThread();
+                    _clientThread.CancelTask();
             }
         }
 
-        private void SendBackHeatbeatSignal()
+        private void SendBackHeatbeatSignal(CancellationToken token)
         {
             _logger.AppendLine("HeartBeatSender started.");
             while (_keepAlive)
@@ -276,15 +270,15 @@ namespace BedrockService.Service.Networking
 
         public bool VerifyClientData(byte[] certificate)
         {
-            if(certificate != null)
+            if (certificate != null)
             {
                 byte[] decrypted;
-                using(RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
+                using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
                 {
                     rsa.ImportParameters(_keyContainer.LocalPrivateKey.GetPrivateKey());
-                    
+
                 }
-                using(RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
+                using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
                 {
                     rsa.ImportParameters(_keyContainer.RemotePublicKey.GetPrivateKey());
 
