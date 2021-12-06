@@ -6,12 +6,11 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Timers;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows.Forms;
 
 namespace BedrockService.Client.Forms
@@ -159,15 +158,15 @@ namespace BedrockService.Client.Forms
         }
 
         public override void Refresh()
-        {              
+        {
             HostInfoLabel.Text = $"Connected to host:";
             ServerSelectBox.Items.Clear();
-            if(connectedHost != null)
+            if (connectedHost != null)
             {
                 _logManager.InitLogThread(connectedHost);
                 foreach (ServerInfo server in connectedHost.GetServerList())
                     ServerSelectBox.Items.Add(server.ServerName);
-                if(ServerSelectBox.Items.Count > 0)
+                if (ServerSelectBox.Items.Count > 0)
                 {
                     ServerSelectBox.SelectedIndex = 0;
                     selectedServer = connectedHost.GetServerInfoByName((string)ServerSelectBox.SelectedItem);
@@ -185,7 +184,7 @@ namespace BedrockService.Client.Forms
             {
                 HostListBox.Items.Add(host.GetHostName());
             }
-            if(HostListBox.Items.Count > 0)
+            if (HostListBox.Items.Count > 0)
             {
                 HostListBox.SelectedIndex = 0;
             }
@@ -325,7 +324,7 @@ namespace BedrockService.Client.Forms
 
         private void newSrvBtn_Click(object sender, EventArgs e)
         {
-            if(clientSideServiceConfiguration == null)
+            if (clientSideServiceConfiguration == null)
             {
                 clientSideServiceConfiguration = _configManager.HostConnectList.First(host => host.GetHostName() == HostListBox.Text);
             }
@@ -352,10 +351,14 @@ namespace BedrockService.Client.Forms
         private void PlayerManager_Click(object sender, EventArgs e)
         {
             FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PlayersRequest);
+            DisableUI();
             WaitForServerData().Wait();
             FormManager.TCPClient.PlayerInfoArrived = false;
             PlayerManagerForm form = new PlayerManagerForm(selectedServer);
-            form.Show();
+            if(form.ShowDialog() != DialogResult.OK)
+            {
+                ServerBusy = false;
+            }
         }
 
         private void Disconn_Click(object sender, EventArgs e)
@@ -470,7 +473,6 @@ namespace BedrockService.Client.Forms
             DisableUI();
             ServerSelectBox.SelectedIndex = 0;
             FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.EnumBackups);
-            DisableUI().Wait();
             FormManager.TCPClient.EnumBackupsArrived = false;
             JsonSerializerSettings settings = new JsonSerializerSettings()
             {
@@ -509,7 +511,6 @@ namespace BedrockService.Client.Forms
             ServerBusy = true;
             return Task.Run(() =>
             {
-
                 Invoke((MethodInvoker)delegate { ComponentEnableManager(); });
                 while (ServerBusy)
                 {
@@ -580,6 +581,10 @@ namespace BedrockService.Client.Forms
                     FormManager.TCPClient.SendData(Encoding.UTF8.GetBytes(editDialog.RollbackFolderName), NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.BackupRollback);
                     ServerBusy = true;
                 }
+                else
+                {
+                    ServerBusy = false;
+                }
                 editDialog.Close();
             }
         }
@@ -592,8 +597,11 @@ namespace BedrockService.Client.Forms
             using (ManagePacksForms form = new ManagePacksForms(connectedHost.GetServerIndex(selectedServer), _logger, _processInfo))
             {
                 form.PopulateServerPacks(FormManager.TCPClient.RecievedPacks);
-                if (form.ShowDialog() == DialogResult.OK)
-                    form.Close();
+                if (form.ShowDialog() != DialogResult.OK)
+                {
+                    ServerBusy = false;
+                }
+                form.Close();
             }
             FormManager.TCPClient.RecievedPacks = null;
         }
@@ -628,7 +636,7 @@ namespace BedrockService.Client.Forms
 
         private void HostListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if(HostListBox.SelectedIndex != -1)
+            if (HostListBox.SelectedIndex != -1)
             {
                 clientSideServiceConfiguration = _configManager.HostConnectList.FirstOrDefault(host => host.GetHostName() == (string)HostListBox.SelectedItem);
             }
@@ -643,7 +651,7 @@ namespace BedrockService.Client.Forms
         {
             using (ClientConfigForm form = new ClientConfigForm(_configManager))
             {
-                if(form.ShowDialog() == DialogResult.OK)
+                if (form.ShowDialog() == DialogResult.OK)
                 {
                     form.Close();
                     InitForm();
