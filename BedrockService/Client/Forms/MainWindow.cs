@@ -50,6 +50,7 @@ namespace BedrockService.Client.Forms
                 if (_connectTimer.Interval == 100.0)
                     _connectTimer.Interval = 5000.0;
                 Invoke((MethodInvoker)delegate { FormManager.TCPClient.ConnectHost(_configManager.HostConnectList.FirstOrDefault(host => host.GetHostName() == (string)HostListBox.SelectedItem)); });
+                Thread.Sleep(500);
                 if (connectedHost != null && FormManager.TCPClient.EstablishedLink)
                 {
                     ServerBusy = false;
