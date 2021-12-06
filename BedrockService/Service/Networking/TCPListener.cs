@@ -22,7 +22,7 @@ namespace BedrockService.Service.Networking
         private bool _firstHeartbeatRecieved = false;
         private bool _keepAlive = false;
         private int _heartbeatFailTimeout;
-        private readonly int _heartbeatFailTimeoutLimit = 200;
+        private readonly int _heartbeatFailTimeoutLimit = 500;
         private Dictionary<NetworkMessageTypes, IMessageParser> _standardMessageLookup;
         private Dictionary<NetworkMessageTypes, IFlaggedMessageParser> _flaggedMessageLookup;
         private readonly IPAddress _ipAddress = IPAddress.Parse("0.0.0.0");
@@ -55,7 +55,6 @@ namespace BedrockService.Service.Networking
             try
             {
                 _inListener.Start();
-                _keepAlive = true;
             }
             catch (SocketException e)
             {
@@ -81,6 +80,8 @@ namespace BedrockService.Service.Networking
                 {
                     _logger.AppendLine(e.ToString());
                 }
+                if (token.IsCancellationRequested)
+                    break;
             }
         }
 
@@ -147,7 +148,7 @@ namespace BedrockService.Service.Networking
             byte serverIndex = 0xFF;
             NetworkMessageTypes msgType = 0;
             NetworkMessageFlags msgFlag = 0;
-            while (_keepAlive)
+            while (!token.IsCancellationRequested)
             {
                 try
                 {
@@ -221,10 +222,10 @@ namespace BedrockService.Service.Networking
         private void SendBackHeatbeatSignal(CancellationToken token)
         {
             _logger.AppendLine("HeartBeatSender started.");
-            while (_keepAlive)
+            while (!token.IsCancellationRequested)
             {
                 _heartbeatRecieved = false;
-                while (!_heartbeatRecieved && _keepAlive)
+                while (!_heartbeatRecieved)
                 {
                     Thread.Sleep(100);
                     _heartbeatFailTimeout++;
@@ -235,6 +236,7 @@ namespace BedrockService.Service.Networking
                             try
                             {
                                 SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Heartbeat);
+                                //_logger.AppendLine("ThumpThump");
                                 _heartbeatFailTimeout = 0;
                             }
                             catch (Exception e)
@@ -247,6 +249,7 @@ namespace BedrockService.Service.Networking
                 }
                 _heartbeatRecieved = false;
                 _heartbeatFailTimeout = 0;
+                //_logger.AppendLine("ThumpThump");
                 SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Heartbeat);
                 int timeWaited = 0;
                 while (timeWaited < 3000)
