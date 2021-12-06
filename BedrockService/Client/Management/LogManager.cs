@@ -4,16 +4,18 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace BedrockService.Client.Management
 {
     class LogManager
     {
-        public Thread LogThread;
+        public Task LogThread;
         public bool EnableFlag;
         public bool Working = false;
         public List<string> ServiceLogs = new List<string>();
+        private CancellationTokenSource LogTaskCancelSource;
         private IServiceConfiguration connectedHost;
         private readonly IBedrockLogger Logger;
 
@@ -24,7 +26,7 @@ namespace BedrockService.Client.Management
 
         private void LogManagerTask()
         {
-            while (FormManager.TCPClient.Connected)
+            while (!LogTaskCancelSource.Token.IsCancellationRequested)
             {
                 try
                 {
@@ -69,6 +71,7 @@ namespace BedrockService.Client.Management
         public bool InitLogThread(IServiceConfiguration host)
         {
             connectedHost = host;
+            LogTaskCancelSource = new CancellationTokenSource();
             return StartLogThread();
         }
 
@@ -76,11 +79,9 @@ namespace BedrockService.Client.Management
         {
             try
             {
-                if (LogThread != null && LogThread.IsAlive)
-                    LogThread.Abort();
-                LogThread = new Thread(new ThreadStart(LogManagerTask));
-                LogThread.Name = "LogThread";
-                LogThread.IsBackground = true;
+                if (LogThread != null && !LogTaskCancelSource.IsCancellationRequested)
+                    LogTaskCancelSource.Cancel();
+                LogThread = new Task(new Action(LogManagerTask), LogTaskCancelSource.Token);
                 EnableFlag = true;
                 LogThread.Start();
                 Logger.AppendLine("LogThread started");
@@ -101,7 +102,7 @@ namespace BedrockService.Client.Management
             }
             try
             {
-                LogThread.Abort();
+                LogTaskCancelSource.Cancel();
             }
             catch (ThreadAbortException e)
             {

@@ -10,6 +10,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace BedrockService.Client.Networking
 {
@@ -24,21 +25,23 @@ namespace BedrockService.Client.Networking
         public bool EnumBackupsArrived;
         public List<Property> BackupList;
         public List<MinecraftPackParser> RecievedPacks;
-        public Thread ClientReciever;
-        public Thread HeartbeatThread;
+        public Task ClientReciever;
+        public Task HeartbeatTask;
+        private CancellationTokenSource _netCancelSource;
         private int _heartbeatFailTimeout;
         private const int _heartbeatFailTimeoutLimit = 250;
         private bool _heartbeatRecieved;
         private bool _keepAlive;
         private readonly IBedrockLogger _logger;
 
-        public TCPClient (IBedrockLogger logger)
+        public TCPClient(IBedrockLogger logger)
         {
             _logger = logger;
         }
 
         public void ConnectHost(IClientSideServiceConfiguration host)
         {
+            _netCancelSource = new CancellationTokenSource();
             if (EstablishConnection(host.GetAddress(), int.Parse(host.GetPort())))
             {
                 SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Connect);
@@ -55,16 +58,13 @@ namespace BedrockService.Client.Networking
                 OpenedTcpClient = new TcpClient(addr, port);
                 stream = OpenedTcpClient.GetStream();
                 _keepAlive = true;
-                ClientReciever = new Thread(new ThreadStart(ReceiveListener));
-                ClientReciever.Name = "ClientPacketReviever";
-                ClientReciever.IsBackground = true;
-                ClientReciever.Start();
+                ClientReciever = Task.Factory.StartNew(new Action(ReceiveListener), _netCancelSource.Token);
             }
             catch
             {
                 _logger.AppendLine("Could not connect to Server");
-                if(ClientReciever != null)
-                    ClientReciever.Abort();
+                if (ClientReciever != null)
+                    _netCancelSource.Cancel();
                 ClientReciever = null;
                 return false;
             }
@@ -95,7 +95,7 @@ namespace BedrockService.Client.Networking
         public void ReceiveListener()
         {
             List<byte[]> byteBlocks = new List<byte[]>();
-            while (_keepAlive)
+            while (!_netCancelSource.IsCancellationRequested)
             {
                 try
                 {
@@ -135,14 +135,7 @@ namespace BedrockService.Client.Networking
                                             Connected = true;
                                             FormManager.MainWindow.RefreshServerContents();
                                             _heartbeatFailTimeout = 0;
-                                            if (HeartbeatThread == null || !HeartbeatThread.IsAlive)
-                                                HeartbeatThread = new Thread(new ThreadStart(SendHeatbeatSignal))
-                                                {
-                                                    IsBackground = true,
-                                                    Name = "HeartBeatThread"
-                                                };
-                                            HeartbeatThread.Start();
-
+                                            HeartbeatTask = Task.Factory.StartNew(new Action(SendHeatbeatSignal), _netCancelSource.Token);
                                         }
                                         catch (Exception e)
                                         {
@@ -151,13 +144,6 @@ namespace BedrockService.Client.Networking
                                         break;
                                     case NetworkMessageTypes.Heartbeat:
                                         _heartbeatRecieved = true;
-                                        if (!HeartbeatThread.IsAlive)
-                                        {
-                                            HeartbeatThread = new Thread(new ThreadStart(SendHeatbeatSignal));
-                                            HeartbeatThread.IsBackground = true;
-                                            HeartbeatThread.Name = "HeartBeatThread";
-                                            HeartbeatThread.Start();
-                                        }
                                         break;
 
                                     case NetworkMessageTypes.EnumBackups:
@@ -271,7 +257,7 @@ namespace BedrockService.Client.Networking
                     if (_heartbeatFailTimeout > _heartbeatFailTimeoutLimit)
                     {
                         FormManager.MainWindow.HeartbeatFailDisconnect();
-                        HeartbeatThread.Abort();
+                        _netCancelSource.Cancel();
                         _heartbeatFailTimeout = 0;
                     }
                 }
@@ -325,11 +311,10 @@ namespace BedrockService.Client.Networking
 
         public void Dispose()
         {
-            if (HeartbeatThread != null && HeartbeatThread.IsAlive)
-                HeartbeatThread.Abort();
-            if (ClientReciever != null && ClientReciever.IsAlive)
-                ClientReciever.Abort();
-            HeartbeatThread = null;
+            _netCancelSource.Cancel();
+            _netCancelSource.Dispose();
+            _netCancelSource = null;
+            HeartbeatTask = null;
             ClientReciever = null;
             if (OpenedTcpClient != null)
             {

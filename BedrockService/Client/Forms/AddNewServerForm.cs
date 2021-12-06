@@ -49,9 +49,9 @@ namespace BedrockService.Client.Forms
                 usedPorts.Add(serverConfiguration.GetProp("server-port").ToString());
                 usedPorts.Add(serverConfiguration.GetProp("server-portv6").ToString());
             }
-            foreach(string port in usedPorts)
+            foreach (string port in usedPorts)
             {
-                if(ipV4Box.Text == port || ipV6Box.Text == port)
+                if (ipV4Box.Text == port || ipV6Box.Text == port)
                 {
                     MessageBox.Show($"You have selected port {port} to use, but this port is already used. Please select another port!");
                     return;

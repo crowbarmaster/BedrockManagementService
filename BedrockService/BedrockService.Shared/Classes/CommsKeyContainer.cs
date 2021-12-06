@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Security.Cryptography;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BedrockService.Shared.Classes
 {
@@ -84,7 +80,7 @@ namespace BedrockService.Shared.Classes
 
         public CommsKeyContainer() { }
 
-        public CommsKeyContainer (RSAParameters priv, RSAParameters pub, byte[] key, byte[] IV)
+        public CommsKeyContainer(RSAParameters priv, RSAParameters pub, byte[] key, byte[] IV)
         {
             LocalPrivateKey = new RSAContainer(priv);
             RemotePublicKey = new RSAContainer(pub);
