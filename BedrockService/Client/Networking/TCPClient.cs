@@ -19,6 +19,7 @@ namespace BedrockService.Client.Networking
         public TcpClient OpenedTcpClient;
         public string ClientName;
         public NetworkStream stream;
+        public bool EstablishedLink;
         public bool Connected;
         public bool EnableRead;
         public bool PlayerInfoArrived;
@@ -29,9 +30,8 @@ namespace BedrockService.Client.Networking
         public Task HeartbeatTask;
         private CancellationTokenSource _netCancelSource;
         private int _heartbeatFailTimeout;
-        private const int _heartbeatFailTimeoutLimit = 250;
+        private const int _heartbeatFailTimeoutLimit = 350;
         private bool _heartbeatRecieved;
-        private bool _keepAlive;
         private readonly IBedrockLogger _logger;
 
         public TCPClient(IBedrockLogger logger)
@@ -57,7 +57,7 @@ namespace BedrockService.Client.Networking
                 EnableRead = false;
                 OpenedTcpClient = new TcpClient(addr, port);
                 stream = OpenedTcpClient.GetStream();
-                _keepAlive = true;
+                EstablishedLink = true;
                 ClientReciever = Task.Factory.StartNew(new Action(ReceiveListener), _netCancelSource.Token);
             }
             catch
@@ -68,7 +68,7 @@ namespace BedrockService.Client.Networking
                 ClientReciever = null;
                 return false;
             }
-            return _keepAlive;
+            return EstablishedLink;
         }
 
         public void CloseConnection()
@@ -79,12 +79,13 @@ namespace BedrockService.Client.Networking
                     stream.Dispose();
                 stream = null;
                 Connected = false;
-                _keepAlive = false;
+                EstablishedLink = false;
+                _netCancelSource.Cancel();
             }
             catch (NullReferenceException)
             {
                 Connected = false;
-                _keepAlive = false;
+                EstablishedLink = false;
             }
             catch (Exception e)
             {
@@ -246,11 +247,11 @@ namespace BedrockService.Client.Networking
         public void SendHeatbeatSignal()
         {
             _logger.AppendLine("HeartbeatThread started.");
-            while (_keepAlive)
+            while (!_netCancelSource.Token.IsCancellationRequested)
             {
                 _heartbeatRecieved = false;
                 SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Heartbeat);
-                while (!_heartbeatRecieved && _keepAlive)
+                while (!_heartbeatRecieved && EstablishedLink)
                 {
                     Thread.Sleep(100);
                     _heartbeatFailTimeout++;
@@ -261,7 +262,7 @@ namespace BedrockService.Client.Networking
                         _heartbeatFailTimeout = 0;
                     }
                 }
-                // Logger.AppendLine("ThumpThump");
+                _logger.AppendLine("ThumpThump");
                 _heartbeatRecieved = false;
                 _heartbeatFailTimeout = 0;
                 Thread.Sleep(3000);
@@ -279,7 +280,7 @@ namespace BedrockService.Client.Networking
             compiled[7] = (byte)type;
             compiled[8] = (byte)status;
             Buffer.BlockCopy(bytes, 0, compiled, 9, bytes.Length);
-            if (_keepAlive)
+            if (EstablishedLink)
             {
                 try
                 {
@@ -311,9 +312,12 @@ namespace BedrockService.Client.Networking
 
         public void Dispose()
         {
-            _netCancelSource.Cancel();
-            _netCancelSource.Dispose();
-            _netCancelSource = null;
+            if(_netCancelSource != null)
+            {
+                _netCancelSource.Cancel();
+                _netCancelSource.Dispose();
+                _netCancelSource = null;
+            }
             HeartbeatTask = null;
             ClientReciever = null;
             if (OpenedTcpClient != null)
