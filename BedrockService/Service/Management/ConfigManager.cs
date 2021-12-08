@@ -294,7 +294,7 @@ namespace BedrockService.Service.Management
                 if (!player.IsDefaultRegistration() && playerReg[0] == "True")
                 {
                     sb.Append("\t{\n");
-                    sb.Append($"\t\t\"ignoresPlayerLimit\": {playerReg[0].ToLower()},\n");
+                    sb.Append($"\t\t\"ignoresPlayerLimit\": {playerReg[2].ToLower()},\n");
                     sb.Append($"\t\t\"name\": \"{player.GetUsername()}\",\n");
                     sb.Append($"\t\t\"xuid\": \"{player.GetXUID()}\"\n");
                     sb.Append("\t},\n");
@@ -312,7 +312,7 @@ namespace BedrockService.Service.Management
             foreach (Player player in server.GetPlayerList())
             {
                 string[] playerReg = player.GetRegistration();
-                if (!player.IsDefaultRegistration() && playerReg[0] == "False")
+                if (!player.IsDefaultRegistration())
                 {
                     sb.Append("\t{\n");
                     sb.Append($"\t\t\"permission\": \"{playerReg[1]}\",\n");
