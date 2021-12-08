@@ -47,8 +47,7 @@ namespace BedrockService.Client.Forms
         {
             if (_connectTimer.Enabled && !FormManager.TCPClient.EstablishedLink)
             {
-                if (_connectTimer.Interval == 100.0)
-                    _connectTimer.Interval = 5000.0;
+                _connectTimer.Interval = 2000.0;
                 Invoke((MethodInvoker)delegate { FormManager.TCPClient.ConnectHost(_configManager.HostConnectList.FirstOrDefault(host => host.GetHostName() == (string)HostListBox.SelectedItem)); });
                 Thread.Sleep(500);
                 if (connectedHost != null && FormManager.TCPClient.EstablishedLink)
@@ -63,17 +62,17 @@ namespace BedrockService.Client.Forms
                 _connectTimeout++;
                 if (_connectTimeout >= _connectTimeoutLimit)
                 {
+                    _connectTimer.Enabled = false;
+                    _connectTimer.Stop();
+                    _connectTimer.Close();
                     Invoke((MethodInvoker)delegate
                     {
                         RefreshServerContents();
                         HostInfoLabel.Text = $"Failed to connect to host!";
                         Connect.Enabled = true;
                         ComponentEnableManager();
-                        _connectTimer.Enabled = false;
-                        _connectTimer.Stop();
-                        _connectTimer.Close();
-                        return;
                     });
+                        return;
                 }
             }
         }
@@ -364,13 +363,13 @@ namespace BedrockService.Client.Forms
 
         private void Disconn_Click(object sender, EventArgs e)
         {
+            _connectTimer.Stop();
             if (_logManager.StopLogThread())
             {
                 try
                 {
                     if (FormManager.TCPClient.Connected)
                     {
-                        FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Disconnect);
                         Thread.Sleep(500);
                         FormManager.TCPClient.CloseConnection();
                     }
@@ -620,6 +619,7 @@ namespace BedrockService.Client.Forms
                         _configManager.NBTStudioPath = openFile.FileName;
                         _configManager.SaveConfigFile();
                     }
+                    else return;
                 }
             ServerBusy = true;
             FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.LevelEditRequest);
