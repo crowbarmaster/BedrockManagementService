@@ -11,33 +11,33 @@ namespace BedrockService.Client.Management
 {
     class LogManager
     {
-        public Task LogThread;
+        public Task LogTask;
         public bool EnableFlag;
         public bool Working = false;
         public List<string> ServiceLogs = new List<string>();
-        private CancellationTokenSource LogTaskCancelSource;
-        private IServiceConfiguration connectedHost;
-        private readonly IBedrockLogger Logger;
+        private CancellationTokenSource _logTaskCancelSource;
+        private IServiceConfiguration _connectedHost;
+        private readonly IBedrockLogger _logger;
 
         public LogManager(IBedrockLogger logger)
         {
-            Logger = logger;
+            _logger = logger;
         }
 
         private void LogManagerTask()
         {
-            while (!LogTaskCancelSource.Token.IsCancellationRequested)
+            while (!_logTaskCancelSource.Token.IsCancellationRequested)
             {
                 try
                 {
                     Working = true;
                     StringBuilder sendString = new StringBuilder();
-                    foreach (ServerInfo server in connectedHost.GetServerList())
+                    foreach (ServerInfo server in _connectedHost.GetServerList())
                     {
                         server.ConsoleBuffer = server.ConsoleBuffer ?? new List<string>();
                         sendString.Append($"{server.ServerName};{server.ConsoleBuffer.Count}|");
                     }
-                    sendString.Append($"Service;{connectedHost.GetLog().Count}");
+                    sendString.Append($"Service;{_connectedHost.GetLog().Count}");
                     byte[] stringsToBytes = Encoding.UTF8.GetBytes(sendString.ToString());
                     FormManager.TCPClient.SendData(stringsToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.ConsoleLogUpdate);
                     Thread.Sleep(200);
@@ -51,9 +51,9 @@ namespace BedrockService.Client.Management
                     {
                         currentLogBoxLength = FormManager.MainWindow.LogBox.TextLength;
                     });
-                    if (FormManager.MainWindow.ShowsSvcLog && connectedHost.GetLog().Count != currentLogBoxLength)
+                    if (FormManager.MainWindow.ShowsSvcLog && _connectedHost.GetLog().Count != currentLogBoxLength)
                     {
-                        UpdateLogBoxInvoked(string.Join("\r\n", connectedHost.GetLog()));
+                        UpdateLogBoxInvoked(string.Join("\r\n", _connectedHost.GetLog()));
                     }
                     else if (!FormManager.MainWindow.ShowsSvcLog && FormManager.MainWindow.selectedServer != null && FormManager.MainWindow.selectedServer.GetLog() != null && FormManager.MainWindow.selectedServer.GetLog().Count != currentLogBoxLength)
                     {
@@ -63,15 +63,15 @@ namespace BedrockService.Client.Management
                 }
                 catch (Exception e)
                 {
-                    Logger.AppendLine($"LogManager Error! Stacetrace: {e.StackTrace}");
+                    _logger.AppendLine($"LogManager Error! Stacetrace: {e.StackTrace}");
                 }
             }
         }
 
         public bool InitLogThread(IServiceConfiguration host)
         {
-            connectedHost = host;
-            LogTaskCancelSource = new CancellationTokenSource();
+            _connectedHost = host;
+            _logTaskCancelSource = new CancellationTokenSource();
             return StartLogThread();
         }
 
@@ -79,37 +79,37 @@ namespace BedrockService.Client.Management
         {
             try
             {
-                if (LogThread != null && !LogTaskCancelSource.IsCancellationRequested)
-                    LogTaskCancelSource.Cancel();
-                LogThread = new Task(new Action(LogManagerTask), LogTaskCancelSource.Token);
-                EnableFlag = true;
-                LogThread.Start();
-                Logger.AppendLine("LogThread started");
+                if (LogTask != null && !_logTaskCancelSource.IsCancellationRequested)
+                    _logTaskCancelSource.Cancel();
+                Thread.Sleep(500);
+                _logTaskCancelSource = new CancellationTokenSource();
+                LogTask = Task.Factory.StartNew(new Action(LogManagerTask), _logTaskCancelSource.Token);
+                _logger.AppendLine("LogThread started");
                 return true;
             }
             catch (Exception e)
             {
-                Logger.AppendLine($"Error starting LogThread: {e.StackTrace}");
+                _logger.AppendLine($"Error starting LogThread: {e.StackTrace}");
             }
             return false;
         }
 
         public bool StopLogThread()
         {
-            if (LogThread == null)
+            if (LogTask == null)
             {
                 return true;
             }
             try
             {
-                LogTaskCancelSource.Cancel();
+                _logTaskCancelSource.Cancel();
             }
             catch (ThreadAbortException e)
             {
-                Logger.AppendLine(e.StackTrace);
+                _logger.AppendLine(e.StackTrace);
             }
-            Logger.AppendLine("LogThread stopped");
-            LogThread = null;
+            _logger.AppendLine("LogThread stopped");
+            LogTask = null;
             return true;
         }
 
