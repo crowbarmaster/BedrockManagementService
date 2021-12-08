@@ -28,9 +28,9 @@ namespace BedrockService.Client.Networking
         public List<MinecraftPackParser> RecievedPacks;
         public Task ClientReciever;
         public Task HeartbeatTask;
-        private CancellationTokenSource _netCancelSource;
+        private CancellationTokenSource? _netCancelSource;
         private int _heartbeatFailTimeout;
-        private const int _heartbeatFailTimeoutLimit = 350;
+        private const int _heartbeatFailTimeoutLimit = 2;
         private bool _heartbeatRecieved;
         private readonly IBedrockLogger _logger;
 
@@ -41,7 +41,6 @@ namespace BedrockService.Client.Networking
 
         public void ConnectHost(IClientSideServiceConfiguration host)
         {
-            _netCancelSource = new CancellationTokenSource();
             if (EstablishConnection(host.GetAddress(), int.Parse(host.GetPort())))
             {
                 SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Connect);
@@ -52,6 +51,7 @@ namespace BedrockService.Client.Networking
         public bool EstablishConnection(string addr, int port)
         {
             _logger.AppendLine("Connecting to Server");
+            _netCancelSource = new CancellationTokenSource();
             try
             {
                 EnableRead = false;
@@ -95,7 +95,6 @@ namespace BedrockService.Client.Networking
 
         public void ReceiveListener()
         {
-            List<byte[]> byteBlocks = new List<byte[]>();
             while (!_netCancelSource.IsCancellationRequested)
             {
                 try
@@ -249,24 +248,17 @@ namespace BedrockService.Client.Networking
             _logger.AppendLine("HeartbeatThread started.");
             while (!_netCancelSource.Token.IsCancellationRequested)
             {
-                _heartbeatRecieved = false;
+                Thread.Sleep(3000);
                 SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Heartbeat);
                 while (!_heartbeatRecieved && EstablishedLink)
                 {
                     Thread.Sleep(100);
-                    _heartbeatFailTimeout++;
-                    if (_heartbeatFailTimeout > _heartbeatFailTimeoutLimit)
-                    {
-                        FormManager.MainWindow.HeartbeatFailDisconnect();
-                        _netCancelSource.Cancel();
-                        _heartbeatFailTimeout = 0;
-                    }
                 }
-                //_logger.AppendLine("ThumpThump");
+                _logger.AppendLine("ThumpThump");
                 _heartbeatRecieved = false;
                 _heartbeatFailTimeout = 0;
-                Thread.Sleep(3000);
             }
+            _logger.AppendLine("HeartbeatThread exited.");
         }
 
         public bool SendData(byte[] bytes, NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type, NetworkMessageFlags status)
@@ -286,12 +278,20 @@ namespace BedrockService.Client.Networking
                 {
                     stream.Write(compiled, 0, compiled.Length);
                     stream.Flush();
+                    _heartbeatFailTimeout = 0;
                     return true;
-
                 }
                 catch
                 {
                     _logger.AppendLine("Error writing to network stream!");
+                    Thread.Sleep(100);
+                    _heartbeatFailTimeout++;
+                    if (_heartbeatFailTimeout > _heartbeatFailTimeoutLimit)
+                    {
+                        FormManager.MainWindow.HeartbeatFailDisconnect();
+                        _netCancelSource.Cancel();
+                        _heartbeatFailTimeout = 0;
+                    }
                     return false;
                 }
             }
