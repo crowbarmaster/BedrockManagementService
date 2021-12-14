@@ -8,8 +8,7 @@
         string SearchForProperty(string input);
         string GetUsername();
         string GetXUID();
-        string[] GetTimes();
-        string[] GetRegistration();
+        (string First, string Conn, string Disconn) GetTimes();
         bool IsPlayerWhitelisted();
         bool PlayerIgnoresLimit();
         string GetPermissionLevel();
