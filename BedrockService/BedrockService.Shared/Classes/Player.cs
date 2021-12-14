@@ -86,14 +86,9 @@ namespace BedrockService.Shared.Classes
             IgnorePlayerLimits = bool.Parse(ignoreLimit);
         }
 
-        public string[] GetTimes()
+        public (string First, string Conn, string Disconn) GetTimes()
         {
-            return new string[] { FirstConnectedTime, LastConnectedTime, LastDisconnectTime };
-        }
-
-        public string[] GetRegistration()
-        {
-            return new string[] { Whitelisted.ToString(), PermissionLevel, IgnorePlayerLimits.ToString() };
+            return ( FirstConnectedTime, LastConnectedTime, LastDisconnectTime );
         }
 
         public bool IsDefaultRegistration()
