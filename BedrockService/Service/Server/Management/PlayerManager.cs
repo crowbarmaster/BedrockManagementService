@@ -19,15 +19,15 @@
                 _serverConfiguration.AddUpdatePlayer(new Player(xuid, username, DateTime.Now.Ticks.ToString(), "0", "0", false, _serverConfiguration.GetProp("default-player-permission-level").ToString(), false));
                 return;
             }
-            playerFound.UpdateTimes(DateTime.Now.Ticks.ToString(), playerFound.GetTimes()[2]);
+            playerFound.UpdateTimes(DateTime.Now.Ticks.ToString(), playerFound.GetTimes().Disconn);
             _serverConfiguration.AddUpdatePlayer(playerFound);
         }
 
         public void PlayerDisconnected(string xuid)
         {
             IPlayer playerFound = _serverConfiguration.GetPlayerByXuid(xuid);
-            string[] oldTimes = playerFound.GetTimes();
-            playerFound.UpdateTimes(oldTimes[1], DateTime.Now.Ticks.ToString());
+            var oldTimes = playerFound.GetTimes();
+            playerFound.UpdateTimes(oldTimes.Conn, DateTime.Now.Ticks.ToString());
             _serverConfiguration.AddUpdatePlayer(playerFound);
         }
 

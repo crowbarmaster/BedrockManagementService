@@ -1,6 +1,4 @@
-﻿using BedrockService.Service.Core.Interfaces;
-using BedrockService.Service.Core.Tasks;
-using BedrockService.Service.Server.Management;
+﻿using BedrockService.Service.Server.Management;
 using BedrockService.Shared.Utilities;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -9,8 +7,10 @@ namespace BedrockService.Service.Server
 {
     public class BedrockServer : IBedrockServer
     {
-        private IServiceTask _serverThread;
-        private IServiceTask _watchdogThread;
+        private Task _serverTask;
+        private Task _watchdogTask;
+        private CancellationTokenSource _serverCanceler = new CancellationTokenSource();
+        private CancellationTokenSource _watchdogCanceler = new CancellationTokenSource();
         private StreamWriter _stdInStream;
         private Process _serverProcess;
         private HostControl _hostController;
@@ -49,11 +49,14 @@ namespace BedrockService.Service.Server
 
         public void StartControl()
         {
-            _serverThread = new ServerProcessTask(new Action<CancellationToken>(RunServer));
+            _serverCanceler = new CancellationTokenSource();
+            _serverTask = RunServer();
+            _serverTask.Start();
         }
 
         public void StopControl()
         {
+            _serverCanceler.Cancel();
             if (_serverProcess != null)
             {
                 _logger.AppendLine("Sending Stop to Bedrock. Process.HasExited = " + _serverProcess.HasExited.ToString());
@@ -63,18 +66,16 @@ namespace BedrockService.Service.Server
                 _stdInStream.WriteLine("stop");
                 while (!_serverProcess.HasExited) { }
             }
-            _serverThread.CancelTask();
             _serverProcess = null;
             _currentServerStatus = ServerStatus.Stopped;
         }
 
         public void StartWatchdog(HostControl hostControl)
         {
+            _watchdogCanceler = new CancellationTokenSource();
             _hostController = hostControl;
-            if (_watchdogThread == null)
-            {
-                _watchdogThread = new WatchdogTask(new Action<CancellationToken>(ApplicationWatchdogMonitor));
-            }
+            _watchdogTask = ApplicationWatchdogMonitor();
+            _watchdogTask.Start();
         }
 
         private bool Backup()
@@ -146,69 +147,63 @@ namespace BedrockService.Service.Server
             }
         }
 
-        public void StopWatchdog()
-        {
-            if (_watchdogThread != null)
-                _watchdogThread.CancelTask();
-            _watchdogThread = null;
-        }
-
         public ServerStatus GetServerStatus() => _currentServerStatus;
 
         public void SetServerStatus(ServerStatus newStatus) => _currentServerStatus = newStatus;
 
-        private void ApplicationWatchdogMonitor(CancellationToken token)
+        private Task ApplicationWatchdogMonitor()
         {
-            while (_watchdogThread.IsAlive())
+            return new Task(() =>
             {
-                string exeName = _serverConfiguration.GetProp("ServerExeName").ToString();
-                string appName = exeName.Substring(0, exeName.Length - 4);
-                if (!MonitoredAppExists(appName) && _currentServerStatus == ServerStatus.Starting)
+                while (true)
                 {
-                    StartControl();
-                    _logger.AppendLine($"Recieved start signal for server {_serverConfiguration.GetServerName()}.");
-                    Thread.Sleep(15000);
-                }
-                while (MonitoredAppExists(appName) && _currentServerStatus == ServerStatus.Started)
-                {
-                    Thread.Sleep(5000);
-                }
-                if (MonitoredAppExists(appName) && _currentServerStatus == ServerStatus.Stopping)
-                {
-                    _logger.AppendLine($"BedrockService signaled stop to application {appName}.");
-                    _logger.AppendLine("Stopping...");
-                    StopControl();
-                    while (_currentServerStatus == ServerStatus.Stopping)
+                    if (_watchdogCanceler.IsCancellationRequested)
                     {
-                        Thread.Sleep(250);
+                        _logger.AppendLine("WatchDog Task was canceled. Stopping server!");
+                        StopControl();
+                        return;
                     }
+                    string exeName = _serverConfiguration.GetProp("ServerExeName").ToString();
+                    string appName = exeName.Substring(0, exeName.Length - 4);
+                    if (!MonitoredAppExists(appName) && _currentServerStatus == ServerStatus.Starting)
+                    {
+                        StartControl();
+                        _logger.AppendLine($"Recieved start signal for server {_serverConfiguration.GetServerName()}.");
+                        Thread.Sleep(15000);
+                    }
+                    if (MonitoredAppExists(appName) && _currentServerStatus == ServerStatus.Stopping)
+                    {
+                        _logger.AppendLine($"BedrockService signaled stop to application {appName}.");
+                        _logger.AppendLine("Stopping...");
+                        StopControl();
+                        while (_currentServerStatus == ServerStatus.Stopping)
+                        {
+                            Thread.Sleep(250);
+                        }
+                    }
+                    if (!MonitoredAppExists(appName) && _currentServerStatus == ServerStatus.Started)
+                    {
+                        StopControl();
+                        _logger.AppendLine($"Started application {appName} was not found in running processes... Resarting {appName}.");
+                        StartControl();
+                        Thread.Sleep(1500);
+                    }
+                    if (!MonitoredAppExists(appName) && _currentServerStatus == ServerStatus.Stopped)
+                    {
+                        _logger.AppendLine("Server stopped successfully.");
+                    }
+                    if (!MonitoredAppExists(appName) && _currentServerStatus == ServerStatus.Stopping)
+                    {
+                        _logger.AppendLine("Server stopped unexpectedly. Setting server status to stopped.");
+                        _currentServerStatus = ServerStatus.Stopped;
+                    }
+                    if (!MonitoredAppExists(appName) && _currentServerStatus == ServerStatus.Stopped && Program.IsExiting)
+                    {
+                        return;
+                    }
+                    Task.Delay(3000).Wait();
                 }
-                if (!MonitoredAppExists(appName) && _currentServerStatus == ServerStatus.Started)
-                {
-                    StopControl();
-                    _logger.AppendLine($"Started application {appName} was not found in running processes... Resarting {appName}.");
-                    StartControl();
-                    Thread.Sleep(1500);
-                }
-                if (!MonitoredAppExists(appName) && _currentServerStatus == ServerStatus.Stopped)
-                {
-                    _logger.AppendLine("Server stopped successfully.");
-                }
-                if (!MonitoredAppExists(appName) && _currentServerStatus == ServerStatus.Stopping)
-                {
-                    _logger.AppendLine("Server stopped unexpectedly. Setting server status to stopped.");
-                    _currentServerStatus = ServerStatus.Stopped;
-                }
-                while (!MonitoredAppExists(appName) && _currentServerStatus == ServerStatus.Stopped && !Program.IsExiting)
-                {
-                    Thread.Sleep(1000);
-                }
-                if (!MonitoredAppExists(appName) && _currentServerStatus == ServerStatus.Stopped && Program.IsExiting)
-                {
-                    return;
-                }
-
-            }
+            }, _watchdogCanceler.Token);
         }
 
         public bool RestartServer(bool ShouldPerformBackup)
@@ -232,42 +227,43 @@ namespace BedrockService.Service.Server
 
         public string GetServerName() => _serverConfiguration.GetServerName();
 
-        private void RunServer(CancellationToken token)
+        private Task RunServer()
         {
-            string exeName = _serverConfiguration.GetProp("ServerExeName").ToString();
-            string appName = exeName.Substring(0, exeName.Length - 4);
-            _configurator.WriteJSONFiles(_serverConfiguration);
-            _configurator.SaveServerProps(_serverConfiguration, false);
-
-            try
+            return new Task(() =>
             {
-                if (File.Exists($@"{_serverConfiguration.GetProp("ServerPath")}\{_serverConfiguration.GetProp("ServerExeName")}"))
+                string exeName = _serverConfiguration.GetProp("ServerExeName").ToString();
+                string appName = exeName.Substring(0, exeName.Length - 4);
+                _configurator.WriteJSONFiles(_serverConfiguration);
+                _configurator.SaveServerProps(_serverConfiguration, false);
+
+                try
                 {
-                    if (MonitoredAppExists(appName))
+                    if (File.Exists($@"{_serverConfiguration.GetProp("ServerPath")}\{_serverConfiguration.GetProp("ServerExeName")}"))
                     {
-                        Process[] processList = Process.GetProcessesByName(appName);
-                        if (processList.Length != 0)
+                        if (MonitoredAppExists(appName))
                         {
-                            _logger.AppendLine($@"Application {appName} was found running! Killing to proceed.");
-                            KillProcess(processList);
+                            Process[] processList = Process.GetProcessesByName(appName);
+                            if (processList.Length != 0)
+                            {
+                                _logger.AppendLine($@"Application {appName} was found running! Killing to proceed.");
+                                KillProcess(processList);
+                            }
                         }
+                        // Fires up a new process to run inside this one
+                        CreateProcess();
                     }
-                    // Fires up a new process to run inside this one
-                    CreateProcess();
+                    else
+                    {
+                        _logger.AppendLine($"The Bedrock Server is not accessible at {$@"{_serverConfiguration.GetProp("ServerPath")}\{_serverConfiguration.GetProp("ServerExeName")}"}\r\nCheck if the file is at that location and that permissions are correct.");
+                        _hostController.Stop();
+                    }
                 }
-                else
+                catch (Exception e)
                 {
-                    _logger.AppendLine($"The Bedrock Server is not accessible at {$@"{_serverConfiguration.GetProp("ServerPath")}\{_serverConfiguration.GetProp("ServerExeName")}"}\r\nCheck if the file is at that location and that permissions are correct.");
+                    _logger.AppendLine($"Error Running Bedrock Server: {e.Message}\n{e.StackTrace}");
                     _hostController.Stop();
                 }
-            }
-            catch (Exception e)
-            {
-                _logger.AppendLine($"Error Running Bedrock Server: {e.Message}\n{e.StackTrace}");
-                _hostController.Stop();
-
-            }
-
+            }, _serverCanceler.Token);
         }
 
         private void CreateProcess()
@@ -342,7 +338,7 @@ namespace BedrockService.Service.Server
                     if (dataMsg.Contains(_startupMessage))
                     {
                         _currentServerStatus = ServerStatus.Started;
-                        Thread.Sleep(1000);
+                        Task.Delay(3000).Wait();
 
                         if (_serverConfiguration.GetStartCommands().Count > 0)
                         {

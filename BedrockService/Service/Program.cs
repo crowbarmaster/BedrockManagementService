@@ -3,7 +3,6 @@
 // This file may need updated according to the specific scenario of the application being upgraded.
 // For more information on ASP.NET Core hosting, see https://docs.microsoft.com/aspnet/core/fundamentals/host/web-host
 
-global using BedrockService.Service.Core;
 global using BedrockService.Service.Logging;
 global using BedrockService.Service.Management;
 global using BedrockService.Service.Networking;
@@ -19,6 +18,7 @@ global using System.Diagnostics;
 global using System.IO;
 global using System.Linq;
 global using System.Reflection;
+global using System.Threading;
 global using System.Threading.Tasks;
 global using Topshelf;
 using BedrockService.Service.Core.Interfaces;
@@ -28,12 +28,15 @@ namespace BedrockService.Service
     public class Program
     {
         public static bool IsExiting = false;
-        private static bool _isDebugEnabled;
+        private static bool _isDebugEnabled = false;
         private static bool _isConsoleMode = false;
+        private static CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
+        private static CancellationToken token = CancellationTokenSource.Token;
         public static void Main(string[] args)
         {
             if (args.Length > 0)
             {
+                Console.WriteLine(string.Join(" ", args));
                 _isDebugEnabled = args[0].ToLower() == "-debug";
             }
             if (args.Length == 0 || Environment.UserInteractive)
