@@ -25,13 +25,11 @@ namespace BedrockService.Client.Networking
         public bool PlayerInfoArrived;
         public bool EnumBackupsArrived;
         public List<Property> BackupList;
-        public List<MinecraftPackParser> RecievedPacks;
+        public List<MinecraftPackContainer> RecievedPacks;
         public Task ClientReciever;
-        public Task HeartbeatTask;
         private CancellationTokenSource? _netCancelSource;
         private int _heartbeatFailTimeout;
         private const int _heartbeatFailTimeoutLimit = 2;
-        private bool _heartbeatRecieved;
         private readonly IBedrockLogger _logger;
 
         public TCPClient(IBedrockLogger logger)
@@ -97,6 +95,7 @@ namespace BedrockService.Client.Networking
         {
             while (!_netCancelSource.IsCancellationRequested)
             {
+                SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Heartbeat);
                 try
                 {
                     byte[] buffer = new byte[4];
@@ -134,16 +133,11 @@ namespace BedrockService.Client.Networking
                                             FormManager.MainWindow.connectedHost = JsonConvert.DeserializeObject<IServiceConfiguration>(data, settings);
                                             Connected = true;
                                             FormManager.MainWindow.RefreshServerContents();
-                                            _heartbeatFailTimeout = 0;
-                                            HeartbeatTask = Task.Factory.StartNew(new Action(SendHeatbeatSignal), _netCancelSource.Token);
                                         }
                                         catch (Exception e)
                                         {
                                             _logger.AppendLine($"Error: ConnectMan reported error: {e.Message}\n{e.StackTrace}");
                                         }
-                                        break;
-                                    case NetworkMessageTypes.Heartbeat:
-                                        _heartbeatRecieved = true;
                                         break;
 
                                     case NetworkMessageTypes.EnumBackups:
@@ -207,10 +201,10 @@ namespace BedrockService.Client.Networking
                                         break;
                                     case NetworkMessageTypes.PackList:
 
-                                        List<MinecraftPackParser> temp = new List<MinecraftPackParser>();
+                                        List<MinecraftPackContainer> temp = new List<MinecraftPackContainer>();
                                         JArray jArray = JArray.Parse(data);
                                         foreach (JToken token in jArray)
-                                            temp.Add(token.ToObject<MinecraftPackParser>());
+                                            temp.Add(token.ToObject<MinecraftPackContainer>());
                                         RecievedPacks = temp;
 
                                         break;
@@ -243,24 +237,6 @@ namespace BedrockService.Client.Networking
             }
         }
 
-        public void SendHeatbeatSignal()
-        {
-            _logger.AppendLine("HeartbeatThread started.");
-            while (!_netCancelSource.Token.IsCancellationRequested)
-            {
-                Thread.Sleep(3000);
-                SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Heartbeat);
-                while (!_heartbeatRecieved && EstablishedLink)
-                {
-                    Thread.Sleep(100);
-                }
-                _logger.AppendLine("ThumpThump");
-                _heartbeatRecieved = false;
-                _heartbeatFailTimeout = 0;
-            }
-            _logger.AppendLine("HeartbeatThread exited.");
-        }
-
         public bool SendData(byte[] bytes, NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type, NetworkMessageFlags status)
         {
             byte[] compiled = new byte[9 + bytes.Length];
@@ -288,8 +264,9 @@ namespace BedrockService.Client.Networking
                     _heartbeatFailTimeout++;
                     if (_heartbeatFailTimeout > _heartbeatFailTimeoutLimit)
                     {
-                        FormManager.MainWindow.HeartbeatFailDisconnect();
+                        Task.Run(() => { FormManager.MainWindow.HeartbeatFailDisconnect(); }); 
                         _netCancelSource.Cancel();
+                        EstablishedLink = false;
                         _heartbeatFailTimeout = 0;
                     }
                     return false;
@@ -312,13 +289,12 @@ namespace BedrockService.Client.Networking
 
         public void Dispose()
         {
-            if(_netCancelSource != null)
+            if (_netCancelSource != null)
             {
                 _netCancelSource.Cancel();
                 _netCancelSource.Dispose();
                 _netCancelSource = null;
             }
-            HeartbeatTask = null;
             ClientReciever = null;
             if (OpenedTcpClient != null)
             {
