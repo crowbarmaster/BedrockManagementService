@@ -44,16 +44,10 @@ namespace BedrockService.Client.Forms
             gridView.Rows.Clear();
             foreach (IPlayer player in playersFound)
             {
-                string[] playerReg = player.GetRegistration();
-                string[] playerTimes = player.GetTimes();
-                string playerFirstConnect = playerTimes[0];
-                string playerConnectTime = playerTimes[1];
-                string playerDisconnectTime = playerTimes[2];
-                string playerWhitelist = playerReg[0];
+                var playerTimes = player.GetTimes();
                 string playerPermission = player.GetPermissionLevel();
-                string playerIgnoreLimit = playerReg[2];
-                TimeSpan timeSpent = TimeSpan.FromTicks(long.Parse(playerConnectTime) - long.Parse(playerDisconnectTime));
-                string[] list = new string[] { player.GetXUID(), player.GetUsername(), playerPermission, playerWhitelist, playerIgnoreLimit, playerFirstConnect, playerConnectTime, timeSpent.ToString("hhmmss") };
+                TimeSpan timeSpent = TimeSpan.FromTicks(long.Parse(playerTimes.Conn) - long.Parse(playerTimes.Disconn));
+                string[] list = new string[] { player.GetXUID(), player.GetUsername(), playerPermission, player.IsPlayerWhitelisted().ToString(), player.PlayerIgnoresLimit().ToString(), playerTimes.First, playerTimes.Conn, timeSpent.ToString("hhmmss") };
                 gridView.Rows.Add(list);
             }
             gridView.Refresh();
@@ -139,14 +133,13 @@ namespace BedrockService.Client.Forms
         private void gridView_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
             DataGridViewRow focusedRow = gridView.Rows[e.RowIndex];
-            string[] playerReg = playerToEdit.GetRegistration();
-            string[] playerTimes = playerToEdit.GetTimes();
-            string playerFirstConnect = playerTimes[0];
-            string playerConnectTime = playerTimes[1];
-            string playerDisconnectTime = playerTimes[2];
-            string playerWhitelist = playerReg[0];
-            string playerPermission = playerReg[1];
-            string playerIgnoreLimit = playerReg[2];
+            var playerTimes = playerToEdit.GetTimes();
+            string playerFirstConnect = playerTimes.First;
+            string playerConnectTime = playerTimes.Conn;
+            string playerDisconnectTime = playerTimes.Disconn;
+            string playerWhitelist = playerToEdit.IsPlayerWhitelisted().ToString();
+            string playerPermission = playerToEdit.GetPermissionLevel();
+            string playerIgnoreLimit = playerToEdit.PlayerIgnoresLimit().ToString();
             if ((string)focusedRow.Cells[0].Value != playerToEdit.GetXUID() || (string)focusedRow.Cells[1].Value != playerToEdit.GetUsername() || (string)focusedRow.Cells[2].Value != playerPermission || (string)focusedRow.Cells[3].Value != playerWhitelist || (string)focusedRow.Cells[4].Value != playerIgnoreLimit)
             {
                 playerToEdit = new Player((string)focusedRow.Cells[0].Value, (string)focusedRow.Cells[1].Value, playerFirstConnect, playerConnectTime, playerDisconnectTime, bool.Parse((string)focusedRow.Cells[3].Value), (string)focusedRow.Cells[2].Value, bool.Parse((string)focusedRow.Cells[4].Value));
