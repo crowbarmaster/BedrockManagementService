@@ -97,10 +97,6 @@ namespace BedrockService.Service.Core
                     while (brs.GetServerStatus() == BedrockServer.ServerStatus.Stopping && !Program.IsExiting)
                         Thread.Sleep(100);
                 }
-                foreach (IBedrockServer brs in _bedrockServers)
-                {
-                    brs.StopWatchdog();
-                }
                 try
                 {
                     _tCPListener.ResetListener();
