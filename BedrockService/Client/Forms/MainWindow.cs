@@ -72,7 +72,7 @@ namespace BedrockService.Client.Forms
                         Connect.Enabled = true;
                         ComponentEnableManager();
                     });
-                        return;
+                    return;
                 }
             }
         }
@@ -312,7 +312,7 @@ namespace BedrockService.Client.Forms
                 connectedHost.SetAllProps(_editDialog.workingProps);
                 _editDialog.Close();
                 _editDialog.Dispose();
-                RestartSrv_Click(null, null);
+                ServiceRestartFromClient();
             }
         }
 
@@ -320,6 +320,20 @@ namespace BedrockService.Client.Forms
         {
             FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.BackupAll);
             DisableUI();
+        }
+
+        private Task ServiceRestartFromClient()
+        {
+            return Task.Run(() =>
+            {
+                Invoke(() =>
+                {
+                    Disconn_Click(null, null);
+                    Connect.Enabled = false;
+                    Task.Delay(6000).Wait();
+                    Connect_Click(null, null);
+                });
+            });
         }
 
         private void newSrvBtn_Click(object sender, EventArgs e)
@@ -355,7 +369,7 @@ namespace BedrockService.Client.Forms
             WaitForServerData().Wait();
             FormManager.TCPClient.PlayerInfoArrived = false;
             PlayerManagerForm form = new PlayerManagerForm(selectedServer);
-            if(form.ShowDialog() != DialogResult.OK)
+            if (form.ShowDialog() != DialogResult.OK)
             {
                 ServerBusy = false;
             }
@@ -370,6 +384,7 @@ namespace BedrockService.Client.Forms
                 {
                     if (FormManager.TCPClient.Connected)
                     {
+                        FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Disconnect);
                         Thread.Sleep(500);
                         FormManager.TCPClient.CloseConnection();
                     }
@@ -408,9 +423,9 @@ namespace BedrockService.Client.Forms
             {
                 TypeNameHandling = TypeNameHandling.All
             };
-            byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(editSrvDialog.startCmds, Formatting.Indented, settings));
             if (editSrvDialog.ShowDialog() == DialogResult.OK)
             {
+                byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(editSrvDialog.startCmds, Formatting.Indented, settings));
                 DisableUI();
                 FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.StartCmdUpdate);
                 selectedServer.SetStartCommands(editSrvDialog.startCmds);
@@ -514,7 +529,7 @@ namespace BedrockService.Client.Forms
                 Invoke((MethodInvoker)delegate { ComponentEnableManager(); });
                 while (ServerBusy)
                 {
-                    Task.Delay(250);
+                    Task.Delay(250).Wait();
                 }
                 Invoke((MethodInvoker)delegate { ComponentEnableManager(); });
             });
@@ -526,7 +541,7 @@ namespace BedrockService.Client.Forms
             {
                 while (!FormManager.TCPClient.EnumBackupsArrived && !FormManager.TCPClient.PlayerInfoArrived && FormManager.TCPClient.RecievedPacks == null)
                 {
-                    Task.Delay(250);
+                    Task.Delay(250).Wait();
                 }
             });
         }
@@ -603,7 +618,6 @@ namespace BedrockService.Client.Forms
                 }
                 form.Close();
             }
-            FormManager.TCPClient.RecievedPacks = null;
         }
 
         private void nbtStudioBtn_Click(object sender, EventArgs e)
