@@ -42,6 +42,7 @@ namespace BedrockService.Client.Forms
         {
             startCmds = list;
             gridView.Columns.RemoveAt(0);
+            gridView.AllowUserToDeleteRows = true;
             foreach (StartCmdEntry entry in startCmds)
             {
                 dataGrid.Rows.Add(new string[1] { entry.Command });
