@@ -1,11 +1,10 @@
 ﻿using BedrockService.Service.Networking.MessageInterfaces;
-using System.Threading;
 
 namespace BedrockService.Service.Networking
 {
     public interface ITCPListener : IMessageSender
     {
-        void StartListening(CancellationToken token);
+        Task StartListening();
 
         void ResetListener();
 

@@ -1,10 +1,7 @@
-﻿using BedrockService.Service.Core.Interfaces;
-using BedrockService.Service.Core.Tasks;
-using BedrockService.Service.Networking.MessageInterfaces;
+﻿using BedrockService.Service.Networking.MessageInterfaces;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
-using System.Threading;
 
 namespace BedrockService.Service.Networking
 {
@@ -15,31 +12,29 @@ namespace BedrockService.Service.Networking
         private NetworkStream _stream;
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IBedrockLogger _logger;
-        private IServiceTask _tcpTask;
-        private IServiceTask _clientListenerTask;
-        private IServiceTask _heartbeatTask;
         private int _heartbeatFailTimeout;
         private readonly int _heartbeatFailTimeoutLimit = 2;
         private Dictionary<NetworkMessageTypes, IMessageParser> _standardMessageLookup;
         private Dictionary<NetworkMessageTypes, IFlaggedMessageParser> _flaggedMessageLookup;
         private readonly IPAddress _ipAddress = IPAddress.Parse("0.0.0.0");
-        private readonly System.Timers.Timer _reconnectTimer = new System.Timers.Timer(500.0);
         private CommsKeyContainer _keyContainer;
         private CancellationTokenSource _cancelTokenSource = new CancellationTokenSource();
+        private Task _tcpTask;
+        private Task _recieverTask;
 
         public TCPListener(IServiceConfiguration serviceConfiguration, IBedrockLogger logger)
         {
             _logger = logger;
             _serviceConfiguration = serviceConfiguration;
-            _reconnectTimer.Elapsed += ReconnectTimer_Elapsed;
-            _tcpTask = new TCPListenerTask(new Action<CancellationToken>(StartListening), _cancelTokenSource);
             _cancelTokenSource = new CancellationTokenSource();
+            InitializeTasks();
         }
 
-        private void ReconnectTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private void InitializeTasks()
         {
-            _reconnectTimer.Stop();
-            _tcpTask = new TCPListenerTask(new Action<CancellationToken>(StartListening), _cancelTokenSource);
+            _tcpTask = StartListening();
+            _recieverTask = IncomingListener();
+            _tcpTask.Start();
         }
 
         public void SetStrategyDictionaries(Dictionary<NetworkMessageTypes, IMessageParser> standard, Dictionary<NetworkMessageTypes, IFlaggedMessageParser> flagged)
@@ -48,58 +43,77 @@ namespace BedrockService.Service.Networking
             _flaggedMessageLookup = flagged;
         }
 
-        public void StartListening(CancellationToken token)
+        public Task StartListening()
         {
-            _inListener = new TcpListener(_ipAddress, int.Parse(_serviceConfiguration.GetProp("ClientPort").ToString()));
-            try
+            return new Task(() =>
             {
-                _inListener.Start();
-            }
-            catch (SocketException e)
-            {
-                _logger.AppendLine($"Error! {e.Message}");
-                Thread.Sleep(2000);
-                Environment.Exit(1);
-            }
-
-            while (true)
-            {
+                _logger.AppendLine("TCP listener task started.");
+                _inListener = new TcpListener(_ipAddress, int.Parse(_serviceConfiguration.GetProp("ClientPort").ToString()));
                 try
                 {
-                    if (_inListener.Pending())
+
+                    while (_standardMessageLookup == null) { Task.Delay(100).Wait(); }
+                    _inListener.Start();
+                }
+                catch (SocketException e)
+                {
+                    _logger.AppendLine($"Error! {e.Message}");
+                    Thread.Sleep(2000);
+                    Environment.Exit(1);
+                }
+                while (true)
+                {
+                    try
                     {
-                        _cancelTokenSource = new CancellationTokenSource();
-                        _client = _inListener.AcceptTcpClient();
-                        _stream = _client.GetStream();
-                        _clientListenerTask = new ClientServiceTask(new Action<CancellationToken>(IncomingListener), _cancelTokenSource);
-                        _heartbeatTask = new HeartbeatTask(new Action<CancellationToken>(HeartbeatSender), _cancelTokenSource);
+                        if (_inListener.Pending())
+                        {
+                            _cancelTokenSource = new CancellationTokenSource();
+                            _client = _inListener.AcceptTcpClient();
+                            _stream = _client.GetStream();
+                            _recieverTask.Start();
+                        }
+                        if (_cancelTokenSource.IsCancellationRequested)
+                        {
+                            _logger.AppendLine("TCP Listener task canceled!");
+                            _inListener.Stop();
+                            _inListener = null;
+                            return;
+                        }
+                        Task.Delay(500).Wait();
+                    }
+                    catch (NullReferenceException) { }
+                    catch (InvalidOperationException) 
+                    {
+                        _inListener = null;
+                        return;
+                    }
+                    catch (SocketException) { }
+                    catch (Exception e)
+                    {
+                        _logger.AppendLine(e.ToString());
                     }
                 }
-                catch (ThreadStateException) { }
-                catch (NullReferenceException) { }
-                catch (InvalidOperationException) { }
-                catch (SocketException) { }
-                catch (Exception e)
-                {
-                    _logger.AppendLine(e.ToString());
-                }
-            }
+            }, _cancelTokenSource.Token);
         }
 
         public void ResetListener()
         {
-            _logger.AppendLine("Resetting listener!");
-            _cancelTokenSource.Cancel();
-            _client.Client.Blocking = false;
-            _stream.Close();
-            _stream.Dispose();
-            _client.Close();
-            _inListener.Stop();
-            _tcpTask = null;
-            _tcpTask = new TCPListenerTask(new Action<CancellationToken>(StartListening), _cancelTokenSource);
-            _clientListenerTask = null;
-            _heartbeatTask = null;
-            
+            Task.Run(() =>
+            {
+                _logger.AppendLine("Resetting listener!");
+                _client.Client.Blocking = false;
+                _stream.Close();
+                _stream.Dispose();
+                _client.Close();
+                _inListener?.Stop();
+                _cancelTokenSource?.Cancel();
+                while (_tcpTask.Status == TaskStatus.Running || _recieverTask.Status == TaskStatus.Running)
+                {
+                    Task.Delay(100).Wait();
+                }
+                _cancelTokenSource = new CancellationTokenSource();
+                InitializeTasks();
+            });
         }
 
         public void SendData(byte[] bytesToSend, NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type, NetworkMessageFlags status)
@@ -114,7 +128,7 @@ namespace BedrockService.Service.Networking
             byteHeader[8] = (byte)status;
             Buffer.BlockCopy(bytesToSend, 0, byteHeader, 9, bytesToSend.Length);
 
-            if (_clientListenerTask != null && _clientListenerTask.IsAlive())
+            if (_tcpTask?.Status == TaskStatus.Running && _recieverTask?.Status == TaskStatus.Running)
             {
                 try
                 {
@@ -145,107 +159,90 @@ namespace BedrockService.Service.Networking
 
         public void SendData(NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type, NetworkMessageFlags status) => SendData(new byte[0], source, destination, 0xFF, type, status);
 
-        private void IncomingListener(CancellationToken token)
+        private Task IncomingListener()
         {
-            _logger.AppendLine("Packet listener thread started.");
-            int AvailBytes = 0;
-            int byteCount = 0;
-            NetworkMessageSource msgSource = 0;
-            NetworkMessageDestination msgDest = 0;
-            byte serverIndex = 0xFF;
-            NetworkMessageTypes msgType = 0;
-            NetworkMessageFlags msgFlag = 0;
-            while (!token.IsCancellationRequested)
+            return new Task(() =>
             {
-                try
+                _logger.AppendLine("TCP Client packet listener started.");
+                int AvailBytes = 0;
+                int byteCount = 0;
+                NetworkMessageSource msgSource = 0;
+                NetworkMessageDestination msgDest = 0;
+                byte serverIndex = 0xFF;
+                NetworkMessageTypes msgType = 0;
+                NetworkMessageFlags msgFlag = 0;
+                while (true)
                 {
-                    byte[] buffer = new byte[4];
-                    while (_client.Client != null && _client.Client.Available != 0) // Recieve data from client.
+                    SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Heartbeat);
+                    if (_cancelTokenSource.IsCancellationRequested)
                     {
-                        byteCount = _stream.Read(buffer, 0, 4);
-                        int expectedLen = BitConverter.ToInt32(buffer, 0);
-                        buffer = new byte[expectedLen];
-                        byteCount = _stream.Read(buffer, 0, expectedLen);
-                        msgSource = (NetworkMessageSource)buffer[0];
-                        msgDest = (NetworkMessageDestination)buffer[1];
-                        serverIndex = buffer[2];
-                        msgType = (NetworkMessageTypes)buffer[3];
-                        msgFlag = (NetworkMessageFlags)buffer[4];
-                        if (msgType == NetworkMessageTypes.Disconnect)
-                        {
-                            ResetListener();
-                        }
-                        if (msgType < NetworkMessageTypes.Heartbeat)
-                        {
-                            try
-                            {
-                                if (_standardMessageLookup.ContainsKey(msgType))
-                                    _standardMessageLookup[msgType].ParseMessage(buffer, serverIndex);
-                                else
-                                    _flaggedMessageLookup[msgType].ParseMessage(buffer, serverIndex, msgFlag);
-                            }
-                            catch
-                            {
-                                if(msgType == NetworkMessageTypes.Connect)
-                                    ResetListener();
-                            }
-                        }
-                    }
-                    Thread.Sleep(200);
-                }
-                catch (OutOfMemoryException)
-                {
-                    _logger.AppendLine("Out of memory exception thrown.");
-                }
-                catch (ObjectDisposedException)
-                {
-                    _logger.AppendLine("Client was disposed! Killing thread...");
-                    break;
-                }
-                catch (InvalidOperationException e)
-                {
-                    if (msgType != NetworkMessageTypes.ConsoleLogUpdate)
-                    {
-                        _logger.AppendLine(e.Message);
-                        _logger.AppendLine(e.StackTrace);
-                    }
-                }
-                catch (ThreadAbortException)
-                {
-                    _logger.AppendLine("ListenerThread aborted!");
-                }
-                catch (Exception e)
-                {
-                    _logger.AppendLine($"Error: {e.Message} {e.StackTrace}");
-                }
-                try
-                {
-                    AvailBytes = _client.Client != null ? _client.Client.Available:0;
-                }
-                catch { }
-            }
-        }
-
-        private void HeartbeatSender(CancellationToken token)
-        {
-            _logger.AppendLine("HeartBeatSender started.");
-            while (!token.IsCancellationRequested)
-            {
-
-                SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Heartbeat);
-                int timeWaited = 0;
-                while (timeWaited < 3000)
-                {
-                    Thread.Sleep(100);
-                    timeWaited += 100;
-                    if (token.IsCancellationRequested)
-                    {
-                        _logger.AppendLine("HeartBeatSender exited.");
+                        _logger.AppendLine("TCP Client packet listener canceled!");
                         return;
                     }
+                    try
+                    {
+                        byte[] buffer = new byte[4];
+                        while (_client.Client != null && _client.Client.Available != 0) // Recieve data from client.
+                        {
+                            byteCount = _stream.Read(buffer, 0, 4);
+                            int expectedLen = BitConverter.ToInt32(buffer, 0);
+                            buffer = new byte[expectedLen];
+                            byteCount = _stream.Read(buffer, 0, expectedLen);
+                            msgSource = (NetworkMessageSource)buffer[0];
+                            msgDest = (NetworkMessageDestination)buffer[1];
+                            serverIndex = buffer[2];
+                            msgType = (NetworkMessageTypes)buffer[3];
+                            msgFlag = (NetworkMessageFlags)buffer[4];
+                            if (msgType == NetworkMessageTypes.Disconnect)
+                            {
+                                ResetListener();
+                            }
+                            if (msgType < NetworkMessageTypes.Heartbeat)
+                            {
+                                try
+                                {
+                                    if (_standardMessageLookup.ContainsKey(msgType))
+                                        _standardMessageLookup[msgType].ParseMessage(buffer, serverIndex);
+                                    else
+                                        _flaggedMessageLookup[msgType].ParseMessage(buffer, serverIndex, msgFlag);
+                                }
+                                catch
+                                {
+                                    if (msgType == NetworkMessageTypes.Connect)
+                                        Task.Delay(1000).Wait();
+                                        ResetListener();
+                                }
+                            }
+                        }
+                        Task.Delay(500).Wait();
+                    }
+                    catch (OutOfMemoryException)
+                    {
+                        _logger.AppendLine("Out of memory exception thrown.");
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        _logger.AppendLine("Client was disposed!");
+                    }
+                    catch (InvalidOperationException e)
+                    {
+                        if (msgType != NetworkMessageTypes.ConsoleLogUpdate)
+                        {
+                            _logger.AppendLine(e.Message);
+                            _logger.AppendLine(e.StackTrace);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.AppendLine($"Error: {e.Message} {e.StackTrace}");
+                    }
+                    try
+                    {
+                        AvailBytes = _client.Client != null ? _client.Client.Available : 0;
+                    }
+                    catch { }
                 }
-            }
-            _logger.AppendLine("HeartBeatSender exited.");
+            }, _cancelTokenSource.Token);
         }
 
         public void SetKeyContainer(CommsKeyContainer keyContainer)
