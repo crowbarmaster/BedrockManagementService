@@ -147,8 +147,8 @@ namespace BedrockService.Service.Management
                     server.AddUpdatePlayer(new Player(split[0], split[1], DateTime.Now.Ticks.ToString(), "0", "0", split[3].ToLower() == "true", split[2], split[4].ToLower() == "true"));
                     continue;
                 }
-                string[] playerTimes = playerFound.GetTimes();
-                server.AddUpdatePlayer(new Player(split[0], split[1], playerTimes[0], playerTimes[1], playerTimes[2], split[3].ToLower() == "true", split[2], split[4].ToLower() == "true"));
+                var playerTimes = playerFound.GetTimes();
+                server.AddUpdatePlayer(new Player(split[0], split[1], playerTimes.First, playerTimes.Conn, playerTimes.Disconn, split[3].ToLower() == "true", split[2], split[4].ToLower() == "true"));
             }
         }
 
@@ -239,8 +239,8 @@ namespace BedrockService.Service.Management
                     server.AddUpdatePlayer(new Player(split[0], split[1], split[2], split[3], split[4], false, server.GetProp("default-player-permission-level").ToString(), false));
                     continue;
                 }
-                string[] playerTimes = playerFound.GetTimes();
-                server.AddUpdatePlayer(new Player(split[0], split[1], playerTimes[0], playerTimes[1], playerTimes[2], playerFound.IsPlayerWhitelisted(), playerFound.GetPermissionLevel(), playerFound.PlayerIgnoresLimit()));
+                var playerTimes = playerFound.GetTimes();
+                server.AddUpdatePlayer(new Player(split[0], split[1], playerTimes.First, playerTimes.Conn, playerTimes.Disconn, playerFound.IsPlayerWhitelisted(), playerFound.GetPermissionLevel(), playerFound.PlayerIgnoresLimit()));
             }
         }
 
@@ -290,11 +290,10 @@ namespace BedrockService.Service.Management
 
             foreach (IPlayer player in server.GetPlayerList())
             {
-                string[] playerReg = player.GetRegistration();
-                if (!player.IsDefaultRegistration() && playerReg[0] == "True")
+                if (!player.IsDefaultRegistration() && player.IsPlayerWhitelisted())
                 {
                     sb.Append("\t{\n");
-                    sb.Append($"\t\t\"ignoresPlayerLimit\": {playerReg[2].ToLower()},\n");
+                    sb.Append($"\t\t\"ignoresPlayerLimit\": {player.PlayerIgnoresLimit().ToString().ToLower()},\n");
                     sb.Append($"\t\t\"name\": \"{player.GetUsername()}\",\n");
                     sb.Append($"\t\t\"xuid\": \"{player.GetXUID()}\"\n");
                     sb.Append("\t},\n");
@@ -311,11 +310,10 @@ namespace BedrockService.Service.Management
 
             foreach (Player player in server.GetPlayerList())
             {
-                string[] playerReg = player.GetRegistration();
                 if (!player.IsDefaultRegistration())
                 {
                     sb.Append("\t{\n");
-                    sb.Append($"\t\t\"permission\": \"{playerReg[1]}\",\n");
+                    sb.Append($"\t\t\"permission\": \"{player.GetPermissionLevel()}\",\n");
                     sb.Append($"\t\t\"xuid\": \"{player.GetXUID()}\"\n");
                     sb.Append("\t},\n");
                 }
