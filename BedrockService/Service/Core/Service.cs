@@ -10,11 +10,14 @@ namespace BedrockService.Service.Core
         private readonly IBedrockService _bedrockService;
         private Topshelf.Host _host;
         private readonly IBedrockLogger _logger;
+        IHostApplicationLifetime _applicationLifetime;
 
-        public Service(IBedrockLogger logger, IBedrockService bedrockService, NetworkStrategyLookup lookup)
+        public Service(IBedrockLogger logger, IBedrockService bedrockService, NetworkStrategyLookup lookup, IHostApplicationLifetime appLifetime)
         {
             _logger = logger;
             _bedrockService = bedrockService;
+            _applicationLifetime = appLifetime;
+            appLifetime.ApplicationStarted.Register(OnStarted);
         }
 
         public async Task InitializeHost()
@@ -40,20 +43,29 @@ namespace BedrockService.Service.Core
                             }
                         });
                     });
-
                     hostConfig.RunAsLocalSystem();
                     hostConfig.SetDescription("Windows Service Wrapper for Windows Bedrock Server");
                     hostConfig.SetDisplayName("BedrockService");
                     hostConfig.SetServiceName("BedrockService");
                     hostConfig.UnhandledExceptionPolicy = UnhandledExceptionPolicyCode.LogErrorOnly;
-
+                    hostConfig.AfterInstall(() =>
+                    {
+                        _logger.AppendLine("Service install completed... Exiting!");
+                        Task.Delay(1000).Wait();
+                        _applicationLifetime.StopApplication();
+                    });
+                    hostConfig.AfterUninstall(() =>
+                    {
+                        _logger.AppendLine("Service uninstall completed... Exiting!");
+                        Task.Delay(1000).Wait();
+                        _applicationLifetime.StopApplication();
+                    });
                     hostConfig.EnableServiceRecovery(src =>
                     {
                         src.RestartService(delayInMinutes: 0);
                         src.RestartService(delayInMinutes: 1);
                         src.SetResetPeriod(days: 1);
                     });
-
                     hostConfig.OnException((ex) =>
                     {
                         _logger.AppendLine("Exception occured Main : " + ex.Message);
@@ -65,16 +77,17 @@ namespace BedrockService.Service.Core
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            return Task.Run(() =>
-            {
-                InitializeHost().Wait();
-                _host.Run();
-            });
+            return InitializeHost();
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
             return Task.Delay(100);
+        }
+
+        private void OnStarted()
+        {
+            Task.Run(() => { _host.Run(); });
         }
     }
 }
