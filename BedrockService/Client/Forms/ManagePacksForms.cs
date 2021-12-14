@@ -9,6 +9,7 @@ using System.Drawing;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace BedrockService.Client.Forms
@@ -28,11 +29,11 @@ namespace BedrockService.Client.Forms
             InitializeComponent();
         }
 
-        public void PopulateServerPacks(List<MinecraftPackParser> packList)
+        public void PopulateServerPacks(List<MinecraftPackContainer> packList)
         {
-            foreach (MinecraftPackParser pack in packList)
-                foreach (MinecraftPackContainer container in pack.FoundPacks)
-                    serverListBox.Items.Add(container);
+            foreach (MinecraftPackContainer container in packList)
+                serverListBox.Items.Add(container);
+            FormManager.TCPClient.RecievedPacks = null;
         }
 
         private void ListBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -53,7 +54,7 @@ namespace BedrockService.Client.Forms
                 if (selectedPack.JsonManifest != null)
                     textBox1.Text = $"{selectedPack.JsonManifest.header.name}\r\n{selectedPack.JsonManifest.header.description}\r\n{selectedPack.JsonManifest.header.uuid}\r\n{selectedPack.JsonManifest.header.version[0]}";
                 else
-                    textBox1.Text = selectedPack.PackContentLocation.Name;
+                    textBox1.Text = new DirectoryInfo(selectedPack.PackContentLocation).Name;
             }
         }
 
@@ -62,15 +63,20 @@ namespace BedrockService.Client.Forms
             if (serverListBox.SelectedIndex != -1)
             {
                 List<MinecraftPackContainer> temp = new List<MinecraftPackContainer>();
-                temp.Add((MinecraftPackContainer)serverListBox.SelectedItem);
+                object[] items = new object[serverListBox.SelectedItems.Count];
+                serverListBox.SelectedItems.CopyTo(items, 0);
+                foreach(object item in items)
+                {
+                    temp.Add((MinecraftPackContainer)item);
+                    serverListBox.Items.Remove(item);
+                }
                 JsonSerializerSettings settings = new JsonSerializerSettings()
                 {
                     TypeNameHandling = TypeNameHandling.All
                 };
                 FormManager.TCPClient.SendData(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(temp, Formatting.Indented, settings)), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.RemovePack);
-                serverListBox.Items.Remove(temp[0]);
             }
-
+            DialogResult = DialogResult.OK;
         }
 
         private void removeAllPacksBtn_Click(object sender, EventArgs e)
@@ -83,7 +89,7 @@ namespace BedrockService.Client.Forms
                 TypeNameHandling = TypeNameHandling.All
             };
             FormManager.TCPClient.SendData(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(temp, Formatting.Indented, settings)), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.RemovePack);
-            serverListBox.Items.Clear();
+            DialogResult = DialogResult.OK;
         }
 
         private void sendPacksBtn_Click(object sender, EventArgs e)
@@ -112,7 +118,7 @@ namespace BedrockService.Client.Forms
             openFileDialog.Multiselect = true;
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                MinecraftPackParser parser = new MinecraftPackParser(openFileDialog.FileNames, PackExtractDir, Logger, ProcessInfo);
+                MinecraftPackParser parser = new MinecraftPackParser(openFileDialog.FileNames, PackExtractDir.FullName, Logger, ProcessInfo);
                 parsedPacksListBox.Items.Clear();
                 foreach (MinecraftPackContainer container in parser.FoundPacks)
                     parsedPacksListBox.Items.Add(container);
@@ -124,12 +130,13 @@ namespace BedrockService.Client.Forms
             foreach (MinecraftPackContainer container in packList)
             {
                 Directory.CreateDirectory($@"{PackExtractDir.FullName}\ZipTemp");
-                container.PackContentLocation.MoveTo($@"{PackExtractDir.FullName}\ZipTemp\{container.PackContentLocation.Name}");
-                container.PackContentLocation = new DirectoryInfo($@"{PackExtractDir.FullName}\ZipTemp\{container.PackContentLocation.Name}");
+                DirectoryInfo directoryInfo = new DirectoryInfo(container.PackContentLocation);
+                directoryInfo.MoveTo($@"{PackExtractDir.FullName}\ZipTemp\{directoryInfo.Name}");
+                container.PackContentLocation = $@"{PackExtractDir.FullName}\ZipTemp\{directoryInfo.Name}";
             }
             ZipFile.CreateFromDirectory($@"{PackExtractDir.FullName}\ZipTemp", $@"{PackExtractDir.FullName}\SendZip.zip");
             FormManager.TCPClient.SendData(File.ReadAllBytes($@"{PackExtractDir.FullName}\SendZip.zip"), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.PackFile);
-            parsedPacksListBox.Items.Clear();
+            DialogResult = DialogResult.OK;
         }
     }
 }
