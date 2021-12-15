@@ -387,7 +387,7 @@ namespace BedrockService.Service.Server
                         if (currentVersion != versionString)
                         {
                             _logger.AppendLine($"Server {GetServerName()} version found out-of-date! Now updating!");
-                            StopServer().Wait();
+                            StopServer(false).Wait();
                             _configurator.ReplaceServerBuild(_serverConfiguration).Wait();
                             StartControl();
                         }
@@ -408,7 +408,7 @@ namespace BedrockService.Service.Server
         public bool RollbackToBackup(byte serverIndex, string folderName)
         {
             IServerConfiguration server = _serviceConfiguration.GetServerInfoByIndex(serverIndex);
-            StopServer().Wait();
+            StopServer(false).Wait();
             try
             {
                 foreach (DirectoryInfo dir in new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{server.GetServerName()}").GetDirectories())
@@ -436,7 +436,7 @@ namespace BedrockService.Service.Server
 
         public IPlayerManager GetPlayerManager() => _playerManager;
 
-        public Task StopServer()
+        public Task StopServer(bool stopWatchdog)
         {
             return Task.Run(() =>
              {
@@ -445,7 +445,10 @@ namespace BedrockService.Service.Server
                  {
                      Thread.Sleep(100);
                  }
-
+                 if (stopWatchdog)
+                 {
+                     _watchdogCanceler.Cancel();
+                 }
              });
         }
     }

@@ -402,7 +402,7 @@ namespace BedrockService.Service.Networking
                 Buffer.BlockCopy(data, 5, stripHeaderFromBuffer, 0, stripHeaderFromBuffer.Length);
                 IServerConfiguration server = _serviceConfiguration.GetServerInfoByIndex(serverIndex);
                 string pathToLevelDat = $@"{_serviceConfiguration.GetProp("ServersPath")}\{server.GetProp("server-name")}\worlds\{server.GetProp("level-name")}\level.dat";
-                _bedrockService.GetBedrockServerByIndex(serverIndex).StopServer().Wait();
+                _bedrockService.GetBedrockServerByIndex(serverIndex).StopServer(false).Wait();
                 File.WriteAllBytes(pathToLevelDat, stripHeaderFromBuffer);
                 _bedrockService.GetBedrockServerByIndex(serverIndex).SetServerStatus(BedrockServer.ServerStatus.Starting);
             }
@@ -562,7 +562,7 @@ namespace BedrockService.Service.Networking
 
             public void ParseMessage(byte[] data, byte serverIndex, NetworkMessageFlags flag)
             {
-                _bedrockService.GetBedrockServerByIndex(serverIndex).StopServer().Wait();
+                _bedrockService.GetBedrockServerByIndex(serverIndex).StopServer(true).Wait();
                 _configurator.RemoveServerConfigs(_serviceConfiguration.GetServerInfoByIndex(serverIndex), flag);
                 _bedrockService.RemoveBedrockServerByIndex(serverIndex);
                 JsonSerializerSettings settings = new JsonSerializerSettings()
