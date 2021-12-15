@@ -161,6 +161,7 @@ namespace BedrockService.Service.Networking
                     return;
                 }
                 _serviceConfiguration.GetServerInfoByIndex(serverIndex).SetAllProps(propList);
+                _configurator.SaveServerProps(_serviceConfiguration.GetServerInfoByIndex(serverIndex), true);
                 _bedrockService.GetBedrockServerByIndex(serverIndex).SetServerStatus(BedrockServer.ServerStatus.Stopping);
                 while (_bedrockService.GetBedrockServerByIndex(serverIndex).GetServerStatus() == BedrockServer.ServerStatus.Stopping)
                 {
