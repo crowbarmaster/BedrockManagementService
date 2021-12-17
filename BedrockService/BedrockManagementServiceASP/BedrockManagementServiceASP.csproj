@@ -5,6 +5,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>dotnet-BedrockManagementServiceASP-4ABD78ED-14F3-43D6-821D-3F1C9B453A6F</UserSecretsId>
+    <Configurations>Debug;Release;Publish</Configurations>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
