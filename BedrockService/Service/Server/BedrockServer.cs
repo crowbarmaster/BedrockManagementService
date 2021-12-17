@@ -155,10 +155,9 @@ namespace BedrockService.Service.Server {
                     }
                     string exeName = _serverConfiguration.GetProp("ServerExeName").ToString();
                     string appName = exeName.Substring(0, exeName.Length - 4);
-                    if (!MonitoredAppExists(appName) && _currentServerStatus == ServerStatus.Starting) {
-                        StartControl();
-                        _logger.AppendLine($"Recieved start signal for server {_serverConfiguration.GetServerName()}.");
-                        Thread.Sleep(15000);
+                    if (MonitoredAppExists(appName) && _currentServerStatus == ServerStatus.Starting) {
+                        _logger.AppendLine($"BedrockService found {appName} already running! Killing to proceed...");
+                        KillProcesses(Process.GetProcessesByName(appName));
                     }
                     if (MonitoredAppExists(appName) && _currentServerStatus == ServerStatus.Stopping) {
                         _logger.AppendLine($"BedrockService signaled stop to application {appName}.");
@@ -167,6 +166,11 @@ namespace BedrockService.Service.Server {
                         while (_currentServerStatus == ServerStatus.Stopping) {
                             Thread.Sleep(250);
                         }
+                    }
+                    if (!MonitoredAppExists(appName) && _currentServerStatus == ServerStatus.Starting) {
+                        StartControl();
+                        _logger.AppendLine($"Recieved start signal for server {_serverConfiguration.GetServerName()}.");
+                        Thread.Sleep(15000);
                     }
                     if (!MonitoredAppExists(appName) && _currentServerStatus == ServerStatus.Started) {
                         StopControl();
@@ -215,7 +219,7 @@ namespace BedrockService.Service.Server {
                             Process[] processList = Process.GetProcessesByName(appName);
                             if (processList.Length != 0) {
                                 _logger.AppendLine($@"Application {appName} was found running! Killing to proceed.");
-                                KillProcess(processList);
+                                KillProcesses(processList);
                             }
                         }
                         // Fires up a new process to run inside this one
@@ -250,7 +254,7 @@ namespace BedrockService.Service.Server {
             _stdInStream = _serverProcess.StandardInput;
         }
 
-        private void KillProcess(Process[] processList) {
+        private void KillProcesses(Process[] processList) {
             foreach (Process process in processList) {
                 try {
                     process.Kill();
