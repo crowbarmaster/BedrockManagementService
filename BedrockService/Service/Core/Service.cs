@@ -31,8 +31,11 @@ namespace BedrockService.Service.Core {
                                 while (server.GetServerStatus() != BedrockServer.ServerStatus.Stopped)
                                     Thread.Sleep(100);
                             }
+                            Environment.Exit(0);
                         });
                     });
+                    hostConfig.EnableShutdown();
+                    hostConfig.EnableHandleCtrlBreak();
                     hostConfig.RunAsLocalSystem();
                     hostConfig.SetDescription("Windows Service Wrapper for Windows Bedrock Server");
                     hostConfig.SetDisplayName("BedrockService");
@@ -70,6 +73,10 @@ namespace BedrockService.Service.Core {
         }
 
         private void OnStarted() {
+            Task.Run(() => { _host.Run(); });
+        }
+
+        private void OnStopping() {
             Task.Run(() => { _host.Run(); });
         }
     }
