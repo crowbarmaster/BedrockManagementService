@@ -2,6 +2,8 @@
     public interface IProcessInfo {
         string GetDirectory();
 
+        string GetExecutableName();
+
         int GetProcessPID();
 
         bool IsDebugEnabled();
