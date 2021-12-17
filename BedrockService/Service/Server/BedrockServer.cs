@@ -78,10 +78,18 @@ namespace BedrockService.Service.Server
             _watchdogTask.Start();
         }
 
-        private bool Backup()
+        public void InitializeBackup()
+        {
+            WriteToStandardIn("save hold");
+            Task.Delay(1000).Wait();
+            WriteToStandardIn("save query");
+        }
+
+        private bool PerformBackup(string queryString)
         {
             try
             {
+                FileUtils fileUtils = new FileUtils(_servicePath);
                 FileInfo exe = new FileInfo($@"{_serverConfiguration.GetProp("ServerPath")}\{_serverConfiguration.GetProp("ServerExeName")}");
                 string configBackupPath = _serviceConfiguration.GetProp("BackupPath").ToString();
                 DirectoryInfo backupDir = new DirectoryInfo($@"{configBackupPath}\{_serverConfiguration.GetServerName()}");
@@ -90,6 +98,15 @@ namespace BedrockService.Service.Server
                 if (!backupDir.Exists)
                 {
                     backupDir.Create();
+                }
+                Dictionary<string, int> backupFileInfoPairs = new Dictionary<string, int>();
+                string[] files = queryString.Split(", ");
+                foreach (string file in files)
+                {
+                    string[] fileInfoSplit = file.Split(':');
+                    string fileName = fileInfoSplit[0];
+                    int fileSize = int.Parse(fileInfoSplit[1]);
+                    backupFileInfoPairs.Add(fileName, fileSize);
                 }
                 int dirCount = backupDir.GetDirectories().Length;
                 try
@@ -134,11 +151,14 @@ namespace BedrockService.Service.Server
                 _logger.AppendLine($"Backing up files for server {_serverConfiguration.GetServerName()}. Please wait!");
                 if (_serviceConfiguration.GetProp("EntireBackups").ToString() == "false")
                 {
-                    new FileUtils(_servicePath).CopyFilesRecursively(worldsDir, targetDirectory);
-                    return true;
+                    bool resuilt = fileUtils.BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, $@"{targetDirectory.FullName}").Result;
+                    WriteToStandardIn("save resume");
+                    return resuilt;
                 }
-                new FileUtils(_servicePath).CopyFilesRecursively(serverDir, targetDirectory);
-                return true;
+                fileUtils.CopyFilesRecursively(serverDir, targetDirectory);
+                bool result = fileUtils.BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, $@"{targetDirectory.FullName}\{_serverConfiguration.GetProp("level-name")}").Result;
+                WriteToStandardIn("save resume");
+                return result;
             }
             catch (Exception e)
             {
@@ -214,11 +234,6 @@ namespace BedrockService.Service.Server
                 while (_currentServerStatus == ServerStatus.Stopping)
                 {
                     Thread.Sleep(100);
-                }
-                if (ShouldPerformBackup)
-                {
-                    if (!Backup())
-                        return false;
                 }
                 _currentServerStatus = ServerStatus.Starting;
             }
@@ -391,6 +406,21 @@ namespace BedrockService.Service.Server
                             _configurator.ReplaceServerBuild(_serverConfiguration).Wait();
                             StartControl();
                         }
+                    }
+                    if(dataMsg.Contains("A previous save has not been completed."))
+                    {
+                        Task.Delay(1000).Wait();
+                        WriteToStandardIn("save query");
+                    }
+                    if (dataMsg.Contains($@"{_serverConfiguration.GetProp("level-name")}/db/"))
+                    {
+                        _logger.AppendLine("Save data string detected! Performing backup now!");
+                        if (PerformBackup(dataMsg))
+                        {
+                            _logger.AppendLine($"Backup for server {_serverConfiguration.GetServerName()} Completed.");
+                            return;
+                        }
+                        _logger.AppendLine($"Backup for server {_serverConfiguration.GetServerName()} Failed. Check logs!");
                     }
                 }
             }

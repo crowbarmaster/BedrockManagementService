@@ -10,6 +10,7 @@ namespace BedrockService.Service.Server
         bool RestartServer(bool shouldPerformBackup);
         bool RollbackToBackup(byte serverIndex, string folderName);
         Task StopServer(bool stopWatchdog);
+        void InitializeBackup();
         BedrockServer.ServerStatus GetServerStatus();
         void SetServerStatus(BedrockServer.ServerStatus newStatus);
         IPlayerManager GetPlayerManager();

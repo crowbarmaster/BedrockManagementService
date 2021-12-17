@@ -100,7 +100,7 @@ namespace BedrockService.Service.Networking
 
             public void ParseMessage(byte[] data, byte serverIndex)
             {
-                _service.GetBedrockServerByIndex(serverIndex).RestartServer(true);
+                _service.GetBedrockServerByIndex(serverIndex).InitializeBackup();
                 _messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
             }
         }
