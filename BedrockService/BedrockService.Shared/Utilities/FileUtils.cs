@@ -1,8 +1,10 @@
 ﻿using BedrockService.Shared.MincraftJson;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace BedrockService.Shared.Utilities
 {
@@ -75,7 +77,7 @@ namespace BedrockService.Shared.Utilities
                     currentFileContents = File.ReadAllText(path);
                     jArray = JArray.Parse(currentFileContents);
                 }
-                if(type == typeof(WorldPacksJsonModel))
+                if (type == typeof(WorldPacksJsonModel))
                 {
                     foreach (JToken jToken in content)
                     {
@@ -95,10 +97,45 @@ namespace BedrockService.Shared.Utilities
                 }
                 File.WriteAllText(path, jArray.ToString());
             }
-            catch(System.Exception)
+            catch (System.Exception)
             {
                 return;
             }
+        }
+
+        public Task<bool> BackupWorldFilesFromQuery(Dictionary<string, int> fileNameSizePairs, string worldPath, string destinationPath)
+        {
+            return Task.Run<bool>(() =>
+            {
+                try
+                {
+                    foreach (KeyValuePair<string, int> file in fileNameSizePairs)
+                    {
+                        string fileName = file.Key.Replace('/', '\\');
+                        int fileSize = file.Value;
+                        string filePath = $@"{worldPath}\{fileName}";
+                        string destFilePath = $@"{destinationPath}\{fileName}";
+                        byte[] fileData = null;
+                        using (FileStream fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        using (MemoryStream ms = new MemoryStream())
+                        {
+                            fs.CopyTo(ms);
+                            ms.Position = 0;
+                            fileData = ms.ToArray();
+                        }
+                        byte[] destData = new byte[fileSize];
+                        Buffer.BlockCopy(fileData, 0, destData, 0, fileSize);
+                        Directory.CreateDirectory(new FileInfo(destFilePath).DirectoryName);
+                        File.WriteAllBytes(destFilePath, fileData);
+                    }
+                    return true;
+                }
+                catch (System.Exception ex)
+                {
+                    Console.WriteLine($"Error! {ex.Message}");
+                }
+                return false;
+            });
         }
     }
 }
