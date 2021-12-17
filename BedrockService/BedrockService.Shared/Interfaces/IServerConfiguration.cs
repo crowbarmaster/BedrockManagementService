@@ -1,10 +1,8 @@
 ﻿using BedrockService.Shared.Classes;
 using System.Collections.Generic;
 
-namespace BedrockService.Shared.Interfaces
-{
-    public interface IServerConfiguration : IBedrockConfiguration
-    {
+namespace BedrockService.Shared.Interfaces {
+    public interface IServerConfiguration : IBedrockConfiguration {
         string GetServerName();
 
         string GetFileName();

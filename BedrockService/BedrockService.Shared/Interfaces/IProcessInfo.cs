@@ -1,7 +1,5 @@
-﻿namespace BedrockService.Shared.Interfaces
-{
-    public interface IProcessInfo
-    {
+﻿namespace BedrockService.Shared.Interfaces {
+    public interface IProcessInfo {
         string GetDirectory();
 
         string GetExecutableName();

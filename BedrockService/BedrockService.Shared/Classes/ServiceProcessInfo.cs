@@ -1,17 +1,14 @@
 ﻿using BedrockService.Shared.Interfaces;
 
-namespace BedrockService.Shared.Classes
-{
-    public class ServiceProcessInfo : IProcessInfo
-    {
+namespace BedrockService.Shared.Classes {
+    public class ServiceProcessInfo : IProcessInfo {
         private readonly string _serviceDirectory;
         private readonly string _serviceExeName;
         private readonly int _processPid;
         private bool _debugEnabled;
         private bool _isConsoleMode;
 
-        public ServiceProcessInfo(string serviceDirectory, string serviceExeName, int processPid, bool debugEnabled, bool isConsoleMode)
-        {
+        public ServiceProcessInfo(string serviceDirectory, string serviceExeName, int processPid, bool debugEnabled, bool isConsoleMode) {
             _serviceDirectory = serviceDirectory;
             _serviceExeName = serviceExeName;
             _processPid = processPid;
@@ -29,8 +26,7 @@ namespace BedrockService.Shared.Classes
 
         public bool IsConsoleMode() => _isConsoleMode;
 
-        public void SetArguments(bool isDebug, bool isConsole)
-        {
+        public void SetArguments(bool isDebug, bool isConsole) {
             _debugEnabled = isDebug;
             _isConsoleMode = isConsole;
         }

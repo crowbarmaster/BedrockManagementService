@@ -1,8 +1,7 @@
 using BedrockManagementServiceASP;
 
 IHost host = Host.CreateDefaultBuilder(args)
-    .ConfigureServices(services =>
-    {
+    .ConfigureServices(services => {
         services.AddHostedService<Worker>();
     })
     .Build();

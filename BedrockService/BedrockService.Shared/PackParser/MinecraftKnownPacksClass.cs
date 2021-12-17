@@ -3,14 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace BedrockService.Shared.PackParser
-{
-    public class MinecraftKnownPacksClass
-    {
+namespace BedrockService.Shared.PackParser {
+    public class MinecraftKnownPacksClass {
         public List<KnownPack> KnownPacks = new List<KnownPack>();
         private readonly List<KnownPack> _stockPacks = new List<KnownPack>();
-        public class KnownPack
-        {
+        public class KnownPack {
             public int file_version { get; set; }
             public string file_system { get; set; }
             public bool? from_disk { get; set; }
@@ -19,19 +16,16 @@ namespace BedrockService.Shared.PackParser
             public string uuid { get; set; }
             public string version { get; set; }
 
-            public override string ToString()
-            {
+            public override string ToString() {
                 return path;
             }
         }
 
-        public MinecraftKnownPacksClass(string serverFile, string stockFile)
-        {
+        public MinecraftKnownPacksClass(string serverFile, string stockFile) {
             KnownPacks = ParseJsonArray(serverFile);
             _stockPacks = ParseJsonArray(stockFile);
             KnownPacks.RemoveAt(0); // Strip file version entry.
-            foreach (KnownPack pack in _stockPacks)
-            {
+            foreach (KnownPack pack in _stockPacks) {
                 KnownPack packToRemove = new KnownPack();
                 if (pack.uuid == null)
                     continue;
@@ -40,8 +34,7 @@ namespace BedrockService.Shared.PackParser
             }
         }
 
-        public void RemovePackFromServer(string serverPath, MinecraftPackContainer pack)
-        {
+        public void RemovePackFromServer(string serverPath, MinecraftPackContainer pack) {
             if (pack.ManifestType == "WorldPack")
                 Directory.Delete($@"{serverPath}\worlds\{pack.FolderName}", true);
             if (pack.ManifestType == "data")
@@ -55,8 +48,7 @@ namespace BedrockService.Shared.PackParser
             File.WriteAllText($@"{serverPath}\valid_known_packs.json", JArray.FromObject(packsToWrite).ToString());
         }
 
-        private List<KnownPack> ParseJsonArray(string jsonFile)
-        {
+        private List<KnownPack> ParseJsonArray(string jsonFile) {
             JArray packList = JArray.Parse(File.ReadAllText(jsonFile));
             List<KnownPack> parsedPackInfos = new List<KnownPack>();
             foreach (JToken token in packList)

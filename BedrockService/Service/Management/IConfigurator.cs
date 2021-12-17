@@ -1,7 +1,5 @@
-﻿namespace BedrockService.Service.Management
-{
-    public interface IConfigurator
-    {
+﻿namespace BedrockService.Service.Management {
+    public interface IConfigurator {
         void DeleteBackupsForServer(byte serverIndex, List<string> list);
         List<Property> EnumerateBackupsForServer(byte serverIndex);
         Task LoadAllConfigurations();

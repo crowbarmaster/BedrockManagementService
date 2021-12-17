@@ -1,7 +1,5 @@
-﻿namespace BedrockService.Shared.Interfaces
-{
-    public interface IBedrockLogger
-    {
+﻿namespace BedrockService.Shared.Interfaces {
+    public interface IBedrockLogger {
         void AppendLine(string incomingText);
         void AppendText(string incomingText);
         int Count();

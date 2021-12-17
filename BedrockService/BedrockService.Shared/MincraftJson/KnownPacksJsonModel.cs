@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
-namespace BedrockService.Shared.MincraftJson
-{
-    internal class KnownPacksJsonModel
-    {
+namespace BedrockService.Shared.MincraftJson {
+    internal class KnownPacksJsonModel {
         public int file_version { get; set; }
         public string file_system { get; set; }
         public bool? from_disk { get; set; }
@@ -14,8 +10,7 @@ namespace BedrockService.Shared.MincraftJson
         public string uuid { get; set; }
         public string version { get; set; }
 
-        public override string ToString()
-        {
+        public override string ToString() {
             return path;
         }
     }

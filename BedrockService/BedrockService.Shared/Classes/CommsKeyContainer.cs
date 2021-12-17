@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Security.Cryptography;
 
-namespace BedrockService.Shared.Classes
-{
+namespace BedrockService.Shared.Classes {
     [Serializable]
-    public class RSAContainer
-    {
+    public class RSAContainer {
         public byte[] D;
         public byte[] DP;
         public byte[] DQ;
@@ -15,8 +13,7 @@ namespace BedrockService.Shared.Classes
         public byte[] P;
         public byte[] Q;
 
-        public RSAContainer(RSAParameters input)
-        {
+        public RSAContainer(RSAParameters input) {
             D = input.D;
             P = input.DP;
             DP = input.DP;
@@ -27,10 +24,8 @@ namespace BedrockService.Shared.Classes
             Exponent = input.Exponent;
         }
 
-        public RSAParameters GetPrivateKey()
-        {
-            return new RSAParameters()
-            {
+        public RSAParameters GetPrivateKey() {
+            return new RSAParameters() {
                 D = this.D,
                 P = this.P,
                 DP = this.DP,
@@ -42,17 +37,14 @@ namespace BedrockService.Shared.Classes
             };
         }
 
-        public RSAParameters GetPublicKey()
-        {
-            return new RSAParameters()
-            {
+        public RSAParameters GetPublicKey() {
+            return new RSAParameters() {
                 Modulus = this.Modulus,
                 Exponent = this.Exponent
             };
         }
 
-        public void SetPrivateKey(RSAParameters privateKey)
-        {
+        public void SetPrivateKey(RSAParameters privateKey) {
             this.D = privateKey.D;
             this.DP = privateKey.DP;
             this.P = privateKey.P;
@@ -63,16 +55,14 @@ namespace BedrockService.Shared.Classes
             this.Exponent = privateKey.Exponent;
         }
 
-        public void SetPublicKey(RSAParameters publicKey)
-        {
+        public void SetPublicKey(RSAParameters publicKey) {
             this.Exponent = publicKey.Exponent;
             this.Modulus = publicKey.Modulus;
         }
     }
 
     [Serializable]
-    public class CommsKeyContainer
-    {
+    public class CommsKeyContainer {
         public RSAContainer LocalPrivateKey = new RSAContainer(new RSAParameters());
         public RSAContainer RemotePublicKey = new RSAContainer(new RSAParameters());
         public byte[] AesKey;
@@ -80,8 +70,7 @@ namespace BedrockService.Shared.Classes
 
         public CommsKeyContainer() { }
 
-        public CommsKeyContainer(RSAParameters priv, RSAParameters pub, byte[] key, byte[] IV)
-        {
+        public CommsKeyContainer(RSAParameters priv, RSAParameters pub, byte[] key, byte[] IV) {
             LocalPrivateKey = new RSAContainer(priv);
             RemotePublicKey = new RSAContainer(pub);
             AesKey = key;

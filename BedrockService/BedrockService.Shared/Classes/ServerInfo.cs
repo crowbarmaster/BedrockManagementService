@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BedrockService.Shared.Classes
-{
-    public class ServerInfo : IServerConfiguration
-    {
+namespace BedrockService.Shared.Classes {
+    public class ServerInfo : IServerConfiguration {
         public string serversPath;
         public string ServerName { get; set; }
         public string FileName { get; set; }
@@ -16,15 +14,13 @@ namespace BedrockService.Shared.Classes
         public List<Property> ServerPropList = new List<Property>();
         public List<StartCmdEntry> StartCmds = new List<StartCmdEntry>();
 
-        public ServerInfo(string[] configEntries, string coreServersPath)
-        {
+        public ServerInfo(string[] configEntries, string coreServersPath) {
             serversPath = coreServersPath;
             InitializeDefaults();
             ProcessConfiguration(configEntries);
         }
 
-        public void InitializeDefaults()
-        {
+        public void InitializeDefaults() {
             ServerName = "Default";
             FileName = "Default.conf";
             ServerPath = new Property("ServerPath", $@"{serversPath}\{ServerName}");
@@ -62,26 +58,20 @@ namespace BedrockService.Shared.Classes
 
         public void SetStartCommands(List<StartCmdEntry> newEntries) => StartCmds = newEntries;
 
-        public void ProcessConfiguration(string[] fileEntries)
-        {
+        public void ProcessConfiguration(string[] fileEntries) {
             if (fileEntries == null)
                 return;
-            foreach (string line in fileEntries)
-            {
-                if (!line.StartsWith("#") && !string.IsNullOrEmpty(line))
-                {
+            foreach (string line in fileEntries) {
+                if (!line.StartsWith("#") && !string.IsNullOrEmpty(line)) {
                     string[] split = line.Split('=');
-                    if (split.Length == 1)
-                    {
+                    if (split.Length == 1) {
                         split = new string[] { split[0], "" };
                     }
                     Property SrvProp = ServerPropList.FirstOrDefault(prop => prop.KeyName == split[0]);
-                    if (SrvProp != null)
-                    {
+                    if (SrvProp != null) {
                         SetProp(split[0], split[1]);
                     }
-                    switch (split[0])
-                    {
+                    switch (split[0]) {
                         case "server-name":
                             ServerName = split[1];
                             ServerPath.SetValue($@"{serversPath}\{ServerName}");
@@ -97,43 +87,34 @@ namespace BedrockService.Shared.Classes
             }
         }
 
-        public bool SetProp(string name, string newValue)
-        {
-            try
-            {
+        public bool SetProp(string name, string newValue) {
+            try {
                 Property serverProp = ServerPropList.First(prop => prop.KeyName == name);
                 ServerPropList[ServerPropList.IndexOf(serverProp)].SetValue(newValue);
                 return true;
             }
-            catch
-            {
+            catch {
 
             }
             return false;
         }
 
-        public bool SetProp(Property propToSet)
-        {
-            try
-            {
+        public bool SetProp(Property propToSet) {
+            try {
                 Property serverProp = ServerPropList.First(prop => prop.KeyName == propToSet.KeyName);
                 ServerPropList[ServerPropList.IndexOf(serverProp)] = propToSet;
                 return true;
             }
-            catch
-            {
+            catch {
 
             }
             return false;
         }
 
-        public Property GetProp(string name)
-        {
+        public Property GetProp(string name) {
             Property foundProp = ServerPropList.FirstOrDefault(prop => prop.KeyName == name);
-            if (foundProp == null)
-            {
-                switch (name)
-                {
+            if (foundProp == null) {
+                switch (name) {
                     case "ServerPath":
                         return ServerPath;
                     case "ServerExeName":
@@ -145,26 +126,22 @@ namespace BedrockService.Shared.Classes
 
         public void SetAllInfos() => throw new System.NotImplementedException();
 
-        public void AddStartCommand(string command)
-        {
+        public void AddStartCommand(string command) {
             StartCmds.Add(new StartCmdEntry(command));
         }
 
-        public bool DeleteStartCommand(string command)
-        {
+        public bool DeleteStartCommand(string command) {
             StartCmdEntry entry = StartCmds.FirstOrDefault(prop => prop.Command == command);
             return StartCmds.Remove(entry);
         }
 
         public List<StartCmdEntry> GetStartCommands() => StartCmds;
 
-        public override string ToString()
-        {
+        public override string ToString() {
             return ServerName;
         }
 
-        public override int GetHashCode()
-        {
+        public override int GetHashCode() {
             int hashCode = -298215838;
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ServerName);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(FileName);
@@ -172,8 +149,7 @@ namespace BedrockService.Shared.Classes
             return hashCode;
         }
 
-        public override bool Equals(object obj)
-        {
+        public override bool Equals(object obj) {
             return obj is ServerInfo info &&
                    ServerName == info.ServerName &&
                    EqualityComparer<Property>.Default.Equals(ServerPath, info.ServerPath);
@@ -185,29 +161,24 @@ namespace BedrockService.Shared.Classes
 
         public void SetAllProps(List<Property> newPropList) => ServerPropList = newPropList;
 
-        public void AddUpdatePlayer(IPlayer player)
-        {
+        public void AddUpdatePlayer(IPlayer player) {
             IPlayer foundPlayer = PlayersList.FirstOrDefault(p => p.GetXUID() == player.GetXUID());
-            if (foundPlayer == null)
-            {
+            if (foundPlayer == null) {
                 PlayersList.Add(player);
                 return;
             }
             PlayersList[PlayersList.IndexOf(foundPlayer)] = player;
         }
 
-        public IPlayer GetPlayerByXuid(string xuid)
-        {
+        public IPlayer GetPlayerByXuid(string xuid) {
             IPlayer foundPlayer = PlayersList.FirstOrDefault(p => p.GetXUID() == xuid);
-            if (foundPlayer == null)
-            {
+            if (foundPlayer == null) {
                 return null;
             }
             return foundPlayer;
         }
 
-        public string GetFileName()
-        {
+        public string GetFileName() {
             return FileName;
         }
 

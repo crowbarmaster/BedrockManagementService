@@ -1,10 +1,8 @@
 ﻿using Newtonsoft.Json;
 using System.Text;
 
-namespace BedrockService.Service.Logging
-{
-    public class ServiceLogger : IBedrockLogger
-    {
+namespace BedrockService.Service.Logging {
+    public class ServiceLogger : IBedrockLogger {
         private readonly IServiceConfiguration _serviceConfiguration;
         private StringBuilder _outputString = new StringBuilder();
         [NonSerialized]
@@ -14,14 +12,12 @@ namespace BedrockService.Service.Logging
         private readonly string _parent = "Service";
         private readonly string _logPath;
 
-        public ServiceLogger(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration)
-        {
+        public ServiceLogger(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration) {
             _serviceConfiguration = serviceConfiguration;
             _logPath = $@"{processInfo.GetDirectory()}\Service\Logs";
             _logToFile = bool.Parse(serviceConfiguration.GetProp("LogServiceToFile").ToString());
             _logToConsole = true;
-            if (_logToFile)
-            {
+            if (_logToFile) {
                 if (!Directory.Exists(_logPath))
                     Directory.CreateDirectory(_logPath);
                 _logWriter = new StreamWriter($@"{_logPath}\ServiceLog_{_parent}_{DateTime.Now:yyyymmddhhmmss}.log", true);
@@ -29,68 +25,54 @@ namespace BedrockService.Service.Logging
         }
 
         [JsonConstructor]
-        public ServiceLogger(IServiceConfiguration serviceConfiguration, string serverName)
-        {
+        public ServiceLogger(IServiceConfiguration serviceConfiguration, string serverName) {
             _serviceConfiguration = serviceConfiguration;
             _parent = serverName;
             _logToFile = false;
             _logToConsole = false;
         }
 
-        public void AppendLine(string text)
-        {
-            try
-            {
+        public void AppendLine(string text) {
+            try {
                 _serviceConfiguration.GetLog().Add(text);
-                if (_logToFile && _logWriter != null)
-                {
+                if (_logToFile && _logWriter != null) {
                     _logWriter.WriteLine(text);
                     _logWriter.Flush();
                 }
                 if (_logToConsole)
                     Console.WriteLine(text);
             }
-            catch
-            {
+            catch {
             }
         }
 
-        public void AppendText(string text)
-        {
-            try
-            {
+        public void AppendText(string text) {
+            try {
                 _serviceConfiguration.GetLog().Add(text);
-                if (_logToFile && _logWriter != null)
-                {
+                if (_logToFile && _logWriter != null) {
                     _logWriter.Write(text);
                     _logWriter.Flush();
                 }
-                if (_logToConsole)
-                {
+                if (_logToConsole) {
                     Console.Write(text);
                     Console.Out.Flush();
                 }
             }
-            catch
-            {
+            catch {
             }
         }
 
-        public int Count()
-        {
+        public int Count() {
             return _serviceConfiguration.GetLog().Count;
         }
 
-        public string FromIndex(int index)
-        {
+        public string FromIndex(int index) {
             return _serviceConfiguration.GetLog()[index];
         }
 
-        public override string ToString()
-        {
+        public override string ToString() {
             _outputString = new StringBuilder();
-            foreach (string s in _serviceConfiguration.GetLog())
-            {
+            foreach (string s in _serviceConfiguration.GetLog()) {
                 _outputString.Append(s);
             }
             return _outputString.ToString();

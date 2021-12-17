@@ -9,7 +9,6 @@ global using BedrockService.Service.Networking;
 global using BedrockService.Shared.Classes;
 global using BedrockService.Shared.Interfaces;
 global using Microsoft.AspNetCore.Hosting;
-global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 global using System;
@@ -23,24 +22,19 @@ global using System.Threading.Tasks;
 global using Topshelf;
 using BedrockService.Service.Core.Interfaces;
 
-namespace BedrockService.Service
-{
-    public class Program
-    {
+namespace BedrockService.Service {
+    public class Program {
         public static bool IsExiting = false;
         private static bool _isDebugEnabled = false;
         private static bool _isConsoleMode = false;
         private static CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
         private static CancellationToken token = CancellationTokenSource.Token;
-        public static void Main(string[] args)
-        {
-            if (args.Length > 0)
-            {
+        public static void Main(string[] args) {
+            if (args.Length > 0) {
                 Console.WriteLine(string.Join(" ", args));
                 _isDebugEnabled = args[0].ToLower() == "-debug";
             }
-            if (args.Length == 0 || Environment.UserInteractive)
-            {
+            if (args.Length == 0 || Environment.UserInteractive) {
                 _isConsoleMode = true;
             }
             CreateHostBuilder(args).Build().Run();
@@ -48,8 +42,7 @@ namespace BedrockService.Service
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
-                .ConfigureServices((hostContext, services) =>
-                {
+                .ConfigureServices((hostContext, services) => {
                     IProcessInfo processInfo = new ServiceProcessInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Path.GetFileName(Assembly.GetExecutingAssembly().Location), Process.GetCurrentProcess().Id, _isDebugEnabled, _isConsoleMode);
                     services.AddHostedService<Core.Service>()
                         .AddSingleton(processInfo)

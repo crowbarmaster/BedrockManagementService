@@ -1,22 +1,18 @@
-﻿namespace BedrockService.Shared.Classes
-{
-    public enum NetworkMessageSource
-    {
+﻿namespace BedrockService.Shared.Classes {
+    public enum NetworkMessageSource {
         Client,
         Server,
         Service
     }
 
 
-    public enum NetworkMessageDestination
-    {
+    public enum NetworkMessageDestination {
         Client,
         Server,
         Service
     }
 
-    public enum NetworkMessageTypes
-    {
+    public enum NetworkMessageTypes {
         Connect,
         AddNewServer,
         RemoveServer,
@@ -43,8 +39,7 @@
         UICallback
     }
 
-    public enum NetworkMessageFlags
-    {
+    public enum NetworkMessageFlags {
         Failed,
         Passed,
         RemoveBackups,

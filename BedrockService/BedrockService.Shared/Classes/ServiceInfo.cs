@@ -3,10 +3,8 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BedrockService.Shared.Classes
-{
-    public class ServiceInfo : IServiceConfiguration
-    {
+namespace BedrockService.Shared.Classes {
+    public class ServiceInfo : IServiceConfiguration {
         private string hostName { get; set; }
         private string address { get; set; }
         private string hostDisplayName { get; set; }
@@ -20,14 +18,12 @@ namespace BedrockService.Shared.Classes
         private List<Property> globals = new List<Property>();
         private readonly IProcessInfo _processInfo;
 
-        public ServiceInfo(IProcessInfo processInfo)
-        {
+        public ServiceInfo(IProcessInfo processInfo) {
             _processInfo = processInfo;
             InitializeDefaults();
         }
 
-        public void InitializeDefaults()
-        {
+        public void InitializeDefaults() {
             globals.Clear();
             globals.Add(new Property("ServersPath", @"C:\MCBedrockService"));
             globals.Add(new Property("AcceptedMojangLic", "false"));
@@ -43,62 +39,49 @@ namespace BedrockService.Shared.Classes
             globals.Add(new Property("LogServiceToFile", "true"));
         }
 
-        public void ProcessConfiguration(string[] fileEntries)
-        {
-            foreach (string line in fileEntries)
-            {
-                if (!line.StartsWith("#") && !string.IsNullOrEmpty(line))
-                {
+        public void ProcessConfiguration(string[] fileEntries) {
+            foreach (string line in fileEntries) {
+                if (!line.StartsWith("#") && !string.IsNullOrEmpty(line)) {
                     string[] split = line.Split('=');
-                    if (split.Length == 1)
-                    {
+                    if (split.Length == 1) {
                         split[1] = "";
                     }
-                    if (split[0] == "BackupPath")
-                    {
+                    if (split[0] == "BackupPath") {
                         if (split[1] == "Default")
                             split[1] = $@"{_processInfo.GetDirectory()}\Server\Backups";
                     }
-                    if (!SetProp(split[0], split[1]))
-                    {
+                    if (!SetProp(split[0], split[1])) {
                         //Logger.AppendLine($"Error! Key \"{split[0]}\" was not found! Check configs!");
                     }
                 }
             }
         }
 
-        public bool SetProp(string name, string newValue)
-        {
-            try
-            {
+        public bool SetProp(string name, string newValue) {
+            try {
                 Property GlobalToEdit = globals.First(glob => glob.KeyName == name);
                 globals[globals.IndexOf(GlobalToEdit)].SetValue(newValue);
                 return true;
             }
-            catch
-            {
+            catch {
                 // handle soon.
                 return false;
             }
         }
 
-        public bool SetProp(Property propToSet)
-        {
-            try
-            {
+        public bool SetProp(Property propToSet) {
+            try {
                 Property GlobalToEdit = globals.First(glob => glob.KeyName == propToSet.KeyName);
                 globals[globals.IndexOf(GlobalToEdit)] = propToSet;
             }
-            catch
-            {
+            catch {
                 // handle soon.
                 return false;
             }
             return true;
         }
 
-        public Property GetProp(string name)
-        {
+        public Property GetProp(string name) {
             return globals.FirstOrDefault(prop => prop.KeyName == name);
         }
 
@@ -106,40 +89,33 @@ namespace BedrockService.Shared.Classes
 
         public void SetAllProps(List<Property> props) => globals = props;
 
-        public IServerConfiguration GetServerInfoByName(string serverName)
-        {
+        public IServerConfiguration GetServerInfoByName(string serverName) {
             return ServerList.FirstOrDefault(info => info.GetServerName() == serverName);
         }
 
-        public IServerConfiguration GetServerInfoByIndex(int index)
-        {
+        public IServerConfiguration GetServerInfoByIndex(int index) {
             return ServerList[index];
         }
 
-        public void RemoveServerInfo(IServerConfiguration serverConfiguration)
-        {
+        public void RemoveServerInfo(IServerConfiguration serverConfiguration) {
             ServerList.Remove(serverConfiguration.GetServerInfo());
         }
 
-        public void SetServerInfo(IServerConfiguration newInfo)
-        {
+        public void SetServerInfo(IServerConfiguration newInfo) {
             ServerList[ServerList.IndexOf(newInfo.GetServerInfo())] = newInfo.GetServerInfo();
         }
 
         public List<IServerConfiguration> GetServerList() => ServerList;
 
-        public void SetAllServerInfos(List<IServerConfiguration> newInfos)
-        {
+        public void SetAllServerInfos(List<IServerConfiguration> newInfos) {
             ServerList = newInfos;
         }
 
-        public void AddNewServerInfo(IServerConfiguration serverConfiguration)
-        {
+        public void AddNewServerInfo(IServerConfiguration serverConfiguration) {
             ServerList.Add(serverConfiguration);
         }
 
-        public void RemoveServerInfoByIndex(int serverIndex)
-        {
+        public void RemoveServerInfoByIndex(int serverIndex) {
             ServerList.RemoveAt(serverIndex);
         }
 

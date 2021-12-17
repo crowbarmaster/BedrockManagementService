@@ -1,10 +1,8 @@
 ﻿using BedrockService.Shared.Classes;
 using System.Collections.Generic;
 
-namespace BedrockService.Shared.Interfaces
-{
-    public interface IBedrockConfiguration
-    {
+namespace BedrockService.Shared.Interfaces {
+    public interface IBedrockConfiguration {
 
         void InitializeDefaults();
 

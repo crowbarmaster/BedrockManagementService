@@ -1,9 +1,7 @@
 ﻿using BedrockService.Service.Networking.MessageInterfaces;
 
-namespace BedrockService.Service.Networking
-{
-    public interface ITCPListener : IMessageSender
-    {
+namespace BedrockService.Service.Networking {
+    public interface ITCPListener : IMessageSender {
         Task StartListening();
 
         void ResetListener();

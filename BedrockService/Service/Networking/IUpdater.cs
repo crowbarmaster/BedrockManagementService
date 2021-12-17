@@ -1,7 +1,5 @@
-﻿namespace BedrockService.Service.Networking
-{
-    public interface IUpdater
-    {
+﻿namespace BedrockService.Service.Networking {
+    public interface IUpdater {
         Task CheckUpdates();
         Task FetchBuild(string path, string version);
         bool CheckVersionChanged();

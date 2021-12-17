@@ -1,7 +1,5 @@
-﻿namespace BedrockService.Service.Server.Management
-{
-    public interface IPlayerManager
-    {
+﻿namespace BedrockService.Service.Server.Management {
+    public interface IPlayerManager {
         IPlayer GetPlayerByXUID(string xuid);
         void SetPlayer(IPlayer player);
         List<IPlayer> GetPlayers();

@@ -6,30 +6,24 @@ using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
 
-namespace BedrockService.Client.Forms
-{
-    public partial class PropEditorForm : Form
-    {
+namespace BedrockService.Client.Forms {
+    public partial class PropEditorForm : Form {
         readonly DataGridView dataGrid;
         public List<Property> workingProps;
         public List<StartCmdEntry> startCmds;
         public string RollbackFolderName = "";
 
-        public PropEditorForm()
-        {
+        public PropEditorForm() {
             InitializeComponent();
             dataGrid = gridView;
         }
 
-        public void PopulateBoxes(List<Property> propList)
-        {
+        public void PopulateBoxes(List<Property> propList) {
             int index = 0;
             workingProps = propList;
-            foreach (Property prop in workingProps)
-            {
+            foreach (Property prop in workingProps) {
                 dataGrid.Rows.Add(new string[2] { prop.KeyName, prop.Value });
-                if (prop.KeyName == "server-name" || prop.KeyName == "server-port" || prop.KeyName == "server-portv6")
-                {
+                if (prop.KeyName == "server-name" || prop.KeyName == "server-port" || prop.KeyName == "server-portv6") {
                     dataGrid.Rows[index].ReadOnly = true;
                     dataGrid.Rows[index].DefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(225, 225, 225);
                 }
@@ -38,39 +32,31 @@ namespace BedrockService.Client.Forms
             gridView.AllowUserToAddRows = false;
         }
 
-        public void PopulateStartCmds(List<StartCmdEntry> list)
-        {
+        public void PopulateStartCmds(List<StartCmdEntry> list) {
             startCmds = list;
             gridView.Columns.RemoveAt(0);
             gridView.AllowUserToDeleteRows = true;
-            foreach (StartCmdEntry entry in startCmds)
-            {
+            foreach (StartCmdEntry entry in startCmds) {
                 dataGrid.Rows.Add(new string[1] { entry.Command });
             }
         }
 
-        public void EnableBackupManager()
-        {
+        public void EnableBackupManager() {
             gridView.MultiSelect = true;
             DelBackupBtn.Enabled = true;
             DelBackupBtn.Visible = true;
             SaveBtn.Text = "Rollback this date";
         }
 
-        private void CancelBtn_Click(object sender, EventArgs e)
-        {
+        private void CancelBtn_Click(object sender, EventArgs e) {
             Close();
             Dispose();
         }
 
-        private void SaveBtn_Click(object sender, EventArgs e)
-        {
-            if (DelBackupBtn.Enabled)
-            {
-                if (dataGrid.SelectedRows.Count == 0)
-                {
-                    if (dataGrid.SelectedCells.Count == 1)
-                    {
+        private void SaveBtn_Click(object sender, EventArgs e) {
+            if (DelBackupBtn.Enabled) {
+                if (dataGrid.SelectedRows.Count == 0) {
+                    if (dataGrid.SelectedCells.Count == 1) {
                         dataGrid.SelectedCells[0].OwningRow.Selected = true;
                     }
                 }
@@ -80,20 +66,15 @@ namespace BedrockService.Client.Forms
                 Close();
             }
             startCmds = new List<StartCmdEntry>();
-            foreach (DataGridViewRow row in dataGrid.Rows)
-            {
-                if (workingProps != null)
-                {
-                    foreach (Property prop in workingProps)
-                    {
-                        if ((string)row.Cells[0].Value == prop.KeyName)
-                        {
+            foreach (DataGridViewRow row in dataGrid.Rows) {
+                if (workingProps != null) {
+                    foreach (Property prop in workingProps) {
+                        if ((string)row.Cells[0].Value == prop.KeyName) {
                             prop.Value = (string)row.Cells[1].Value;
                         }
                     }
                 }
-                else
-                {
+                else {
                     if ((string)row.Cells[0].Value != null)
                         startCmds.Add(new StartCmdEntry((string)row.Cells[0].Value));
                 }
@@ -103,19 +84,15 @@ namespace BedrockService.Client.Forms
             Close();
         }
 
-        private void gridView_NewRowNeeded(object sender, DataGridViewRowEventArgs e)
-        {
+        private void gridView_NewRowNeeded(object sender, DataGridViewRowEventArgs e) {
             DataGridViewRow focusedRow = gridView.CurrentRow;
             focusedRow.Cells[0].Value = "Cmd:";
             gridView.Refresh();
         }
 
-        private void DelBackupBtn_Click(object sender, EventArgs e)
-        {
-            if (dataGrid.SelectedRows.Count == 0)
-            {
-                if (dataGrid.SelectedCells.Count == 1)
-                {
+        private void DelBackupBtn_Click(object sender, EventArgs e) {
+            if (dataGrid.SelectedRows.Count == 0) {
+                if (dataGrid.SelectedCells.Count == 1) {
                     dataGrid.SelectedCells[0].OwningRow.Selected = true;
                 }
             }
@@ -123,8 +100,7 @@ namespace BedrockService.Client.Forms
             if (dataGrid.SelectedRows.Count > 0)
                 foreach (DataGridViewRow viewRow in dataGrid.SelectedRows)
                     removeBackups.Add((string)viewRow.Cells[0].Value);
-            JsonSerializerSettings settings = new JsonSerializerSettings()
-            {
+            JsonSerializerSettings settings = new JsonSerializerSettings() {
                 TypeNameHandling = TypeNameHandling.All
             };
             byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(removeBackups, Formatting.Indented, settings));

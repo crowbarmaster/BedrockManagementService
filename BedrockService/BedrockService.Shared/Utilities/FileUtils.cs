@@ -6,25 +6,20 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BedrockService.Shared.Utilities
-{
-    public class FileUtils
-    {
+namespace BedrockService.Shared.Utilities {
+    public class FileUtils {
         readonly string _servicePath;
-        public FileUtils(string servicePath)
-        {
+        public FileUtils(string servicePath) {
             _servicePath = servicePath;
         }
-        public void CopyFilesRecursively(DirectoryInfo source, DirectoryInfo target)
-        {
+        public void CopyFilesRecursively(DirectoryInfo source, DirectoryInfo target) {
             foreach (DirectoryInfo dir in source.GetDirectories())
                 CopyFilesRecursively(dir, target.CreateSubdirectory(dir.Name));
             foreach (FileInfo file in source.GetFiles())
                 file.CopyTo(Path.Combine(target.FullName, file.Name), true);
         }
 
-        public void DeleteFilesRecursively(DirectoryInfo source, bool removeSourceFolder)
-        {
+        public void DeleteFilesRecursively(DirectoryInfo source, bool removeSourceFolder) {
             foreach (DirectoryInfo dir in source.GetDirectories())
                 DeleteFilesRecursively(dir, removeSourceFolder);
             foreach (FileInfo file in source.GetFiles())
@@ -35,8 +30,7 @@ namespace BedrockService.Shared.Utilities
                 source.Delete(true);
         }
 
-        public void ClearTempDir()
-        {
+        public void ClearTempDir() {
             DirectoryInfo tempDirectory = new DirectoryInfo($@"{_servicePath}\Temp");
             if (!tempDirectory.Exists)
                 tempDirectory.Create();
@@ -46,11 +40,9 @@ namespace BedrockService.Shared.Utilities
                 directory.Delete(true);
         }
 
-        public void DeleteFilelist(string[] fileList, string serverPath)
-        {
+        public void DeleteFilelist(string[] fileList, string serverPath) {
             foreach (string file in fileList)
-                try
-                {
+                try {
                     File.Delete($@"{serverPath}\{file}");
                 }
                 catch { }
@@ -66,59 +58,45 @@ namespace BedrockService.Shared.Utilities
 
         public void WriteStringArrayToFile(string path, string[] content) => File.WriteAllLines(path, content);
 
-        public void UpdateJArrayFile(string path, JArray content, System.Type type)
-        {
-            try
-            {
+        public void UpdateJArrayFile(string path, JArray content, System.Type type) {
+            try {
                 string currentFileContents = null;
                 JArray jArray = new JArray();
-                if (File.Exists(path))
-                {
+                if (File.Exists(path)) {
                     currentFileContents = File.ReadAllText(path);
                     jArray = JArray.Parse(currentFileContents);
                 }
-                if (type == typeof(WorldPacksJsonModel))
-                {
-                    foreach (JToken jToken in content)
-                    {
+                if (type == typeof(WorldPacksJsonModel)) {
+                    foreach (JToken jToken in content) {
                         bool doesContainToken = false;
-                        foreach (JToken currentToken in jArray)
-                        {
-                            if (currentToken.ToObject<WorldPacksJsonModel>().pack_id == jToken.ToObject<WorldPacksJsonModel>().pack_id)
-                            {
+                        foreach (JToken currentToken in jArray) {
+                            if (currentToken.ToObject<WorldPacksJsonModel>().pack_id == jToken.ToObject<WorldPacksJsonModel>().pack_id) {
                                 doesContainToken = true;
                             }
                         }
-                        if (!doesContainToken)
-                        {
+                        if (!doesContainToken) {
                             jArray.Add(jToken);
                         }
                     }
                 }
                 File.WriteAllText(path, jArray.ToString());
             }
-            catch (System.Exception)
-            {
+            catch (System.Exception) {
                 return;
             }
         }
 
-        public Task<bool> BackupWorldFilesFromQuery(Dictionary<string, int> fileNameSizePairs, string worldPath, string destinationPath)
-        {
-            return Task.Run<bool>(() =>
-            {
-                try
-                {
-                    foreach (KeyValuePair<string, int> file in fileNameSizePairs)
-                    {
+        public Task<bool> BackupWorldFilesFromQuery(Dictionary<string, int> fileNameSizePairs, string worldPath, string destinationPath) {
+            return Task.Run<bool>(() => {
+                try {
+                    foreach (KeyValuePair<string, int> file in fileNameSizePairs) {
                         string fileName = file.Key.Replace('/', '\\');
                         int fileSize = file.Value;
                         string filePath = $@"{worldPath}\{fileName}";
                         string destFilePath = $@"{destinationPath}\{fileName}";
                         byte[] fileData = null;
                         using (FileStream fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                        using (MemoryStream ms = new MemoryStream())
-                        {
+                        using (MemoryStream ms = new MemoryStream()) {
                             fs.CopyTo(ms);
                             ms.Position = 0;
                             fileData = ms.ToArray();
@@ -130,8 +108,7 @@ namespace BedrockService.Shared.Utilities
                     }
                     return true;
                 }
-                catch (System.Exception ex)
-                {
+                catch (System.Exception ex) {
                     Console.WriteLine($"Error! {ex.Message}");
                 }
                 return false;

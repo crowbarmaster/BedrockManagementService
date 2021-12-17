@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 
-namespace BedrockService.Shared.Interfaces
-{
-    public interface IServiceConfiguration : IBedrockConfiguration
-    {
+namespace BedrockService.Shared.Interfaces {
+    public interface IServiceConfiguration : IBedrockConfiguration {
         IServerConfiguration GetServerInfoByName(string serverName);
 
         IServerConfiguration GetServerInfoByIndex(int index);
