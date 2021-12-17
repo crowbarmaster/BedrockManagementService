@@ -182,8 +182,7 @@ namespace BedrockService.Service.Core
                 }
                 if (_serviceConfiguration.GetProp("BackupEnabled").ToString() == "true" && _shed != null)
                 {
-                    Backup();
-
+                    BackupAllServers();
                     _cronTimer = new System.Timers.Timer((_shed.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
                     _cronTimer.Elapsed += CronTimer_Elapsed;
                     _cronTimer.Start();
@@ -227,12 +226,12 @@ namespace BedrockService.Service.Core
             }
         }
 
-        private void Backup()
+        private void BackupAllServers()
         {
             _logger.AppendLine("Service started backup manager.");
             foreach (var brs in _bedrockServers)
             {
-                brs.RestartServer(true);
+                brs.InitializeBackup();
             }
             _logger.AppendLine("Backups have been completed.");
         }
