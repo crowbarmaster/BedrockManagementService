@@ -40,11 +40,11 @@ namespace BedrockService.Client.Forms
             // 
             // CancelBtn
             // 
-            this.CancelBtn.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.CancelBtn.Location = new System.Drawing.Point(27, 628);
-            this.CancelBtn.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.CancelBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.CancelBtn.Location = new System.Drawing.Point(13, 322);
+            this.CancelBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.CancelBtn.Name = "CancelBtn";
-            this.CancelBtn.Size = new System.Drawing.Size(333, 45);
+            this.CancelBtn.Size = new System.Drawing.Size(170, 30);
             this.CancelBtn.TabIndex = 48;
             this.CancelBtn.Text = "Cancel";
             this.CancelBtn.UseVisualStyleBackColor = true;
@@ -52,11 +52,11 @@ namespace BedrockService.Client.Forms
             // 
             // SaveBtn
             // 
-            this.SaveBtn.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.SaveBtn.Location = new System.Drawing.Point(936, 628);
-            this.SaveBtn.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.SaveBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.SaveBtn.Location = new System.Drawing.Point(531, 322);
+            this.SaveBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.SaveBtn.Name = "SaveBtn";
-            this.SaveBtn.Size = new System.Drawing.Size(333, 45);
+            this.SaveBtn.Size = new System.Drawing.Size(170, 30);
             this.SaveBtn.TabIndex = 49;
             this.SaveBtn.Text = "Save";
             this.SaveBtn.UseVisualStyleBackColor = true;
@@ -72,12 +72,12 @@ namespace BedrockService.Client.Forms
             this.gridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.EntryKey,
             this.EntryData});
-            this.gridView.Location = new System.Drawing.Point(21, 25);
-            this.gridView.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.gridView.Location = new System.Drawing.Point(13, 15);
+            this.gridView.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.gridView.MultiSelect = false;
             this.gridView.Name = "gridView";
             this.gridView.RowHeadersWidth = 62;
-            this.gridView.Size = new System.Drawing.Size(1248, 560);
+            this.gridView.Size = new System.Drawing.Size(686, 301);
             this.gridView.TabIndex = 1;
             this.gridView.NewRowNeeded += new System.Windows.Forms.DataGridViewRowEventHandler(this.gridView_NewRowNeeded);
             // 
@@ -94,16 +94,17 @@ namespace BedrockService.Client.Forms
             this.EntryData.HeaderText = "Value:";
             this.EntryData.MinimumWidth = 8;
             this.EntryData.Name = "EntryData";
-            this.EntryData.Width = 500;
+            this.EntryData.Width = 300;
             // 
             // DelBackupBtn
             // 
-            this.DelBackupBtn.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.DelBackupBtn.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.DelBackupBtn.Enabled = false;
-            this.DelBackupBtn.Location = new System.Drawing.Point(488, 628);
-            this.DelBackupBtn.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.DelBackupBtn.Location = new System.Drawing.Point(271, 322);
+            this.DelBackupBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.DelBackupBtn.Name = "DelBackupBtn";
-            this.DelBackupBtn.Size = new System.Drawing.Size(333, 45);
+            this.DelBackupBtn.Size = new System.Drawing.Size(170, 30);
             this.DelBackupBtn.TabIndex = 50;
             this.DelBackupBtn.Text = "Delete Backup";
             this.DelBackupBtn.UseVisualStyleBackColor = true;
@@ -112,14 +113,16 @@ namespace BedrockService.Client.Forms
             // 
             // PropEditorForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1344, 766);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.ClientSize = new System.Drawing.Size(714, 361);
             this.Controls.Add(this.DelBackupBtn);
             this.Controls.Add(this.gridView);
             this.Controls.Add(this.SaveBtn);
             this.Controls.Add(this.CancelBtn);
-            this.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.MinimumSize = new System.Drawing.Size(730, 145);
             this.Name = "PropEditorForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Form1";
