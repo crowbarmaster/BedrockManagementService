@@ -43,7 +43,7 @@ namespace BedrockService.Service {
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hostContext, services) => {
-                    IProcessInfo processInfo = new ServiceProcessInfo(hostContext.HostingEnvironment.ContentRootPath, Process.GetCurrentProcess().Id, _isDebugEnabled, _isConsoleMode);
+                    IProcessInfo processInfo = new ServiceProcessInfo(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), Process.GetCurrentProcess().Id, _isDebugEnabled, _isConsoleMode);
                     services.AddHostedService<Core.Service>()
                         .AddSingleton(processInfo)
                         .AddSingleton<NetworkStrategyLookup>()

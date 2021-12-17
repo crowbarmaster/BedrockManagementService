@@ -22,6 +22,7 @@ namespace BedrockService.Service.Logging {
                     Directory.CreateDirectory(_logPath);
                 _logWriter = new StreamWriter($@"{_logPath}\ServiceLog_{_parent}_{DateTime.Now:yyyymmddhhmmss}.log", true);
             }
+            AppendLine($"Service logging started. Service working directory: {processInfo.GetDirectory()}");
         }
 
         [JsonConstructor]
