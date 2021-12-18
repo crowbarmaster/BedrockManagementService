@@ -42,57 +42,64 @@ namespace BedrockService.Client.Forms
             // 
             // srvNameBox
             // 
-            this.srvNameBox.Location = new System.Drawing.Point(106, 56);
+            this.srvNameBox.Location = new System.Drawing.Point(124, 65);
+            this.srvNameBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.srvNameBox.Name = "srvNameBox";
-            this.srvNameBox.Size = new System.Drawing.Size(100, 20);
+            this.srvNameBox.Size = new System.Drawing.Size(116, 23);
             this.srvNameBox.TabIndex = 0;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(30, 59);
+            this.label1.Location = new System.Drawing.Point(35, 68);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(70, 13);
+            this.label1.Size = new System.Drawing.Size(75, 15);
             this.label1.TabIndex = 1;
             this.label1.Text = "Server name:";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(30, 85);
+            this.label2.Location = new System.Drawing.Point(35, 98);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(56, 13);
+            this.label2.Size = new System.Drawing.Size(60, 15);
             this.label2.TabIndex = 3;
             this.label2.Text = "IP v4 port:";
             // 
             // ipV4Box
             // 
-            this.ipV4Box.Location = new System.Drawing.Point(106, 82);
+            this.ipV4Box.Location = new System.Drawing.Point(124, 95);
+            this.ipV4Box.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.ipV4Box.Name = "ipV4Box";
-            this.ipV4Box.Size = new System.Drawing.Size(100, 20);
+            this.ipV4Box.Size = new System.Drawing.Size(116, 23);
             this.ipV4Box.TabIndex = 2;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(30, 111);
+            this.label3.Location = new System.Drawing.Point(35, 128);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(56, 13);
+            this.label3.Size = new System.Drawing.Size(60, 15);
             this.label3.TabIndex = 5;
             this.label3.Text = "IP v6 port:";
             // 
             // ipV6Box
             // 
-            this.ipV6Box.Location = new System.Drawing.Point(106, 108);
+            this.ipV6Box.Location = new System.Drawing.Point(124, 125);
+            this.ipV6Box.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.ipV6Box.Name = "ipV6Box";
-            this.ipV6Box.Size = new System.Drawing.Size(100, 20);
+            this.ipV6Box.Size = new System.Drawing.Size(116, 23);
             this.ipV6Box.TabIndex = 4;
             // 
             // editPropsBtn
             // 
-            this.editPropsBtn.Location = new System.Drawing.Point(33, 149);
+            this.editPropsBtn.Location = new System.Drawing.Point(38, 172);
+            this.editPropsBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.editPropsBtn.Name = "editPropsBtn";
-            this.editPropsBtn.Size = new System.Drawing.Size(173, 23);
+            this.editPropsBtn.Size = new System.Drawing.Size(202, 27);
             this.editPropsBtn.TabIndex = 6;
             this.editPropsBtn.Text = "Edit server settings...";
             this.editPropsBtn.UseVisualStyleBackColor = true;
@@ -100,9 +107,10 @@ namespace BedrockService.Client.Forms
             // 
             // saveBtn
             // 
-            this.saveBtn.Location = new System.Drawing.Point(106, 191);
+            this.saveBtn.Location = new System.Drawing.Point(124, 220);
+            this.saveBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.saveBtn.Name = "saveBtn";
-            this.saveBtn.Size = new System.Drawing.Size(100, 23);
+            this.saveBtn.Size = new System.Drawing.Size(117, 27);
             this.saveBtn.TabIndex = 7;
             this.saveBtn.Text = "Save Server";
             this.saveBtn.UseVisualStyleBackColor = true;
@@ -112,18 +120,19 @@ namespace BedrockService.Client.Forms
             // 
             this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.label4.Location = new System.Drawing.Point(30, 9);
+            this.label4.Location = new System.Drawing.Point(35, 10);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(176, 44);
+            this.label4.Size = new System.Drawing.Size(201, 51);
             this.label4.TabIndex = 8;
             this.label4.Text = "Add a new server to the service. Note: Requires a Global restart to run new serve" +
     "r!";
             // 
             // AddNewServerForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(238, 226);
+            this.ClientSize = new System.Drawing.Size(274, 261);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.saveBtn);
             this.Controls.Add(this.editPropsBtn);
@@ -133,10 +142,14 @@ namespace BedrockService.Client.Forms
             this.Controls.Add(this.ipV4Box);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.srvNameBox);
+            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(290, 300);
             this.MinimizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(290, 300);
             this.Name = "AddNewServerForm";
             this.ShowInTaskbar = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "AddNewServerForm";
             this.ResumeLayout(false);
             this.PerformLayout();

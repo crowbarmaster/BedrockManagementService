@@ -1,16 +1,13 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using BedrockService.Client.Forms;
+﻿using BedrockService.Client.Forms;
+using BedrockService.Client.Management;
 using BedrockService.Shared.Classes;
 using BedrockService.Shared.Interfaces;
-using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using BedrockService.Client.Management;
 using System.Diagnostics;
-using System.Reflection;
 using System.IO;
-using System.Windows.Forms;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace ClientUnitTests
 {

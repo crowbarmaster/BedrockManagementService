@@ -1,80 +1,64 @@
-﻿using BedrockService.Service.Core;
-using BedrockService.Service.Logging;
-using BedrockService.Service.Management;
-using BedrockService.Service.Networking;
-using BedrockService.Shared.Classes;
-using BedrockService.Shared.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Reflection;
-using Topshelf;
+﻿// This application entry point is based on ASP.NET Core new project templates and is included
+// as a starting point for app host configuration.
+// This file may need updated according to the specific scenario of the application being upgraded.
+// For more information on ASP.NET Core hosting, see https://docs.microsoft.com/aspnet/core/fundamentals/host/web-host
 
-namespace BedrockService.Service
-{
-    class Program
-    {
+global using BedrockService.Service.Logging;
+global using BedrockService.Service.Management;
+global using BedrockService.Service.Networking;
+global using BedrockService.Shared.Classes;
+global using BedrockService.Shared.Interfaces;
+global using Microsoft.AspNetCore.Hosting;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Hosting;
+global using System;
+global using System.Collections.Generic;
+global using System.Diagnostics;
+global using System.IO;
+global using System.Linq;
+global using System.Reflection;
+global using System.Threading;
+global using System.Threading.Tasks;
+global using Topshelf;
+using BedrockService.Service.Core.Interfaces;
+
+namespace BedrockService.Service {
+    public class Program {
         public static bool IsExiting = false;
         private static bool _isDebugEnabled = false;
         private static bool _isConsoleMode = false;
-        private static readonly IServiceCollection _services = new ServiceCollection();
-
-        static void Main(string[] args)
-        {
-            if (args.Length > 0)
-            {
+        private static bool _shouldStartService = true;
+        private static CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
+        private static CancellationToken token = CancellationTokenSource.Token;
+        public static void Main(string[] args) {
+            if (args.Length > 0) {
+                Console.WriteLine(string.Join(" ", args));
                 _isDebugEnabled = args[0].ToLower() == "-debug";
+                _shouldStartService =
+                    args[0].ToLower() != "install" &&
+                    args[0].ToLower() != "uninstall" &&
+                    args[0].ToLower() != "start" &&
+                    args[0].ToLower() != "stop";
             }
-            ConfigureServices(_services);
-            IServiceProvider serviceProvider = _services.BuildServiceProvider();
-            serviceProvider.GetRequiredService<IConfigurator>().LoadAllConfigurations().Wait();
-            serviceProvider.GetRequiredService<IUpdater>().CheckUpdates().Wait();
-            IService service = serviceProvider.GetRequiredService<IService>();
-            ILogger Logger = serviceProvider.GetRequiredService<ILogger>();
-            IProcessInfo ProcessInfo = serviceProvider.GetRequiredService<IProcessInfo>();
-            serviceProvider.GetRequiredService<NetworkStrategyLookup>();
-            if (args.Length == 0 || Environment.UserInteractive)
-            {
+            if (args.Length == 0 || Environment.UserInteractive) {
                 _isConsoleMode = true;
-                Logger.AppendLine("BedrockService startup detected in Console mode.");
             }
-            else
-            {
-                Logger.AppendLine("BedrockService startup detected in Service mode.");
-                foreach (Process process in Process.GetProcesses())
-                {
-                    if (process.Id != ProcessInfo.GetProcessPID() && process.ProcessName.StartsWith("BedrockService.") && process.ProcessName != "BedrockService.Client")
-                    {
-                        Logger.AppendLine($"Found additional running instance of {process.ProcessName} with ID {process.Id}");
-                        Logger.AppendLine($"Killing process with id {process.Id}");
-                        process.Kill();
-                    }
-                }
-            }
-            service.InitializeHost().Wait();
-            TopshelfExitCode rc = service.Run();
-            var exitCode = (int)Convert.ChangeType(rc, rc.GetTypeCode());
-            if (_isDebugEnabled)
-            {
-                Console.Write("Program is force-quitting. Press any key to exit.");
-                Console.Out.Flush();
-                Console.ReadLine();
-            }
-            Environment.ExitCode = exitCode;
+            CreateHostBuilder(args).Build().Run();
         }
-        private static void ConfigureServices(IServiceCollection services)
-        {
-            IProcessInfo processInfo = new ServiceProcessInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Path.GetFileName(Assembly.GetExecutingAssembly().Location), Process.GetCurrentProcess().Id, _isDebugEnabled, _isConsoleMode);
-            services.AddSingleton(processInfo);
-            services.AddSingleton<IService, Core.Service>();
-            services.AddSingleton<IServiceConfiguration, ServiceInfo>();
-            services.AddSingleton<ITCPListener, TCPListener>();
-            services.AddSingleton<ILogger, ServiceLogger>();
-            services.AddSingleton<NetworkStrategyLookup>();
-            services.AddSingleton<IConfigurator, ConfigManager>();
-            services.AddSingleton<IBedrockService, Core.BedrockService>();
-            services.AddSingleton<IUpdater, Updater>();
-        }
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
+                .ConfigureServices((hostContext, services) => {
+                    IProcessInfo processInfo = new ServiceProcessInfo(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), Process.GetCurrentProcess().Id, _isDebugEnabled, _isConsoleMode, _shouldStartService);
+                    services.AddHostedService<Core.Service>()
+                        .AddSingleton(processInfo)
+                        .AddSingleton<NetworkStrategyLookup>()
+                        .AddSingleton<IServiceConfiguration, ServiceInfo>()
+                        .AddSingleton<IBedrockLogger, ServiceLogger>()
+                        .AddSingleton<IBedrockService, Core.BedrockService>()
+                        .AddSingleton<ITCPListener, TCPListener>()
+                        .AddSingleton<IConfigurator, ConfigManager>()
+                        .AddSingleton<IUpdater, Updater>();
+                });
     }
 }

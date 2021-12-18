@@ -58,9 +58,10 @@
             // Connect
             // 
             this.Connect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.Connect.Location = new System.Drawing.Point(622, 57);
+            this.Connect.Location = new System.Drawing.Point(580, 66);
+            this.Connect.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Connect.Name = "Connect";
-            this.Connect.Size = new System.Drawing.Size(170, 25);
+            this.Connect.Size = new System.Drawing.Size(198, 29);
             this.Connect.TabIndex = 0;
             this.Connect.Text = "Connect";
             this.Connect.UseVisualStyleBackColor = true;
@@ -70,9 +71,10 @@
             // 
             this.HostInfoLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.HostInfoLabel.AutoSize = true;
-            this.HostInfoLabel.Location = new System.Drawing.Point(620, 12);
+            this.HostInfoLabel.Location = new System.Drawing.Point(577, 14);
+            this.HostInfoLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.HostInfoLabel.Name = "HostInfoLabel";
-            this.HostInfoLabel.Size = new System.Drawing.Size(87, 13);
+            this.HostInfoLabel.Size = new System.Drawing.Size(98, 15);
             this.HostInfoLabel.TabIndex = 1;
             this.HostInfoLabel.Text = "HostConnectInfo";
             // 
@@ -81,9 +83,10 @@
             this.HostListBox.AllowDrop = true;
             this.HostListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.HostListBox.FormattingEnabled = true;
-            this.HostListBox.Location = new System.Drawing.Point(622, 28);
+            this.HostListBox.Location = new System.Drawing.Point(580, 32);
+            this.HostListBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.HostListBox.Name = "HostListBox";
-            this.HostListBox.Size = new System.Drawing.Size(355, 21);
+            this.HostListBox.Size = new System.Drawing.Size(414, 23);
             this.HostListBox.TabIndex = 2;
             this.HostListBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.HostListBox_KeyPress);
             // 
@@ -92,12 +95,13 @@
             this.LogBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.LogBox.Location = new System.Drawing.Point(12, 28);
+            this.LogBox.Location = new System.Drawing.Point(14, 32);
+            this.LogBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.LogBox.Multiline = true;
             this.LogBox.Name = "LogBox";
             this.LogBox.ReadOnly = true;
             this.LogBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.LogBox.Size = new System.Drawing.Size(580, 361);
+            this.LogBox.Size = new System.Drawing.Size(530, 402);
             this.LogBox.TabIndex = 3;
             this.LogBox.WordWrap = false;
             // 
@@ -106,9 +110,11 @@
             this.ServerSelectBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.ServerSelectBox.FormattingEnabled = true;
-            this.ServerSelectBox.Location = new System.Drawing.Point(808, 96);
+            this.ServerSelectBox.ItemHeight = 15;
+            this.ServerSelectBox.Location = new System.Drawing.Point(797, 111);
+            this.ServerSelectBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.ServerSelectBox.Name = "ServerSelectBox";
-            this.ServerSelectBox.Size = new System.Drawing.Size(170, 95);
+            this.ServerSelectBox.Size = new System.Drawing.Size(198, 94);
             this.ServerSelectBox.TabIndex = 4;
             this.ServerSelectBox.SelectedIndexChanged += new System.EventHandler(this.ServerSelectBox_SelectedIndexChanged);
             // 
@@ -116,9 +122,10 @@
             // 
             this.Disconn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.Disconn.Enabled = false;
-            this.Disconn.Location = new System.Drawing.Point(808, 57);
+            this.Disconn.Location = new System.Drawing.Point(797, 66);
+            this.Disconn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Disconn.Name = "Disconn";
-            this.Disconn.Size = new System.Drawing.Size(170, 25);
+            this.Disconn.Size = new System.Drawing.Size(198, 29);
             this.Disconn.TabIndex = 5;
             this.Disconn.Text = "Disconnect";
             this.Disconn.UseVisualStyleBackColor = true;
@@ -128,9 +135,10 @@
             // 
             this.EditGlobals.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.EditGlobals.Enabled = false;
-            this.EditGlobals.Location = new System.Drawing.Point(808, 266);
+            this.EditGlobals.Location = new System.Drawing.Point(797, 293);
+            this.EditGlobals.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.EditGlobals.Name = "EditGlobals";
-            this.EditGlobals.Size = new System.Drawing.Size(170, 23);
+            this.EditGlobals.Size = new System.Drawing.Size(198, 27);
             this.EditGlobals.TabIndex = 8;
             this.EditGlobals.Text = "Edit global service settings";
             this.EditGlobals.UseVisualStyleBackColor = true;
@@ -140,9 +148,10 @@
             // 
             this.removeSrvBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.removeSrvBtn.Enabled = false;
-            this.removeSrvBtn.Location = new System.Drawing.Point(808, 353);
+            this.removeSrvBtn.Location = new System.Drawing.Point(797, 393);
+            this.removeSrvBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.removeSrvBtn.Name = "removeSrvBtn";
-            this.removeSrvBtn.Size = new System.Drawing.Size(170, 23);
+            this.removeSrvBtn.Size = new System.Drawing.Size(198, 27);
             this.removeSrvBtn.TabIndex = 9;
             this.removeSrvBtn.Text = "Remove selected server";
             this.removeSrvBtn.UseVisualStyleBackColor = true;
@@ -152,9 +161,10 @@
             // 
             this.ChkUpdates.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.ChkUpdates.Enabled = false;
-            this.ChkUpdates.Location = new System.Drawing.Point(808, 294);
+            this.ChkUpdates.Location = new System.Drawing.Point(797, 325);
+            this.ChkUpdates.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.ChkUpdates.Name = "ChkUpdates";
-            this.ChkUpdates.Size = new System.Drawing.Size(170, 23);
+            this.ChkUpdates.Size = new System.Drawing.Size(198, 27);
             this.ChkUpdates.TabIndex = 10;
             this.ChkUpdates.Text = "Check for updates";
             this.ChkUpdates.UseVisualStyleBackColor = true;
@@ -164,9 +174,10 @@
             // 
             this.GlobBackup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.GlobBackup.Enabled = false;
-            this.GlobBackup.Location = new System.Drawing.Point(808, 237);
+            this.GlobBackup.Location = new System.Drawing.Point(797, 259);
+            this.GlobBackup.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.GlobBackup.Name = "GlobBackup";
-            this.GlobBackup.Size = new System.Drawing.Size(170, 23);
+            this.GlobBackup.Size = new System.Drawing.Size(198, 27);
             this.GlobBackup.TabIndex = 11;
             this.GlobBackup.Text = "Backup all servers";
             this.GlobBackup.UseVisualStyleBackColor = true;
@@ -176,9 +187,10 @@
             // 
             this.cmdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdTextBox.Enabled = false;
-            this.cmdTextBox.Location = new System.Drawing.Point(446, 429);
+            this.cmdTextBox.Location = new System.Drawing.Point(374, 481);
+            this.cmdTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.cmdTextBox.Name = "cmdTextBox";
-            this.cmdTextBox.Size = new System.Drawing.Size(355, 20);
+            this.cmdTextBox.Size = new System.Drawing.Size(414, 23);
             this.cmdTextBox.TabIndex = 12;
             this.cmdTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.cmdTextBox_KeyPress);
             // 
@@ -186,9 +198,10 @@
             // 
             this.SendCmd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.SendCmd.Enabled = false;
-            this.SendCmd.Location = new System.Drawing.Point(808, 426);
+            this.SendCmd.Location = new System.Drawing.Point(797, 478);
+            this.SendCmd.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.SendCmd.Name = "SendCmd";
-            this.SendCmd.Size = new System.Drawing.Size(170, 23);
+            this.SendCmd.Size = new System.Drawing.Size(198, 27);
             this.SendCmd.TabIndex = 13;
             this.SendCmd.Text = "Send command to server";
             this.SendCmd.UseVisualStyleBackColor = true;
@@ -198,9 +211,10 @@
             // 
             this.EditCfg.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.EditCfg.Enabled = false;
-            this.EditCfg.Location = new System.Drawing.Point(622, 208);
+            this.EditCfg.Location = new System.Drawing.Point(580, 226);
+            this.EditCfg.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.EditCfg.Name = "EditCfg";
-            this.EditCfg.Size = new System.Drawing.Size(170, 23);
+            this.EditCfg.Size = new System.Drawing.Size(198, 27);
             this.EditCfg.TabIndex = 15;
             this.EditCfg.Text = "Edit server config";
             this.EditCfg.UseVisualStyleBackColor = true;
@@ -210,9 +224,10 @@
             // 
             this.PlayerManagerBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.PlayerManagerBtn.Enabled = false;
-            this.PlayerManagerBtn.Location = new System.Drawing.Point(622, 382);
+            this.PlayerManagerBtn.Location = new System.Drawing.Point(580, 427);
+            this.PlayerManagerBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.PlayerManagerBtn.Name = "PlayerManagerBtn";
-            this.PlayerManagerBtn.Size = new System.Drawing.Size(170, 23);
+            this.PlayerManagerBtn.Size = new System.Drawing.Size(198, 27);
             this.PlayerManagerBtn.TabIndex = 16;
             this.PlayerManagerBtn.Text = "Player Manager";
             this.PlayerManagerBtn.UseVisualStyleBackColor = true;
@@ -222,9 +237,10 @@
             // 
             this.EditStCmd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.EditStCmd.Enabled = false;
-            this.EditStCmd.Location = new System.Drawing.Point(622, 237);
+            this.EditStCmd.Location = new System.Drawing.Point(580, 259);
+            this.EditStCmd.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.EditStCmd.Name = "EditStCmd";
-            this.EditStCmd.Size = new System.Drawing.Size(170, 23);
+            this.EditStCmd.Size = new System.Drawing.Size(198, 27);
             this.EditStCmd.TabIndex = 18;
             this.EditStCmd.Text = "Edit start commands";
             this.EditStCmd.UseVisualStyleBackColor = true;
@@ -234,9 +250,10 @@
             // 
             this.ManPacks.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.ManPacks.Enabled = false;
-            this.ManPacks.Location = new System.Drawing.Point(622, 353);
+            this.ManPacks.Location = new System.Drawing.Point(580, 393);
+            this.ManPacks.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.ManPacks.Name = "ManPacks";
-            this.ManPacks.Size = new System.Drawing.Size(170, 23);
+            this.ManPacks.Size = new System.Drawing.Size(198, 27);
             this.ManPacks.TabIndex = 19;
             this.ManPacks.Text = "R/B Pack Manager";
             this.ManPacks.UseVisualStyleBackColor = true;
@@ -246,9 +263,10 @@
             // 
             this.SingBackup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.SingBackup.Enabled = false;
-            this.SingBackup.Location = new System.Drawing.Point(622, 266);
+            this.SingBackup.Location = new System.Drawing.Point(580, 293);
+            this.SingBackup.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.SingBackup.Name = "SingBackup";
-            this.SingBackup.Size = new System.Drawing.Size(170, 23);
+            this.SingBackup.Size = new System.Drawing.Size(198, 27);
             this.SingBackup.TabIndex = 20;
             this.SingBackup.Text = "Backup selected server";
             this.SingBackup.UseVisualStyleBackColor = true;
@@ -258,9 +276,10 @@
             // 
             this.RestartSrv.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.RestartSrv.Enabled = false;
-            this.RestartSrv.Location = new System.Drawing.Point(622, 294);
+            this.RestartSrv.Location = new System.Drawing.Point(580, 325);
+            this.RestartSrv.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.RestartSrv.Name = "RestartSrv";
-            this.RestartSrv.Size = new System.Drawing.Size(170, 23);
+            this.RestartSrv.Size = new System.Drawing.Size(198, 27);
             this.RestartSrv.TabIndex = 21;
             this.RestartSrv.Text = "Restart selected server";
             this.RestartSrv.UseVisualStyleBackColor = true;
@@ -270,9 +289,10 @@
             // 
             this.BackupManagerBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.BackupManagerBtn.Enabled = false;
-            this.BackupManagerBtn.Location = new System.Drawing.Point(622, 324);
+            this.BackupManagerBtn.Location = new System.Drawing.Point(580, 360);
+            this.BackupManagerBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BackupManagerBtn.Name = "BackupManagerBtn";
-            this.BackupManagerBtn.Size = new System.Drawing.Size(170, 23);
+            this.BackupManagerBtn.Size = new System.Drawing.Size(198, 27);
             this.BackupManagerBtn.TabIndex = 22;
             this.BackupManagerBtn.Text = "Backup Manager";
             this.BackupManagerBtn.UseVisualStyleBackColor = true;
@@ -282,10 +302,11 @@
             // 
             this.SvcLog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.SvcLog.Enabled = false;
-            this.SvcLog.Location = new System.Drawing.Point(17, 395);
+            this.SvcLog.Location = new System.Drawing.Point(20, 442);
+            this.SvcLog.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.SvcLog.Name = "SvcLog";
             this.SvcLog.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.SvcLog.Size = new System.Drawing.Size(131, 26);
+            this.SvcLog.Size = new System.Drawing.Size(153, 30);
             this.SvcLog.TabIndex = 24;
             this.SvcLog.Text = "Switch to service logs";
             this.SvcLog.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -295,20 +316,22 @@
             // 
             this.ServerInfoBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.ServerInfoBox.Location = new System.Drawing.Point(622, 96);
+            this.ServerInfoBox.Location = new System.Drawing.Point(580, 111);
+            this.ServerInfoBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.ServerInfoBox.Multiline = true;
             this.ServerInfoBox.Name = "ServerInfoBox";
             this.ServerInfoBox.ReadOnly = true;
-            this.ServerInfoBox.Size = new System.Drawing.Size(170, 95);
+            this.ServerInfoBox.Size = new System.Drawing.Size(198, 95);
             this.ServerInfoBox.TabIndex = 25;
             // 
             // newSrvBtn
             // 
             this.newSrvBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.newSrvBtn.Enabled = false;
-            this.newSrvBtn.Location = new System.Drawing.Point(808, 208);
+            this.newSrvBtn.Location = new System.Drawing.Point(797, 226);
+            this.newSrvBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.newSrvBtn.Name = "newSrvBtn";
-            this.newSrvBtn.Size = new System.Drawing.Size(170, 23);
+            this.newSrvBtn.Size = new System.Drawing.Size(198, 27);
             this.newSrvBtn.TabIndex = 26;
             this.newSrvBtn.Text = "Deploy new server";
             this.newSrvBtn.UseVisualStyleBackColor = true;
@@ -318,10 +341,11 @@
             // 
             this.scrollLockChkBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.scrollLockChkBox.Enabled = false;
-            this.scrollLockChkBox.Location = new System.Drawing.Point(464, 395);
+            this.scrollLockChkBox.Location = new System.Drawing.Point(395, 442);
+            this.scrollLockChkBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.scrollLockChkBox.Name = "scrollLockChkBox";
             this.scrollLockChkBox.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.scrollLockChkBox.Size = new System.Drawing.Size(131, 26);
+            this.scrollLockChkBox.Size = new System.Drawing.Size(153, 30);
             this.scrollLockChkBox.TabIndex = 27;
             this.scrollLockChkBox.Text = "Lock scrollbar to end";
             this.scrollLockChkBox.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -332,9 +356,10 @@
             // 
             this.nbtStudioBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.nbtStudioBtn.Enabled = false;
-            this.nbtStudioBtn.Location = new System.Drawing.Point(808, 324);
+            this.nbtStudioBtn.Location = new System.Drawing.Point(797, 360);
+            this.nbtStudioBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.nbtStudioBtn.Name = "nbtStudioBtn";
-            this.nbtStudioBtn.Size = new System.Drawing.Size(170, 23);
+            this.nbtStudioBtn.Size = new System.Drawing.Size(198, 27);
             this.nbtStudioBtn.TabIndex = 28;
             this.nbtStudioBtn.Text = "Edit world via NBTStudio";
             this.nbtStudioBtn.UseVisualStyleBackColor = true;
@@ -343,10 +368,10 @@
             // clientConfigBtn
             // 
             this.clientConfigBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.clientConfigBtn.Location = new System.Drawing.Point(808, 382);
-            this.clientConfigBtn.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.clientConfigBtn.Location = new System.Drawing.Point(797, 427);
+            this.clientConfigBtn.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.clientConfigBtn.Name = "clientConfigBtn";
-            this.clientConfigBtn.Size = new System.Drawing.Size(170, 23);
+            this.clientConfigBtn.Size = new System.Drawing.Size(198, 27);
             this.clientConfigBtn.TabIndex = 29;
             this.clientConfigBtn.Text = "Edit client config";
             this.clientConfigBtn.UseVisualStyleBackColor = true;
@@ -354,9 +379,9 @@
             // 
             // MainWindow
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(989, 467);
+            this.ClientSize = new System.Drawing.Size(1008, 525);
             this.Controls.Add(this.clientConfigBtn);
             this.Controls.Add(this.nbtStudioBtn);
             this.Controls.Add(this.scrollLockChkBox);
@@ -382,7 +407,8 @@
             this.Controls.Add(this.HostListBox);
             this.Controls.Add(this.HostInfoLabel);
             this.Controls.Add(this.Connect);
-            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
+            this.MinimumSize = new System.Drawing.Size(1024, 564);
             this.Name = "MainWindow";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Bedrock Service Management";
