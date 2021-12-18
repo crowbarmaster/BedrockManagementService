@@ -21,6 +21,7 @@ namespace BedrockService.Client.Forms {
         public void PopulateBoxes(List<Property> propList) {
             int index = 0;
             workingProps = propList;
+            this.Text = "Properties Editor";
             foreach (Property prop in workingProps) {
                 dataGrid.Rows.Add(new string[2] { prop.KeyName, prop.Value });
                 if (prop.KeyName == "server-name" || prop.KeyName == "server-port" || prop.KeyName == "server-portv6") {
@@ -33,6 +34,7 @@ namespace BedrockService.Client.Forms {
         }
 
         public void PopulateStartCmds(List<StartCmdEntry> list) {
+            this.Text = "Start Command Editor";
             startCmds = list;
             gridView.Columns.RemoveAt(0);
             gridView.AllowUserToDeleteRows = true;
@@ -42,6 +44,7 @@ namespace BedrockService.Client.Forms {
         }
 
         public void EnableBackupManager() {
+            this.Text = "Backup Manager";
             gridView.MultiSelect = true;
             DelBackupBtn.Enabled = true;
             DelBackupBtn.Visible = true;

@@ -501,12 +501,12 @@ namespace BedrockService.Client.Forms {
 
         private void BackupManager_Click(object sender, EventArgs e) {
             using (PropEditorForm editDialog = new PropEditorForm()) {
-                editDialog.EnableBackupManager();
                 FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.EnumBackups);
                 DisableUI();
                 WaitForServerData().Wait();
                 FormManager.TCPClient.EnumBackupsArrived = false;
                 editDialog.PopulateBoxes(FormManager.TCPClient.BackupList);
+                editDialog.EnableBackupManager();
                 if (editDialog.ShowDialog() == DialogResult.OK) {
                     FormManager.TCPClient.SendData(Encoding.UTF8.GetBytes(editDialog.RollbackFolderName), NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.BackupRollback);
                     ServerBusy = true;
