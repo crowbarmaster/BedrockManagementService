@@ -164,19 +164,19 @@ namespace BedrockService.Service.Server {
                         _logger.AppendLine("Stopping...");
                         StopControl();
                         while (_currentServerStatus == ServerStatus.Stopping) {
-                            Thread.Sleep(250);
+                            Task.Delay(500).Wait();
                         }
                     }
                     if (!MonitoredAppExists(appName) && _currentServerStatus == ServerStatus.Starting) {
                         StartControl();
                         _logger.AppendLine($"Recieved start signal for server {_serverConfiguration.GetServerName()}.");
-                        Thread.Sleep(15000);
+                        Task.Delay(25000).Wait();
                     }
                     if (!MonitoredAppExists(appName) && _currentServerStatus == ServerStatus.Started) {
                         StopControl();
                         _logger.AppendLine($"Started application {appName} was not found in running processes... Resarting {appName}.");
                         StartControl();
-                        Thread.Sleep(1500);
+                        Task.Delay(1500).Wait();
                     }
                     if (!MonitoredAppExists(appName) && _currentServerStatus == ServerStatus.Stopped) {
                         _logger.AppendLine("Server stopped successfully.");
