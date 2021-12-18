@@ -20,7 +20,7 @@ namespace BedrockService.Shared.Classes {
 
         public ServiceInfo(IProcessInfo processInfo) {
             _processInfo = processInfo;
-            if (processInfo.ShouldStartService()) {
+            if (processInfo == null || processInfo.ShouldStartService()) {
                 InitializeDefaults();
             }
         }
