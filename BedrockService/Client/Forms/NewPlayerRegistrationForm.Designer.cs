@@ -174,6 +174,7 @@ namespace BedrockService.Client.Forms
             this.MinimizeBox = false;
             this.MinimumSize = new System.Drawing.Size(375, 230);
             this.Name = "NewPlayerRegistrationForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "New Player Registration Form";
             this.ResumeLayout(false);
             this.PerformLayout();

@@ -50,7 +50,7 @@ namespace BedrockService.Client.Forms
             this.HostAddress,
             this.Port});
             this.serverGridView.Location = new System.Drawing.Point(9, 22);
-            this.serverGridView.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.serverGridView.Margin = new System.Windows.Forms.Padding(2);
             this.serverGridView.Name = "serverGridView";
             this.serverGridView.RowHeadersWidth = 62;
             this.serverGridView.RowTemplate.Height = 28;
@@ -93,7 +93,7 @@ namespace BedrockService.Client.Forms
             // 
             this.nbtButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.nbtButton.Location = new System.Drawing.Point(12, 253);
-            this.nbtButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.nbtButton.Margin = new System.Windows.Forms.Padding(2);
             this.nbtButton.Name = "nbtButton";
             this.nbtButton.Size = new System.Drawing.Size(163, 28);
             this.nbtButton.TabIndex = 2;
@@ -105,7 +105,7 @@ namespace BedrockService.Client.Forms
             // 
             this.saveBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.saveBtn.Location = new System.Drawing.Point(632, 253);
-            this.saveBtn.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.saveBtn.Margin = new System.Windows.Forms.Padding(2);
             this.saveBtn.Name = "saveBtn";
             this.saveBtn.Size = new System.Drawing.Size(163, 28);
             this.saveBtn.TabIndex = 3;
@@ -122,9 +122,10 @@ namespace BedrockService.Client.Forms
             this.Controls.Add(this.nbtButton);
             this.Controls.Add(this.nbtPathLabel);
             this.Controls.Add(this.serverGridView);
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.MinimumSize = new System.Drawing.Size(820, 345);
             this.Name = "ClientConfigForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Client Configuration";
             ((System.ComponentModel.ISupportInitialize)(this.serverGridView)).EndInit();
             this.ResumeLayout(false);

@@ -204,6 +204,7 @@ namespace BedrockService.Client.Forms
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.MinimumSize = new System.Drawing.Size(940, 444);
             this.Name = "ManagePacksForms";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Pack Manager";
             ((System.ComponentModel.ISupportInitialize)(this.selectedPackIcon)).EndInit();
             this.ResumeLayout(false);
