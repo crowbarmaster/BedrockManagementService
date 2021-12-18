@@ -1,10 +1,5 @@
-﻿using System.Threading.Tasks;
-
-namespace BedrockService.Service.Core
-{
-    public interface IService
-    {
+﻿namespace BedrockService.Service.Core.Interfaces {
+    public interface IService : IHostedService {
         Task InitializeHost();
-        Topshelf.TopshelfExitCode Run();
     }
 }

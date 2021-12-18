@@ -61,10 +61,6 @@
       <Project>{f146d5e8-ef1f-4785-9150-182631f059b7}</Project>
       <Name>BedrockService.Shared</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Client\BedrockService.Client.csproj">
-      <Project>{a2daf70a-925a-4f4b-b7ee-caace75d6740}</Project>
-      <Name>BedrockService.Client</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

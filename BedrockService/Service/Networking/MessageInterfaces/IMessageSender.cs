@@ -1,9 +1,5 @@
-﻿using BedrockService.Shared.Classes;
-
-namespace BedrockService.Service.Networking.NetworkMessageClasses
-{
-    public interface IMessageSender
-    {
+﻿namespace BedrockService.Service.Networking.MessageInterfaces {
+    public interface IMessageSender {
         void SendData(byte[] bytes, NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type, NetworkMessageFlags status);
 
         void SendData(NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type);

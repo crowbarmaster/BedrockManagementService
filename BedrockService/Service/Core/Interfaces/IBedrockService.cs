@@ -1,12 +1,7 @@
 ﻿using BedrockService.Service.Server;
-using BedrockService.Shared.Interfaces;
-using System.Collections.Generic;
-using Topshelf;
 
-namespace BedrockService.Service.Core
-{
-    public interface IBedrockService : ServiceControl
-    {
+namespace BedrockService.Service.Core.Interfaces {
+    public interface IBedrockService : ServiceControl {
         IBedrockServer GetBedrockServerByIndex(int index);
 
         void RemoveBedrockServerByIndex(int serverIndex);

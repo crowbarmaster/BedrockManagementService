@@ -10,98 +10,81 @@ using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
-namespace BedrockService.Client.Networking
-{
-    public class TCPClient
-    {
+namespace BedrockService.Client.Networking {
+    public class TCPClient {
         public TcpClient OpenedTcpClient;
         public string ClientName;
         public NetworkStream stream;
+        public bool EstablishedLink;
         public bool Connected;
         public bool EnableRead;
         public bool PlayerInfoArrived;
         public bool EnumBackupsArrived;
         public List<Property> BackupList;
-        public List<MinecraftPackParser> RecievedPacks;
-        public Thread ClientReciever;
-        public Thread HeartbeatThread;
+        public List<MinecraftPackContainer> RecievedPacks;
+        public Task ClientReciever;
+        private CancellationTokenSource? _netCancelSource;
         private int _heartbeatFailTimeout;
-        private const int _heartbeatFailTimeoutLimit = 250;
-        private bool _heartbeatRecieved;
-        private bool _keepAlive;
-        private readonly ILogger _logger;
+        private const int _heartbeatFailTimeoutLimit = 2;
+        private readonly IBedrockLogger _logger;
 
-        public TCPClient (ILogger logger)
-        {
+        public TCPClient(IBedrockLogger logger) {
             _logger = logger;
         }
 
-        public void ConnectHost(IClientSideServiceConfiguration host)
-        {
-            if (EstablishConnection(host.GetAddress(), int.Parse(host.GetPort())))
-            {
+        public void ConnectHost(IClientSideServiceConfiguration host) {
+            if (EstablishConnection(host.GetAddress(), int.Parse(host.GetPort()))) {
                 SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Connect);
                 return;
             }
         }
 
-        public bool EstablishConnection(string addr, int port)
-        {
+        public bool EstablishConnection(string addr, int port) {
             _logger.AppendLine("Connecting to Server");
-            try
-            {
+            _netCancelSource = new CancellationTokenSource();
+            try {
                 EnableRead = false;
                 OpenedTcpClient = new TcpClient(addr, port);
                 stream = OpenedTcpClient.GetStream();
-                _keepAlive = true;
-                ClientReciever = new Thread(new ThreadStart(ReceiveListener));
-                ClientReciever.Name = "ClientPacketReviever";
-                ClientReciever.IsBackground = true;
-                ClientReciever.Start();
+                EstablishedLink = true;
+                ClientReciever = Task.Factory.StartNew(new Action(ReceiveListener), _netCancelSource.Token);
             }
-            catch
-            {
+            catch {
                 _logger.AppendLine("Could not connect to Server");
-                if(ClientReciever != null)
-                    ClientReciever.Abort();
+                if (ClientReciever != null)
+                    _netCancelSource.Cancel();
                 ClientReciever = null;
                 return false;
             }
-            return _keepAlive;
+            return EstablishedLink;
         }
 
-        public void CloseConnection()
-        {
-            try
-            {
+        public void CloseConnection() {
+            try {
                 if (stream != null)
                     stream.Dispose();
                 stream = null;
                 Connected = false;
-                _keepAlive = false;
+                EstablishedLink = false;
+                _netCancelSource.Cancel();
             }
-            catch (NullReferenceException)
-            {
+            catch (NullReferenceException) {
                 Connected = false;
-                _keepAlive = false;
+                EstablishedLink = false;
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 _logger.AppendLine($"Error closing connection: {e.StackTrace}");
             }
         }
 
-        public void ReceiveListener()
-        {
-            List<byte[]> byteBlocks = new List<byte[]>();
-            while (_keepAlive)
-            {
-                try
-                {
+        public void ReceiveListener() {
+            while (!_netCancelSource.IsCancellationRequested) {
+                SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Heartbeat);
+                try {
                     byte[] buffer = new byte[4];
-                    while (OpenedTcpClient.Client.Available > 0)
-                    {
+                    while (OpenedTcpClient.Client.Available > 0) {
                         int byteCount = stream.Read(buffer, 0, 4);
                         int expectedLen = BitConverter.ToInt32(buffer, 0);
                         buffer = new byte[expectedLen];
@@ -117,46 +100,22 @@ namespace BedrockService.Client.Networking
                         if (destination != NetworkMessageDestination.Client)
                             continue;
                         int srvCurLen = 0;
-                        JsonSerializerSettings settings = new JsonSerializerSettings()
-                        {
+                        JsonSerializerSettings settings = new JsonSerializerSettings() {
                             TypeNameHandling = TypeNameHandling.All
                         };
-                        switch (source)
-                        {
+                        switch (source) {
                             case NetworkMessageSource.Service:
-                                switch (msgType)
-                                {
+                                switch (msgType) {
                                     case NetworkMessageTypes.Connect:
-                                        try
-                                        {
+                                        try {
                                             _logger.AppendLine("Connection to Host successful!");
                                             FormManager.MainWindow.connectedHost = null;
                                             FormManager.MainWindow.connectedHost = JsonConvert.DeserializeObject<IServiceConfiguration>(data, settings);
                                             Connected = true;
                                             FormManager.MainWindow.RefreshServerContents();
-                                            _heartbeatFailTimeout = 0;
-                                            if (HeartbeatThread == null || !HeartbeatThread.IsAlive)
-                                                HeartbeatThread = new Thread(new ThreadStart(SendHeatbeatSignal))
-                                                {
-                                                    IsBackground = true,
-                                                    Name = "HeartBeatThread"
-                                                };
-                                            HeartbeatThread.Start();
-
                                         }
-                                        catch (Exception e)
-                                        {
+                                        catch (Exception e) {
                                             _logger.AppendLine($"Error: ConnectMan reported error: {e.Message}\n{e.StackTrace}");
-                                        }
-                                        break;
-                                    case NetworkMessageTypes.Heartbeat:
-                                        _heartbeatRecieved = true;
-                                        if (!HeartbeatThread.IsAlive)
-                                        {
-                                            HeartbeatThread = new Thread(new ThreadStart(SendHeatbeatSignal));
-                                            HeartbeatThread.IsBackground = true;
-                                            HeartbeatThread.Name = "HeartBeatThread";
-                                            HeartbeatThread.Start();
                                         }
                                         break;
 
@@ -180,30 +139,24 @@ namespace BedrockService.Client.Networking
                                 }
                                 break;
                             case NetworkMessageSource.Server:
-                                switch (msgType)
-                                {
+                                switch (msgType) {
                                     case NetworkMessageTypes.ConsoleLogUpdate:
                                         string[] strings = data.Split('|');
-                                        for (int i = 0; i < strings.Length; i++)
-                                        {
+                                        for (int i = 0; i < strings.Length; i++) {
                                             string[] srvSplit = strings[i].Split(';');
                                             string srvName = srvSplit[0];
                                             string srvText = srvSplit[1];
                                             srvCurLen = int.Parse(srvSplit[2]);
-                                            if (srvName != "Service")
-                                            {
+                                            if (srvName != "Service") {
                                                 IServerConfiguration bedrockServer = FormManager.MainWindow.connectedHost.GetServerInfoByName(srvName);
                                                 int curCount = bedrockServer.GetLog().Count;
-                                                if (curCount == srvCurLen)
-                                                {
+                                                if (curCount == srvCurLen) {
                                                     bedrockServer.GetLog().Add(srvText);
                                                 }
                                             }
-                                            else
-                                            {
+                                            else {
                                                 int curCount = FormManager.MainWindow.connectedHost.GetLog().Count;
-                                                if (curCount == srvCurLen)
-                                                {
+                                                if (curCount == srvCurLen) {
                                                     FormManager.MainWindow.connectedHost.GetLog().Add(srvText);
                                                 }
                                             }
@@ -221,10 +174,10 @@ namespace BedrockService.Client.Networking
                                         break;
                                     case NetworkMessageTypes.PackList:
 
-                                        List<MinecraftPackParser> temp = new List<MinecraftPackParser>();
+                                        List<MinecraftPackContainer> temp = new List<MinecraftPackContainer>();
                                         JArray jArray = JArray.Parse(data);
                                         foreach (JToken token in jArray)
-                                            temp.Add(token.ToObject<MinecraftPackParser>());
+                                            temp.Add(token.ToObject<MinecraftPackContainer>());
                                         RecievedPacks = temp;
 
                                         break;
@@ -249,41 +202,14 @@ namespace BedrockService.Client.Networking
                         }
                     }
                 }
-                catch (Exception e)
-                {
+                catch (Exception e) {
                     _logger.AppendLine($"TCPClient error! Stacktrace: {e.Message}\n{e.StackTrace}");
                 }
                 Thread.Sleep(200);
             }
         }
 
-        public void SendHeatbeatSignal()
-        {
-            _logger.AppendLine("HeartbeatThread started.");
-            while (_keepAlive)
-            {
-                _heartbeatRecieved = false;
-                SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Heartbeat);
-                while (!_heartbeatRecieved && _keepAlive)
-                {
-                    Thread.Sleep(100);
-                    _heartbeatFailTimeout++;
-                    if (_heartbeatFailTimeout > _heartbeatFailTimeoutLimit)
-                    {
-                        FormManager.MainWindow.HeartbeatFailDisconnect();
-                        HeartbeatThread.Abort();
-                        _heartbeatFailTimeout = 0;
-                    }
-                }
-                // Logger.AppendLine("ThumpThump");
-                _heartbeatRecieved = false;
-                _heartbeatFailTimeout = 0;
-                Thread.Sleep(3000);
-            }
-        }
-
-        public bool SendData(byte[] bytes, NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type, NetworkMessageFlags status)
-        {
+        public bool SendData(byte[] bytes, NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type, NetworkMessageFlags status) {
             byte[] compiled = new byte[9 + bytes.Length];
             byte[] len = BitConverter.GetBytes(5 + bytes.Length);
             Buffer.BlockCopy(len, 0, compiled, 0, 4);
@@ -293,18 +219,23 @@ namespace BedrockService.Client.Networking
             compiled[7] = (byte)type;
             compiled[8] = (byte)status;
             Buffer.BlockCopy(bytes, 0, compiled, 9, bytes.Length);
-            if (_keepAlive)
-            {
-                try
-                {
+            if (EstablishedLink) {
+                try {
                     stream.Write(compiled, 0, compiled.Length);
                     stream.Flush();
+                    _heartbeatFailTimeout = 0;
                     return true;
-
                 }
-                catch
-                {
+                catch {
                     _logger.AppendLine("Error writing to network stream!");
+                    Thread.Sleep(100);
+                    _heartbeatFailTimeout++;
+                    if (_heartbeatFailTimeout > _heartbeatFailTimeoutLimit) {
+                        Task.Run(() => { FormManager.MainWindow.HeartbeatFailDisconnect(); });
+                        _netCancelSource.Cancel();
+                        EstablishedLink = false;
+                        _heartbeatFailTimeout = 0;
+                    }
                     return false;
                 }
             }
@@ -323,16 +254,14 @@ namespace BedrockService.Client.Networking
 
         public void SendData(NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type, NetworkMessageFlags status) => SendData(new byte[0], source, destination, 0xFF, type, status);
 
-        public void Dispose()
-        {
-            if (HeartbeatThread != null && HeartbeatThread.IsAlive)
-                HeartbeatThread.Abort();
-            if (ClientReciever != null && ClientReciever.IsAlive)
-                ClientReciever.Abort();
-            HeartbeatThread = null;
+        public void Dispose() {
+            if (_netCancelSource != null) {
+                _netCancelSource.Cancel();
+                _netCancelSource.Dispose();
+                _netCancelSource = null;
+            }
             ClientReciever = null;
-            if (OpenedTcpClient != null)
-            {
+            if (OpenedTcpClient != null) {
                 OpenedTcpClient.Close();
                 OpenedTcpClient.Dispose();
             }
