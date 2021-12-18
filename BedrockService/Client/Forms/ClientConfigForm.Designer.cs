@@ -41,16 +41,20 @@ namespace BedrockService.Client.Forms
             // 
             // serverGridView
             // 
+            this.serverGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.serverGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.serverGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.HostName,
             this.HostAddress,
             this.Port});
-            this.serverGridView.Location = new System.Drawing.Point(12, 30);
+            this.serverGridView.Location = new System.Drawing.Point(9, 22);
+            this.serverGridView.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.serverGridView.Name = "serverGridView";
             this.serverGridView.RowHeadersWidth = 62;
             this.serverGridView.RowTemplate.Height = 28;
-            this.serverGridView.Size = new System.Drawing.Size(1154, 381);
+            this.serverGridView.Size = new System.Drawing.Size(786, 184);
             this.serverGridView.TabIndex = 0;
             // 
             // HostName
@@ -76,18 +80,22 @@ namespace BedrockService.Client.Forms
             // 
             // nbtPathLabel
             // 
+            this.nbtPathLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.nbtPathLabel.AutoSize = true;
-            this.nbtPathLabel.Location = new System.Drawing.Point(12, 437);
+            this.nbtPathLabel.Location = new System.Drawing.Point(9, 226);
+            this.nbtPathLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.nbtPathLabel.Name = "nbtPathLabel";
-            this.nbtPathLabel.Size = new System.Drawing.Size(130, 20);
+            this.nbtPathLabel.Size = new System.Drawing.Size(95, 15);
             this.nbtPathLabel.TabIndex = 1;
             this.nbtPathLabel.Text = "NBT Studio path:";
             // 
             // nbtButton
             // 
-            this.nbtButton.Location = new System.Drawing.Point(16, 473);
+            this.nbtButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.nbtButton.Location = new System.Drawing.Point(12, 253);
+            this.nbtButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.nbtButton.Name = "nbtButton";
-            this.nbtButton.Size = new System.Drawing.Size(209, 37);
+            this.nbtButton.Size = new System.Drawing.Size(163, 28);
             this.nbtButton.TabIndex = 2;
             this.nbtButton.Text = "Set NBT Studio path";
             this.nbtButton.UseVisualStyleBackColor = true;
@@ -95,9 +103,11 @@ namespace BedrockService.Client.Forms
             // 
             // saveBtn
             // 
-            this.saveBtn.Location = new System.Drawing.Point(957, 473);
+            this.saveBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.saveBtn.Location = new System.Drawing.Point(632, 253);
+            this.saveBtn.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.saveBtn.Name = "saveBtn";
-            this.saveBtn.Size = new System.Drawing.Size(209, 37);
+            this.saveBtn.Size = new System.Drawing.Size(163, 28);
             this.saveBtn.TabIndex = 3;
             this.saveBtn.Text = "Save settings";
             this.saveBtn.UseVisualStyleBackColor = true;
@@ -105,15 +115,17 @@ namespace BedrockService.Client.Forms
             // 
             // ClientConfigForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1178, 544);
+            this.ClientSize = new System.Drawing.Size(804, 306);
             this.Controls.Add(this.saveBtn);
             this.Controls.Add(this.nbtButton);
             this.Controls.Add(this.nbtPathLabel);
             this.Controls.Add(this.serverGridView);
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.MinimumSize = new System.Drawing.Size(820, 345);
             this.Name = "ClientConfigForm";
-            this.Text = "ClientConfigForm";
+            this.Text = "Client Configuration";
             ((System.ComponentModel.ISupportInitialize)(this.serverGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

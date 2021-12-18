@@ -46,8 +46,6 @@ namespace BedrockService.Client.Forms
             // 
             // serverListBox
             // 
-            this.serverListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
             this.serverListBox.FormattingEnabled = true;
             this.serverListBox.ItemHeight = 15;
             this.serverListBox.Location = new System.Drawing.Point(14, 95);
@@ -64,7 +62,7 @@ namespace BedrockService.Client.Forms
             | System.Windows.Forms.AnchorStyles.Right)));
             this.parsedPacksListBox.FormattingEnabled = true;
             this.parsedPacksListBox.ItemHeight = 15;
-            this.parsedPacksListBox.Location = new System.Drawing.Point(699, 95);
+            this.parsedPacksListBox.Location = new System.Drawing.Point(690, 95);
             this.parsedPacksListBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.parsedPacksListBox.Name = "parsedPacksListBox";
             this.parsedPacksListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
@@ -75,7 +73,7 @@ namespace BedrockService.Client.Forms
             // sendPacksBtn
             // 
             this.sendPacksBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.sendPacksBtn.Location = new System.Drawing.Point(546, 95);
+            this.sendPacksBtn.Location = new System.Drawing.Point(537, 95);
             this.sendPacksBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.sendPacksBtn.Name = "sendPacksBtn";
             this.sendPacksBtn.Size = new System.Drawing.Size(146, 27);
@@ -87,7 +85,7 @@ namespace BedrockService.Client.Forms
             // sendAllBtn
             // 
             this.sendAllBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.sendAllBtn.Location = new System.Drawing.Point(546, 128);
+            this.sendAllBtn.Location = new System.Drawing.Point(537, 128);
             this.sendAllBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.sendAllBtn.Name = "sendAllBtn";
             this.sendAllBtn.Size = new System.Drawing.Size(146, 27);
@@ -120,9 +118,8 @@ namespace BedrockService.Client.Forms
             // 
             // textBox1
             // 
-            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox1.Location = new System.Drawing.Point(336, 243);
+            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
+            this.textBox1.Location = new System.Drawing.Point(332, 243);
             this.textBox1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
@@ -132,8 +129,8 @@ namespace BedrockService.Client.Forms
             // 
             // selectedPackIcon
             // 
-            this.selectedPackIcon.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.selectedPackIcon.Location = new System.Drawing.Point(387, 87);
+            this.selectedPackIcon.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.selectedPackIcon.Location = new System.Drawing.Point(383, 87);
             this.selectedPackIcon.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.selectedPackIcon.Name = "selectedPackIcon";
             this.selectedPackIcon.Size = new System.Drawing.Size(152, 150);
@@ -144,7 +141,7 @@ namespace BedrockService.Client.Forms
             // openFileBtn
             // 
             this.openFileBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.openFileBtn.Location = new System.Drawing.Point(699, 33);
+            this.openFileBtn.Location = new System.Drawing.Point(690, 33);
             this.openFileBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.openFileBtn.Name = "openFileBtn";
             this.openFileBtn.Size = new System.Drawing.Size(220, 27);
@@ -167,7 +164,7 @@ namespace BedrockService.Client.Forms
             // 
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(695, 76);
+            this.label2.Location = new System.Drawing.Point(686, 76);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(161, 15);
@@ -191,7 +188,7 @@ namespace BedrockService.Client.Forms
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(933, 519);
+            this.ClientSize = new System.Drawing.Size(924, 405);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -205,8 +202,9 @@ namespace BedrockService.Client.Forms
             this.Controls.Add(this.parsedPacksListBox);
             this.Controls.Add(this.serverListBox);
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.MinimumSize = new System.Drawing.Size(940, 444);
             this.Name = "ManagePacksForms";
-            this.Text = "Form1";
+            this.Text = "Pack Manager";
             ((System.ComponentModel.ISupportInitialize)(this.selectedPackIcon)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

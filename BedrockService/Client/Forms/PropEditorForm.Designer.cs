@@ -122,7 +122,7 @@ namespace BedrockService.Client.Forms
             this.Controls.Add(this.SaveBtn);
             this.Controls.Add(this.CancelBtn);
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.MinimumSize = new System.Drawing.Size(730, 145);
+            this.MinimumSize = new System.Drawing.Size(730, 400);
             this.Name = "PropEditorForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Form1";
