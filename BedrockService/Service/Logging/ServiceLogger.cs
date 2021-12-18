@@ -15,14 +15,16 @@ namespace BedrockService.Service.Logging {
         public ServiceLogger(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration) {
             _serviceConfiguration = serviceConfiguration;
             _logPath = $@"{processInfo.GetDirectory()}\Service\Logs";
-            _logToFile = bool.Parse(serviceConfiguration.GetProp("LogServiceToFile").ToString());
-            _logToConsole = true;
-            if (_logToFile) {
-                if (!Directory.Exists(_logPath))
-                    Directory.CreateDirectory(_logPath);
-                _logWriter = new StreamWriter($@"{_logPath}\ServiceLog_{_parent}_{DateTime.Now:yyyymmddhhmmss}.log", true);
+            if (processInfo.ShouldStartService()) {
+                _logToFile = bool.Parse(serviceConfiguration.GetProp("LogServiceToFile").ToString());
+                _logToConsole = true;
+                if (_logToFile) {
+                    if (!Directory.Exists(_logPath))
+                        Directory.CreateDirectory(_logPath);
+                    _logWriter = new StreamWriter($@"{_logPath}\ServiceLog_{_parent}_{DateTime.Now:yyyymmddhhmmss}.log", true);
+                }
+                AppendLine($"Service logging started. Service working directory: {processInfo.GetDirectory()}");
             }
-            AppendLine($"Service logging started. Service working directory: {processInfo.GetDirectory()}");
         }
 
         [JsonConstructor]

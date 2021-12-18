@@ -20,11 +20,13 @@ namespace BedrockService.Service.Networking {
         private Task _tcpTask;
         private Task _recieverTask;
 
-        public TCPListener(IServiceConfiguration serviceConfiguration, IBedrockLogger logger) {
+        public TCPListener(IServiceConfiguration serviceConfiguration, IBedrockLogger logger, IProcessInfo processInfo) {
             _logger = logger;
             _serviceConfiguration = serviceConfiguration;
             _cancelTokenSource = new CancellationTokenSource();
-            InitializeTasks();
+            if (processInfo.ShouldStartService()) {
+                InitializeTasks();
+            }
         }
 
         private void InitializeTasks() {

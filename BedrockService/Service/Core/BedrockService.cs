@@ -25,18 +25,20 @@ namespace BedrockService.Service.Core {
         private System.Timers.Timer _cronTimer;
 
         public BedrockService(IConfigurator configurator, IUpdater updater, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ITCPListener tCPListener) {
-            _tCPListener = tCPListener;
-            _configurator = configurator;
-            _configurator.LoadAllConfigurations().Wait();
-            _serviceConfiguration = serviceConfiguration;
-            _processInfo = serviceProcessInfo;
-            _updater = updater;
-            _updater.CheckUpdates().Wait();
-            _logger = logger;
-            _shed = CrontabSchedule.TryParse(serviceConfiguration.GetProp("BackupCron").ToString());
-            _updaterCron = CrontabSchedule.TryParse(serviceConfiguration.GetProp("UpdateCron").ToString());
-            Initialize();
-            _tCPListener.SetKeyContainer(_configurator.GetKeyContainer());
+            if (serviceProcessInfo.ShouldStartService()) {
+                _tCPListener = tCPListener;
+                _configurator = configurator;
+                _configurator.LoadAllConfigurations().Wait();
+                _serviceConfiguration = serviceConfiguration;
+                _processInfo = serviceProcessInfo;
+                _updater = updater;
+                _updater.CheckUpdates().Wait();
+                _logger = logger;
+                _shed = CrontabSchedule.TryParse(serviceConfiguration.GetProp("BackupCron").ToString());
+                _updaterCron = CrontabSchedule.TryParse(serviceConfiguration.GetProp("UpdateCron").ToString());
+                Initialize();
+                _tCPListener.SetKeyContainer(_configurator.GetKeyContainer());
+            }
         }
 
         public bool Start(HostControl hostControl) {

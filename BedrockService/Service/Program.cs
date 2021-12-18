@@ -27,12 +27,18 @@ namespace BedrockService.Service {
         public static bool IsExiting = false;
         private static bool _isDebugEnabled = false;
         private static bool _isConsoleMode = false;
+        private static bool _shouldStartService = true;
         private static CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
         private static CancellationToken token = CancellationTokenSource.Token;
         public static void Main(string[] args) {
             if (args.Length > 0) {
                 Console.WriteLine(string.Join(" ", args));
                 _isDebugEnabled = args[0].ToLower() == "-debug";
+                _shouldStartService =
+                    args[0].ToLower() != "install" &&
+                    args[0].ToLower() != "uninstall" &&
+                    args[0].ToLower() != "start" &&
+                    args[0].ToLower() != "stop";
             }
             if (args.Length == 0 || Environment.UserInteractive) {
                 _isConsoleMode = true;
@@ -43,15 +49,15 @@ namespace BedrockService.Service {
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hostContext, services) => {
-                    IProcessInfo processInfo = new ServiceProcessInfo(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), Process.GetCurrentProcess().Id, _isDebugEnabled, _isConsoleMode);
+                    IProcessInfo processInfo = new ServiceProcessInfo(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), Process.GetCurrentProcess().Id, _isDebugEnabled, _isConsoleMode, _shouldStartService);
                     services.AddHostedService<Core.Service>()
                         .AddSingleton(processInfo)
                         .AddSingleton<NetworkStrategyLookup>()
                         .AddSingleton<IServiceConfiguration, ServiceInfo>()
-                        .AddSingleton<ITCPListener, TCPListener>()
                         .AddSingleton<IBedrockLogger, ServiceLogger>()
-                        .AddSingleton<IConfigurator, ConfigManager>()
                         .AddSingleton<IBedrockService, Core.BedrockService>()
+                        .AddSingleton<ITCPListener, TCPListener>()
+                        .AddSingleton<IConfigurator, ConfigManager>()
                         .AddSingleton<IUpdater, Updater>();
                 });
     }

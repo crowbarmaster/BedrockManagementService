@@ -8,6 +8,8 @@
 
         bool IsConsoleMode();
 
+        bool ShouldStartService();
+
         void SetArguments(bool isDebug, bool isConsole);
     }
 }

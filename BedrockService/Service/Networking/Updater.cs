@@ -16,12 +16,14 @@ namespace BedrockService.Service.Networking {
             _processInfo = processInfo;
             _logger = logger;
             _version = "None";
-            if (!Directory.Exists($@"{processInfo.GetDirectory()}\Server")) { Directory.CreateDirectory($@"{processInfo.GetDirectory()}\Server"); }
-            if (!File.Exists($@"{processInfo.GetDirectory()}\Server\bedrock_ver.ini")) {
-                logger.AppendLine("Version ini file missing, creating and fetching build...");
-                File.Create($@"{processInfo.GetDirectory()}\Server\bedrock_ver.ini").Close();
+            if (processInfo.ShouldStartService()) {
+                if (!Directory.Exists($@"{processInfo.GetDirectory()}\Server")) { Directory.CreateDirectory($@"{processInfo.GetDirectory()}\Server"); }
+                if (!File.Exists($@"{processInfo.GetDirectory()}\Server\bedrock_ver.ini")) {
+                    logger.AppendLine("Version ini file missing, creating and fetching build...");
+                    File.Create($@"{processInfo.GetDirectory()}\Server\bedrock_ver.ini").Close();
+                }
+                _version = File.ReadAllText($@"{processInfo.GetDirectory()}\Server\bedrock_ver.ini");
             }
-            _version = File.ReadAllText($@"{processInfo.GetDirectory()}\Server\bedrock_ver.ini");
         }
 
         public async Task CheckUpdates() {

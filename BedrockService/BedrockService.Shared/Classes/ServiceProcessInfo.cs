@@ -6,12 +6,14 @@ namespace BedrockService.Shared.Classes {
         private readonly int _processPid;
         private bool _debugEnabled;
         private bool _isConsoleMode;
+        private bool _shouldStartService;
 
-        public ServiceProcessInfo(string serviceDirectory, int processPid, bool debugEnabled, bool isConsoleMode) {
+        public ServiceProcessInfo(string serviceDirectory, int processPid, bool debugEnabled, bool isConsoleMode, bool shouldStartService) {
             _serviceDirectory = serviceDirectory;
             _processPid = processPid;
             _debugEnabled = debugEnabled;
             _isConsoleMode = isConsoleMode;
+            _shouldStartService = shouldStartService;
         }
 
         public string GetDirectory() => _serviceDirectory;
@@ -21,6 +23,8 @@ namespace BedrockService.Shared.Classes {
         public bool IsDebugEnabled() => _debugEnabled;
 
         public bool IsConsoleMode() => _isConsoleMode;
+
+        public bool ShouldStartService() => _shouldStartService;
 
         public void SetArguments(bool isDebug, bool isConsole) {
             _debugEnabled = isDebug;

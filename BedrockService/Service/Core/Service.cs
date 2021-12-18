@@ -75,9 +75,5 @@ namespace BedrockService.Service.Core {
         private void OnStarted() {
             Task.Run(() => { _host.Run(); });
         }
-
-        private void OnStopping() {
-            Task.Run(() => { _host.Run(); });
-        }
     }
 }

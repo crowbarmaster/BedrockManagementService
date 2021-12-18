@@ -41,7 +41,9 @@ namespace BedrockService.Service.Networking {
             {
                 {NetworkMessageTypes.RemoveServer, new RemoveServer(configurator, messageSender, serviceConfiguration, service) },
             };
-            messageSender.SetStrategyDictionaries(_standardMessageLookup, _flaggedMessageLookup);
+            if (processInfo.ShouldStartService()) {
+                messageSender.SetStrategyDictionaries(_standardMessageLookup, _flaggedMessageLookup);
+            }
         }
 
         class DeleteBackups : IMessageParser {
