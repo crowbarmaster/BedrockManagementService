@@ -17,12 +17,12 @@ namespace BedrockService.Service.Core {
         private readonly IConfigurator _configurator;
         private readonly IUpdater _updater;
         private readonly ITCPListener _tCPListener;
-        private readonly CrontabSchedule _shed;
+        private readonly CrontabSchedule _backupCron;
         private readonly CrontabSchedule _updaterCron;
         private HostControl _hostControl;
         private readonly List<IBedrockServer> _bedrockServers = new List<IBedrockServer>();
         private System.Timers.Timer _updaterTimer;
-        private System.Timers.Timer _cronTimer;
+        private System.Timers.Timer _backupTimer;
 
         public BedrockService(IConfigurator configurator, IUpdater updater, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ITCPListener tCPListener) {
             if (serviceProcessInfo.ShouldStartService()) {
@@ -34,7 +34,7 @@ namespace BedrockService.Service.Core {
                 _updater = updater;
                 _updater.CheckUpdates().Wait();
                 _logger = logger;
-                _shed = CrontabSchedule.TryParse(serviceConfiguration.GetProp("BackupCron").ToString());
+                _backupCron = CrontabSchedule.TryParse(serviceConfiguration.GetProp("BackupCron").ToString());
                 _updaterCron = CrontabSchedule.TryParse(serviceConfiguration.GetProp("UpdateCron").ToString());
                 Initialize();
                 _tCPListener.SetKeyContainer(_configurator.GetKeyContainer());
@@ -121,17 +121,7 @@ namespace BedrockService.Service.Core {
 
         private void Initialize() {
             _bedrockServers.Clear();
-            if (_serviceConfiguration.GetProp("BackupEnabled").ToString() == "true" && _shed != null) {
-                _cronTimer = new System.Timers.Timer((_shed.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
-                _cronTimer.Elapsed += CronTimer_Elapsed;
-                _cronTimer.Start();
-            }
-            if (_serviceConfiguration.GetProp("CheckUpdates").ToString() == "true" && _updaterCron != null) {
-                _updaterTimer = new System.Timers.Timer((_updaterCron.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
-                _updaterTimer.Elapsed += UpdateTimer_Elapsed;
-                _logger.AppendLine($"Updates Enabled, will be checked in: {((float)_updaterTimer.Interval / 1000)} seconds.");
-                _updaterTimer.Start();
-            }
+            InitializeTimers();
             try {
                 List<IServerConfiguration> temp = _serviceConfiguration.GetServerList();
                 foreach (IServerConfiguration server in temp) {
@@ -144,18 +134,39 @@ namespace BedrockService.Service.Core {
             }
         }
 
-        private void CronTimer_Elapsed(object sender, ElapsedEventArgs e) {
+        private void InitializeTimers() {
+            if (_backupTimer != null) {
+                _backupTimer.Stop();
+                _backupTimer = null;
+            }
+            if (_updaterTimer != null) {
+                _updaterTimer.Stop();
+                _updaterTimer = null;
+            }
+            if (_serviceConfiguration.GetProp("BackupEnabled").ToString().ToLower() == "true" && _backupCron != null) {
+                double interval = (_backupCron.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds;
+                if (interval >= 0) {
+                    _backupTimer = new System.Timers.Timer(interval);
+                    _logger.AppendLine($"Automatic backups Enabled, next backup in: {((float)_backupTimer.Interval / 1000)} seconds.");
+                    _backupTimer.Elapsed += BackupTimer_Elapsed;
+                    _backupTimer.Start();
+                }
+            }
+            if (_serviceConfiguration.GetProp("CheckUpdates").ToString().ToLower() == "true" && _updaterCron != null) {
+                double interval = (_updaterCron.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds;
+                if (interval >= 0) {
+                    _updaterTimer = new System.Timers.Timer(interval);
+                    _updaterTimer.Elapsed += UpdateTimer_Elapsed;
+                    _logger.AppendLine($"Automatic updates Enabled, will be checked in: {((float)_updaterTimer.Interval / 1000)} seconds.");
+                    _updaterTimer.Start();
+                }
+            }
+        }
+
+        private void BackupTimer_Elapsed(object sender, ElapsedEventArgs e) {
             try {
-                if (_cronTimer != null) {
-                    _cronTimer.Stop();
-                    _cronTimer = null;
-                }
-                if (_serviceConfiguration.GetProp("BackupEnabled").ToString() == "true" && _shed != null) {
-                    BackupAllServers();
-                    _cronTimer = new System.Timers.Timer((_shed.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
-                    _cronTimer.Elapsed += CronTimer_Elapsed;
-                    _cronTimer.Start();
-                }
+                BackupAllServers();
+                InitializeTimers();
             }
             catch (Exception ex) {
                 _logger.AppendLine($"Error in BackupTimer_Elapsed {ex}");
@@ -164,23 +175,14 @@ namespace BedrockService.Service.Core {
 
         private void UpdateTimer_Elapsed(object sender, ElapsedEventArgs e) {
             try {
-                if (_updaterTimer != null) {
-                    _updaterTimer.Stop();
-                    _updaterTimer = null;
-                }
                 _updater.CheckUpdates().Wait();
-                if (_serviceConfiguration.GetProp("CheckUpdates").ToString() == "true" && _updater != null) {
-                    if (_updater.CheckVersionChanged()) {
-                        _logger.AppendLine("Version change detected! Restarting server(s) to apply update...");
-                        foreach (IBedrockServer server in _bedrockServers) {
-                            server.RestartServer(false);
-                        }
+                if (_updater.CheckVersionChanged()) {
+                    _logger.AppendLine("Version change detected! Restarting server(s) to apply update...");
+                    foreach (IBedrockServer server in _bedrockServers) {
+                        server.RestartServer(false);
                     }
-
-                    _updaterTimer = new System.Timers.Timer((_updaterCron.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds);
-                    _updaterTimer.Elapsed += UpdateTimer_Elapsed;
-                    _updaterTimer.Start();
                 }
+                InitializeTimers();
             }
             catch (Exception ex) {
                 _logger.AppendLine($"Error in UpdateTimer_Elapsed {ex}");
@@ -188,7 +190,7 @@ namespace BedrockService.Service.Core {
         }
 
         private void BackupAllServers() {
-            _logger.AppendLine("Service started backup manager.");
+            _logger.AppendLine("Service started backup of all servers...");
             foreach (var brs in _bedrockServers) {
                 brs.InitializeBackup();
             }
