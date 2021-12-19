@@ -1,4 +1,8 @@
 # Minecraft Bedrock management service
+
+## This readme is out of date, and reflects version 2.2. The quick start guide displayed below is still accurate, however other details here may not align!
+
+Please feel free to post in the discussions if you require assistance or would like to offer your thoughts! I will do my best to answer any questions in a timely fashion.
 ## An application suite for running and controlling multiple bedrock dedicated servers
 
 ## Project information
