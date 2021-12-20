@@ -17,9 +17,7 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.x
-    - name: Restore dependencies
-      run: dotnet restore "BedrockService/Service/BedrockService.Service.csproj"
-    - name: Build
-      run: dotnet build "BedrockService/Service/BedrockService.Service.csproj" --no-restore
+    - name: Publish with MSBuild
+      run: msbuild /t:publish -p:PublishProfile=FolderProfile
     - name: Test
       run: dotnet test --no-build --verbosity normal
