@@ -23,7 +23,9 @@ jobs:
       run: dotnet restore "BedrockService\BedrockService.sln"
     - name: Publish with MSBuild
       run: msbuild "BedrockService\BedrockService.sln" /t:publish -p:PublishProfile=FolderProfile
-    - name: Setup Automatic Releases
+    - name: Display published path
+      run: dir .\BedrockService\bin\Published
+    - name: Push Automatic Release
       uses: marvinpinto/action-automatic-releases@v1.2.1
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
@@ -31,5 +33,5 @@ jobs:
         prerelease: true
         title: "Development Build"
         files: |
-          .\bin\Published\BedrockService.Service.exe
-          .\bin\Published\BedrockService.Client.exe
+          .\BedrockService\bin\Published\BedrockService.Service.exe
+          .\BedrockService\bin\Published\BedrockService.Client.exe
