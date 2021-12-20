@@ -1,0 +1,37 @@
+name: Build BMS
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: windows-2022
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.1
+    - name: Restore NuGet packages
+      run: dotnet restore "BedrockService\BedrockService.sln"
+    - name: Publish with MSBuild
+      run: msbuild "BedrockService\BedrockService.sln" /t:publish -p:PublishProfileFullPath=".\BedrockService\Service\Properties\PublishProfiles\FolderProfile.pubxml"
+    - name: Display published path
+      run: dir .\BedrockService\bin\Published
+    - name: Push Automatic Release
+      uses: marvinpinto/action-automatic-releases@v1.2.1
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "latest"
+        prerelease: true
+        title: "Development Build"
+        files: |
+          .\BedrockService\bin\Published\BedrockService.Service.exe
+          .\BedrockService\bin\Published\BedrockService.Client.exe
