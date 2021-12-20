@@ -19,6 +19,10 @@ jobs:
         dotnet-version: 6.0.x
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.1
+    - name: Restore NuGet packages
+      run: dotnet restore "BedrockService\BedrockService.sln"
+    - name: Publish with MSBuild
+      run: msbuild "BedrockService\BedrockService.sln" /t:publish -p:PublishProfile=FolderProfile
     - name: Setup Automatic Releases
       uses: marvinpinto/action-automatic-releases@v1.2.1
       with:
@@ -29,7 +33,3 @@ jobs:
         files: |
           BedrockService.Service.exe
           BedrockService.Client.exe
-    - name: Restore NuGet packages
-      run: dotnet restore "BedrockService\BedrockService.sln"
-    - name: Publish with MSBuild
-      run: msbuild "BedrockService\BedrockService.sln" /t:publish -p:PublishProfile=FolderProfile
