@@ -44,6 +44,8 @@
   <PropertyGroup>
     <StartupObject>BedrockService.Client.Forms.MainWindow</StartupObject>
     <ApplicationIcon>mc_icon.ico</ApplicationIcon>
+    <TargetFrameworks>net6.0-windows</TargetFrameworks>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
   </PropertyGroup>
   <ItemGroup>
     <AdditionalFiles Include="Configs\Config.conf" />

@@ -64,14 +64,13 @@
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <ApplicationIcon>mc_icon.ico</ApplicationIcon>
     <DebugType>embedded</DebugType>
     <StartupObject>BedrockService.Service.Program</StartupObject>
     <UseWindowsForms>False</UseWindowsForms>
-    <TargetFrameworks>net6.0-windows</TargetFrameworks>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <TargetFrameworks></TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
