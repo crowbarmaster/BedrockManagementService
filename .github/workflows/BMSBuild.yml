@@ -20,6 +20,6 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.1
     - name: Publish with MSBuild
-      run: msbuild "$GITHUB_WORKSPACE\\BedrockService.sln" /t:publish -p:PublishProfile=FolderProfile
+      run: msbuild "{GITHUB_WORKSPACE}/BedrockService/BedrockService.sln" /t:publish -p:PublishProfile=FolderProfile
     - name: Test
       run: dotnet test --no-build --verbosity normal
