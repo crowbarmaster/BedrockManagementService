@@ -18,7 +18,7 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore "BedrockService/Service/BedrockService.Service.csproj"
     - name: Build
       run: dotnet build "BedrockService/Service/BedrockService.Service.csproj" --no-restore
     - name: Test
