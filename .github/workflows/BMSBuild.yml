@@ -22,9 +22,9 @@ jobs:
     - name: Restore NuGet packages
       run: dotnet restore "BedrockService\BedrockService.sln"
     - name: Publish with MSBuild
-      run: msbuild "BedrockService\BedrockService.sln" /t:publish -p:PublishProfile="FolderProfile"
+      run: msbuild "BedrockService\BedrockService.sln" /t:publish -p:PublishProfile=FolderProfile
     - name: Display published path
-      run: dir .\BedrockService\bin
+      run: dir .\BedrockService\bin\Published
     - name: Push Automatic Release
       uses: marvinpinto/action-automatic-releases@v1.2.1
       with:
