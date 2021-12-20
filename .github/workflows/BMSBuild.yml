@@ -31,5 +31,5 @@ jobs:
         prerelease: true
         title: "Development Build"
         files: |
-          BedrockService.Service.exe
-          BedrockService.Client.exe
+          .\bin\Published\BedrockService.Service.exe
+          .\bin\Published\BedrockService.Client.exe
