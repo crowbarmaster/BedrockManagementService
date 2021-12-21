@@ -24,7 +24,7 @@ jobs:
     - name: Publish with MSBuild
       run: msbuild "BedrockService\BedrockService.sln" /t:publish -p:PublishProfile=FolderProfile
     - name: Display published path
-      run: dir .\BedrockService\bin\Published
+      run: dir ./BedrockService/bin/Published
     - name: Push Automatic Release
       uses: marvinpinto/action-automatic-releases@v1.2.1
       with:
@@ -33,5 +33,5 @@ jobs:
         prerelease: true
         title: "Development Build"
         files: |
-          ".\BedrockService\bin\Published\BedrockService.Service.exe"
-          ".\BedrockService\bin\Published\BedrockService.Client.exe"
+          ./BedrockService/bin/Published/BedrockService.Service.exe
+          ./BedrockService/bin/Published/BedrockService.Client.exe
