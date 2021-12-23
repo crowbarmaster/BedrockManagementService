@@ -1,7 +1,8 @@
 ﻿using BedrockService.Service.Core.Interfaces;
 using BedrockService.Service.Networking.MessageInterfaces;
 using BedrockService.Service.Server;
-using BedrockService.Shared.MincraftJson;
+using BedrockService.Shared.MinecraftJsonModels.FileModels;
+using BedrockService.Shared.MinecraftJsonModels.JsonModels;
 using BedrockService.Shared.PackParser;
 using BedrockService.Shared.Utilities;
 using Newtonsoft.Json;
@@ -31,7 +32,7 @@ namespace BedrockService.Service.Networking {
                 {NetworkMessageTypes.CheckUpdates, new CheckUpdates(messageSender, updater) },
                 {NetworkMessageTypes.BackupRollback, new BackupRollback(messageSender, service) },
                 {NetworkMessageTypes.AddNewServer, new AddNewServer(configurator, messageSender, serviceConfiguration, service) },
-                {NetworkMessageTypes.ConsoleLogUpdate, new ConsoleLogUpdate(messageSender, serviceConfiguration, service) },
+                {NetworkMessageTypes.ConsoleLogUpdate, new ConsoleLogUpdate(messageSender, logger, serviceConfiguration, service) },
                 {NetworkMessageTypes.PlayersRequest, new PlayerRequest(messageSender, serviceConfiguration) },
                 {NetworkMessageTypes.PlayersUpdate, new PlayersUpdate(configurator, messageSender, serviceConfiguration, service) },
                 {NetworkMessageTypes.LevelEditRequest, new LevelEditRequest(messageSender, serviceConfiguration) },
@@ -39,11 +40,9 @@ namespace BedrockService.Service.Networking {
             };
             _flaggedMessageLookup = new Dictionary<NetworkMessageTypes, IFlaggedMessageParser>()
             {
-                {NetworkMessageTypes.RemoveServer, new RemoveServer(configurator, messageSender, serviceConfiguration, service) },
+                {NetworkMessageTypes.RemoveServer, new RemoveServer(configurator, messageSender, serviceConfiguration, service) }
             };
-            if (processInfo.ShouldStartService()) {
                 messageSender.SetStrategyDictionaries(_standardMessageLookup, _flaggedMessageLookup);
-            }
         }
 
         class DeleteBackups : IMessageParser {
@@ -54,9 +53,7 @@ namespace BedrockService.Service.Networking {
             }
 
             public void ParseMessage(byte[] data, byte serverIndex) {
-                JsonSerializerSettings settings = new JsonSerializerSettings() {
-                    TypeNameHandling = TypeNameHandling.All
-                };
+                JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                 string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
                 List<string> backupFileNames = JsonConvert.DeserializeObject<List<string>>(stringData, settings);
                 _configurator.DeleteBackupsForServer(serverIndex, backupFileNames);
@@ -103,9 +100,7 @@ namespace BedrockService.Service.Networking {
 
             public void ParseMessage(byte[] data, byte serverIndex) {
                 Formatting indented = Formatting.Indented;
-                JsonSerializerSettings settings = new JsonSerializerSettings() {
-                    TypeNameHandling = TypeNameHandling.All
-                };
+                JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                 byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_configurator.EnumerateBackupsForServer(serverIndex), indented, settings));
                 _messageSender.SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.EnumBackups);
 
@@ -126,9 +121,7 @@ namespace BedrockService.Service.Networking {
             }
 
             public void ParseMessage(byte[] data, byte serverIndex) {
-                JsonSerializerSettings settings = new JsonSerializerSettings() {
-                    TypeNameHandling = TypeNameHandling.All
-                };
+                JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                 string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
                 List<Property> propList = JsonConvert.DeserializeObject<List<Property>>(stringData, settings);
                 Property prop = propList.FirstOrDefault(p => p.KeyName == "server-name");
@@ -201,12 +194,12 @@ namespace BedrockService.Service.Networking {
                     File.Copy($@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath")}\valid_known_packs.json", $@"{_processInfo.GetDirectory()}\Server\stock_packs.json");
                 MinecraftKnownPacksClass knownPacks = new MinecraftKnownPacksClass($@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath")}\valid_known_packs.json", $@"{_processInfo.GetDirectory()}\Server\stock_packs.json");
                 List<MinecraftPackContainer> list = new List<MinecraftPackContainer>();
-                foreach (MinecraftKnownPacksClass.KnownPack pack in knownPacks.KnownPacks) {
+                foreach (KnownPacksJsonModel pack in knownPacks.InstalledPacks.Contents) {
                     MinecraftPackParser currentParser = new MinecraftPackParser(_logger, _processInfo);
                     currentParser.ParseDirectory($@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath")}\{pack.path.Replace(@"/", @"\")}");
                     list.AddRange(currentParser.FoundPacks);
                 }
-                string arrayString = JArray.FromObject(list).ToString();
+                string arrayString = JsonConvert.SerializeObject(list);
                 _messageSender.SendData(Encoding.UTF8.GetBytes(arrayString), NetworkMessageSource.Server, NetworkMessageDestination.Client, NetworkMessageTypes.PackList);
             }
         }
@@ -227,12 +220,10 @@ namespace BedrockService.Service.Networking {
             public void ParseMessage(byte[] data, byte serverIndex) {
                 string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
                 MinecraftKnownPacksClass knownPacks = new MinecraftKnownPacksClass($@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath")}\valid_known_packs.json", $@"{_processInfo.GetDirectory()}\Server\stock_packs.json");
-                JsonSerializerSettings settings = new JsonSerializerSettings() {
-                    TypeNameHandling = TypeNameHandling.All
-                };
+                JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                 List<MinecraftPackContainer> container = JsonConvert.DeserializeObject<List<MinecraftPackContainer>>(stringData, settings);
                 foreach (MinecraftPackContainer content in container)
-                    knownPacks.RemovePackFromServer(_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath").ToString(), content);
+                    knownPacks.RemovePackFromServer(_serviceConfiguration.GetServerInfoByIndex(serverIndex), content);
                 _messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
             }
         }
@@ -269,9 +260,7 @@ namespace BedrockService.Service.Networking {
 
             public void ParseMessage(byte[] data, byte serverIndex) {
                 string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
-                JsonSerializerSettings settings = new JsonSerializerSettings() {
-                    TypeNameHandling = TypeNameHandling.All
-                };
+                JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                 List<IPlayer> fetchedPlayers = JsonConvert.DeserializeObject<List<IPlayer>>(stringData, settings);
                 foreach (IPlayer player in fetchedPlayers) {
                     try {
@@ -321,10 +310,9 @@ namespace BedrockService.Service.Networking {
                         filePath = $@"{serverPath}\worlds\{levelName}\world_resource_packs.json";
                     }
                     if (filePath != null) {
-                        WorldPacksJsonModel worldPackManifentClass = new WorldPacksJsonModel(container.JsonManifest.header.uuid, container.JsonManifest.header.version);
-                        List<WorldPacksJsonModel> list = new List<WorldPacksJsonModel>();
-                        list.Add(worldPackManifentClass);
-                        fileUtils.UpdateJArrayFile(filePath, JArray.FromObject(list), typeof(WorldPacksJsonModel));
+                        WorldPackFileModel worldPackFile = new WorldPackFileModel(filePath);
+                        worldPackFile.Contents.Add(new WorldKnownPackEntryJsonModel(container.JsonManifest.header.uuid, container.JsonManifest.header.version));
+                        worldPackFile.SaveToFile(worldPackFile.Contents);
                         _messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
                     }
                 }
@@ -362,9 +350,7 @@ namespace BedrockService.Service.Networking {
 
             public void ParseMessage(byte[] data, byte serverIndex) {
                 Formatting indented = Formatting.Indented;
-                JsonSerializerSettings settings = new JsonSerializerSettings() {
-                    TypeNameHandling = TypeNameHandling.All
-                };
+                JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                 string jsonString = JsonConvert.SerializeObject(_serviceConfiguration, indented, settings);
                 byte[] serializeToBytes = Encoding.UTF8.GetBytes(jsonString);
                 _iTCPListener.SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
@@ -381,9 +367,7 @@ namespace BedrockService.Service.Networking {
             }
 
             public void ParseMessage(byte[] data, byte serverIndex) {
-                JsonSerializerSettings settings = new JsonSerializerSettings() {
-                    TypeNameHandling = TypeNameHandling.All
-                };
+                JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                 List<StartCmdEntry> entries = JsonConvert.DeserializeObject<List<StartCmdEntry>>(Encoding.UTF8.GetString(data, 5, data.Length - 5), settings);
                 _serviceConfiguration.GetServerInfoByIndex(serverIndex).SetStartCommands(entries);
                 _configurator.SaveServerProps(_serviceConfiguration.GetServerInfoByIndex(serverIndex), true);
@@ -440,9 +424,7 @@ namespace BedrockService.Service.Networking {
 
             public void ParseMessage(byte[] data, byte serverIndex) {
                 string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
-                JsonSerializerSettings settings = new JsonSerializerSettings() {
-                    TypeNameHandling = TypeNameHandling.All
-                };
+                JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                 List<Property> propList = JsonConvert.DeserializeObject<List<Property>>(stringData, settings);
                 Property serverNameProp = propList.First(p => p.KeyName == "server-name");
                 ServerInfo newServer = new ServerInfo(null, _serviceConfiguration.GetProp("ServersPath").ToString()) {
@@ -483,9 +465,7 @@ namespace BedrockService.Service.Networking {
                 _bedrockService.GetBedrockServerByIndex(serverIndex).StopServer(true).Wait();
                 _configurator.RemoveServerConfigs(_serviceConfiguration.GetServerInfoByIndex(serverIndex), flag);
                 _bedrockService.RemoveBedrockServerByIndex(serverIndex);
-                JsonSerializerSettings settings = new JsonSerializerSettings() {
-                    TypeNameHandling = TypeNameHandling.All
-                };
+                JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                 byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_serviceConfiguration, Formatting.Indented, settings));
                 _messageSender.SendData(serializeToBytes, NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Connect);
                 _messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
@@ -495,11 +475,13 @@ namespace BedrockService.Service.Networking {
 
         class ConsoleLogUpdate : IMessageParser {
             private readonly IMessageSender _messageSender;
+            private readonly IBedrockLogger _logger;
             private readonly IBedrockService _service;
             private readonly IServiceConfiguration _serviceConfiguration;
 
-            public ConsoleLogUpdate(IMessageSender messageSender, IServiceConfiguration serviceConfiguration, IBedrockService service) {
+            public ConsoleLogUpdate(IMessageSender messageSender, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IBedrockService service) {
                 _service = service;
+                _logger = logger;
                 _messageSender = messageSender;
                 _serviceConfiguration = serviceConfiguration;
             }
@@ -536,7 +518,7 @@ namespace BedrockService.Service.Networking {
                         clientCurLen = int.Parse(dataSplit[1]);
                         loop = clientCurLen;
                         while (loop < srvTextLen) {
-                            srvString.Append($"{srvName};{_serviceConfiguration.GetLog()[loop]};{loop}|");
+                            srvString.Append($"{srvName};{_logger.FromIndex(loop)};{loop}|");
                             loop++;
                         }
                     }
@@ -559,9 +541,7 @@ namespace BedrockService.Service.Networking {
 
             public void ParseMessage(byte[] data, byte serverIndex) {
                 IServerConfiguration server = _serviceConfiguration.GetServerInfoByIndex(serverIndex);
-                JsonSerializerSettings settings = new JsonSerializerSettings() {
-                    TypeNameHandling = TypeNameHandling.All
-                };
+                JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                 byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(server.GetPlayerList(), Formatting.Indented, settings));
                 _messageSender.SendData(serializeToBytes, NetworkMessageSource.Server, NetworkMessageDestination.Client, serverIndex, NetworkMessageTypes.PlayersRequest);
             }
