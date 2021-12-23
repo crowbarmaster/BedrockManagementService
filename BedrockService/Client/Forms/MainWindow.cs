@@ -32,6 +32,7 @@ namespace BedrockService.Client.Forms {
         public MainWindow(IProcessInfo processInfo, IBedrockLogger logger) {
             _processInfo = processInfo;
             _logger = logger;
+            _logger.Initialize();
             _logManager = new LogManager(_logger);
             _configManager = new ConfigManager(_logger);
             InitializeComponent();
@@ -243,9 +244,7 @@ namespace BedrockService.Client.Forms {
             _editDialog = new PropEditorForm();
             _editDialog.PopulateBoxes(selectedServer.GetAllProps());
             if (_editDialog.ShowDialog() == DialogResult.OK) {
-                JsonSerializerSettings settings = new JsonSerializerSettings() {
-                    TypeNameHandling = TypeNameHandling.All
-                };
+                JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                 byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_editDialog.workingProps, Formatting.Indented, settings));
                 FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PropUpdate);
                 selectedServer.SetAllProps(_editDialog.workingProps);
@@ -264,9 +263,7 @@ namespace BedrockService.Client.Forms {
             _editDialog = new PropEditorForm();
             _editDialog.PopulateBoxes(connectedHost.GetAllProps());
             if (_editDialog.ShowDialog() == DialogResult.OK) {
-                JsonSerializerSettings settings = new JsonSerializerSettings() {
-                    TypeNameHandling = TypeNameHandling.All
-                };
+                JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                 byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_editDialog.workingProps, Formatting.Indented, settings));
                 FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.PropUpdate);
                 connectedHost.SetAllProps(_editDialog.workingProps);
@@ -298,9 +295,7 @@ namespace BedrockService.Client.Forms {
             }
             AddNewServerForm newServerForm = new AddNewServerForm(clientSideServiceConfiguration, connectedHost.GetServerList());
             if (newServerForm.ShowDialog() == DialogResult.OK) {
-                JsonSerializerSettings settings = new JsonSerializerSettings() {
-                    TypeNameHandling = TypeNameHandling.All
-                };
+                JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                 byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(newServerForm.DefaultProps, Formatting.Indented, settings));
                 FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.AddNewServer);
                 newServerForm.Close();
@@ -360,9 +355,7 @@ namespace BedrockService.Client.Forms {
         private void EditStCmd_Click(object sender, EventArgs e) {
             PropEditorForm editSrvDialog = new PropEditorForm();
             editSrvDialog.PopulateStartCmds(selectedServer.GetStartCommands());
-            JsonSerializerSettings settings = new JsonSerializerSettings() {
-                TypeNameHandling = TypeNameHandling.All
-            };
+            JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
             if (editSrvDialog.ShowDialog() == DialogResult.OK) {
                 byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(editSrvDialog.startCmds, Formatting.Indented, settings));
                 DisableUI();
@@ -422,9 +415,7 @@ namespace BedrockService.Client.Forms {
             ServerSelectBox.SelectedIndex = 0;
             FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.EnumBackups);
             FormManager.TCPClient.EnumBackupsArrived = false;
-            JsonSerializerSettings settings = new JsonSerializerSettings() {
-                TypeNameHandling = TypeNameHandling.All
-            };
+            JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
             byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new string[] { FormManager.TCPClient.BackupList[0].ToString() }, Formatting.Indented, settings));
             FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, FormManager.MainWindow.connectedHost.GetServerIndex(FormManager.MainWindow.selectedServer), NetworkMessageTypes.DelBackups);
         }
