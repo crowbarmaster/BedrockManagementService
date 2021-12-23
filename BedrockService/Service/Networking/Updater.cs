@@ -23,12 +23,16 @@ namespace BedrockService.Service.Networking {
             if (!File.Exists($@"{_processInfo.GetDirectory()}\Server\bedrock_ver.ini")) {
                 _logger.AppendLine("Version ini file missing, creating and fetching build...");
                 File.Create($@"{_processInfo.GetDirectory()}\Server\bedrock_ver.ini").Close();
+                return;
             }
             _version = File.ReadAllText($@"{_processInfo.GetDirectory()}\Server\bedrock_ver.ini");
         }
 
         public async Task CheckUpdates() {
             await Task.Run(async () => {
+                if (_serviceConfiguration.GetServerVersion() != null) {
+                    _version = _serviceConfiguration.GetServerVersion();
+                }
                 if (bool.Parse(_serviceConfiguration.GetProp("AcceptedMojangLic").ToString())) {
                     _logger.AppendLine("You have not accepted the license. Please visit the readme for more info!");
                     return false;
