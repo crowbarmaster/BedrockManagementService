@@ -16,8 +16,8 @@ namespace BedrockService.Shared.Interfaces {
 
         void SetAllProps(List<Property> newPropList);
 
-        List<string> GetLog();
+        List<LogEntry> GetLog();
 
-        void SetLog(List<string> newLog);
+        void SetLog(List<LogEntry> newLog);
     }
 }
