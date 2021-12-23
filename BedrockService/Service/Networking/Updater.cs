@@ -9,21 +9,22 @@ namespace BedrockService.Service.Networking {
         private readonly IBedrockLogger _logger;
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IProcessInfo _processInfo;
-        private readonly string _version;
+        private string _version;
 
         public Updater(IProcessInfo processInfo, IBedrockLogger logger, IServiceConfiguration serviceConfiguration) {
             _serviceConfiguration = serviceConfiguration;
             _processInfo = processInfo;
             _logger = logger;
             _version = "None";
-            if (processInfo.ShouldStartService()) {
-                if (!Directory.Exists($@"{processInfo.GetDirectory()}\Server")) { Directory.CreateDirectory($@"{processInfo.GetDirectory()}\Server"); }
-                if (!File.Exists($@"{processInfo.GetDirectory()}\Server\bedrock_ver.ini")) {
-                    logger.AppendLine("Version ini file missing, creating and fetching build...");
-                    File.Create($@"{processInfo.GetDirectory()}\Server\bedrock_ver.ini").Close();
-                }
-                _version = File.ReadAllText($@"{processInfo.GetDirectory()}\Server\bedrock_ver.ini");
+        }
+
+        public void Initialize() {
+            if (!Directory.Exists($@"{_processInfo.GetDirectory()}\Server")) { Directory.CreateDirectory($@"{_processInfo.GetDirectory()}\Server"); }
+            if (!File.Exists($@"{_processInfo.GetDirectory()}\Server\bedrock_ver.ini")) {
+                _logger.AppendLine("Version ini file missing, creating and fetching build...");
+                File.Create($@"{_processInfo.GetDirectory()}\Server\bedrock_ver.ini").Close();
             }
+            _version = File.ReadAllText($@"{_processInfo.GetDirectory()}\Server\bedrock_ver.ini");
         }
 
         public async Task CheckUpdates() {

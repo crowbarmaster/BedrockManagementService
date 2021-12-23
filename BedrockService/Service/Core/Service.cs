@@ -7,9 +7,9 @@ namespace BedrockService.Service.Core {
         private readonly IBedrockService _bedrockService;
         private Topshelf.Host _host;
         private readonly IBedrockLogger _logger;
-        IHostApplicationLifetime _applicationLifetime;
+        private readonly IHostApplicationLifetime _applicationLifetime;
 
-        public Service(IBedrockLogger logger, IBedrockService bedrockService, NetworkStrategyLookup lookup, IHostApplicationLifetime appLifetime) {
+        public Service(IBedrockLogger logger, IBedrockService bedrockService, NetworkStrategyLookup networkStrategyLookup, IHostApplicationLifetime appLifetime) {
             _logger = logger;
             _bedrockService = bedrockService;
             _applicationLifetime = appLifetime;
@@ -69,11 +69,13 @@ namespace BedrockService.Service.Core {
         }
 
         public Task StopAsync(CancellationToken cancellationToken) {
-            return Task.Delay(100);
+            return Task.Run(() => Environment.Exit(0));
         }
 
         private void OnStarted() {
-            Task.Run(() => { _host.Run(); });
+            Task.Run(() => { 
+                _host.Run();
+            });
         }
     }
 }

@@ -3,7 +3,6 @@
 // This file may need updated according to the specific scenario of the application being upgraded.
 // For more information on ASP.NET Core hosting, see https://docs.microsoft.com/aspnet/core/fundamentals/host/web-host
 
-global using BedrockService.Service.Logging;
 global using BedrockService.Service.Management;
 global using BedrockService.Service.Networking;
 global using BedrockService.Shared.Classes;
@@ -25,11 +24,9 @@ using BedrockService.Service.Core.Interfaces;
 namespace BedrockService.Service {
     public class Program {
         public static bool IsExiting = false;
+        private static string _declaredType = "Service";
         private static bool _isDebugEnabled = false;
-        private static bool _isConsoleMode = false;
         private static bool _shouldStartService = true;
-        private static CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
-        private static CancellationToken token = CancellationTokenSource.Token;
         public static void Main(string[] args) {
             if (args.Length > 0) {
                 Console.WriteLine(string.Join(" ", args));
@@ -40,21 +37,20 @@ namespace BedrockService.Service {
                     args[0].ToLower() != "start" &&
                     args[0].ToLower() != "stop";
             }
-            if (args.Length == 0 || Environment.UserInteractive) {
-                _isConsoleMode = true;
-            }
             CreateHostBuilder(args).Build().Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hostContext, services) => {
-                    IProcessInfo processInfo = new ServiceProcessInfo(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), Process.GetCurrentProcess().Id, _isDebugEnabled, _isConsoleMode, _shouldStartService);
+                    IProcessInfo processInfo = new ServiceProcessInfo(_declaredType, Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), Process.GetCurrentProcess().Id, _isDebugEnabled, _shouldStartService);
                     services.AddHostedService<Core.Service>()
                         .AddSingleton(processInfo)
                         .AddSingleton<NetworkStrategyLookup>()
-                        .AddSingleton<IServiceConfiguration, ServiceInfo>()
-                        .AddSingleton<IBedrockLogger, ServiceLogger>()
+                        .AddSingleton<ServiceInfo>()
+                        .AddSingleton<IServiceConfiguration>(x => x.GetRequiredService<ServiceInfo>())
+                        .AddSingleton<IBedrockConfiguration>(x => x.GetRequiredService<ServiceInfo>())
+                        .AddSingleton<IBedrockLogger, BedrockLogger>()
                         .AddSingleton<IBedrockService, Core.BedrockService>()
                         .AddSingleton<ITCPListener, TCPListener>()
                         .AddSingleton<IConfigurator, ConfigManager>()

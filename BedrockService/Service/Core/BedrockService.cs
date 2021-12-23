@@ -17,45 +17,68 @@ namespace BedrockService.Service.Core {
         private readonly IConfigurator _configurator;
         private readonly IUpdater _updater;
         private readonly ITCPListener _tCPListener;
-        private readonly CrontabSchedule _backupCron;
-        private readonly CrontabSchedule _updaterCron;
+        private CrontabSchedule _backupCron;
+        private CrontabSchedule _updaterCron;
         private HostControl _hostControl;
-        private readonly List<IBedrockServer> _bedrockServers = new List<IBedrockServer>();
+        private List<IBedrockServer> _bedrockServers = new List<IBedrockServer>();
         private System.Timers.Timer _updaterTimer;
         private System.Timers.Timer _backupTimer;
 
         public BedrockService(IConfigurator configurator, IUpdater updater, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ITCPListener tCPListener) {
-            if (serviceProcessInfo.ShouldStartService()) {
                 _tCPListener = tCPListener;
                 _configurator = configurator;
-                _configurator.LoadAllConfigurations().Wait();
+                _logger = logger;
                 _serviceConfiguration = serviceConfiguration;
                 _processInfo = serviceProcessInfo;
                 _updater = updater;
-                _updater.CheckUpdates().Wait();
                 _logger = logger;
-                _backupCron = CrontabSchedule.TryParse(serviceConfiguration.GetProp("BackupCron").ToString());
-                _updaterCron = CrontabSchedule.TryParse(serviceConfiguration.GetProp("UpdateCron").ToString());
-                Initialize();
-                _tCPListener.SetKeyContainer(_configurator.GetKeyContainer());
-            }
+        }
+
+        public Task Initialize() {
+            return Task.Run(() => {
+                _updater.Initialize();
+                _configurator.LoadAllConfigurations().Wait();
+                _backupCron = CrontabSchedule.TryParse(_serviceConfiguration.GetProp("BackupCron").ToString());
+                _updaterCron = CrontabSchedule.TryParse(_serviceConfiguration.GetProp("UpdateCron").ToString());
+                _logger.Initialize();
+                _updater.CheckUpdates().Wait();
+                _bedrockServers.Clear();
+                InitializeTimers();
+                try {
+                    List<IServerConfiguration> temp = _serviceConfiguration.GetServerList();
+                    foreach (IServerConfiguration server in temp) {
+                        IBedrockServer bedrockServer = new BedrockServer(server, _configurator, _logger, _serviceConfiguration, _processInfo);
+                        bedrockServer.Initialize();
+                        _bedrockServers.Add(bedrockServer);
+                    }
+                }
+                catch (Exception e) {
+                    _logger.AppendLine($"Error Instantiating BedrockServiceWrapper: {e.StackTrace}");
+                }
+                _tCPListener.Initialize();
+            });
         }
 
         public bool Start(HostControl hostControl) {
+            Initialize().Wait();
             _hostControl = hostControl;
             try {
                 ValidSettingsCheck();
-
                 foreach (var brs in _bedrockServers) {
                     if (hostControl != null)
-                        _hostControl.RequestAdditionalTime(TimeSpan.FromSeconds(30));
+                        try {
+                            _hostControl.RequestAdditionalTime(TimeSpan.FromSeconds(30));
+                        }
+                        catch (Exception ex) {
+                            _logger.AppendLine("Error!");
+                        }
                     brs.SetServerStatus(BedrockServer.ServerStatus.Starting);
                     brs.StartWatchdog(_hostControl);
                 }
                 return true;
             }
             catch (Exception e) {
-                _logger.AppendLine($"Error Starting BedrockServiceWrapper {e.StackTrace}");
+                _logger.AppendLine($"Error: {e.Message}.\n{e.StackTrace}");
                 return false;
             }
         }
@@ -116,21 +139,6 @@ namespace BedrockService.Service.Core {
             if (ValidSettingsCheck()) {
                 bedrockServer.SetServerStatus(BedrockServer.ServerStatus.Starting);
                 bedrockServer.StartWatchdog(_hostControl);
-            }
-        }
-
-        private void Initialize() {
-            _bedrockServers.Clear();
-            InitializeTimers();
-            try {
-                List<IServerConfiguration> temp = _serviceConfiguration.GetServerList();
-                foreach (IServerConfiguration server in temp) {
-                    IBedrockServer bedrockServer = new BedrockServer(server, _configurator, _logger, _serviceConfiguration, _processInfo);
-                    _bedrockServers.Add(bedrockServer);
-                }
-            }
-            catch (Exception e) {
-                _logger.AppendLine($"Error Instantiating BedrockServiceWrapper: {e.StackTrace}");
             }
         }
 

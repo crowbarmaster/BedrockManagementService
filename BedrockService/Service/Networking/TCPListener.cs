@@ -24,12 +24,9 @@ namespace BedrockService.Service.Networking {
             _logger = logger;
             _serviceConfiguration = serviceConfiguration;
             _cancelTokenSource = new CancellationTokenSource();
-            if (processInfo.ShouldStartService()) {
-                InitializeTasks();
-            }
         }
 
-        private void InitializeTasks() {
+        public void Initialize() {
             _tcpTask = StartListening();
             _recieverTask = IncomingListener();
             _tcpTask.Start();
@@ -96,7 +93,7 @@ namespace BedrockService.Service.Networking {
                     Task.Delay(100).Wait();
                 }
                 _cancelTokenSource = new CancellationTokenSource();
-                InitializeTasks();
+                Initialize();
             });
         }
 

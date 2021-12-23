@@ -1,11 +1,9 @@
 ﻿namespace BedrockService.Service.Server.Management {
     public class PlayerManager : IPlayerManager {
         readonly IServerConfiguration _serverConfiguration;
-        readonly IBedrockLogger _logger;
 
-        public PlayerManager(IServerConfiguration serverConfiguration, IBedrockLogger logger) {
-            this._serverConfiguration = serverConfiguration;
-            this._logger = logger;
+        public PlayerManager(IServerConfiguration serverConfiguration) {
+            _serverConfiguration = serverConfiguration;
         }
 
         public void PlayerConnected(string username, string xuid) {
