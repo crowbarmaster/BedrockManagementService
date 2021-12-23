@@ -19,6 +19,18 @@ namespace BedrockService.Shared.Utilities {
                 file.CopyTo(Path.Combine(target.FullName, file.Name), true);
         }
 
+        public void CopyFilesMatchingExtension(string source, string target, string extension) {
+            DirectoryInfo sourceDirInfo = new(source);
+            if (!extension.StartsWith('.')) {
+                extension = $".{extension}";
+            }
+            foreach (FileInfo file in sourceDirInfo.GetFiles()) {
+                if (file.Extension == extension) {
+                    file.CopyTo(Path.Combine(target, file.Name), true);
+                }
+            }
+        }
+
         public void DeleteFilesRecursively(DirectoryInfo source, bool removeSourceFolder) {
             foreach (DirectoryInfo dir in source.GetDirectories())
                 DeleteFilesRecursively(dir, removeSourceFolder);
@@ -31,7 +43,7 @@ namespace BedrockService.Shared.Utilities {
         }
 
         public void ClearTempDir() {
-            DirectoryInfo tempDirectory = new DirectoryInfo($@"{_servicePath}\Temp");
+            DirectoryInfo tempDirectory = new($@"{_servicePath}\Temp");
             if (!tempDirectory.Exists)
                 tempDirectory.Create();
             foreach (FileInfo file in tempDirectory.GetFiles("*", SearchOption.AllDirectories))
@@ -60,7 +72,7 @@ namespace BedrockService.Shared.Utilities {
 
  
         public Task<bool> BackupWorldFilesFromQuery(Dictionary<string, int> fileNameSizePairs, string worldPath, string destinationPath) {
-            return Task.Run<bool>(() => {
+            return Task.Run(() => {
                 try {
                     foreach (KeyValuePair<string, int> file in fileNameSizePairs) {
                         string fileName = file.Key.Replace('/', '\\');
@@ -81,7 +93,7 @@ namespace BedrockService.Shared.Utilities {
                     }
                     return true;
                 }
-                catch (System.Exception ex) {
+                catch (Exception ex) {
                     Console.WriteLine($"Error! {ex.Message}");
                 }
                 return false;
