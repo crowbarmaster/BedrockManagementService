@@ -1,4 +1,5 @@
 using BedrockService.Shared.Interfaces;
+using BedrockService.Shared.MinecraftJsonModels.JsonModels;
 using BedrockService.Shared.Utilities;
 using Newtonsoft.Json;
 using System.Collections.Generic;
@@ -6,44 +7,6 @@ using System.IO;
 using System.IO.Compression;
 
 namespace BedrockService.Shared.PackParser {
-    public class Header {
-        public string description { get; set; }
-        public string name { get; set; }
-        public string uuid { get; set; }
-        public List<int> version { get; set; }
-    }
-
-    public class Module {
-        public string description { get; set; }
-        public string type { get; set; }
-        public string uuid { get; set; }
-        public List<int> version { get; set; }
-    }
-
-    public class Dependency {
-        public string uuid { get; set; }
-        public List<int> version { get; set; }
-    }
-
-    public class Manifest {
-        public int format_version { get; set; }
-        public Header header { get; set; }
-        public List<Module> modules { get; set; }
-        public List<Dependency> dependencies { get; set; }
-    }
-
-    public class MinecraftPackContainer {
-        public Manifest JsonManifest;
-        public string PackContentLocation;
-        public string ManifestType;
-        public string FolderName;
-        public byte[] IconBytes;
-
-        public override string ToString() {
-            return JsonManifest != null ? JsonManifest.header.name : "WorldPack";
-        }
-    }
-
     public class MinecraftPackParser {
         private readonly IProcessInfo _processInfo;
         private readonly IBedrockLogger _logger;
@@ -61,8 +24,8 @@ namespace BedrockService.Shared.PackParser {
             PackExtractDirectory = $@"{processInfo.GetDirectory()}\Temp";
             _processInfo = processInfo;
             new FileUtils(processInfo.GetDirectory()).ClearTempDir();
-            using (MemoryStream fileStream = new MemoryStream(fileContents, 5, fileContents.Length - 5)) {
-                using (ZipArchive zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read)) {
+            using (MemoryStream fileStream = new(fileContents, 5, fileContents.Length - 5)) {
+                using (ZipArchive zipArchive = new(fileStream, ZipArchiveMode.Read)) {
                     zipArchive.ExtractToDirectory(PackExtractDirectory);
                 }
             }
@@ -88,12 +51,11 @@ namespace BedrockService.Shared.PackParser {
                     }
                 }
             }
-            DirectoryInfo directoryInfo = new DirectoryInfo(PackExtractDirectory);
             ParseDirectory(PackExtractDirectory);
         }
 
         public void ParseDirectory(string directoryToParse) {
-            DirectoryInfo directoryInfo = new DirectoryInfo(directoryToParse);
+            DirectoryInfo directoryInfo = new(directoryToParse);
             if (directoryInfo.Exists) {
                 _logger.AppendLine($"Parsing directory {directoryInfo.Name}");
                 foreach (FileInfo file in directoryInfo.GetFiles("*", SearchOption.AllDirectories)) {
@@ -126,17 +88,15 @@ namespace BedrockService.Shared.PackParser {
                         else
                             iconBytes = File.ReadAllBytes($@"{file.Directory.FullName}\pack_icon.png");
 
-                        MinecraftPackContainer container = new MinecraftPackContainer {
-                            JsonManifest = new Manifest(),
+                        MinecraftPackContainer container = new() {
+                            JsonManifest = new(),
                             PackContentLocation = file.Directory.FullName,
                             ManifestType = "",
                             FolderName = file.Directory.Name,
                             IconBytes = iconBytes
                         };
-                        JsonSerializerSettings settings = new JsonSerializerSettings() {
-                            TypeNameHandling = TypeNameHandling.All
-                        };
-                        container.JsonManifest = JsonConvert.DeserializeObject<Manifest>(File.ReadAllText(file.FullName), settings);
+                        JsonSerializerSettings settings = new() {TypeNameHandling = TypeNameHandling.All};
+                        container.JsonManifest = JsonConvert.DeserializeObject<PackManifestJsonModel>(File.ReadAllText(file.FullName), settings);
                         container.ManifestType = container.JsonManifest.modules[0].type;
                         _logger.AppendLine($"{container.ManifestType} pack found, name: {container.JsonManifest.header.name}, path: {container.PackContentLocation}");
                         FoundPacks.Add(container);
