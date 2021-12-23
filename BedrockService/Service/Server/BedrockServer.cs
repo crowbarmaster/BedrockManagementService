@@ -14,11 +14,12 @@ namespace BedrockService.Service.Server {
         private ServerStatus _currentServerStatus;
         private readonly IServerConfiguration _serverConfiguration;
         private readonly IServiceConfiguration _serviceConfiguration;
-        private readonly IPlayerManager _playerManager;
         private readonly IConfigurator _configurator;
         private readonly IBedrockLogger _logger;
-        private readonly IBedrockLogger _serverLogger;
-        private readonly string _servicePath;
+        private readonly IProcessInfo _processInfo;
+        private IBedrockLogger _serverLogger;
+        private IPlayerManager _playerManager;
+        private string _servicePath;
         private const string _startupMessage = "INFO] Server started.";
         public enum ServerStatus {
             Stopped,
@@ -29,12 +30,17 @@ namespace BedrockService.Service.Server {
 
         public BedrockServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo) {
             _serverConfiguration = serverConfiguration;
+            _processInfo = processInfo;
             _serviceConfiguration = serviceConfiguration;
             _configurator = configurator;
             _logger = logger;
-            _servicePath = processInfo.GetDirectory();
-            _serverLogger = new ServerLogger(processInfo, serviceConfiguration, serverConfiguration, serverConfiguration.GetServerName());
-            _playerManager = new PlayerManager(serverConfiguration, logger);
+        }
+
+        public void Initialize() {
+            _servicePath = _processInfo.GetDirectory();
+            _serverLogger = new BedrockLogger(_processInfo, _serviceConfiguration, _serverConfiguration);
+            _serverLogger.Initialize();
+            _playerManager = new PlayerManager(_serverConfiguration);
         }
 
         public void WriteToStandardIn(string command) {
@@ -289,7 +295,7 @@ namespace BedrockService.Service.Server {
                 string logFileText = "NO LOG FILE! - ";
                 if (dataMsg.StartsWith(logFileText))
                     dataMsg = dataMsg.Substring(logFileText.Length, dataMsg.Length - logFileText.Length);
-                _serverLogger.AppendText($"{_serverConfiguration.GetServerName()}: {dataMsg}\r\n");
+                _serverLogger.AppendLine(dataMsg);
                 if (e.Data != null) {
 
                     if (dataMsg.Contains(_startupMessage)) {
