@@ -1,59 +1,60 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using BedrockService.Shared.Classes;
+using BedrockService.Shared.Interfaces;
+using BedrockService.Shared.MinecraftJsonModels.FileModels;
+using BedrockService.Shared.MinecraftJsonModels.JsonModels;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace BedrockService.Shared.PackParser {
     public class MinecraftKnownPacksClass {
-        public List<KnownPack> KnownPacks = new List<KnownPack>();
-        private readonly List<KnownPack> _stockPacks = new List<KnownPack>();
-        public class KnownPack {
-            public int file_version { get; set; }
-            public string file_system { get; set; }
-            public bool? from_disk { get; set; }
-            public List<string> hashes { get; set; }
-            public string path { get; set; }
-            public string uuid { get; set; }
-            public string version { get; set; }
-
-            public override string ToString() {
-                return path;
-            }
-        }
+        public KnownPacksFileModel InstalledPacks;
+        private readonly KnownPacksFileModel _stockDataModel;
 
         public MinecraftKnownPacksClass(string serverFile, string stockFile) {
-            KnownPacks = ParseJsonArray(serverFile);
-            _stockPacks = ParseJsonArray(stockFile);
-            KnownPacks.RemoveAt(0); // Strip file version entry.
-            foreach (KnownPack pack in _stockPacks) {
-                KnownPack packToRemove = new KnownPack();
-                if (pack.uuid == null)
-                    continue;
-                packToRemove = KnownPacks.First(p => p.uuid != null && p.uuid == pack.uuid);
-                KnownPacks.Remove(packToRemove);
-            }
+            _stockDataModel = new KnownPacksFileModel(stockFile);
+            InstalledPacks = new KnownPacksFileModel(serverFile);
+            _stockDataModel.Contents.RemoveAt(0); // Strip file version entry.
+            InstalledPacks.Contents.RemoveAt(0);
+            List<KnownPacksJsonModel> AddedPacks = InstalledPacks.Contents.Except(_stockDataModel.Contents).ToList();
+            InstalledPacks.Contents.Clear();
+            InstalledPacks.Contents.AddRange(AddedPacks);
         }
 
-        public void RemovePackFromServer(string serverPath, MinecraftPackContainer pack) {
-            if (pack.ManifestType == "WorldPack")
+        public void RemovePackFromServer(IServerConfiguration configuration, MinecraftPackContainer pack) {
+            string serverPath = configuration.GetProp("ServerPath").ToString();
+            string serverFolderName = configuration.GetProp("level-name").ToString();
+            string jsonPackPath = null;
+            string jsonWorldPackEnablerPath = null;
+            if (pack.ManifestType == "WorldPack") {
                 Directory.Delete($@"{serverPath}\worlds\{pack.FolderName}", true);
-            if (pack.ManifestType == "data")
-                Directory.Delete($@"{serverPath}\behavior_packs\{pack.FolderName}", true);
-            if (pack.ManifestType == "resources")
-                Directory.Delete($@"{serverPath}\resource_packs\{ pack.FolderName}", true);
-            KnownPacks.Remove(KnownPacks.First(p => p.uuid != null || p.uuid == pack.JsonManifest.header.uuid));
-            List<KnownPack> packsToWrite = new List<KnownPack>(_stockPacks);
-            if (KnownPacks.Count > 0)
-                packsToWrite.AddRange(KnownPacks);
-            File.WriteAllText($@"{serverPath}\valid_known_packs.json", JArray.FromObject(packsToWrite).ToString());
-        }
-
-        private List<KnownPack> ParseJsonArray(string jsonFile) {
-            JArray packList = JArray.Parse(File.ReadAllText(jsonFile));
-            List<KnownPack> parsedPackInfos = new List<KnownPack>();
-            foreach (JToken token in packList)
-                parsedPackInfos.Add(token.ToObject<KnownPack>());
-            return parsedPackInfos;
+            }
+            if (pack.ManifestType == "data") {
+                jsonPackPath = $@"{serverPath}\behavior_packs\{pack.FolderName}";
+                jsonWorldPackEnablerPath = $@"{serverPath}\worlds\{serverFolderName}\world_behavior_packs.json";
+                Directory.Delete(jsonPackPath, true);
+            }
+            if (pack.ManifestType == "resources") {
+                jsonPackPath = $@"{serverPath}\resource_packs\{pack.FolderName}";
+                jsonWorldPackEnablerPath = $@"{serverPath}\worlds\{serverFolderName}\world_resource_packs.json";
+                Directory.Delete(jsonPackPath, true);
+            }
+            if(jsonWorldPackEnablerPath != null) {
+                WorldPackFileModel worldPackFile = new WorldPackFileModel(jsonWorldPackEnablerPath);
+                List<WorldKnownPackEntryJsonModel> worldPacks = worldPackFile.Contents;
+                WorldKnownPackEntryJsonModel foundEntry = worldPacks.FirstOrDefault(x => x.pack_id.Equals(pack.JsonManifest.header.uuid));
+                if (foundEntry != null) {
+                    worldPacks.Remove(foundEntry);
+                    worldPackFile.SaveToFile(worldPacks);
+                }
+            }
+            InstalledPacks.Contents.Remove(InstalledPacks.Contents.First(p => p.uuid != null || p.uuid == pack.JsonManifest.header.uuid));
+            List<KnownPacksJsonModel> packsToWrite = new(_stockDataModel.Contents);
+            if (InstalledPacks.Contents.Count > 0)
+                packsToWrite.AddRange(InstalledPacks.Contents);
+            File.WriteAllText($@"{serverPath}\valid_known_packs.json", JsonConvert.SerializeObject(packsToWrite));
         }
     }
 }
