@@ -1,4 +1,4 @@
-﻿using BedrockService.Shared.MincraftJson;
+﻿using BedrockService.Shared.MinecraftJsonModels.JsonModels;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -58,34 +58,7 @@ namespace BedrockService.Shared.Utilities {
 
         public void WriteStringArrayToFile(string path, string[] content) => File.WriteAllLines(path, content);
 
-        public void UpdateJArrayFile(string path, JArray content, System.Type type) {
-            try {
-                string currentFileContents = null;
-                JArray jArray = new JArray();
-                if (File.Exists(path)) {
-                    currentFileContents = File.ReadAllText(path);
-                    jArray = JArray.Parse(currentFileContents);
-                }
-                if (type == typeof(WorldPacksJsonModel)) {
-                    foreach (JToken jToken in content) {
-                        bool doesContainToken = false;
-                        foreach (JToken currentToken in jArray) {
-                            if (currentToken.ToObject<WorldPacksJsonModel>().pack_id == jToken.ToObject<WorldPacksJsonModel>().pack_id) {
-                                doesContainToken = true;
-                            }
-                        }
-                        if (!doesContainToken) {
-                            jArray.Add(jToken);
-                        }
-                    }
-                }
-                File.WriteAllText(path, jArray.ToString());
-            }
-            catch (System.Exception) {
-                return;
-            }
-        }
-
+ 
         public Task<bool> BackupWorldFilesFromQuery(Dictionary<string, int> fileNameSizePairs, string worldPath, string destinationPath) {
             return Task.Run<bool>(() => {
                 try {
