@@ -53,9 +53,7 @@ namespace BedrockService.Client.Forms {
                     _server.AddUpdatePlayer(player);
                 }
             }
-            JsonSerializerSettings settings = new JsonSerializerSettings() {
-                TypeNameHandling = TypeNameHandling.All
-            };
+            JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
             byte[] sendBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(modifiedPlayers, Formatting.Indented, settings));
             FormManager.TCPClient.SendData(sendBytes, NetworkMessageSource.Client, NetworkMessageDestination.Server, FormManager.MainWindow.connectedHost.GetServerIndex(_server), NetworkMessageTypes.PlayersUpdate);
             FormManager.MainWindow.DisableUI();

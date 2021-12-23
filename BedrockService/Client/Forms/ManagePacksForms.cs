@@ -59,9 +59,7 @@ namespace BedrockService.Client.Forms {
                     temp.Add((MinecraftPackContainer)item);
                     serverListBox.Items.Remove(item);
                 }
-                JsonSerializerSettings settings = new JsonSerializerSettings() {
-                    TypeNameHandling = TypeNameHandling.All
-                };
+                JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                 FormManager.TCPClient.SendData(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(temp, Formatting.Indented, settings)), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.RemovePack);
             }
             DialogResult = DialogResult.OK;
@@ -70,10 +68,8 @@ namespace BedrockService.Client.Forms {
         private void removeAllPacksBtn_Click(object sender, EventArgs e) {
             List<MinecraftPackContainer> temp = new List<MinecraftPackContainer>();
             foreach (object item in serverListBox.Items)
-                temp.Add((MinecraftPackContainer)item);
-            JsonSerializerSettings settings = new JsonSerializerSettings() {
-                TypeNameHandling = TypeNameHandling.All
-            };
+                temp.Add((MinecraftPackContainer)item); 
+            JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
             FormManager.TCPClient.SendData(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(temp, Formatting.Indented, settings)), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.RemovePack);
             DialogResult = DialogResult.OK;
         }
@@ -87,6 +83,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void sendAllBtn_Click(object sender, EventArgs e) {
+            if (parsedPacksListBox.Items.Count < 1) { return; }
             object[] items = new object[parsedPacksListBox.Items.Count];
             parsedPacksListBox.Items.CopyTo(items, 0);
             SendPacks(items);
