@@ -10,8 +10,6 @@ namespace BedrockService.Service.Management {
     public class ConfigManager : IConfigurator {
         private readonly string _configDir;
         private readonly string _globalFile;
-        private readonly string _clientKeyPath;
-        private readonly string _commsKeyPath;
         private string _loadedVersion;
         private static readonly object _fileLock = new object();
         private readonly IServiceConfiguration _serviceConfiguration;
