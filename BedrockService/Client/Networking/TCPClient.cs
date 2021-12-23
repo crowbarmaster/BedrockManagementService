@@ -100,9 +100,7 @@ namespace BedrockService.Client.Networking {
                         if (destination != NetworkMessageDestination.Client)
                             continue;
                         int srvCurLen = 0;
-                        JsonSerializerSettings settings = new JsonSerializerSettings() {
-                            TypeNameHandling = TypeNameHandling.All
-                        };
+                        JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                         switch (source) {
                             case NetworkMessageSource.Service:
                                 switch (msgType) {
@@ -151,13 +149,13 @@ namespace BedrockService.Client.Networking {
                                                 IServerConfiguration bedrockServer = FormManager.MainWindow.connectedHost.GetServerInfoByName(srvName);
                                                 int curCount = bedrockServer.GetLog().Count;
                                                 if (curCount == srvCurLen) {
-                                                    bedrockServer.GetLog().Add(srvText);
+                                                    bedrockServer.GetLog().Add(new LogEntry(srvText));
                                                 }
                                             }
                                             else {
                                                 int curCount = FormManager.MainWindow.connectedHost.GetLog().Count;
                                                 if (curCount == srvCurLen) {
-                                                    FormManager.MainWindow.connectedHost.GetLog().Add(srvText);
+                                                    FormManager.MainWindow.connectedHost.GetLog().Add(new LogEntry(srvText));
                                                 }
                                             }
                                         }
