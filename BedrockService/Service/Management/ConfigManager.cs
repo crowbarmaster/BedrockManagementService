@@ -1,4 +1,6 @@
-﻿using BedrockService.Shared.Utilities;
+﻿using BedrockService.Shared.MinecraftJsonModels.FileModels;
+using BedrockService.Shared.MinecraftJsonModels.JsonModels;
+using BedrockService.Shared.Utilities;
 using System.IO.Compression;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
@@ -15,9 +17,6 @@ namespace BedrockService.Service.Management {
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IProcessInfo _processInfo;
         private readonly IBedrockLogger _logger;
-        private CommsKeyContainer _keyContainer;
-        private RSAParameters _serviceKey;
-        private RSAParameters _clientKey;
 
         public ConfigManager(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, IBedrockLogger logger) {
             _processInfo = processInfo;
@@ -25,8 +24,6 @@ namespace BedrockService.Service.Management {
             _logger = logger;
             _configDir = $@"{_processInfo.GetDirectory()}\Server\Configs";
             _globalFile = $@"{_processInfo.GetDirectory()}\Service\Globals.conf";
-            _clientKeyPath = $@"{_processInfo.GetDirectory()}\Client\ClientKey.dat";
-            _commsKeyPath = $@"{_processInfo.GetDirectory()}\Service\CommsKey.dat";
         }
 
         public async Task LoadAllConfigurations() {
@@ -44,38 +41,6 @@ namespace BedrockService.Service.Management {
                     Directory.CreateDirectory($@"{_configDir}\Backups");
                 if (File.Exists($@"{_configDir}\..\bedrock_ver.ini"))
                     _loadedVersion = File.ReadAllText($@"{_configDir}\..\bedrock_ver.ini");
-                if (!File.Exists(_commsKeyPath)) {
-                    RSACryptoServiceProvider rsa = new RSACryptoServiceProvider(2048);
-                    using (AesCryptoServiceProvider aes = new AesCryptoServiceProvider()) {
-                        CommsKeyContainer serviceKeys = new CommsKeyContainer();
-                        CommsKeyContainer clientKeys = new CommsKeyContainer();
-                        serviceKeys.LocalPrivateKey.SetPrivateKey(rsa.ExportParameters(true));
-                        clientKeys.RemotePublicKey.SetPublicKey(rsa.ExportParameters(false));
-                        rsa = new RSACryptoServiceProvider(2048);
-                        clientKeys.LocalPrivateKey.SetPrivateKey(rsa.ExportParameters(true));
-                        serviceKeys.RemotePublicKey.SetPublicKey(rsa.ExportParameters(false));
-                        aes.GenerateKey();
-                        aes.GenerateIV();
-                        serviceKeys.AesKey = aes.Key;
-                        clientKeys.AesKey = aes.Key;
-                        serviceKeys.AesIV = aes.IV;
-                        clientKeys.AesIV = aes.IV;
-                        formatter.Serialize(File.Create(_clientKeyPath), clientKeys);
-                        formatter.Serialize(File.Create(_commsKeyPath), serviceKeys);
-                    }
-                    rsa.Clear();
-                    rsa.Dispose();
-                }
-                else {
-                    try {
-                        _keyContainer = (CommsKeyContainer)formatter.Deserialize(File.Open(_commsKeyPath, FileMode.Open));
-                        _serviceKey = _keyContainer.LocalPrivateKey.GetPrivateKey();
-                        _clientKey = _keyContainer.RemotePublicKey.GetPrivateKey();
-                    }
-                    catch {
-                        _logger.AppendLine("Error loading Encryption keys!");
-                    }
-                }
 
                 ServerInfo serverInfo;
                 LoadGlobals();
@@ -134,13 +99,13 @@ namespace BedrockService.Service.Management {
         }
 
         private void LoadGlobals() {
+            _serviceConfiguration.InitializeDefaults();
             if (File.Exists(_globalFile)) {
                 _logger.AppendLine("Loading Globals...");
                 _serviceConfiguration.ProcessConfiguration(File.ReadAllLines(_globalFile));
                 _serviceConfiguration.SetServerVersion(_loadedVersion);
                 return;
             }
-            _serviceConfiguration.InitializeDefaults();
             _logger.AppendLine("Globals.conf was not found. Loaded defaults and saved to file.");
             SaveGlobalFile();
         }
@@ -155,7 +120,7 @@ namespace BedrockService.Service.Management {
                     if (!Directory.Exists(server.GetProp("ServerPath").ToString()))
                         Directory.CreateDirectory(server.GetProp("ServerPath").ToString());
                     while (_serviceConfiguration.GetServerVersion() == null || _serviceConfiguration.GetServerVersion() == "None") {
-                        Thread.Sleep(150);
+                        Task.Delay(200).Wait();
                     }
                     using (ZipArchive archive = ZipFile.OpenRead($@"{_processInfo.GetDirectory()}\Server\MCSFiles\Update_{ _serviceConfiguration.GetServerVersion()}.zip")) {
                         int fileCount = archive.Entries.Count;
@@ -164,8 +129,9 @@ namespace BedrockService.Service.Management {
                                 _logger.AppendLine($"Extracting server files for server {server.GetServerName()}, {Math.Round((double)i / (double)fileCount, 2) * 100}% completed...");
                             }
                             if (!archive.Entries[i].FullName.EndsWith("/")) {
-                                if (File.Exists($@"{server.GetProp("ServerPath")}\{archive.Entries[i].FullName.Replace('/', '\\')}")) {
-                                    File.Delete($@"{server.GetProp("ServerPath")}\{archive.Entries[i].FullName.Replace('/', '\\')}");
+                                string fixedPath = $@"{server.GetProp("ServerPath")}\{archive.Entries[i].FullName.Replace('/', '\\')}";
+                                if (File.Exists(fixedPath)) {
+                                    File.Delete(fixedPath);
                                 }
                                 archive.Entries[i].ExtractToFile($@"{server.GetProp("ServerPath")}\{archive.Entries[i].FullName.Replace('/', '\\')}");
                             }
@@ -239,39 +205,24 @@ namespace BedrockService.Service.Management {
         }
 
         public void WriteJSONFiles(IServerConfiguration server) {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("[\n");
-
-            foreach (IPlayer player in server.GetPlayerList()) {
-                if (!player.IsDefaultRegistration() && player.IsPlayerWhitelisted()) {
-                    sb.Append("\t{\n");
-                    sb.Append($"\t\t\"ignoresPlayerLimit\": {player.PlayerIgnoresLimit().ToString().ToLower()},\n");
-                    sb.Append($"\t\t\"name\": \"{player.GetUsername()}\",\n");
-                    sb.Append($"\t\t\"xuid\": \"{player.GetXUID()}\"\n");
-                    sb.Append("\t},\n");
-                }
-            }
-            if (sb.Length > 2) {
-                sb.Remove(sb.Length - 2, 2);
-            }
-            sb.Append("\n]");
-            File.WriteAllText($@"{server.GetProp("ServerPath")}\whitelist.json", sb.ToString());
-            sb = new StringBuilder();
-            sb.Append("[\n");
-
-            foreach (Player player in server.GetPlayerList()) {
-                if (!player.IsDefaultRegistration()) {
-                    sb.Append("\t{\n");
-                    sb.Append($"\t\t\"permission\": \"{player.GetPermissionLevel()}\",\n");
-                    sb.Append($"\t\t\"xuid\": \"{player.GetXUID()}\"\n");
-                    sb.Append("\t},\n");
-                }
-            }
-            if (sb.Length > 2) {
-                sb.Remove(sb.Length - 2, 2);
-            }
-            sb.Append("\n]");
-            File.WriteAllText($@"{server.GetProp("ServerPath")}\permissions.json", sb.ToString());
+            string permFilePath = $@"{server.GetProp("ServerPath")}\permissions.json";
+            string whitelistFilePath = $@"{server.GetProp("ServerPath")}\whitelist.json";
+            PermissionsFileModel permissionsFile = new() {FilePath = permFilePath};
+            WhitelistFileModel whitelistFile = new() {FilePath = whitelistFilePath};
+            server.GetPlayerList()
+                .Where(x => x.IsPlayerWhitelisted())
+                .Select(x => (xuid: x.GetXUID(), userName: x.GetUsername(), ignoreLimits: x.PlayerIgnoresLimit()))
+                .ToList().ForEach(x => {
+                    whitelistFile.Contents.Add(new WhitelistEntryJsonModel(x.ignoreLimits, x.xuid, x.userName));
+                });
+            server.GetPlayerList()
+                .Where(x => !x.IsDefaultRegistration())
+                .Select(x => (xuid: x.GetXUID(), permLevel: x.GetPermissionLevel()))
+                .ToList().ForEach(x => {
+                    permissionsFile.Contents.Add(new PermissionsEntryJsonModel(x.permLevel, x.xuid));
+                });
+            permissionsFile.SaveToFile(permissionsFile.Contents);
+            whitelistFile.SaveToFile(whitelistFile.Contents);
         }
 
         public void SaveServerProps(IServerConfiguration server, bool SaveServerInfo) {
@@ -431,8 +382,6 @@ namespace BedrockService.Service.Management {
             }
             catch { return false; }
         }
-
-        public CommsKeyContainer GetKeyContainer() => _keyContainer;
 
         public Task LoadConfiguration(IBedrockConfiguration configuration) {
             throw new NotImplementedException();
