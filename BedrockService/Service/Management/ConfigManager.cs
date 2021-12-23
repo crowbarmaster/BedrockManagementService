@@ -31,8 +31,8 @@ namespace BedrockService.Service.Management {
                 BinaryFormatter formatter = new BinaryFormatter();
                 if (!Directory.Exists(_configDir))
                     Directory.CreateDirectory(_configDir);
-                if (!Directory.Exists($@"{_processInfo.GetDirectory()}\Client"))
-                    Directory.CreateDirectory($@"{_processInfo.GetDirectory()}\Client");
+                if (!Directory.Exists($@"{_processInfo.GetDirectory()}\Service"))
+                    Directory.CreateDirectory($@"{_processInfo.GetDirectory()}\Service");
                 if (!Directory.Exists($@"{_configDir}\KnownPlayers\Backups"))
                     Directory.CreateDirectory($@"{_configDir}\KnownPlayers\Backups");
                 if (!Directory.Exists($@"{_configDir}\RegisteredPlayers\Backups"))
