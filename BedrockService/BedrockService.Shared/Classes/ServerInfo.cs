@@ -7,7 +7,7 @@ namespace BedrockService.Shared.Classes {
         public string serversPath;
         public string ServerName { get; set; }
         public string FileName { get; set; }
-        public List<string> ConsoleBuffer = new List<string>();
+        public List<LogEntry> ConsoleBuffer = new List<LogEntry>();
         public Property ServerPath { get; set; }
         public Property ServerExeName { get; set; }
         public List<IPlayer> PlayersList = new List<IPlayer>();
@@ -182,9 +182,9 @@ namespace BedrockService.Shared.Classes {
             return FileName;
         }
 
-        public List<string> GetLog() => ConsoleBuffer = ConsoleBuffer ?? new List<string>();
+        public List<LogEntry> GetLog() => ConsoleBuffer = ConsoleBuffer ?? new List<LogEntry>();
 
-        public void SetLog(List<string> newLog) => ConsoleBuffer = newLog;
+        public void SetLog(List<LogEntry> newLog) => ConsoleBuffer = newLog;
 
         public List<IPlayer> GetPlayerList() => PlayersList ?? new List<IPlayer>();
 

@@ -11,7 +11,7 @@ namespace BedrockService.Shared.Classes {
         [JsonProperty]
         private string serverVersion { get; set; }
         [JsonProperty]
-        private List<string> serviceLog = new List<string>();
+        private List<LogEntry> serviceLog = new List<LogEntry>();
         [JsonProperty]
         private List<IServerConfiguration> ServerList = new List<IServerConfiguration>();
         [JsonProperty]
@@ -20,9 +20,6 @@ namespace BedrockService.Shared.Classes {
 
         public ServiceInfo(IProcessInfo processInfo) {
             _processInfo = processInfo;
-            if (processInfo == null || processInfo.ShouldStartService()) {
-                InitializeDefaults();
-            }
         }
 
         public void InitializeDefaults() {
@@ -37,8 +34,8 @@ namespace BedrockService.Shared.Classes {
             globals.Add(new Property("EntireBackups", "false"));
             globals.Add(new Property("CheckUpdates", "false"));
             globals.Add(new Property("UpdateCron", "0 2 * * *"));
-            globals.Add(new Property("LogServersToFile", "true"));
-            globals.Add(new Property("LogServiceToFile", "true"));
+            globals.Add(new Property("LogServerOutput", "true"));
+            globals.Add(new Property("LogApplicationOutput", "true"));
         }
 
         public void ProcessConfiguration(string[] fileEntries) {
@@ -125,9 +122,9 @@ namespace BedrockService.Shared.Classes {
 
         public string GetServerVersion() => serverVersion;
 
-        public List<string> GetLog() => serviceLog ?? new List<string>();
+        public List<LogEntry> GetLog() => serviceLog ?? new List<LogEntry>();
 
-        public void SetLog(List<string> newLog) => serviceLog = newLog;
+        public void SetLog(List<LogEntry> newLog) => serviceLog = newLog;
 
         public byte GetServerIndex(IServerConfiguration server) => (byte)ServerList.IndexOf(server);
     }

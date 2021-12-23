@@ -3,6 +3,7 @@ using BedrockService.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -27,13 +28,13 @@ namespace BedrockService.Client.Management {
                     Working = true;
                     StringBuilder sendString = new StringBuilder();
                     foreach (ServerInfo server in _connectedHost.GetServerList()) {
-                        server.ConsoleBuffer = server.ConsoleBuffer ?? new List<string>();
+                        server.ConsoleBuffer = server.ConsoleBuffer ?? new List<LogEntry>();
                         sendString.Append($"{server.ServerName};{server.ConsoleBuffer.Count}|");
                     }
                     sendString.Append($"Service;{_connectedHost.GetLog().Count}");
                     byte[] stringsToBytes = Encoding.UTF8.GetBytes(sendString.ToString());
                     FormManager.TCPClient.SendData(stringsToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.ConsoleLogUpdate);
-                    Thread.Sleep(200);
+                    Task.Delay(300).Wait();
                     int currentLogBoxLength = 0;
 
                     if (FormManager.MainWindow.selectedServer == null) {
@@ -43,10 +44,10 @@ namespace BedrockService.Client.Management {
                         currentLogBoxLength = FormManager.MainWindow.LogBox.TextLength;
                     });
                     if (FormManager.MainWindow.ShowsSvcLog && _connectedHost.GetLog().Count != currentLogBoxLength) {
-                        UpdateLogBoxInvoked(string.Join("\r\n", _connectedHost.GetLog()));
+                        UpdateLogBoxInvoked(string.Join("\r\n", _connectedHost.GetLog().Select(x => x.Text).ToList()));
                     }
                     else if (!FormManager.MainWindow.ShowsSvcLog && FormManager.MainWindow.selectedServer != null && FormManager.MainWindow.selectedServer.GetLog() != null && FormManager.MainWindow.selectedServer.GetLog().Count != currentLogBoxLength) {
-                        UpdateLogBoxInvoked(string.Join("", FormManager.MainWindow.selectedServer.GetLog()));
+                        UpdateLogBoxInvoked(string.Join("\r\n", FormManager.MainWindow.selectedServer.GetLog().Select(x => x.Text).ToList()));
                     }
 
                 }
