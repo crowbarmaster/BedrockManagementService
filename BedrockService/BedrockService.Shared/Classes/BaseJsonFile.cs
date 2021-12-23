@@ -8,19 +8,19 @@ using System.Threading.Tasks;
 
 namespace BedrockService.Shared.Classes {
     public abstract class BaseJsonFile {
-        public FileInfo FileInfo { get; set; }
+        public string FilePath { get; set; }
 
-        public BaseJsonFile(string fullPath) => FileInfo = new FileInfo(fullPath);
+        public BaseJsonFile(string fullPath) => FilePath = fullPath;
 
         public BaseJsonFile() { }
 
         public T LoadJsonFile<T>() {
-            if (!FileInfo.Exists) {
+            if (!File.Exists(FilePath)) {
                 return default(T);
             }
-            return JsonConvert.DeserializeObject<T>(File.ReadAllText(FileInfo.FullName));
+            return JsonConvert.DeserializeObject<T>(File.ReadAllText(FilePath));
         }
 
-        public void SaveToFile<T>(T value) => File.WriteAllText(FileInfo.FullName, JsonConvert.SerializeObject(value, Formatting.Indented));
+        public void SaveToFile<T>(T value) => File.WriteAllText(FilePath, JsonConvert.SerializeObject(value, Formatting.Indented));
     }
 }
