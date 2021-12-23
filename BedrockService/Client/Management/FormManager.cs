@@ -8,14 +8,23 @@ using System.Reflection;
 
 namespace BedrockService.Client.Management {
     public sealed class FormManager {
-        private static readonly IProcessInfo processInfo = new ServiceProcessInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Process.GetCurrentProcess().Id, false, true, true);
-        private static readonly IBedrockLogger Logger = new ClientLogger(processInfo);
+        private static readonly IProcessInfo processInfo = new ServiceProcessInfo("Client", Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Process.GetCurrentProcess().Id, false, true);
+        private static readonly IServiceConfiguration _configuration;
+        private static readonly IBedrockLogger _logger;
         private static MainWindow main;
         private static TCPClient client;
+
+        static FormManager() {
+            _configuration = new ServiceInfo(processInfo);
+            _configuration.InitializeDefaults();
+            _configuration.SetProp(new Property("LogApplicationOutput", "true") { Value = "true" });
+            _logger = new BedrockLogger(processInfo, _configuration);
+        }
+
         public static MainWindow MainWindow {
             get {
                 if (main == null || main.IsDisposed) {
-                    main = new MainWindow(processInfo, Logger);
+                    main = new MainWindow(processInfo, _logger);
                 }
                 return main;
             }
@@ -24,7 +33,7 @@ namespace BedrockService.Client.Management {
         public static TCPClient TCPClient {
             get {
                 if (client == null) {
-                    client = new TCPClient(Logger);
+                    client = new TCPClient(_logger);
                 }
                 return client;
             }
