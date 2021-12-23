@@ -132,7 +132,9 @@ namespace BedrockService.Service.Server {
                 DirectoryInfo targetDirectory = backupDir.CreateSubdirectory($"Backup_{DateTime.Now.Ticks}");
                 _logger.AppendLine($"Backing up files for server {_serverConfiguration.GetServerName()}. Please wait!");
                 if (_serviceConfiguration.GetProp("EntireBackups").ToString() == "false") {
+                    string levelDir = @$"\{_serverConfiguration.GetProp("level-name")}";
                     bool resuilt = fileUtils.BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, $@"{targetDirectory.FullName}").Result;
+                    fileUtils.CopyFilesMatchingExtension(worldsDir.FullName + levelDir, targetDirectory.FullName + levelDir, ".json");
                     WriteToStandardIn("save resume");
                     return resuilt;
                 }
