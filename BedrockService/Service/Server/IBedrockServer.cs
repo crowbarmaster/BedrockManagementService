@@ -2,6 +2,7 @@
 
 namespace BedrockService.Service.Server {
     public interface IBedrockServer {
+        void Initialize();
         void StartWatchdog(HostControl hostControl);
         string GetServerName();
         void WriteToStandardIn(string command);

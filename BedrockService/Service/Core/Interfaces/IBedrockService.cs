@@ -2,16 +2,12 @@
 
 namespace BedrockService.Service.Core.Interfaces {
     public interface IBedrockService : ServiceControl {
-        IBedrockServer GetBedrockServerByIndex(int index);
-
+        Task Initialize();
         void RemoveBedrockServerByIndex(int serverIndex);
-
-        IBedrockServer GetBedrockServerByName(string name);
-
-        List<IBedrockServer> GetAllServers();
-
         void InitializeNewServer(IServerConfiguration serverConfiguration);
-
         void RestartService();
+        IBedrockServer GetBedrockServerByIndex(int index);
+        IBedrockServer GetBedrockServerByName(string name);
+        List<IBedrockServer> GetAllServers();
     }
 }

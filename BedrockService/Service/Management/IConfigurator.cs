@@ -13,6 +13,5 @@
         void SaveKnownPlayerDatabase(IServerConfiguration server);
         void SaveServerProps(IServerConfiguration server, bool SaveServerInfo);
         void WriteJSONFiles(IServerConfiguration server);
-        CommsKeyContainer GetKeyContainer();
     }
 }
