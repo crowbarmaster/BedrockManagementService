@@ -4,8 +4,8 @@ using System.Text.RegularExpressions;
 
 namespace BedrockService.Service.Server {
     public class BedrockServer : IBedrockServer {
-        private Task _serverTask;
-        private Task _watchdogTask;
+        private Task? _serverTask;
+        private Task? _watchdogTask;
         private CancellationTokenSource _serverCanceler = new CancellationTokenSource();
         private CancellationTokenSource _watchdogCanceler = new CancellationTokenSource();
         private StreamWriter _stdInStream;
@@ -70,6 +70,7 @@ namespace BedrockService.Service.Server {
         public void StartWatchdog(HostControl hostControl) {
             _watchdogCanceler = new CancellationTokenSource();
             _hostController = hostControl;
+            _watchdogTask = null;
             _watchdogTask = ApplicationWatchdogMonitor();
             _watchdogTask.Start();
         }
@@ -407,6 +408,9 @@ namespace BedrockService.Service.Server {
                 }
                 if (stopWatchdog) {
                     _watchdogCanceler.Cancel();
+                    while (!_watchdogTask.IsCompleted) {
+                        Task.Delay(200);
+                    }
                 }
             });
         }
