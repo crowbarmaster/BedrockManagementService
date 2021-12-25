@@ -129,7 +129,6 @@ namespace BedrockService.Service.Networking {
                     _serviceConfiguration.SetAllProps(propList);
                     _configurator.SaveGlobalFile();
                     _bedrockService.RestartService();
-                    _messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
                     return;
                 }
                 _serviceConfiguration.GetServerInfoByIndex(serverIndex).SetAllProps(propList);
