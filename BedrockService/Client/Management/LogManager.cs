@@ -17,6 +17,7 @@ namespace BedrockService.Client.Management {
         private CancellationTokenSource _logTaskCancelSource;
         private IServiceConfiguration _connectedHost;
         private readonly IBedrockLogger _logger;
+        private int currentLogBoxLength;
 
         public LogManager(IBedrockLogger logger) {
             _logger = logger;
@@ -35,21 +36,19 @@ namespace BedrockService.Client.Management {
                     byte[] stringsToBytes = Encoding.UTF8.GetBytes(sendString.ToString());
                     FormManager.TCPClient.SendData(stringsToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.ConsoleLogUpdate);
                     Task.Delay(300).Wait();
-                    int currentLogBoxLength = 0;
 
                     if (FormManager.MainWindow.selectedServer == null) {
                         UpdateLogBoxInvoked("");
                     }
-                    FormManager.MainWindow.LogBox.Invoke((MethodInvoker)delegate {
-                        currentLogBoxLength = FormManager.MainWindow.LogBox.TextLength;
-                    });
                     if (FormManager.MainWindow.ShowsSvcLog && _connectedHost.GetLog().Count != currentLogBoxLength) {
                         UpdateLogBoxInvoked(string.Join("\r\n", _connectedHost.GetLog().Select(x => x.Text).ToList()));
                     }
-                    else if (!FormManager.MainWindow.ShowsSvcLog && FormManager.MainWindow.selectedServer != null && FormManager.MainWindow.selectedServer.GetLog() != null && FormManager.MainWindow.selectedServer.GetLog().Count != currentLogBoxLength) {
+                    if (!FormManager.MainWindow.ShowsSvcLog && FormManager.MainWindow.selectedServer != null && FormManager.MainWindow.selectedServer.GetLog() != null && FormManager.MainWindow.selectedServer.GetLog().Count != currentLogBoxLength) {
                         UpdateLogBoxInvoked(string.Join("\r\n", FormManager.MainWindow.selectedServer.GetLog().Select(x => x.Text).ToList()));
                     }
-
+                    FormManager.MainWindow.LogBox.Invoke((MethodInvoker)delegate {
+                        currentLogBoxLength = FormManager.MainWindow.LogBox.TextLength;
+                    });
                 }
                 catch (Exception e) {
                     _logger.AppendLine($"LogManager Error! Stacetrace: {e.StackTrace}");
