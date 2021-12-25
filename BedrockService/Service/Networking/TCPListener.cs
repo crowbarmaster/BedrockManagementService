@@ -5,20 +5,21 @@ using System.Security.Cryptography;
 
 namespace BedrockService.Service.Networking {
     public class TCPListener : ITCPListener, IMessageSender {
-        private TcpClient _client;
-        private TcpListener _inListener;
-        private NetworkStream _stream;
+        private TcpClient? _client;
+        private TcpListener? _inListener;
+        private NetworkStream? _stream;
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IBedrockLogger _logger;
         private int _heartbeatFailTimeout;
         private readonly int _heartbeatFailTimeoutLimit = 2;
-        private Dictionary<NetworkMessageTypes, IMessageParser> _standardMessageLookup;
-        private Dictionary<NetworkMessageTypes, IFlaggedMessageParser> _flaggedMessageLookup;
+        private Dictionary<NetworkMessageTypes, IMessageParser>? _standardMessageLookup;
+        private Dictionary<NetworkMessageTypes, IFlaggedMessageParser>? _flaggedMessageLookup;
         private readonly IPAddress _ipAddress = IPAddress.Parse("0.0.0.0");
-        private CommsKeyContainer _keyContainer;
         private CancellationTokenSource _cancelTokenSource = new CancellationTokenSource();
-        private Task _tcpTask;
-        private Task _recieverTask;
+        private Task? _tcpTask;
+        private Task? _recieverTask;
+        private bool _resettingListener = false;
+        private bool _canClientConnect = true;
 
         public TCPListener(IServiceConfiguration serviceConfiguration, IBedrockLogger logger, IProcessInfo processInfo) {
             _logger = logger;
@@ -27,9 +28,23 @@ namespace BedrockService.Service.Networking {
         }
 
         public void Initialize() {
-            _tcpTask = StartListening();
-            _recieverTask = IncomingListener();
-            _tcpTask.Start();
+            if (!_resettingListener) {
+                ResetListener().Wait();
+                if (_tcpTask == null) {
+                    _tcpTask = StartListening();
+                    _recieverTask = IncomingListener();
+                    _tcpTask.Start();
+                    _resettingListener = false;
+                }
+            }
+        }
+
+        public void BlockClientConnections() {
+            _canClientConnect = false;
+        }
+
+        public void UnblockClientConnections() {
+            _canClientConnect = true;
         }
 
         public void SetStrategyDictionaries(Dictionary<NetworkMessageTypes, IMessageParser> standard, Dictionary<NetworkMessageTypes, IFlaggedMessageParser> flagged) {
@@ -53,15 +68,20 @@ namespace BedrockService.Service.Networking {
                 }
                 while (true) {
                     try {
-                        if (_inListener.Pending()) {
+                        if (_inListener != null && _inListener.Pending() && _canClientConnect) {
                             _cancelTokenSource = new CancellationTokenSource();
                             _client = _inListener.AcceptTcpClient();
                             _stream = _client.GetStream();
-                            _recieverTask.Start();
+                            if (_recieverTask != null) {
+                                _recieverTask.Start();
+                            }
                         }
+                        
                         if (_cancelTokenSource.IsCancellationRequested) {
                             _logger.AppendLine("TCP Listener task canceled!");
-                            _inListener.Stop();
+                            if (_inListener != null) {
+                                _inListener.Stop();
+                            }
                             _inListener = null;
                             return;
                         }
@@ -80,20 +100,23 @@ namespace BedrockService.Service.Networking {
             }, _cancelTokenSource.Token);
         }
 
-        public void ResetListener() {
-            Task.Run(() => {
-                _logger.AppendLine("Resetting listener!");
-                _client.Client.Blocking = false;
-                _stream.Close();
-                _stream.Dispose();
-                _client.Close();
-                _inListener?.Stop();
-                _cancelTokenSource?.Cancel();
-                while (_tcpTask.Status == TaskStatus.Running || _recieverTask.Status == TaskStatus.Running) {
-                    Task.Delay(100).Wait();
+        private Task ResetListener() {
+            return Task.Run(() => {
+                if (!_resettingListener) {
+                    _resettingListener = true;                    
+                    _inListener?.Stop();
+                    _logger?.AppendLine("Resetting listener!");
+                    _stream?.Close();
+                    _stream?.Dispose();
+                    _client?.Close();
+                    _cancelTokenSource?.Cancel();
+                    while (_tcpTask?.Status == TaskStatus.Running || _recieverTask?.Status == TaskStatus.Running) {
+                        Task.Delay(100).Wait();
+                    }
                 }
                 _cancelTokenSource = new CancellationTokenSource();
-                Initialize();
+                _tcpTask = null;
+                _inListener = null;
             });
         }
 
@@ -118,7 +141,7 @@ namespace BedrockService.Service.Networking {
                     _logger.AppendLine("Error writing to network stream!");
                     _heartbeatFailTimeout++;
                     if (_heartbeatFailTimeout >= _heartbeatFailTimeoutLimit) {
-                        ResetListener();
+                        Initialize();
                         _heartbeatFailTimeout = 0;
                     }
                 }
@@ -153,7 +176,7 @@ namespace BedrockService.Service.Networking {
                     }
                     try {
                         byte[] buffer = new byte[4];
-                        while (_client.Client != null && _client.Client.Available != 0) // Recieve data from client.
+                        while (_client?.Client != null && _client.Client.Available != 0) // Recieve data from client.
                         {
                             byteCount = _stream.Read(buffer, 0, 4);
                             int expectedLen = BitConverter.ToInt32(buffer, 0);
@@ -165,20 +188,20 @@ namespace BedrockService.Service.Networking {
                             msgType = (NetworkMessageTypes)buffer[3];
                             msgFlag = (NetworkMessageFlags)buffer[4];
                             if (msgType == NetworkMessageTypes.Disconnect) {
-                                ResetListener();
+                                Task.Run(Initialize);
                             }
                             if (msgType < NetworkMessageTypes.Heartbeat) {
                                 try {
+                                    while (_standardMessageLookup == null || _flaggedMessageLookup == null) {
+                                        Task.Delay(100).Wait();
+                                    }
                                     if (_standardMessageLookup.ContainsKey(msgType))
                                         _standardMessageLookup[msgType].ParseMessage(buffer, serverIndex);
                                     else
                                         _flaggedMessageLookup[msgType].ParseMessage(buffer, serverIndex, msgFlag);
+
                                 }
-                                catch {
-                                    if (msgType == NetworkMessageTypes.Connect)
-                                        Task.Delay(1000).Wait();
-                                    ResetListener();
-                                }
+                                catch { }
                             }
                         }
                         Task.Delay(500).Wait();
@@ -204,25 +227,6 @@ namespace BedrockService.Service.Networking {
                     catch { }
                 }
             }, _cancelTokenSource.Token);
-        }
-
-        public void SetKeyContainer(CommsKeyContainer keyContainer) {
-            _keyContainer = keyContainer;
-        }
-
-        public bool VerifyClientData(byte[] certificate) {
-            if (certificate != null) {
-                byte[] decrypted;
-                using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider()) {
-                    rsa.ImportParameters(_keyContainer.LocalPrivateKey.GetPrivateKey());
-
-                }
-                using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider()) {
-                    rsa.ImportParameters(_keyContainer.RemotePublicKey.GetPrivateKey());
-
-                }
-            }
-            return true;
         }
     }
 }
