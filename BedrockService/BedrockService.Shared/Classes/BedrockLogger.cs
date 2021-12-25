@@ -37,14 +37,15 @@ namespace BedrockService.Shared.Classes {
                     string serverLogPath = $@"{_processInfo.GetDirectory()}\Logs\Servers\{_logOwner}";
                     if (!Directory.Exists(serverLogPath))
                         Directory.CreateDirectory(serverLogPath);
-                    _logWriter = new StreamWriter($@"{serverLogPath}\{_serverConfiguration.GetServerName()}_{DateTime.Now:MM-dd-yy_hh.mm}.log", true);
+                    _logWriter = new StreamWriter($@"{serverLogPath}\{_serverConfiguration.GetServerName()}_{DateTime.Now:MM-dd-yy_hh.mm.ss.ffff}.log", true);
                     return;
                 }
             }
-            if (!Directory.Exists(_logPath))
-                Directory.CreateDirectory(_logPath);
-            _logWriter = new StreamWriter($@"{_logPath}\{_processInfo.DeclaredType()}_{DateTime.Now:MM-dd-yy_hh.mm}.log", true);
-            return;
+            if (_logWriter == null) {
+                if (!Directory.Exists(_logPath))
+                    Directory.CreateDirectory(_logPath);
+                _logWriter = new StreamWriter($@"{_logPath}\{_processInfo.DeclaredType()}_{DateTime.Now:MM-dd-yy_hh.mm.ss.ffff}.log", true);
+            }
         }
 
         public void AppendLine(string text) {
