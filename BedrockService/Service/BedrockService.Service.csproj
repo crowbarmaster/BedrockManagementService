@@ -72,6 +72,7 @@
     <UseWindowsForms>False</UseWindowsForms>
     <TargetFrameworks>net6.0-windows</TargetFrameworks>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
