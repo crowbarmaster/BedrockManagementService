@@ -267,26 +267,16 @@ namespace BedrockService.Client.Forms {
                 byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_editDialog.workingProps, Formatting.Indented, settings));
                 FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.PropUpdate);
                 connectedHost.SetAllProps(_editDialog.workingProps);
+                ServerBusy = true;
+                DisableUI();
                 _editDialog.Close();
                 _editDialog.Dispose();
-                ServiceRestartFromClient();
             }
         }
 
         private void GlobBackup_Click(object sender, EventArgs e) {
             FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.BackupAll);
             DisableUI();
-        }
-
-        private Task ServiceRestartFromClient() {
-            return Task.Run(() => {
-                Invoke(() => {
-                    Disconn_Click(null, null);
-                    Connect.Enabled = false;
-                    Task.Delay(6000).Wait();
-                    Connect_Click(null, null);
-                });
-            });
         }
 
         private void newSrvBtn_Click(object sender, EventArgs e) {
@@ -305,6 +295,7 @@ namespace BedrockService.Client.Forms {
 
         private void RemoveSrvBtn_Click(object sender, EventArgs e) {
             FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.RemoveServer, NetworkMessageFlags.RemoveAll);
+            connectedHost.RemoveServerInfo(selectedServer);
             DisableUI();
         }
 
@@ -402,7 +393,7 @@ namespace BedrockService.Client.Forms {
             // Set the scroll position to maximum.
             si.Pos = si.Max - (int)si.Page;
             SetScrollInfo(LogBox.Handle, (int)ScrollBarDirection.Vertical, ref si, true);
-            SendMessage(LogBox.Handle, VerticalScroll, new IntPtr(Thumbtrack + 0x10000 * si.Pos), new IntPtr(0));
+            SendMessage(LogBox.Handle, VerticalScroll, new IntPtr(Thumbtrack + 0x20000 * si.Pos), new IntPtr(0));
 
             _followTail = true;
         }
