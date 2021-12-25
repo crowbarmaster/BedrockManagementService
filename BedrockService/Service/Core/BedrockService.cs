@@ -4,25 +4,27 @@ using NCrontab;
 using System.Timers;
 
 namespace BedrockService.Service.Core {
+    public enum ServiceStatus {
+        Stopped,
+        Starting,
+        Started,
+        Stopping
+    }
+
     public class BedrockService : ServiceControl, IBedrockService {
-        private enum ServiceStatus {
-            Stopped,
-            Starting,
-            Started,
-            Stopping
-        }
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IBedrockLogger _logger;
         private readonly IProcessInfo _processInfo;
         private readonly IConfigurator _configurator;
         private readonly IUpdater _updater;
         private readonly ITCPListener _tCPListener;
-        private CrontabSchedule _backupCron;
-        private CrontabSchedule _updaterCron;
-        private HostControl _hostControl;
-        private List<IBedrockServer> _bedrockServers = new List<IBedrockServer>();
-        private System.Timers.Timer _updaterTimer;
-        private System.Timers.Timer _backupTimer;
+        private CrontabSchedule? _backupCron { get; set; }
+        private CrontabSchedule? _updaterCron { get; set; }
+        private HostControl? _hostControl { get; set; }
+        private List<IBedrockServer> _bedrockServers { get; set; } = new();
+        private System.Timers.Timer? _updaterTimer { get; set; }
+        private System.Timers.Timer? _backupTimer { get; set; }
+        private ServiceStatus _CurrentServiceStatus { get; set; }
 
         public BedrockService(IConfigurator configurator, IUpdater updater, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ITCPListener tCPListener) {
                 _tCPListener = tCPListener;
@@ -36,6 +38,8 @@ namespace BedrockService.Service.Core {
 
         public Task Initialize() {
             return Task.Run(() => {
+                _CurrentServiceStatus = ServiceStatus.Starting;
+                _tCPListener.BlockClientConnections();
                 _updater.Initialize();
                 _configurator.LoadAllConfigurations().Wait();
                 _backupCron = CrontabSchedule.TryParse(_serviceConfiguration.GetProp("BackupCron").ToString());
@@ -75,6 +79,8 @@ namespace BedrockService.Service.Core {
                     brs.SetServerStatus(BedrockServer.ServerStatus.Starting);
                     brs.StartWatchdog(_hostControl);
                 }
+                _tCPListener.UnblockClientConnections();
+                _CurrentServiceStatus = ServiceStatus.Started;
                 return true;
             }
             catch (Exception e) {
@@ -84,6 +90,7 @@ namespace BedrockService.Service.Core {
         }
 
         public bool Stop(HostControl hostControl) {
+            _CurrentServiceStatus &= ServiceStatus.Stopping;
             _hostControl = hostControl;
             try {
                 foreach (var brs in _bedrockServers) {
@@ -91,6 +98,7 @@ namespace BedrockService.Service.Core {
                     while (brs.GetServerStatus() == BedrockServer.ServerStatus.Stopping && !Program.IsExiting)
                         Thread.Sleep(100);
                 }
+                _CurrentServiceStatus = ServiceStatus.Stopped;
                 return true;
             }
             catch (Exception e) {
@@ -99,34 +107,27 @@ namespace BedrockService.Service.Core {
             }
         }
 
-        public void RestartService() {
-            try {
-                foreach (IBedrockServer brs in _bedrockServers) {
-                    brs.SetServerStatus(BedrockServer.ServerStatus.Stopping);
-                    while (brs.GetServerStatus() == BedrockServer.ServerStatus.Stopping && !Program.IsExiting)
-                        Thread.Sleep(100);
-                }
+        public Task RestartService() { 
+            return Task.Run(() => {
                 try {
-                    _tCPListener.ResetListener();
+                    _tCPListener.BlockClientConnections();
+                    foreach (IBedrockServer brs in _bedrockServers) {
+                        brs.StopServer(true).Wait();
+                    }
+                    Start(_hostControl);
+                } catch (Exception e) {
+                    _logger.AppendLine($"Error Stopping BedrockServiceWrapper {e.Message} StackTrace: {e.StackTrace}");
                 }
-                catch (ThreadAbortException) { }
-                _configurator.LoadAllConfigurations().Wait();
-                Initialize();
-                foreach (var brs in _bedrockServers) {
-                    brs.SetServerStatus(BedrockServer.ServerStatus.Starting);
-                }
-                Start(_hostControl);
-            }
-            catch (Exception e) {
-                _logger.AppendLine($"Error Stopping BedrockServiceWrapper {e.StackTrace}");
-            }
+            });
         }
+
+        public ServiceStatus GetServiceStatus() => _CurrentServiceStatus;
 
         public IBedrockServer GetBedrockServerByIndex(int serverIndex) {
             return _bedrockServers[serverIndex];
         }
 
-        public IBedrockServer GetBedrockServerByName(string name) {
+        public IBedrockServer? GetBedrockServerByName(string name) {
             return _bedrockServers.FirstOrDefault(brs => brs.GetServerName() == name);
         }
 
@@ -134,6 +135,7 @@ namespace BedrockService.Service.Core {
 
         public void InitializeNewServer(IServerConfiguration server) {
             IBedrockServer bedrockServer = new BedrockServer(server, _configurator, _logger, _serviceConfiguration, _processInfo);
+            bedrockServer.Initialize();
             _bedrockServers.Add(bedrockServer);
             _serviceConfiguration.AddNewServerInfo(server);
             if (ValidSettingsCheck()) {
