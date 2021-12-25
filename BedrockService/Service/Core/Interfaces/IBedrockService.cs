@@ -5,9 +5,10 @@ namespace BedrockService.Service.Core.Interfaces {
         Task Initialize();
         void RemoveBedrockServerByIndex(int serverIndex);
         void InitializeNewServer(IServerConfiguration serverConfiguration);
-        void RestartService();
+        Task RestartService();
+        ServiceStatus GetServiceStatus();
         IBedrockServer GetBedrockServerByIndex(int index);
-        IBedrockServer GetBedrockServerByName(string name);
+        IBedrockServer? GetBedrockServerByName(string name);
         List<IBedrockServer> GetAllServers();
     }
 }
