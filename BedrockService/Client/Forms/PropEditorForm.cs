@@ -101,8 +101,10 @@ namespace BedrockService.Client.Forms {
             }
             List<string> removeBackups = new List<string>();
             if (dataGrid.SelectedRows.Count > 0)
-                foreach (DataGridViewRow viewRow in dataGrid.SelectedRows)
+                foreach (DataGridViewRow viewRow in dataGrid.SelectedRows) {
                     removeBackups.Add((string)viewRow.Cells[0].Value);
+                    dataGrid.Rows.Remove(viewRow);
+                }
             JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
             byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(removeBackups, Formatting.Indented, settings));
             FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, FormManager.MainWindow.connectedHost.GetServerIndex(FormManager.MainWindow.selectedServer), NetworkMessageTypes.DelBackups);
