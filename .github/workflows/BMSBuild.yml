@@ -23,15 +23,16 @@ jobs:
       run: dotnet restore "BedrockService\BedrockService.sln"
     - name: Publish with MSBuild
       run: msbuild "BedrockService\BedrockService.sln" /t:publish -p:PublishProfile=FolderProfile
-    - name: Display published path
-      run: dir ./BedrockService/bin/Published
+    - name: Set version string
+      run: $TMP = (get-item BedrockService\bin\Published\BedrockService.Service.exe).VersionInfo.FileVersion; echo "PROJ_VER=$TMP" >> $GITHUB_ENV; echo "${{ env.PROJ_VER }}";
+    - name: Compress published files
+      run: Remove-item BedrockService\bin\Published\Launcher.exe;Compress-Archive -path BedrockService\bin\Published\*.exe* ".\BMS_${{ env.PROJ_VER }}.zip" -Force;
     - name: Push Automatic Release
       uses: marvinpinto/action-automatic-releases@v1.2.1
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: "latest"
+        automatic_release_tag: "${{ env.PROJ_VER }}"
         prerelease: true
-        title: "Development Build"
+        title: "Development Build: Version ${{ env.PROJ_VER }}"
         files: |
-          ./BedrockService/bin/Published/BedrockService.Service.exe
-          ./BedrockService/bin/Published/BedrockService.Client.exe
+          "./BMS_${{ env.PROJ_VER }}.zip"
