@@ -2,7 +2,7 @@
 
 namespace BedrockService.Service.Core.Interfaces {
     public interface IBedrockService : ServiceControl {
-        Task Initialize();
+        Task<bool> Initialize();
         void RemoveBedrockServerByIndex(int serverIndex);
         void InitializeNewServer(IServerConfiguration serverConfiguration);
         Task RestartService();
