@@ -36,7 +36,7 @@ namespace BedrockService.Service.Core {
                 _logger = logger;
         }
 
-        public Task Initialize() {
+        public Task<bool> Initialize() {
             return Task.Run(() => {
                 _CurrentServiceStatus = ServiceStatus.Starting;
                 _tCPListener.BlockClientConnections();
@@ -45,6 +45,10 @@ namespace BedrockService.Service.Core {
                 _backupCron = CrontabSchedule.TryParse(_serviceConfiguration.GetProp("BackupCron").ToString());
                 _updaterCron = CrontabSchedule.TryParse(_serviceConfiguration.GetProp("UpdateCron").ToString());
                 _logger.Initialize();
+                if (!bool.Parse(_serviceConfiguration.GetProp("AcceptedMojangLic").ToString())) {
+                    _logger.AppendLine("You have not accepted the license. Please visit the readme for more info!");
+                    return false;
+                }
                 _updater.CheckUpdates().Wait();
                 _bedrockServers.Clear();
                 InitializeTimers();
@@ -60,11 +64,16 @@ namespace BedrockService.Service.Core {
                     _logger.AppendLine($"Error Instantiating BedrockServiceWrapper: {e.StackTrace}");
                 }
                 _tCPListener.Initialize();
+                return true;
             });
         }
 
         public bool Start(HostControl hostControl) {
-            Initialize().Wait();
+            if (!Initialize().Result) {
+                _logger.AppendLine("BedrockService did not initialize correctly.");
+                Task.Delay(3000).Wait();
+                Environment.Exit(1);
+            }
             _hostControl = hostControl;
             try {
                 ValidSettingsCheck();

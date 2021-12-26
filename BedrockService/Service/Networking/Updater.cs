@@ -33,10 +33,6 @@ namespace BedrockService.Service.Networking {
                 if (_serviceConfiguration.GetServerVersion() != null) {
                     _version = _serviceConfiguration.GetServerVersion();
                 }
-                if (bool.Parse(_serviceConfiguration.GetProp("AcceptedMojangLic").ToString())) {
-                    _logger.AppendLine("You have not accepted the license. Please visit the readme for more info!");
-                    return false;
-                }
                 _logger.AppendLine("Checking MCS Version and fetching update if needed...");
                 HttpClient client = new HttpClient();
                 client.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/apng,*/*;q=0.8");
