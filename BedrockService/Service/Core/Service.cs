@@ -31,7 +31,6 @@ namespace BedrockService.Service.Core {
                                 while (server.GetServerStatus() != BedrockServer.ServerStatus.Stopped)
                                     Thread.Sleep(100);
                             }
-                            Environment.Exit(0);
                         });
                     });
                     hostConfig.EnableShutdown();
@@ -69,7 +68,7 @@ namespace BedrockService.Service.Core {
         }
 
         public Task StopAsync(CancellationToken cancellationToken) {
-            return Task.Run(() => Environment.Exit(0));
+            return Task.CompletedTask;
         }
 
         private void OnStarted() {
