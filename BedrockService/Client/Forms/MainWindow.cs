@@ -294,7 +294,12 @@ namespace BedrockService.Client.Forms {
         }
 
         private void RemoveSrvBtn_Click(object sender, EventArgs e) {
-            FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.RemoveServer, NetworkMessageFlags.RemoveAll);
+            using(RemoveServerControl form = new RemoveServerControl()) {
+                if(form.ShowDialog() == DialogResult.OK) {
+                    FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.RemoveServer, form.SelectedFlag);
+                    form.Close();
+                }
+            }
             connectedHost.RemoveServerInfo(selectedServer);
             DisableUI();
         }
