@@ -2,13 +2,11 @@ name: Build BMS
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    branches: [ master, Working ]
 
 jobs:
   build:
-    if: github.event.pull_request.merged == 'true'
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
 
     runs-on: windows-2022
 
