@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace BedrockService.Client.Forms {
@@ -105,9 +106,18 @@ namespace BedrockService.Client.Forms {
                     removeBackups.Add((string)viewRow.Cells[0].Value);
                     dataGrid.Rows.Remove(viewRow);
                 }
+            DelBackupBtn.Enabled = false;
+            BackupBtnEnableAfterDelay();
             JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
             byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(removeBackups, Formatting.Indented, settings));
             FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, FormManager.MainWindow.connectedHost.GetServerIndex(FormManager.MainWindow.selectedServer), NetworkMessageTypes.DelBackups);
+        }
+
+        private Task BackupBtnEnableAfterDelay() {
+            return Task.Factory.StartNew(() => {
+                Task.Delay(1500).Wait();
+                Invoke(() => { DelBackupBtn.Enabled = true; });
+            });
         }
     }
 }

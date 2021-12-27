@@ -359,3 +359,6 @@ MigrationBackup/
 /BedrockService/Service/Configs/Test2.conf
 /BedrockService/Service/Configs/Default.playerdb.bak
 /BedrockService/Service/Configs/Default.playerdb
+/BedrockService/ServiceTests/TestFiles/Output/stock_packs.json
+/BedrockService/ServiceTests/TestFiles/Server/MCSFiles/Update_1.0.zip
+/BedrockService/ServiceTests/TestFiles/Temp/ServerFileTemp
