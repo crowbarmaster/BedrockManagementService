@@ -35,4 +35,4 @@ jobs:
         prerelease: true
         title: "Development Build: Version ${{ env.PROJ_VER }}"
         files: |
-          "./BMS_${{ env.PROJ_VER }}.zip"
+          BMS_*.zip
