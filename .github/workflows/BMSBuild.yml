@@ -11,7 +11,7 @@ jobs:
 
     steps:
     - name: pull request check
-    - uses: actions/checkout@v2
+      uses: actions/checkout@v2
       if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
