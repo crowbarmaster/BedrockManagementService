@@ -82,11 +82,10 @@ namespace BedrockService.Shared.PackParser {
                         return;
                     }
                     if (file.Name == "manifest.json") {
-                        byte[] iconBytes;
-                        if (File.Exists($@"{file.Directory.FullName}\pack_icon.jpeg"))
-                            iconBytes = File.ReadAllBytes($@"{file.Directory.FullName}\pack_icon.jpeg");
-                        else
-                            iconBytes = File.ReadAllBytes($@"{file.Directory.FullName}\pack_icon.png");
+                        byte[] iconBytes = null;
+                            iconBytes = File.Exists($@"{file.Directory.FullName}\pack_icon.jpeg") ? File.ReadAllBytes($@"{file.Directory.FullName}\pack_icon.jpeg"):null;
+                        
+                            iconBytes = File.Exists($@"{file.Directory.FullName}\pack_icon.png") ?File.ReadAllBytes($@"{file.Directory.FullName}\pack_icon.png"):null;
 
                         MinecraftPackContainer container = new() {
                             JsonManifest = new(),

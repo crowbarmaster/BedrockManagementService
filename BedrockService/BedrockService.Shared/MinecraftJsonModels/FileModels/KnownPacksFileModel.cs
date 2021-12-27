@@ -13,5 +13,7 @@ namespace BedrockService.Shared.MinecraftJsonModels.FileModels {
         }
 
         public KnownPacksFileModel() { }
+
+        public void SaveToFile() => SaveToFile(Contents);
     }
 }

@@ -49,25 +49,27 @@ namespace BedrockService.Shared.Classes {
         }
 
         public void AppendLine(string text) {
+            string newText = $"{_logOwner}: {text}";
+            Console.WriteLine(newText);
             try {
-                string newText = $"{_logOwner}: {text}";
                 if (_serverConfiguration != null) {
                     _serverConfiguration.GetLog().Add(new LogEntry(newText));
                 }
                 else {
-                    _serviceConfiguration.GetLog().Add(new LogEntry(newText));
+                    if (_serviceConfiguration != null) {
+                        _serviceConfiguration.GetLog().Add(new LogEntry(newText));
+                    }
                 }
-                    if (_logToFile && _logWriter != null) {
+                if (_logToFile && _logWriter != null) {
                     _logWriter.WriteLine(newText);
                     _logWriter.Flush();
                 }
-                Console.WriteLine(newText);
             }
             catch {
             }
         }
 
-        public void AppendError(Exception exception) {
+        public void AppendErrorFromException(Exception exception) {
             if (_processInfo.IsDebugEnabled()) {
                 string addText = $"{exception.GetType().Name} occured in {exception.TargetSite.DeclaringType.Name}:{exception.TargetSite.Name}\n{exception.Message}\n{exception.StackTrace}";
                 AppendLine(addText);
