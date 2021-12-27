@@ -42,14 +42,14 @@ namespace BedrockService.Service.Core {
                 _tCPListener.BlockClientConnections();
                 _updater.Initialize();
                 _configurator.LoadAllConfigurations().Wait();
-                _backupCron = CrontabSchedule.TryParse(_serviceConfiguration.GetProp("BackupCron").ToString());
-                _updaterCron = CrontabSchedule.TryParse(_serviceConfiguration.GetProp("UpdateCron").ToString());
                 _logger.Initialize();
                 if (!bool.Parse(_serviceConfiguration.GetProp("AcceptedMojangLic").ToString())) {
                     _logger.AppendLine("You have not accepted the license. Please visit the readme for more info!");
                     return false;
                 }
                 _updater.CheckUpdates().Wait();
+                _backupCron = CrontabSchedule.TryParse(_serviceConfiguration.GetProp("BackupCron").ToString());
+                _updaterCron = CrontabSchedule.TryParse(_serviceConfiguration.GetProp("UpdateCron").ToString());
                 _bedrockServers.Clear();
                 InitializeTimers();
                 try {
