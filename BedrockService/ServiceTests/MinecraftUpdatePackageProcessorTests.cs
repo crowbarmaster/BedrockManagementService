@@ -14,12 +14,13 @@ namespace ServiceTests
 {
     public class MinecraftUpdatePackageProcessorTests {
         const string _testFilePath = @"..\..\..\..\..\TestFiles";
+        private DirectoryInfo _directory = new(_testFilePath);
         [Fact]
-        public void Can_Extract_Zip_File() {
-            IProcessInfo processInfo = new ServiceProcessInfo("TestHost", _testFilePath, 0, true, true);
-            MinecraftUpdatePackageProcessor processor = new MinecraftUpdatePackageProcessor(new BedrockLogger(processInfo, new ServiceInfo(processInfo)), processInfo, _testFilePath, "1.0", @$"{_testFilePath}\Output");
-            processor.ExtractToDirectory();
-            Assert.True(File.Exists(@$"{_testFilePath}\Temp\ServerFileTemp\server.properties"));
+        public void Can_Create_JsonFiles() {
+            IProcessInfo processInfo = new ServiceProcessInfo("TestHost", _directory.FullName, 0, true, true);
+            MinecraftUpdatePackageProcessor processor = new MinecraftUpdatePackageProcessor(new BedrockLogger(processInfo, new ServiceInfo(processInfo)), processInfo, "1.0", @$"{_testFilePath}\Output");
+            processor.ExtractFilesToDirectory();
+            Assert.True(File.Exists(@$"{_testFilePath}\Output\stock_props.conf"));
             Assert.True(File.Exists(@$"{_testFilePath}\Output\stock_packs.json"));
         }
     }
