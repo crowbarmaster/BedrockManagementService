@@ -21,7 +21,6 @@ namespace BedrockManagementServiceASP.BedrockService.Core {
         private readonly IProcessInfo _processInfo;
         private readonly IConfigurator _configurator;
         private readonly IUpdater _updater;
-        private readonly ITCPListener _tCPListener;
         private CrontabSchedule? _backupCron { get; set; }
         private CrontabSchedule? _updaterCron { get; set; }
         private HostControl? _hostControl { get; set; }
@@ -30,8 +29,7 @@ namespace BedrockManagementServiceASP.BedrockService.Core {
         private System.Timers.Timer? _backupTimer { get; set; }
         private ServiceStatus _CurrentServiceStatus { get; set; }
 
-        public BedrockService(IConfigurator configurator, IUpdater updater, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ITCPListener tCPListener) {
-            _tCPListener = tCPListener;
+        public BedrockService(IConfigurator configurator, IUpdater updater, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo) {
             _configurator = configurator;
             _logger = logger;
             _serviceConfiguration = serviceConfiguration;
@@ -43,7 +41,7 @@ namespace BedrockManagementServiceASP.BedrockService.Core {
         public Task<bool> Initialize() {
             return Task.Run(() => {
                 _CurrentServiceStatus = ServiceStatus.Starting;
-                _tCPListener.BlockClientConnections();
+              //_tCPListener.BlockClientConnections();
                 _updater.Initialize();
                 _configurator.LoadAllConfigurations().Wait();
                 _logger.Initialize();
@@ -66,7 +64,7 @@ namespace BedrockManagementServiceASP.BedrockService.Core {
                 } catch (Exception e) {
                     _logger.AppendLine($"Error Instantiating BedrockServiceWrapper: {e.StackTrace}");
                 }
-                _tCPListener.Initialize();
+              //_tCPListener.Initialize();
                 return true;
             });
         }
@@ -90,7 +88,7 @@ namespace BedrockManagementServiceASP.BedrockService.Core {
                     brs.SetServerStatus(BedrockServer.ServerStatus.Starting);
                     brs.StartWatchdog(_hostControl);
                 }
-                _tCPListener.UnblockClientConnections();
+              //_tCPListener.UnblockClientConnections();
                 _CurrentServiceStatus = ServiceStatus.Started;
                 return true;
             } catch (Exception e) {
@@ -119,7 +117,7 @@ namespace BedrockManagementServiceASP.BedrockService.Core {
         public Task RestartService() {
             return Task.Run(() => {
                 try {
-                    _tCPListener.BlockClientConnections();
+                  //_tCPListener.BlockClientConnections();
                     foreach (IBedrockServer brs in _bedrockServers) {
                         brs.StopServer(true).Wait();
                     }

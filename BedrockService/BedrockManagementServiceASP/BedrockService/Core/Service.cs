@@ -12,7 +12,7 @@ namespace BedrockManagementServiceASP.BedrockService.Core {
         private readonly IBedrockLogger _logger;
         private readonly IHostApplicationLifetime _applicationLifetime;
 
-        public Service(IBedrockLogger logger, IBedrockService bedrockService, NetworkStrategyLookup networkStrategyLookup, IHostApplicationLifetime appLifetime) {
+        public Service(IBedrockLogger logger, IBedrockService bedrockService, IHostApplicationLifetime appLifetime) {
             _logger = logger;
             _bedrockService = bedrockService;
             _applicationLifetime = appLifetime;
