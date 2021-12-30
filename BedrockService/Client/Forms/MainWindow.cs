@@ -511,10 +511,8 @@ namespace BedrockService.Client.Forms {
             WaitForServerData().Wait();
             using (ManagePacksForms form = new ManagePacksForms(connectedHost.GetServerIndex(selectedServer), _logger, _processInfo)) {
                 form.PopulateServerPacks(FormManager.TCPClient.RecievedPacks);
-                if (form.ShowDialog() != DialogResult.OK) {
-                    ServerBusy = false;
-                }
-                form.Close();
+                form.ShowDialog();
+                ServerBusy = false;
             }
         }
 
