@@ -189,8 +189,6 @@ namespace BedrockService.Service.Networking {
             }
 
             public void ParseMessage(byte[] data, byte serverIndex) {
-                if (!File.Exists($@"{_processInfo.GetDirectory()}\Server\stock_packs.json"))
-                    File.Copy($@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath")}\valid_known_packs.json", $@"{_processInfo.GetDirectory()}\Server\stock_packs.json");
                 MinecraftKnownPacksClass knownPacks = new MinecraftKnownPacksClass($@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath")}\valid_known_packs.json", $@"{_processInfo.GetDirectory()}\Server\stock_packs.json");
                 List<MinecraftPackContainer> list = new List<MinecraftPackContainer>();
                 foreach (KnownPacksJsonModel pack in knownPacks.InstalledPacks.Contents) {
