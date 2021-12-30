@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using BedrockService.Shared.Classes;
+using System.Collections.Generic;
 
 namespace BedrockService.Shared.Interfaces {
     public interface IServiceConfiguration : IBedrockConfiguration {
@@ -21,5 +22,7 @@ namespace BedrockService.Shared.Interfaces {
         void SetServerVersion(string newVersion);
 
         string GetServerVersion();
+
+        List<Property> GetServerDefaultPropList();
     }
 }
