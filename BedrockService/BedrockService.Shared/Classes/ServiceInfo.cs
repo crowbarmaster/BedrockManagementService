@@ -22,7 +22,7 @@ namespace BedrockService.Shared.Classes {
             _processInfo = processInfo;
         }
 
-        public void InitializeDefaults() {
+        public bool InitializeDefaults() {
             globals.Clear();
             globals.Add(new Property("ServersPath", @"C:\MCBedrockService"));
             globals.Add(new Property("AcceptedMojangLic", "false"));
@@ -36,6 +36,7 @@ namespace BedrockService.Shared.Classes {
             globals.Add(new Property("UpdateCron", "0 2 * * *"));
             globals.Add(new Property("LogServerOutput", "true"));
             globals.Add(new Property("LogApplicationOutput", "true"));
+            return true;
         }
 
         public void ProcessConfiguration(string[] fileEntries) {
