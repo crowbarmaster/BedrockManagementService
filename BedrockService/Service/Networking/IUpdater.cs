@@ -5,6 +5,5 @@
         Task FetchBuild(string path, string version);
         bool CheckVersionChanged();
         void MarkUpToDate();
-        Task ReplaceBuild(IServerConfiguration serverConfiguration);
     }
 }

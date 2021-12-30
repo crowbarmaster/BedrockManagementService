@@ -65,14 +65,15 @@ namespace BedrockService.Service.Networking {
                     return true;
                 }
                 _logger.AppendLine($"New version detected! Now fetching from {downloadPath}...");
-                if (!FetchBuild(downloadPath, fetchedVersion).Wait(60000)) {
+                if (!FetchBuild(downloadPath, fetchedVersion).Wait(90000)) {
                     _logger.AppendLine("Fetching build timed out. If this is a new service instance, please restart service!");
                     return false;
                 }
                 _versionChanged = true;
+                MinecraftUpdatePackageProcessor packageProcessor = new(_logger, _processInfo, fetchedVersion, $@"{_processInfo.GetDirectory()}\Server");
+                packageProcessor.ExtractFilesToDirectory();
                 File.WriteAllText($@"{_processInfo.GetDirectory()}\Server\bedrock_ver.ini", fetchedVersion);
                 _serviceConfiguration.SetServerVersion(fetchedVersion);
-                GenerateFileList(fetchedVersion);
                 return true;
             });
         }
@@ -108,33 +109,12 @@ namespace BedrockService.Service.Networking {
 
         public void MarkUpToDate() => _versionChanged = false;
 
-        public async Task ReplaceBuild(IServerConfiguration server) {
-            await Task.Run(() => {
-                try {
-                    if (!Directory.Exists(server.GetProp("ServerPath").ToString())) {
-                        Directory.CreateDirectory(server.GetProp("ServerPath").ToString());
-                    }
-                    else if (File.Exists($@"{_processInfo.GetDirectory()}\Server\MCSFiles\stock_filelist.ini")) {
-                        new FileUtils(_processInfo.GetDirectory()).DeleteFilelist(File.ReadAllLines($@"{_processInfo.GetDirectory()}\Server\MCSFiles\stock_filelist.ini"), server.GetProp("ServerPath").ToString());
-                    }
-                    else {
-                        new FileUtils(_processInfo.GetDirectory()).DeleteFilesRecursively(new DirectoryInfo(server.GetProp("ServerPath").ToString()), false);
-                        ZipFile.ExtractToDirectory($@"{_processInfo.GetDirectory()}\Server\MCSFiles\Update_{_version}.zip", server.GetProp("ServerPath").ToString());
-                        File.Copy(server.GetProp("ServerPath") + "\\bedrock_server.exe", server.GetProp("ServerPath") + "\\" + server.GetProp("ServerExeName"), true);
-                    }
-                }
-                catch (Exception e) {
-                    _logger.AppendLine($"ERROR: Got an exception deleting entire directory! {e.Message}");
-                }
-            });
-        }
-
         private async Task<string> FetchHTTPContent(HttpClient client) {
             try {
                 return await client.GetStringAsync("https://www.minecraft.net/en-us/download/server/bedrock");
             }
             catch (HttpRequestException) {
-                _logger.AppendLine($"Error! Updater timed out, could not fetch current build!");
+                _logger.AppendLine($"Error! could not fetch current webpage content!");
             }
             catch (TaskCanceledException) {
                 Thread.Sleep(200);
@@ -144,16 +124,6 @@ namespace BedrockService.Service.Networking {
                 _logger.AppendLine($"Updater resulted in error: {e.Message}\n{e.InnerException}\n{e.StackTrace}");
             }
             return null;
-        }
-
-        private void GenerateFileList(string version) {
-            using (ZipArchive zip = ZipFile.OpenRead($@"{_processInfo.GetDirectory()}\Server\MCSFiles\Update_{version}.zip")) {
-                string[] fileList = new string[zip.Entries.Count];
-                for (int i = 0; i < zip.Entries.Count; i++) {
-                    fileList[i] = zip.Entries[i].FullName.Replace('/', '\\');
-                }
-                File.WriteAllLines($@"{_processInfo.GetDirectory()}\Server\MCSFiles\stock_filelist.ini", fileList);
-            }
         }
     }
 }
