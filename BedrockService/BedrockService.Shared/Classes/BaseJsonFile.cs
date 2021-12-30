@@ -21,6 +21,6 @@ namespace BedrockService.Shared.Classes {
             return JsonConvert.DeserializeObject<T>(File.ReadAllText(FilePath));
         }
 
-        public void SaveToFile<T>(T value) => File.WriteAllText(FilePath, JsonConvert.SerializeObject(value, Formatting.Indented));
+        public void SaveToFile<T>(T value) => File.WriteAllText(FilePath, JsonConvert.SerializeObject(value, Formatting.Indented, new JsonSerializerSettings {DefaultValueHandling = DefaultValueHandling.Ignore}));
     }
 }
