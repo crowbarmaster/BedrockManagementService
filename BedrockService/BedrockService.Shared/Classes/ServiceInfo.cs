@@ -1,6 +1,8 @@
 ﻿using BedrockService.Shared.Interfaces;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace BedrockService.Shared.Classes {
@@ -16,6 +18,8 @@ namespace BedrockService.Shared.Classes {
         private List<IServerConfiguration> ServerList = new List<IServerConfiguration>();
         [JsonProperty]
         private List<Property> globals = new List<Property>();
+        [JsonProperty]
+        private List<Property> _defaultServerProps = new List<Property>();
         private readonly IProcessInfo _processInfo;
 
         public ServiceInfo(IProcessInfo processInfo) {
@@ -36,7 +40,17 @@ namespace BedrockService.Shared.Classes {
             globals.Add(new Property("UpdateCron", "0 2 * * *"));
             globals.Add(new Property("LogServerOutput", "true"));
             globals.Add(new Property("LogApplicationOutput", "true"));
-            return true;
+            try {
+                File.ReadAllLines($@"{_processInfo.GetDirectory()}\Server\stock_props.conf")
+                   .ToList()
+                   .ForEach(x => {
+                       string[] s = x.Split('=');
+                       _defaultServerProps.Add(new Property(s[0], s[1]));
+                   });
+                return true;
+            } catch (Exception) {
+                return false;
+            }
         }
 
         public void ProcessConfiguration(string[] fileEntries) {
@@ -126,6 +140,8 @@ namespace BedrockService.Shared.Classes {
         public List<LogEntry> GetLog() => serviceLog ?? new List<LogEntry>();
 
         public void SetLog(List<LogEntry> newLog) => serviceLog = newLog;
+
+        public List<Property> GetServerDefaultPropList() => _defaultServerProps;
 
         public byte GetServerIndex(IServerConfiguration server) => (byte)ServerList.IndexOf(server);
     }
