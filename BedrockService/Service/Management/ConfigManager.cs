@@ -22,50 +22,48 @@ namespace BedrockService.Service.Management {
             _logger = logger;
             _serverConfigDir = $@"{_processInfo.GetDirectory()}\Server\Configs";
             _globalFile = $@"{_processInfo.GetDirectory()}\Service\Globals.conf";
+            if (!Directory.Exists(_serverConfigDir))
+                Directory.CreateDirectory(_serverConfigDir);
+            if (!Directory.Exists($@"{_processInfo.GetDirectory()}\Service"))
+                Directory.CreateDirectory($@"{_processInfo.GetDirectory()}\Service");
+            if (!Directory.Exists($@"{_serverConfigDir}\KnownPlayers\Backups"))
+                Directory.CreateDirectory($@"{_serverConfigDir}\KnownPlayers\Backups");
+            if (!Directory.Exists($@"{_serverConfigDir}\RegisteredPlayers\Backups"))
+                Directory.CreateDirectory($@"{_serverConfigDir}\RegisteredPlayers\Backups");
+            if (!Directory.Exists($@"{_serverConfigDir}\Backups"))
+                Directory.CreateDirectory($@"{_serverConfigDir}\Backups");
+            if (File.Exists($@"{_serverConfigDir}\..\bedrock_ver.ini"))
+                _loadedVersion = File.ReadAllText($@"{_serverConfigDir}\..\bedrock_ver.ini");
         }
 
-        public async Task LoadAllConfigurations() {
-            await Task.Run(() => {
-                BinaryFormatter formatter = new BinaryFormatter();
-                if (!Directory.Exists(_serverConfigDir))
-                    Directory.CreateDirectory(_serverConfigDir);
-                if (!Directory.Exists($@"{_processInfo.GetDirectory()}\Service"))
-                    Directory.CreateDirectory($@"{_processInfo.GetDirectory()}\Service");
-                if (!Directory.Exists($@"{_serverConfigDir}\KnownPlayers\Backups"))
-                    Directory.CreateDirectory($@"{_serverConfigDir}\KnownPlayers\Backups");
-                if (!Directory.Exists($@"{_serverConfigDir}\RegisteredPlayers\Backups"))
-                    Directory.CreateDirectory($@"{_serverConfigDir}\RegisteredPlayers\Backups");
-                if (!Directory.Exists($@"{_serverConfigDir}\Backups"))
-                    Directory.CreateDirectory($@"{_serverConfigDir}\Backups");
-                if (File.Exists($@"{_serverConfigDir}\..\bedrock_ver.ini"))
-                    _loadedVersion = File.ReadAllText($@"{_serverConfigDir}\..\bedrock_ver.ini");
+        public Task LoadAllConfigurations() => Task.Run(() => {
+            LoadGlobals();
+            LoadServerConfigurations();
+        });
+        
 
-                ServerInfo serverInfo;
-                LoadGlobals();
-                
-                LoadServerConfigurations();
-                if (_serviceConfiguration.GetServerList().Count == 0) {
-                    serverInfo = new ServerInfo(null, _serviceConfiguration.GetProp("ServersPath").ToString());
-                    serverInfo.InitializeDefaults();
-                    SaveServerProps(serverInfo, true);
-                    _serviceConfiguration.AddNewServerInfo(serverInfo);
-                }
-            });
-        }
-
-        private void LoadServerConfigurations() {
+        public Task LoadServerConfigurations() => Task.Run(() => {
+            ServerInfo serverInfo;
             _serviceConfiguration.GetServerList().Clear();
             string[] files = Directory.GetFiles(_serverConfigDir, "*.conf");
             foreach (string file in files) {
-                ServerInfo serverInfo;
                 FileInfo FInfo = new FileInfo(file);
                 string[] fileEntries = File.ReadAllLines(file);
-                serverInfo = new ServerInfo(fileEntries, _serviceConfiguration.GetProp("ServersPath").ToString());
+                serverInfo = new ServerInfo(_serviceConfiguration.GetProp("ServersPath").ToString(), $@"{_processInfo.GetDirectory()}\Server\stock_props.conf");
+                serverInfo.InitializeDefaults();
+                serverInfo.ProcessConfiguration(fileEntries);
                 LoadPlayerDatabase(serverInfo);
                 LoadRegisteredPlayers(serverInfo);
                 _serviceConfiguration.AddNewServerInfo(serverInfo);
             }
-        }
+            if (_serviceConfiguration.GetServerList().Count == 0) {
+                serverInfo = new ServerInfo(_serviceConfiguration.GetProp("ServersPath").ToString(), $@"{_processInfo.GetDirectory()}\Server\stock_props.conf");
+                serverInfo.InitializeDefaults();
+                SaveServerProps(serverInfo, true);
+                _serviceConfiguration.AddNewServerInfo(serverInfo);
+            }
+        });
+        
 
         public void SaveGlobalFile() {
             string[] output = new string[_serviceConfiguration.GetAllProps().Count + 3];
@@ -102,7 +100,7 @@ namespace BedrockService.Service.Management {
             }
         }
 
-        private void LoadGlobals() {
+        public Task LoadGlobals() => Task.Run(() => {
             _serviceConfiguration.InitializeDefaults();
             if (File.Exists(_globalFile)) {
                 _logger.AppendLine("Loading Globals...");
@@ -112,7 +110,8 @@ namespace BedrockService.Service.Management {
             }
             _logger.AppendLine("Globals.conf was not found. Loaded defaults and saved to file.");
             SaveGlobalFile();
-        }
+        });
+        
 
         private int RoundOff(int i) {
             return ((int)Math.Round(i / 10.0)) * 10;
