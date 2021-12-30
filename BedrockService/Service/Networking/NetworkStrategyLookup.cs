@@ -31,7 +31,7 @@ namespace BedrockService.Service.Networking {
                 {NetworkMessageTypes.StartCmdUpdate, new StartCmdUpdate(configurator, serviceConfiguration) },
                 {NetworkMessageTypes.CheckUpdates, new CheckUpdates(messageSender, updater) },
                 {NetworkMessageTypes.BackupRollback, new BackupRollback(messageSender, service) },
-                {NetworkMessageTypes.AddNewServer, new AddNewServer(configurator, messageSender, serviceConfiguration, service) },
+                {NetworkMessageTypes.AddNewServer, new AddNewServer(processInfo, configurator, messageSender, serviceConfiguration, service) },
                 {NetworkMessageTypes.ConsoleLogUpdate, new ConsoleLogUpdate(messageSender, logger, serviceConfiguration, service) },
                 {NetworkMessageTypes.PlayersRequest, new PlayerRequest(messageSender, serviceConfiguration) },
                 {NetworkMessageTypes.PlayersUpdate, new PlayersUpdate(configurator, messageSender, serviceConfiguration, service) },
@@ -407,12 +407,14 @@ namespace BedrockService.Service.Networking {
         }
 
         class AddNewServer : IMessageParser {
+            private readonly IProcessInfo _processInfo;
             private readonly IMessageSender _messageSender;
             private readonly IServiceConfiguration _serviceConfiguration;
             private readonly IConfigurator _configurator;
             private readonly IBedrockService _bedrockService;
 
-            public AddNewServer(IConfigurator configurator, IMessageSender messageSender, IServiceConfiguration serviceConfiguration, IBedrockService bedrockService) {
+            public AddNewServer(IProcessInfo processInfo, IConfigurator configurator, IMessageSender messageSender, IServiceConfiguration serviceConfiguration, IBedrockService bedrockService) {
+                _processInfo = processInfo;    
                 _bedrockService = bedrockService;
                 _configurator = configurator;
                 _messageSender = messageSender;
@@ -424,7 +426,7 @@ namespace BedrockService.Service.Networking {
                 JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                 List<Property> propList = JsonConvert.DeserializeObject<List<Property>>(stringData, settings);
                 Property serverNameProp = propList.First(p => p.KeyName == "server-name");
-                ServerInfo newServer = new ServerInfo(null, _serviceConfiguration.GetProp("ServersPath").ToString()) {
+                ServerInfo newServer = new ServerInfo(_serviceConfiguration.GetProp("ServersPath").ToString(), $@"{_processInfo.GetDirectory()}\Server\stock_props.conf") {
                     ServerName = serverNameProp.ToString(),
                     ServerPropList = propList,
                     ServerPath = new Property("ServerPath", "") {
