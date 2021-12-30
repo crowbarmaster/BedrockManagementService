@@ -71,7 +71,7 @@ namespace BedrockService.Service.Networking {
 
             public void ParseMessage(byte[] data, byte serverIndex) {
                 foreach (IBedrockServer server in _service.GetAllServers())
-                    server.RestartServer(true);
+                    server.InitializeBackup();
                 _messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
             }
         }
@@ -293,26 +293,36 @@ namespace BedrockService.Service.Networking {
                 foreach (MinecraftPackContainer container in archiveParser.FoundPacks) {
                     string serverPath = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath").ToString();
                     string levelName = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("level-name").ToString();
-                    string filePath = null;
+                    string filePath = "";
                     FileUtils fileUtils = new FileUtils(_serviceProcessInfo.GetDirectory());
                     if (container.ManifestType == "WorldPack") {
                         fileUtils.CopyFilesRecursively(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($@"{serverPath}\worlds\{container.FolderName}"));
                     }
                     if (container.ManifestType == "data") {
-                        fileUtils.CopyFilesRecursively(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($@"{serverPath}\behavior_packs\{container.FolderName}"));
                         filePath = $@"{serverPath}\worlds\{levelName}\world_behavior_packs.json";
+                        if(VerifyAddToJson(filePath, container.JsonManifest)) {
+                            fileUtils.CopyFilesRecursively(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($@"{serverPath}\behavior_packs\{container.FolderName}"));
+                        }
                     }
                     if (container.ManifestType == "resources") {
-                        fileUtils.CopyFilesRecursively(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($@"{serverPath}\resource_packs\{container.FolderName}"));
                         filePath = $@"{serverPath}\worlds\{levelName}\world_resource_packs.json";
-                    }
-                    if (filePath != null) {
-                        WorldPackFileModel worldPackFile = new WorldPackFileModel(filePath);
-                        worldPackFile.Contents.Add(new WorldKnownPackEntryJsonModel(container.JsonManifest.header.uuid, container.JsonManifest.header.version));
-                        worldPackFile.SaveToFile(worldPackFile.Contents);
-                        _messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+                        filePath = $@"{serverPath}\worlds\{levelName}\world_behavior_packs.json";
+                        if (VerifyAddToJson(filePath, container.JsonManifest)) {
+                            fileUtils.CopyFilesRecursively(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($@"{serverPath}\resource_packs\{container.FolderName}"));
+                        }
                     }
                 }
+            }
+
+            private bool VerifyAddToJson(string filePath, PackManifestJsonModel manifest) {
+                WorldPackFileModel worldPackFile = new WorldPackFileModel(filePath);
+                if (worldPackFile.Contents.Where(x => x.pack_id == manifest.header.uuid).Count() > 0) {
+                    return false;
+                }
+                worldPackFile.Contents.Add(new WorldKnownPackEntryJsonModel(manifest.header.uuid, manifest.header.version));
+                worldPackFile.SaveFile();
+                _messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
+                return true;
             }
         }
 
@@ -426,7 +436,7 @@ namespace BedrockService.Service.Networking {
                 JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                 List<Property> propList = JsonConvert.DeserializeObject<List<Property>>(stringData, settings);
                 Property serverNameProp = propList.First(p => p.KeyName == "server-name");
-                ServerInfo newServer = new ServerInfo(_serviceConfiguration.GetProp("ServersPath").ToString(), $@"{_processInfo.GetDirectory()}\Server\stock_props.conf") {
+                ServerInfo newServer = new ServerInfo(_serviceConfiguration.GetProp("ServersPath").ToString(), _serviceConfiguration.GetServerDefaultPropList()) {
                     ServerName = serverNameProp.ToString(),
                     ServerPropList = propList,
                     ServerPath = new Property("ServerPath", "") {
