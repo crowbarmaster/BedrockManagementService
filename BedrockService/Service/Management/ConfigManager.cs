@@ -49,7 +49,7 @@ namespace BedrockService.Service.Management {
             foreach (string file in files) {
                 FileInfo FInfo = new FileInfo(file);
                 string[] fileEntries = File.ReadAllLines(file);
-                serverInfo = new ServerInfo(_serviceConfiguration.GetProp("ServersPath").ToString(), $@"{_processInfo.GetDirectory()}\Server\stock_props.conf");
+                serverInfo = new ServerInfo(_serviceConfiguration.GetProp("ServersPath").ToString(), _serviceConfiguration.GetServerDefaultPropList());
                 serverInfo.InitializeDefaults();
                 serverInfo.ProcessConfiguration(fileEntries);
                 LoadPlayerDatabase(serverInfo);
@@ -57,7 +57,7 @@ namespace BedrockService.Service.Management {
                 _serviceConfiguration.AddNewServerInfo(serverInfo);
             }
             if (_serviceConfiguration.GetServerList().Count == 0) {
-                serverInfo = new ServerInfo(_serviceConfiguration.GetProp("ServersPath").ToString(), $@"{_processInfo.GetDirectory()}\Server\stock_props.conf");
+                serverInfo = new ServerInfo(_serviceConfiguration.GetProp("ServersPath").ToString(), _serviceConfiguration.GetServerDefaultPropList());
                 serverInfo.InitializeDefaults();
                 SaveServerProps(serverInfo, true);
                 _serviceConfiguration.AddNewServerInfo(serverInfo);
