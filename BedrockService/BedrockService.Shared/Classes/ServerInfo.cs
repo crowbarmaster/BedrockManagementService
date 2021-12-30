@@ -14,11 +14,11 @@ namespace BedrockService.Shared.Classes {
         public Property ServerPath { get; set; }
         public Property ServerExeName { get; set; }
         public List<IPlayer> PlayersList = new List<IPlayer>();
-        public List<Property> ServerPropList = new List<Property>();
+        public List<Property> ServerPropList { get; set; }
         public List<StartCmdEntry> StartCmds = new List<StartCmdEntry>();
 
-        public ServerInfo(string coreServersPath, string defaultPropFilePath) {
-            DefaultPropFilePath = defaultPropFilePath;
+        public ServerInfo(string coreServersPath, List<Property> defaultPropList) {
+            ServerPropList = defaultPropList;
             ServersPath = coreServersPath;
         }
 
@@ -27,18 +27,7 @@ namespace BedrockService.Shared.Classes {
             FileName = "Default.conf";
             ServerPath = new Property("ServerPath", $@"{ServersPath}\{ServerName}");
             ServerExeName = new Property("ServerExeName", $"BedrockService.{ServerName}.exe");
-            try {
-                ServerPropList.Clear();
-                File.ReadAllLines(DefaultPropFilePath)
-                   .ToList()
-                   .ForEach(x => {
-                       string[] s = x.Split('=');
-                       ServerPropList.Add(new Property(s[0], s[1]));
-                   });
-                return true;
-            } catch (Exception) {
-                return false;
-            }
+            return true;
         }
 
 
