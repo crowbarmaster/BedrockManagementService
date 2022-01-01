@@ -59,7 +59,6 @@ namespace BedrockService.Service.Networking {
                 string downloadPath = m.Groups[0].Value;
                 string fetchedVersion = m.Groups[2].Value;
                 client.Dispose();
-
                 if (_version == fetchedVersion) {
                     _logger.AppendLine($"Current version \"{fetchedVersion}\" is up to date!");
                     return true;
@@ -70,8 +69,6 @@ namespace BedrockService.Service.Networking {
                     return false;
                 }
                 _versionChanged = true;
-                MinecraftUpdatePackageProcessor packageProcessor = new(_logger, _processInfo, fetchedVersion, $@"{_processInfo.GetDirectory()}\Server");
-                packageProcessor.ExtractFilesToDirectory();
                 File.WriteAllText($@"{_processInfo.GetDirectory()}\Server\bedrock_ver.ini", fetchedVersion);
                 _serviceConfiguration.SetServerVersion(fetchedVersion);
                 return true;
