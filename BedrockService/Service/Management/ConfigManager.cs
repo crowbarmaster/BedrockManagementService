@@ -50,15 +50,18 @@ namespace BedrockService.Service.Management {
                 FileInfo FInfo = new FileInfo(file);
                 string[] fileEntries = File.ReadAllLines(file);
                 serverInfo = new ServerInfo(_serviceConfiguration.GetProp("ServersPath").ToString(), _serviceConfiguration.GetServerDefaultPropList());
-                serverInfo.InitializeDefaults();
-                serverInfo.ProcessConfiguration(fileEntries);
+                if (serverInfo.InitializeDefaults()) {
+                    serverInfo.ProcessConfiguration(fileEntries);
+                }
                 LoadPlayerDatabase(serverInfo);
                 LoadRegisteredPlayers(serverInfo);
                 _serviceConfiguration.AddNewServerInfo(serverInfo);
             }
             if (_serviceConfiguration.GetServerList().Count == 0) {
                 serverInfo = new ServerInfo(_serviceConfiguration.GetProp("ServersPath").ToString(), _serviceConfiguration.GetServerDefaultPropList());
-                serverInfo.InitializeDefaults();
+                if (!serverInfo.InitializeDefaults()) {
+                    _logger.AppendLine("Error creating default server!");
+                }
                 SaveServerProps(serverInfo, true);
                 _serviceConfiguration.AddNewServerInfo(serverInfo);
             }
