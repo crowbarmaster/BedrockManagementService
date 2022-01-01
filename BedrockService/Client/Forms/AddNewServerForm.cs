@@ -14,9 +14,9 @@ namespace BedrockService.Client.Forms {
             this.serviceConfiguration = serviceConfiguration;
             this.serverConfigurations = serverConfigurations;
             InitializeComponent();
-            IServerConfiguration server = new ServerInfo(null, FormManager.MainWindow.connectedHost.GetProp("ServersPath").ToString());
+            IServerConfiguration server = new ServerInfo(FormManager.MainWindow.connectedHost.GetProp("ServersPath").ToString(), FormManager.MainWindow.connectedHost.GetServerDefaultPropList());
             server.InitializeDefaults();
-            DefaultProps = server.GetAllProps();
+            DefaultProps = FormManager.MainWindow.connectedHost.GetServerDefaultPropList();
         }
 
         private void editPropsBtn_Click(object sender, System.EventArgs e) {

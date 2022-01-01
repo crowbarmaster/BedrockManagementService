@@ -16,8 +16,9 @@ namespace BedrockService.Shared.PackParser {
         public MinecraftKnownPacksClass(string serverFile, string stockFile) {
             _stockDataModel = new KnownPacksFileModel(stockFile);
             InstalledPacks = new KnownPacksFileModel(serverFile);
-            _stockDataModel.Contents.RemoveAt(0); // Strip file version entry.
-            InstalledPacks.Contents.RemoveAt(0);
+            if (InstalledPacks.Contents[0].file_version != 0) {
+                InstalledPacks.Contents.RemoveAt(0); // Strip file version entry.
+            }
             List<KnownPacksJsonModel> AddedPacks = InstalledPacks.Contents.Except(_stockDataModel.Contents).ToList();
             InstalledPacks.Contents.Clear();
             InstalledPacks.Contents.AddRange(AddedPacks);

@@ -41,13 +41,20 @@ namespace BedrockService.Service.Core {
                 _CurrentServiceStatus = ServiceStatus.Starting;
                 _tCPListener.BlockClientConnections();
                 _updater.Initialize();
-                _configurator.LoadAllConfigurations().Wait();
+                _configurator.LoadGlobals().Wait();
                 _logger.Initialize();
                 if (!bool.Parse(_serviceConfiguration.GetProp("AcceptedMojangLic").ToString())) {
                     _logger.AppendLine("You have not accepted the license. Please visit the readme for more info!");
                     return false;
                 }
                 _updater.CheckUpdates().Wait();
+                if (!File.Exists($@"{_processInfo.GetDirectory()}\Server\stock_packs.json") || !File.Exists($@"{_processInfo.GetDirectory()}\Server\stock_props.conf")) {
+                    _logger.AppendLine("Core file(s) found missing. Rebuilding!");
+                    MinecraftUpdatePackageProcessor packageProcessor = new(_logger, _processInfo, _serviceConfiguration.GetServerVersion(), $@"{_processInfo.GetDirectory()}\Server");
+                    packageProcessor.ExtractFilesToDirectory();
+                    _configurator.LoadGlobals().Wait();
+                }
+                _configurator.LoadServerConfigurations().Wait();
                 _backupCron = CrontabSchedule.TryParse(_serviceConfiguration.GetProp("BackupCron").ToString());
                 _updaterCron = CrontabSchedule.TryParse(_serviceConfiguration.GetProp("UpdateCron").ToString());
                 _bedrockServers.Clear();
@@ -103,9 +110,7 @@ namespace BedrockService.Service.Core {
             _hostControl = hostControl;
             try {
                 foreach (var brs in _bedrockServers) {
-                    brs.SetServerStatus(BedrockServer.ServerStatus.Stopping);
-                    while (brs.GetServerStatus() == BedrockServer.ServerStatus.Stopping && !Program.IsExiting)
-                        Thread.Sleep(100);
+                    brs.StopServer(true).Wait();
                 }
                 _CurrentServiceStatus = ServiceStatus.Stopped;
                 return true;
@@ -218,26 +223,30 @@ namespace BedrockService.Service.Core {
 
         private bool ValidSettingsCheck() {
             bool validating = true;
-            bool dupedSettingsFound = false;
             while (validating) {
                 if (_serviceConfiguration.GetServerList().Count() < 1) {
                     throw new Exception("No Servers Configured");
-                }
-                else {
-                    foreach (IServerConfiguration server in _serviceConfiguration.GetServerList()) {
-                        foreach (IServerConfiguration compareServer in _serviceConfiguration.GetServerList()) {
-                            if (server != compareServer) {
-                                if (server.GetProp("server-port").Equals(compareServer.GetProp("server-port")) ||
-                                    server.GetProp("server-portv6").Equals(compareServer.GetProp("server-portv6")) ||
-                                    server.GetProp("server-name").Equals(compareServer.GetProp("server-name"))) {
-                                    _logger.AppendLine($"Duplicate server settings between servers {server.GetFileName()} and {compareServer.GetFileName()}.");
-                                    dupedSettingsFound = true;
-                                }
-                            }
-                        }
+                } else {
+                    var duplicatePortList = _serviceConfiguration.GetServerList()
+                        .Select(x => x.GetAllProps()
+                            .GroupBy(z => z.Value)
+                            .SelectMany(z => z
+                                .Where(y => y.KeyName.StartsWith("server-port"))))
+                        .GroupBy(z => z.Select(x => x.Value))
+                        .SelectMany(x => x.Key)
+                        .GroupBy(x => x)
+                        .Where(x => x.Count() > 1)
+                        .ToList();
+                    var duplicateNameList = _serviceConfiguration.GetServerList()
+                        .GroupBy(x => x.GetServerName())
+                        .Where(x => x.Count() > 1)
+                        .ToList();
+                    if (duplicateNameList.Count() > 0) {
+                        throw new Exception($"Duplicate server name {duplicateNameList.First().First().GetServerName()} was found. Please check configuration files");
                     }
-                    if (dupedSettingsFound) {
-                        throw new Exception("Duplicate settings found! Check logs.");
+                    if(duplicatePortList.Count() > 0) {
+                        string serverPorts = string.Join(", ", duplicatePortList.Select(x=>x.Key).ToArray());
+                        throw new Exception($"Duplicate ports used! Check server configurations targeting port(s) {serverPorts}"); 
                     }
                     foreach (var server in _serviceConfiguration.GetServerList()) {
                         if (_updater.CheckVersionChanged() || !File.Exists(server.GetProp("ServerPath") + "\\bedrock_server.exe")) {

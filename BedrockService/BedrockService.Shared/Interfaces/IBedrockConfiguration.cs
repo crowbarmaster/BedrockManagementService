@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace BedrockService.Shared.Interfaces {
     public interface IBedrockConfiguration {
 
-        void InitializeDefaults();
+        bool InitializeDefaults();
 
         void ProcessConfiguration(string[] configEntries);
 

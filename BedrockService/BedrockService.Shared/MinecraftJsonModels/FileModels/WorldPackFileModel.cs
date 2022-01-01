@@ -8,8 +8,13 @@ namespace BedrockService.Shared.MinecraftJsonModels.FileModels {
 
         public WorldPackFileModel(string fullPath) : base(fullPath) {
             Contents = LoadJsonFile<List<WorldKnownPackEntryJsonModel>>();
+            if(Contents == null) {
+                Contents = new();
+            }
         }
 
         public WorldPackFileModel() { }
+
+        public void SaveFile() => SaveToFile(Contents);
     }
 }

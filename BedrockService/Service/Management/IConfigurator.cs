@@ -3,6 +3,8 @@
         void DeleteBackupsForServer(byte serverIndex, List<string> list);
         List<Property> EnumerateBackupsForServer(byte serverIndex);
         Task LoadAllConfigurations();
+        Task LoadServerConfigurations();
+        Task LoadGlobals();
         void LoadPlayerDatabase(IServerConfiguration server);
         void LoadRegisteredPlayers(IServerConfiguration server);
         void RemoveServerConfigs(IServerConfiguration serverInfo, NetworkMessageFlags flag);

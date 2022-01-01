@@ -1,0 +1,20 @@
+﻿@using BedrockService.Shared.Classes
+@model BedrockService.Shared.Interfaces.IServerConfiguration
+
+<div class="card card-outline-primary m-1 p-1">
+    <div class="bg-faded p-1">
+        <h4>
+           <div class="card card-info" style="align-content:center">
+               <span style="text-align:center">Server name: @Model.GetServerName()</span>
+            <span class="badge badge-info" style="align-content:center">
+                <small>Level name: @Model.GetProp("level-name").ToString()</small>
+            </span>
+            </div>
+        </h4>
+    </div>
+    <div class="button-group role="group" aria-label="Basic example">
+        <button type="button" class="btn btn-primary" style="float:right">View Log</button>
+        <button type="button" class="btn btn-primary" style="float:right">Edit Config</button>
+        <button type="button" class="btn btn-primary" style="float:right">Manage Players</button>
+    </div>
+</div>

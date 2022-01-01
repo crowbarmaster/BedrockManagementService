@@ -1,10 +1,13 @@
 ﻿using BedrockService.Shared.Interfaces;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace BedrockService.Shared.Classes {
     public class ServerInfo : IServerConfiguration {
-        public string serversPath;
+        public string ServersPath;
+        public string DefaultPropFilePath;
         public string ServerName { get; set; }
         public string FileName { get; set; }
         public List<LogEntry> ConsoleBuffer = new List<LogEntry>();
@@ -12,47 +15,21 @@ namespace BedrockService.Shared.Classes {
         public Property ServerExeName { get; set; }
         public List<IPlayer> PlayersList = new List<IPlayer>();
         public List<Property> ServerPropList = new List<Property>();
+        private List<Property> _defaultPropList = new List<Property>();
         public List<StartCmdEntry> StartCmds = new List<StartCmdEntry>();
 
-        public ServerInfo(string[] configEntries, string coreServersPath) {
-            serversPath = coreServersPath;
-            InitializeDefaults();
-            ProcessConfiguration(configEntries);
+        public ServerInfo(string coreServersPath, List<Property> defaultPropList) {
+            _defaultPropList = defaultPropList;
+            ServersPath = coreServersPath;
         }
 
-        public void InitializeDefaults() {
+        public bool InitializeDefaults() {
             ServerName = "Default";
             FileName = "Default.conf";
-            ServerPath = new Property("ServerPath", $@"{serversPath}\{ServerName}");
+            ServerPath = new Property("ServerPath", $@"{ServersPath}\{ServerName}");
             ServerExeName = new Property("ServerExeName", $"BedrockService.{ServerName}.exe");
-
-            ServerPropList.Clear();
-            ServerPropList.Add(new Property("server-name", "Default"));
-            ServerPropList.Add(new Property("gamemode", "creative"));
-            ServerPropList.Add(new Property("difficulty", "easy"));
-            ServerPropList.Add(new Property("allow-cheats", "false"));
-            ServerPropList.Add(new Property("max-players", "10"));
-            ServerPropList.Add(new Property("online-mode", "true"));
-            ServerPropList.Add(new Property("white-list", "false"));
-            ServerPropList.Add(new Property("server-port", "19132"));
-            ServerPropList.Add(new Property("server-portv6", "19133"));
-            ServerPropList.Add(new Property("view-distance", "32"));
-            ServerPropList.Add(new Property("tick-distance", "4"));
-            ServerPropList.Add(new Property("player-idle-timeout", "30"));
-            ServerPropList.Add(new Property("max-threads", "8"));
-            ServerPropList.Add(new Property("level-name", "Bedrock Level"));
-            ServerPropList.Add(new Property("level-seed", ""));
-            ServerPropList.Add(new Property("default-player-permission-level", "member"));
-            ServerPropList.Add(new Property("texturepack-required", "false"));
-            ServerPropList.Add(new Property("content-log-file-enabled", "false"));
-            ServerPropList.Add(new Property("compression-threshold", "1"));
-            ServerPropList.Add(new Property("server-authoritative-movement", "server-auth"));
-            ServerPropList.Add(new Property("player-movement-score-threshold", "20"));
-            ServerPropList.Add(new Property("player-movement-action-direction-threshold", "0.85"));
-            ServerPropList.Add(new Property("player-movement-distance-threshold", "0.3"));
-            ServerPropList.Add(new Property("player-movement-duration-threshold-in-ms", "500"));
-            ServerPropList.Add(new Property("correct-player-movement", "false"));
-            ServerPropList.Add(new Property("server-authoritative-block-breaking", "false"));
+            _defaultPropList.ForEach(p =>  ServerPropList.Add(new Property(p.KeyName, p.DefaultValue)));
+            return true;
         }
 
 
@@ -74,7 +51,7 @@ namespace BedrockService.Shared.Classes {
                     switch (split[0]) {
                         case "server-name":
                             ServerName = split[1];
-                            ServerPath.SetValue($@"{serversPath}\{ServerName}");
+                            ServerPath.SetValue($@"{ServersPath}\{ServerName}");
                             ServerExeName.SetValue($"BedrockService.{ServerName}.exe");
                             FileName = $@"{ServerName}.conf";
                             break;

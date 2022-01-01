@@ -19,17 +19,17 @@ namespace BedrockService.Service.Management {
         private readonly IProcessInfo _processInfo;
 
 
-        public MinecraftUpdatePackageProcessor(IBedrockLogger logger, IProcessInfo processInfo, string serviceDirectory, string packageVersion, string fileTargetDirectory) {
+        public MinecraftUpdatePackageProcessor(IBedrockLogger logger, IProcessInfo processInfo, string packageVersion, string fileTargetDirectory) {
             _processInfo = processInfo;
-            _serviceDirectory = serviceDirectory;
             _packageVersion = packageVersion;
             _fileTargetDirectory = fileTargetDirectory;
+            _serviceDirectory = processInfo.GetDirectory();
             _workingDirectory = $@"{_serviceDirectory}\Temp\ServerFileTemp";
             Directory.CreateDirectory(_workingDirectory);
             _logger = logger;
         }
         
-        public void ExtractToDirectory() {
+        public void ExtractFilesToDirectory() {
             using (ZipArchive archive = ZipFile.OpenRead($@"{_serviceDirectory}\Server\MCSFiles\Update_{_packageVersion}.zip")) {
                 int fileCount = archive.Entries.Count;
                 for (int i = 0; i < fileCount; i++) {
@@ -44,6 +44,9 @@ namespace BedrockService.Service.Management {
                     if (!archive.Entries[i].FullName.EndsWith("/")) {
                         if (File.Exists(fixedPath)) {
                             File.Delete(fixedPath);
+                        }
+                        if (fixedPath.Contains("bedrock_server.pdb")) { 
+                            continue; 
                         }
                         archive.Entries[i].ExtractToFile(fixedPath);
                     } else {
@@ -63,20 +66,30 @@ namespace BedrockService.Service.Management {
             string resouceFolder = $@"{_workingDirectory}\resource_packs";
             string behaviorFolder = $@"{_workingDirectory}\behavior_packs";
             string propFile = $@"{_workingDirectory}\server.properties";
-            MinecraftPackParser packParser = new MinecraftPackParser(_logger, _processInfo);
+            MinecraftPackParser packParser = new(_logger, _processInfo);
             packParser.ParseDirectory(resouceFolder);
             packParser.ParseDirectory(behaviorFolder);
-            KnownPacksFileModel fileModel = new KnownPacksFileModel();
+            KnownPacksFileModel fileModel = new();
             fileModel.FilePath = $@"{_fileTargetDirectory}\stock_packs.json";
             foreach (MinecraftPackContainer pack in packParser.FoundPacks) {
-                KnownPacksJsonModel jsonModel = new KnownPacksJsonModel();
-                jsonModel.file_system = "RawPath";
-                jsonModel.path = pack.PackContentLocation;
-                jsonModel.uuid = pack.JsonManifest.header.uuid;
-                jsonModel.version = string.Join(".", pack.JsonManifest.header.version);
+                string fixedPath = pack.PackContentLocation
+                        .Replace(_workingDirectory+'\\', "")
+                        .Replace('\\', '/');
+                KnownPacksJsonModel jsonModel = new() {
+                    file_system = "RawPath",
+                    path = fixedPath,
+                    uuid = pack.JsonManifest.header.uuid,
+                    version = string.Join(".", pack.JsonManifest.header.version)
+                };
                 fileModel.Contents.Add(jsonModel);
             }
             fileModel.SaveToFile();
+            List<string> propFileContents = new(File.ReadAllLines(propFile));
+            propFileContents = propFileContents
+                .Where(x => !x.StartsWith('#'))
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .ToList();
+            File.WriteAllLines($@"{_fileTargetDirectory}\stock_props.conf", propFileContents);
         }
     }
 }

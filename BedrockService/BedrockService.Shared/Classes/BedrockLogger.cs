@@ -90,7 +90,6 @@ namespace BedrockService.Shared.Classes {
         }
 
         public override string ToString() {
-            string output;
             if (_serverConfiguration != null) {
                 return string.Join("", _serverConfiguration.GetLog().Select(x => x.Text).ToList());
             }
