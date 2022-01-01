@@ -47,7 +47,7 @@ namespace BedrockManagementServiceASP.BedrockService.Management {
 
                 LoadServerConfigurations();
                 if (_serviceConfiguration.GetServerList().Count == 0) {
-                    serverInfo = new ServerInfo(null, _serviceConfiguration.GetProp("ServersPath").ToString());
+                    serverInfo = new ServerInfo(null, _serviceConfiguration.GetServerDefaultPropList());
                     serverInfo.InitializeDefaults();
                     SaveServerProps(serverInfo, true);
                     _serviceConfiguration.AddNewServerInfo(serverInfo);
@@ -62,7 +62,7 @@ namespace BedrockManagementServiceASP.BedrockService.Management {
                 ServerInfo serverInfo;
                 FileInfo FInfo = new FileInfo(file);
                 string[] fileEntries = File.ReadAllLines(file);
-                serverInfo = new ServerInfo(fileEntries, _serviceConfiguration.GetProp("ServersPath").ToString());
+                serverInfo = new ServerInfo($@"{_processInfo.GetDirectory()}\Server", _serviceConfiguration.GetServerDefaultPropList());
                 LoadPlayerDatabase(serverInfo);
                 LoadRegisteredPlayers(serverInfo);
                 _serviceConfiguration.AddNewServerInfo(serverInfo);
