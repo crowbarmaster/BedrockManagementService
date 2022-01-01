@@ -306,7 +306,6 @@ namespace BedrockService.Service.Networking {
                     }
                     if (container.ManifestType == "resources") {
                         filePath = $@"{serverPath}\worlds\{levelName}\world_resource_packs.json";
-                        filePath = $@"{serverPath}\worlds\{levelName}\world_behavior_packs.json";
                         if (VerifyAddToJson(filePath, container.JsonManifest)) {
                             fileUtils.CopyFilesRecursively(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($@"{serverPath}\resource_packs\{container.FolderName}"));
                         }

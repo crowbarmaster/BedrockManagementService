@@ -48,6 +48,8 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <Authors>Crowbarmaster</Authors>
     <Company>CrowbarWares</Company>
+    <BaseOutputPath>bin\Client\</BaseOutputPath>
+    <BaseIntermediateOutputPath>obj\</BaseIntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0-windows|AnyCPU'">
     <Deterministic>False</Deterministic>

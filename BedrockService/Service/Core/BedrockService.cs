@@ -50,9 +50,11 @@ namespace BedrockService.Service.Core {
                 _updater.CheckUpdates().Wait();
                 if (!File.Exists($@"{_processInfo.GetDirectory()}\Server\stock_packs.json") || !File.Exists($@"{_processInfo.GetDirectory()}\Server\stock_props.conf")) {
                     _logger.AppendLine("Core file(s) found missing. Rebuilding!");
+                    string version = _serviceConfiguration.GetServerVersion();
                     MinecraftUpdatePackageProcessor packageProcessor = new(_logger, _processInfo, _serviceConfiguration.GetServerVersion(), $@"{_processInfo.GetDirectory()}\Server");
                     packageProcessor.ExtractFilesToDirectory();
                     _configurator.LoadGlobals().Wait();
+                    _serviceConfiguration.SetServerVersion(version);
                 }
                 _configurator.LoadServerConfigurations().Wait();
                 _backupCron = CrontabSchedule.TryParse(_serviceConfiguration.GetProp("BackupCron").ToString());

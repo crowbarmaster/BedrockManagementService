@@ -84,14 +84,8 @@ namespace BedrockService.Service.Server {
         private bool PerformBackup(string queryString) {
             try {
                 FileUtils fileUtils = new FileUtils(_servicePath);
-                FileInfo exe = new FileInfo($@"{_serverConfiguration.GetProp("ServerPath")}\{_serverConfiguration.GetProp("ServerExeName")}");
-                string configBackupPath = _serviceConfiguration.GetProp("BackupPath").ToString();
-                DirectoryInfo backupDir = new DirectoryInfo($@"{configBackupPath}\{_serverConfiguration.GetServerName()}");
-                DirectoryInfo serverDir = new DirectoryInfo(_serverConfiguration.GetProp("ServerPath").ToString());
                 DirectoryInfo worldsDir = new DirectoryInfo($@"{_serverConfiguration.GetProp("ServerPath")}\worlds");
-                if (!backupDir.Exists) {
-                    backupDir.Create();
-                }
+                DirectoryInfo backupDir = new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath").ToString()}\{_serverConfiguration.GetServerName()}");
                 Dictionary<string, int> backupFileInfoPairs = new Dictionary<string, int>();
                 string[] files = queryString.Split(", ");
                 foreach (string file in files) {
@@ -100,53 +94,40 @@ namespace BedrockService.Service.Server {
                     int fileSize = int.Parse(fileInfoSplit[1]);
                     backupFileInfoPairs.Add(fileName, fileSize);
                 }
-                int dirCount = backupDir.GetDirectories().Length;
-                try {
-                    if (dirCount >= int.Parse(_serviceConfiguration.GetProp("MaxBackupCount").ToString())) {
-                        Regex reg = new Regex(@"Backup_(.*)$");
-
-                        List<long> Dates = new List<long>();
-                        foreach (DirectoryInfo dir in backupDir.GetDirectories()) {
-                            if (reg.IsMatch(dir.Name)) {
-                                Match match = reg.Match(dir.Name);
-                                Dates.Add(Convert.ToInt64(match.Groups[1].Value));
-                            }
-                        }
-                        long OldestDate = 0;
-                        foreach (long date in Dates) {
-                            if (OldestDate == 0) {
-                                OldestDate = date;
-                            }
-                            else if (date < OldestDate) {
-                                OldestDate = date;
-                            }
-                        }
-                        Directory.Delete($@"{backupDir}\Backup_{OldestDate}", true);
-                    }
-                }
-                catch (Exception e) {
-                    if (e.GetType() == typeof(FormatException)) {
-                        _logger.AppendLine("Error in Config! MaxBackupCount must be nothing but a number!");
-                    }
-                }
-
+                PruneBackups(backupDir);
                 DirectoryInfo targetDirectory = backupDir.CreateSubdirectory($"Backup_{DateTime.Now.Ticks}");
                 _logger.AppendLine($"Backing up files for server {_serverConfiguration.GetServerName()}. Please wait!");
-                if (_serviceConfiguration.GetProp("EntireBackups").ToString() == "false") {
-                    string levelDir = @$"\{_serverConfiguration.GetProp("level-name")}";
-                    bool resuilt = fileUtils.BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, $@"{targetDirectory.FullName}").Result;
-                    fileUtils.CopyFilesMatchingExtension(worldsDir.FullName + levelDir, targetDirectory.FullName + levelDir, ".json");
-                    WriteToStandardIn("save resume");
-                    return resuilt;
-                }
-                fileUtils.CopyFilesRecursively(serverDir, targetDirectory);
-                bool result = fileUtils.BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, $@"{targetDirectory.FullName}\{_serverConfiguration.GetProp("level-name")}").Result;
+                string levelDir = @$"\{_serverConfiguration.GetProp("level-name")}";
+                bool resuilt = fileUtils.BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, $@"{targetDirectory.FullName}").Result;
+                fileUtils.CopyFilesMatchingExtension(worldsDir.FullName + levelDir, targetDirectory.FullName + levelDir, ".json");
                 WriteToStandardIn("save resume");
-                return result;
-            }
-            catch (Exception e) {
+                return resuilt;
+
+            } catch (Exception e) {
                 _logger.AppendLine($"Error with Backup: {e.StackTrace}");
                 return false;
+            }
+        }
+
+        private void PruneBackups(DirectoryInfo backupDir) {
+            if (!backupDir.Exists) {
+                backupDir.Create();
+            }
+            int dirCount = backupDir.GetDirectories().Length;
+            try {
+                if (dirCount >= int.Parse(_serviceConfiguration.GetProp("MaxBackupCount").ToString())) {
+                    List<long> dates = new List<long>();
+                    foreach (DirectoryInfo dir in backupDir.GetDirectories()) {
+                        string[] folderNameSplit = dir.Name.Split('_');
+                        dates.Add(Convert.ToInt64(folderNameSplit[1]));
+                    }
+                    dates.Sort();
+                    Directory.Delete($@"{backupDir}\Backup_{dates[dates.Count - 1]}", true);
+                }
+            } catch (Exception e) {
+                if (e.GetType() == typeof(FormatException)) {
+                    _logger.AppendLine("Error in Config! MaxBackupCount must be nothing but a number!");
+                }
             }
         }
 
@@ -376,19 +357,17 @@ namespace BedrockService.Service.Server {
 
         public bool RollbackToBackup(byte serverIndex, string folderName) {
             IServerConfiguration server = _serviceConfiguration.GetServerInfoByIndex(serverIndex);
+            FileUtils fileUtils = new FileUtils(_servicePath);
+            DirectoryInfo worldsDir = new DirectoryInfo($@"{server.GetProp("ServerPath")}\worlds\{server.GetProp("level-name")}");
+            DirectoryInfo backupDir = new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{server.GetServerName()}\{folderName}\{server.GetProp("level-name")}");
             StopServer(false).Wait();
             try {
-                foreach (DirectoryInfo dir in new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{server.GetServerName()}").GetDirectories())
-                    if (dir.Name == folderName) {
-                        new FileUtils(_servicePath).DeleteFilesRecursively(new DirectoryInfo($@"{server.GetProp("ServerPath")}\worlds"), false);
-                        _logger.AppendLine($"Deleted world folder contents.");
-                        foreach (DirectoryInfo worldDir in new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{server.GetServerName()}\{folderName}").GetDirectories()) {
-                            new FileUtils(_servicePath).CopyFilesRecursively(worldDir, new DirectoryInfo($@"{server.GetProp("ServerPath")}\worlds\{worldDir.Name}"));
-                            _logger.AppendLine($@"Copied {worldDir.Name} to path {server.GetProp("ServerPath")}\worlds");
-                        }
-                        SetServerStatus(ServerStatus.Starting);
-                        return true;
-                    }
+                fileUtils.DeleteFilesRecursively(worldsDir, true);
+                _logger.AppendLine($"Deleted world folder \"{worldsDir.Name}\"");
+                fileUtils.CopyFilesRecursively(backupDir, worldsDir);
+                _logger.AppendLine($"Copied files from backup \"{backupDir.Name}\" to server worlds directory.");
+                _currentServerStatus = ServerStatus.Starting;
+                return true;
             }
             catch (IOException e) {
                 _logger.AppendLine($"Error deleting selected backups! {e.Message}");

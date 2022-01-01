@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "BedrockService.Client": {
+      "commandName": "Project"
+    }
+  }
+}
