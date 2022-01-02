@@ -104,7 +104,7 @@ namespace BedrockService.Service.Core {
         }
 
         public void TestStop() {
-            Task.Run(() => Stop(null));
+            Task.Run(() => ServiceShutdown());
         }
 
         public bool Stop(HostControl? hostControl) {
