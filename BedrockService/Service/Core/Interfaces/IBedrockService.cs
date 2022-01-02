@@ -10,5 +10,8 @@ namespace BedrockService.Service.Core.Interfaces {
         IBedrockServer GetBedrockServerByIndex(int index);
         IBedrockServer? GetBedrockServerByName(string name);
         List<IBedrockServer> GetAllServers();
+        void TestStart();
+        void TestStop();
+        bool ServiceShutdown();
     }
 }
