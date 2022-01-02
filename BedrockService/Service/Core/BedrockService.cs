@@ -108,7 +108,7 @@ namespace BedrockService.Service.Core {
         }
 
         public bool Stop(HostControl? hostControl) {
-            return true;
+            return ServiceShutdown();
         }
 
         public bool ServiceShutdown() {
