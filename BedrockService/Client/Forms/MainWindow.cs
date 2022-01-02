@@ -23,6 +23,7 @@ namespace BedrockService.Client.Forms {
         private PropEditorForm _editDialog;
         private int _connectTimeout;
         private bool _followTail = false;
+        private bool _blockConnect = false;
         private const int _connectTimeoutLimit = 3;
         private readonly IBedrockLogger _logger;
         private readonly IProcessInfo _processInfo;
@@ -42,10 +43,11 @@ namespace BedrockService.Client.Forms {
         }
 
         private void ConnectTimer_Elapsed(object sender, ElapsedEventArgs e) {
-            if (_connectTimer.Enabled && !FormManager.TCPClient.EstablishedLink) {
+            if (_connectTimer.Enabled && !FormManager.TCPClient.EstablishedLink && !_blockConnect) {
                 _connectTimer.Interval = 2000.0;
+                _blockConnect = true;
                 Invoke((MethodInvoker)delegate { FormManager.TCPClient.ConnectHost(_configManager.HostConnectList.FirstOrDefault(host => host.GetHostName() == (string)HostListBox.SelectedItem)); });
-                Thread.Sleep(500);
+                Thread.Sleep(1000);
                 if (connectedHost != null && FormManager.TCPClient.EstablishedLink) {
                     ServerBusy = false;
                     Invoke((MethodInvoker)delegate { ComponentEnableManager(); });
@@ -55,6 +57,7 @@ namespace BedrockService.Client.Forms {
                     return;
                 }
                 _connectTimeout++;
+                _blockConnect = false;
                 if (_connectTimeout >= _connectTimeoutLimit) {
                     _connectTimer.Enabled = false;
                     _connectTimer.Stop();
@@ -156,8 +159,6 @@ namespace BedrockService.Client.Forms {
                     selectedServer = connectedHost.GetServerInfoByName((string)ServerSelectBox.SelectedItem);
                 }
             }
-            ServerSelectBox.Refresh();
-            base.Refresh();
         }
 
         public void InitForm() {
@@ -216,6 +217,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void Connect_Click(object sender, EventArgs e) {
+            _blockConnect = false;
             HostInfoLabel.Text = $"Connecting to host {(string)HostListBox.SelectedItem}...";
             Connect.Enabled = false;
             _connectTimeout = 0;
@@ -250,7 +252,6 @@ namespace BedrockService.Client.Forms {
                 selectedServer.SetAllProps(_editDialog.workingProps);
                 _editDialog.Close();
                 _editDialog.Dispose();
-                RestartSrv_Click(null, null);
             }
         }
 
@@ -359,7 +360,6 @@ namespace BedrockService.Client.Forms {
                 selectedServer.SetStartCommands(editSrvDialog.startCmds);
                 editSrvDialog.Close();
                 editSrvDialog.Dispose();
-                RestartSrv_Click(null, null);
             }
         }
 
