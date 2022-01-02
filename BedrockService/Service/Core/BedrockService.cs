@@ -20,7 +20,6 @@ namespace BedrockService.Service.Core {
         private readonly ITCPListener _tCPListener;
         private CrontabSchedule? _backupCron { get; set; }
         private CrontabSchedule? _updaterCron { get; set; }
-        private HostControl? _hostControl { get; set; }
         private List<IBedrockServer> _bedrockServers { get; set; } = new();
         private System.Timers.Timer? _updaterTimer { get; set; }
         private System.Timers.Timer? _backupTimer { get; set; }
@@ -83,19 +82,13 @@ namespace BedrockService.Service.Core {
                 Task.Delay(3000).Wait();
                 Environment.Exit(1);
             }
-            _hostControl = hostControl;
             try {
                 ValidSettingsCheck();
                 foreach (var brs in _bedrockServers) {
-                    if (hostControl != null)
-                        try {
-                            _hostControl.RequestAdditionalTime(TimeSpan.FromSeconds(30));
-                        }
-                        catch (Exception ex) {
-                            _logger.AppendLine("Error!");
-                        }
+
                     brs.SetServerStatus(BedrockServer.ServerStatus.Starting);
-                    brs.StartWatchdog(_hostControl);
+                    brs.StartWatchdog();
+                    brs.AwaitServerStart().Wait();
                 }
                 _tCPListener.UnblockClientConnections();
                 _CurrentServiceStatus = ServiceStatus.Started;
@@ -109,7 +102,6 @@ namespace BedrockService.Service.Core {
 
         public bool Stop(HostControl hostControl) {
             _CurrentServiceStatus &= ServiceStatus.Stopping;
-            _hostControl = hostControl;
             try {
                 foreach (var brs in _bedrockServers) {
                     brs.StopServer(true).Wait();
@@ -130,7 +122,7 @@ namespace BedrockService.Service.Core {
                     foreach (IBedrockServer brs in _bedrockServers) {
                         brs.StopServer(true).Wait();
                     }
-                    Start(_hostControl);
+                    Start(null);
                 } catch (Exception e) {
                     _logger.AppendLine($"Error Stopping BedrockServiceWrapper {e.Message} StackTrace: {e.StackTrace}");
                 }
@@ -156,7 +148,7 @@ namespace BedrockService.Service.Core {
             _serviceConfiguration.AddNewServerInfo(server);
             if (ValidSettingsCheck()) {
                 bedrockServer.SetServerStatus(BedrockServer.ServerStatus.Starting);
-                bedrockServer.StartWatchdog(_hostControl);
+                bedrockServer.StartWatchdog();
             }
         }
 

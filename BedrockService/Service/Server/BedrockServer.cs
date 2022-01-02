@@ -10,7 +10,6 @@ namespace BedrockService.Service.Server {
         private CancellationTokenSource _watchdogCanceler = new CancellationTokenSource();
         private StreamWriter _stdInStream;
         private Process _serverProcess;
-        private HostControl _hostController;
         private ServerStatus _currentServerStatus;
         private readonly IServerConfiguration _serverConfiguration;
         private readonly IServiceConfiguration _serviceConfiguration;
@@ -67,9 +66,8 @@ namespace BedrockService.Service.Server {
             _currentServerStatus = ServerStatus.Stopped;
         }
 
-        public void StartWatchdog(HostControl hostControl) {
+        public void StartWatchdog() {
             _watchdogCanceler = new CancellationTokenSource();
-            _hostController = hostControl;
             _watchdogTask = null;
             _watchdogTask = ApplicationWatchdogMonitor();
             _watchdogTask.Start();
@@ -85,7 +83,7 @@ namespace BedrockService.Service.Server {
             try {
                 FileUtils fileUtils = new FileUtils(_servicePath);
                 DirectoryInfo worldsDir = new DirectoryInfo($@"{_serverConfiguration.GetProp("ServerPath")}\worlds");
-                DirectoryInfo backupDir = new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath").ToString()}\{_serverConfiguration.GetServerName()}");
+                DirectoryInfo backupDir = new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{_serverConfiguration.GetServerName()}");
                 Dictionary<string, int> backupFileInfoPairs = new Dictionary<string, int>();
                 string[] files = queryString.Split(", ");
                 foreach (string file in files) {
@@ -217,12 +215,10 @@ namespace BedrockService.Service.Server {
                     }
                     else {
                         _logger.AppendLine($"The Bedrock Server is not accessible at {$@"{_serverConfiguration.GetProp("ServerPath")}\{_serverConfiguration.GetProp("ServerExeName")}"}\r\nCheck if the file is at that location and that permissions are correct.");
-                        _hostController.Stop();
                     }
                 }
                 catch (Exception e) {
                     _logger.AppendLine($"Error Running Bedrock Server: {e.Message}\n{e.StackTrace}");
-                    _hostController.Stop();
                 }
             }, _serverCanceler.Token);
         }
@@ -390,6 +386,14 @@ namespace BedrockService.Service.Server {
                     while (!_watchdogTask.IsCompleted) {
                         Task.Delay(200);
                     }
+                }
+            });
+        }
+
+        public async Task AwaitServerStart() {
+            await Task.Run(() => {
+                while (_currentServerStatus != ServerStatus.Started) {
+                    Task.Delay(10).Wait();
                 }
             });
         }
