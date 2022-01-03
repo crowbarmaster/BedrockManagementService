@@ -109,9 +109,8 @@ namespace BedrockService.Service.Core {
 
         public bool Stop(HostControl? hostControl) {
             if (ServiceShutdown()) {
-                if(_tCPListener.CancelAllTasks().Wait(5000)){ 
-                    _logger.AppendLine("Service shutdown completed successfully.");
-                }
+                _tCPListener.CancelAllTasks().Wait();
+                _logger.AppendLine("Service shutdown completed successfully.");
                 return true;
             }
             _logger.AppendLine("Service shutdown completed with errors. Check logs!");

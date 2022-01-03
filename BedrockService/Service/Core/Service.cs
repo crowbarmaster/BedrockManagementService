@@ -8,6 +8,7 @@ namespace BedrockService.Service.Core {
         private Topshelf.Host _host;
         private readonly IBedrockLogger _logger;
         private readonly IHostApplicationLifetime _applicationLifetime;
+        TopshelfExitCode _exitCode;
 
         public Service(IBedrockLogger logger, IBedrockService bedrockService, NetworkStrategyLookup networkStrategyLookup, IHostApplicationLifetime appLifetime) {
             _logger = logger;
@@ -26,9 +27,8 @@ namespace BedrockService.Service.Core {
                     hostConfig.UseAssemblyInfoForServiceInfo();
                     hostConfig.Service(settings => _bedrockService, s => {
                         s.BeforeStartingService(_ => _logger.AppendLine("Starting service..."));
-                        s.BeforeStoppingService(_ => {
-                            _logger.AppendLine("Stopping service...");
-                        });
+                        s.BeforeStoppingService(_ => _logger.AppendLine("Stopping service..."));
+                        s.AfterStoppingService(_ => _applicationLifetime.StopApplication());
                     });
                     hostConfig.RunAsLocalSystem();
                     hostConfig.SetDescription("Windows Service Wrapper for Windows Bedrock Server");
@@ -68,19 +68,22 @@ namespace BedrockService.Service.Core {
 
         private void OnStarted() {
             Task.Run(() => { 
-                _host.Run();
+                _exitCode = _host.Run();
             });
         }
 
         private void OnStopping() {
-            _bedrockService.Stop(null);
-            while (_bedrockService.GetServiceStatus() != ServiceStatus.Stopped) {
-                Task.Delay(100).Wait();
+            if (Environment.UserInteractive) {
+                _bedrockService.Stop(null);
+                while (_bedrockService.GetServiceStatus() != ServiceStatus.Stopped) {
+                    Task.Delay(100).Wait();
+                }
             }
         }
 
         private void OnShutdown() {
-            Environment.Exit(0);
+            int exitCode = (int)Convert.ChangeType(_exitCode, _exitCode.GetTypeCode());
+            Environment.ExitCode = exitCode;
         }
     }
 }
