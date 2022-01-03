@@ -29,6 +29,12 @@ TODO:
 
 ## Quick-start guide
 
+!! NOTICE !!
+A couple of keys have changed in the `globals.conf` file:
+`LogServersToFile` should be changed to `LogServerOutput`
+`LogServiceToFile` should be changed to `LogServiceOutput`
+This change is only an issue for you if you are updating the service. New installs are not affected.
+
 This service can be run strictly as a windows service, or as a regular console application.
 Download the latest release and extract to any directory. Run BedrockService.Service.exe, this will automatically download the latest copy of BDS (Bedrock Dedicated Server) from minecraft.net, extract to the default directory of C:\MCBedrockService, deploy stock settings and start the server. Once the new server is running, you can either close it and modify the configs with a text editor (see below for more details) or modify/add servers from the GUI Client.
 
@@ -88,8 +94,8 @@ EntireBackups=false // Enabling this option will backup the entire server direct
 CheckUpdates=true // Enabling this option turns on automatic updates.
 UpdateCron=38 19 * * * // Update time interval. This is a Cron string, search "Cron time format" in your favorite search engine to find more details.
 #Logging
-LogServersToFile=false // Enabling this option will cause the service to write server logs to file.
-LogServiceToFile=false // Enabling this option will cause the service to write the service log to file.
+LogServerOutput=false // Enabling this option will cause the service to write server logs to file.
+LogApplicationOutput=false // Enabling this option will cause the service to write the service log to file.
 ```
 
 Server config file (Filename layout - if your server's name is “DefaultServer”, your config should be “DefaultServer.conf”)
@@ -122,7 +128,7 @@ player-movement-duration-threshold-in-ms=500
 correct-player-movement=false
 
 # StartCmds
-Distracted=help 1 // Any of these optional fields will send following command to server on startup.
+AddStartCmd=help 1 // Any of these optional fields will send following command to server on startup.
 ```
 
 Registered player databases:
