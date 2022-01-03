@@ -61,6 +61,12 @@ namespace BedrockService.Shared.Classes {
                     if (split.Length == 1) {
                         split[1] = "";
                     }
+                    if(split[0] == "LogServiceToFile") {
+                        split[0] = "LogApplicationOutput";
+                    }
+                    if(split[0] == "LogServersToFile") {
+                        split[0] = "LogServerOutput";
+                    }
                     if (split[0] == "BackupPath") {
                         if (split[1] == "Default")
                             split[1] = $@"{_processInfo.GetDirectory()}\Server\Backups";
