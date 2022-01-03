@@ -92,7 +92,6 @@ namespace BedrockService.Service.Management {
                 if (entry.StartsWith("#") || string.IsNullOrWhiteSpace(entry))
                     continue;
                 string[] split = entry.Split(',');
-                _logger.AppendLine($"Server \"{server.GetServerName()}\" Loaded registered player: {split[1]}");
                 IPlayer playerFound = server.GetPlayerByXuid(split[0]);
                 if (playerFound == null) {
                     server.AddUpdatePlayer(new Player(split[0], split[1], DateTime.Now.Ticks.ToString(), "0", "0", split[3].ToLower() == "true", split[2], split[4].ToLower() == "true"));
@@ -167,7 +166,6 @@ namespace BedrockService.Service.Management {
                 if (entry.StartsWith("#") || string.IsNullOrWhiteSpace(entry))
                     continue;
                 string[] split = entry.Split(',');
-                _logger.AppendLine($"Server \"{server.GetServerName()}\" loaded known player: {split[1]}");
                 IPlayer playerFound = server.GetPlayerByXuid(split[0]);
                 if (playerFound == null) {
                     server.AddUpdatePlayer(new Player(split[0], split[1], split[2], split[3], split[4], false, server.GetProp("default-player-permission-level").ToString(), false));
