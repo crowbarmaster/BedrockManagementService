@@ -186,9 +186,11 @@ namespace BedrockService.Service.Server {
             });
         }
 
-        public void RestartServer() {
-            AwaitableServerStop(false).Wait();
-            AwaitableServerStart().Wait(); 
+        public Task RestartServer() {
+            return Task.Run(() => {
+                AwaitableServerStop(false).Wait();
+                AwaitableServerStart().Wait();
+            });
         }
 
         private Task RunServer() {
@@ -287,26 +289,16 @@ namespace BedrockService.Service.Server {
                         _logger.AppendLine($"Server {GetServerName()} received quit signal.");
                         _AwaitingStopSignal = false;
                     }
-                    if (dataMsg.StartsWith("[INFO] Player connected")) {
-                        int usernameStart = dataMsg.IndexOf(':') + 2;
-                        int usernameEnd = dataMsg.IndexOf(',');
-                        int usernameLength = usernameEnd - usernameStart;
-                        int xuidStart = dataMsg.IndexOf(':', usernameEnd) + 2;
-                        string username = dataMsg.Substring(usernameStart, usernameLength);
-                        string xuid = dataMsg.Substring(xuidStart, dataMsg.Length - xuidStart);
-                        _logger.AppendLine($"Player {username} connected with XUID: {xuid}");
-                        _playerManager.PlayerConnected(username, xuid);
+                    if (dataMsg.Contains("Player connected")) {
+                        var playerInfo = ExtractPlayerInfoFromString(dataMsg);
+                        _logger.AppendLine($"Player {playerInfo.username} connected with XUID: {playerInfo.xuid}");
+                        _playerManager.PlayerConnected(playerInfo.username, playerInfo.xuid);
                         _configurator.SaveKnownPlayerDatabase(_serverConfiguration);
                     }
-                    if (dataMsg.StartsWith("[INFO] Player disconnected")) {
-                        int usernameStart = dataMsg.IndexOf(':') + 2;
-                        int usernameEnd = dataMsg.IndexOf(',');
-                        int usernameLength = usernameEnd - usernameStart;
-                        int xuidStart = dataMsg.IndexOf(':', usernameEnd) + 2;
-                        string username = dataMsg.Substring(usernameStart, usernameLength);
-                        string xuid = dataMsg.Substring(xuidStart, dataMsg.Length - xuidStart);
-                        _logger.AppendLine($"Player {username} disconnected with XUID: {xuid}");
-                        _playerManager.PlayerDisconnected(xuid);
+                    if (dataMsg.Contains("Player disconnected")) {
+                        var playerInfo = ExtractPlayerInfoFromString(dataMsg);
+                        _logger.AppendLine($"Player {playerInfo.username} disconnected with XUID: {playerInfo.xuid}");
+                        _playerManager.PlayerDisconnected(playerInfo.xuid);
                         _configurator.SaveKnownPlayerDatabase(_serverConfiguration);
                     }
                     if (dataMsg.Contains("Failed to load Vanilla")) {
@@ -341,6 +333,15 @@ namespace BedrockService.Service.Server {
                     }
                 }
             }
+        }
+
+        private (string username, string xuid) ExtractPlayerInfoFromString (string dataMsg) {
+            int msgStartIndex = dataMsg.IndexOf(']') + 2;
+            int usernameStart = dataMsg.IndexOf(':', msgStartIndex) + 2;
+            int usernameEnd = dataMsg.IndexOf(',', usernameStart);
+            int usernameLength = usernameEnd - usernameStart;
+            int xuidStart = dataMsg.IndexOf(':', usernameEnd) + 2;
+            return (dataMsg.Substring(usernameStart, usernameLength), dataMsg.Substring(xuidStart, dataMsg.Length - xuidStart));
         }
 
         private void RunStartupCommands() {

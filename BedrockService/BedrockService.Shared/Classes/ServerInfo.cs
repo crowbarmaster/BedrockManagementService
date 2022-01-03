@@ -28,6 +28,7 @@ namespace BedrockService.Shared.Classes {
             FileName = "Dedicated Server.conf";
             ServerPath = new Property("ServerPath", $@"{ServersPath}\{ServerName}");
             ServerExeName = new Property("ServerExeName", $"BedrockService.{ServerName}.exe");
+            ServerPropList.Clear();
             _defaultPropList.ForEach(p =>  ServerPropList.Add(new Property(p.KeyName, p.DefaultValue)));
             return true;
         }
