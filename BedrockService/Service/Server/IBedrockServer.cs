@@ -8,7 +8,7 @@ namespace BedrockService.Service.Server {
         Task AwaitableServerStop(bool stopWatchdog);
         string GetServerName();
         void WriteToStandardIn(string command);
-        void RestartServer();
+        Task RestartServer();
         bool RollbackToBackup(byte serverIndex, string folderName);
         void InitializeBackup();
         IBedrockLogger GetLogger();

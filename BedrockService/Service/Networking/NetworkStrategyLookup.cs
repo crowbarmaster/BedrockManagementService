@@ -134,7 +134,7 @@ namespace BedrockService.Service.Networking {
                 }
                 _serviceConfiguration.GetServerInfoByIndex(serverIndex).SetAllProps(propList);
                 _configurator.SaveServerProps(_serviceConfiguration.GetServerInfoByIndex(serverIndex), true);
-                _bedrockService.GetBedrockServerByIndex(serverIndex).RestartServer();
+                _bedrockService.GetBedrockServerByIndex(serverIndex).RestartServer().Wait();
                 return (Array.Empty<byte>(), 0, NetworkMessageTypes.UICallback);
             }
         }
@@ -148,7 +148,7 @@ namespace BedrockService.Service.Networking {
             }
 
             public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
-                _service.GetBedrockServerByIndex(serverIndex).RestartServer();
+                _service.GetBedrockServerByIndex(serverIndex).RestartServer().Wait();
                 return (Array.Empty<byte>(), 0, NetworkMessageTypes.UICallback);
             }
         }
@@ -373,7 +373,7 @@ namespace BedrockService.Service.Networking {
                 List<StartCmdEntry> entries = JsonConvert.DeserializeObject<List<StartCmdEntry>>(Encoding.UTF8.GetString(data, 5, data.Length - 5), settings);
                 _serviceConfiguration.GetServerInfoByIndex(serverIndex).SetStartCommands(entries);
                 _configurator.SaveServerProps(_serviceConfiguration.GetServerInfoByIndex(serverIndex), true);
-                return (Array.Empty<byte>(), 0, 0);
+                return (Array.Empty<byte>(), 0, NetworkMessageTypes.UICallback);
             }
         }
 

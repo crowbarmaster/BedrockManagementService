@@ -186,9 +186,11 @@ namespace BedrockService.Service.Server {
             });
         }
 
-        public void RestartServer() {
-            AwaitableServerStop(false).Wait();
-            AwaitableServerStart().Wait(); 
+        public Task RestartServer() {
+            return Task.Run(() => {
+                AwaitableServerStop(false).Wait();
+                AwaitableServerStart().Wait();
+            });
         }
 
         private Task RunServer() {
@@ -333,7 +335,7 @@ namespace BedrockService.Service.Server {
             }
         }
 
-        private static (string username, string xuid) ExtractPlayerInfoFromString (string dataMsg) {
+        private (string username, string xuid) ExtractPlayerInfoFromString (string dataMsg) {
             int msgStartIndex = dataMsg.IndexOf(']') + 2;
             int usernameStart = dataMsg.IndexOf(':', msgStartIndex) + 2;
             int usernameEnd = dataMsg.IndexOf(',', usernameStart);
