@@ -7,12 +7,13 @@
         }
 
         public void PlayerConnected(string username, string xuid) {
+            string currentTimeInTicks = DateTime.Now.Ticks.ToString();
             IPlayer playerFound = _serverConfiguration.GetPlayerByXuid(xuid);
             if (playerFound == null) {
-                _serverConfiguration.AddUpdatePlayer(new Player(xuid, username, DateTime.Now.Ticks.ToString(), "0", "0", false, _serverConfiguration.GetProp("default-player-permission-level").ToString(), false));
+                _serverConfiguration.AddUpdatePlayer(new Player(xuid, username, currentTimeInTicks, currentTimeInTicks, "0", false, _serverConfiguration.GetProp("default-player-permission-level").ToString(), false));
                 return;
             }
-            playerFound.UpdateTimes(DateTime.Now.Ticks.ToString(), playerFound.GetTimes().Disconn);
+            playerFound.UpdateTimes(currentTimeInTicks, playerFound.GetTimes().Disconn);
             _serverConfiguration.AddUpdatePlayer(playerFound);
         }
 
