@@ -31,8 +31,10 @@ TODO:
 
 !! NOTICE !!
 A couple of keys have changed in the `globals.conf` file:
+```
 `LogServersToFile` should be changed to `LogServerOutput`
 `LogServiceToFile` should be changed to `LogServiceOutput`
+```
 This change is only an issue for you if you are updating the service. New installs are not affected.
 
 This service can be run strictly as a windows service, or as a regular console application.
