@@ -1,0 +1,19 @@
+name: Changelogs
+
+on:
+  push:
+    tags: "*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Generate Change Log
+        id: generate_log
+        run: |
+          curl -sSL https://bina.egoist.sh/barelyhuman/commitlog | sh
+          commitlog > CHANGELOG.md
