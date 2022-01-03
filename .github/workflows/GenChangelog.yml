@@ -2,7 +2,8 @@ name: Changelogs
 
 on:
   push:
-    tags: "*"
+    branches: 
+        [master, working]
 
 jobs:
   build:
