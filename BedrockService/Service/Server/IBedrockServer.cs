@@ -3,16 +3,14 @@
 namespace BedrockService.Service.Server {
     public interface IBedrockServer {
         void Initialize();
-        void StartWatchdog(HostControl hostControl);
+        void StartWatchdog();
+        Task AwaitableServerStart();
+        Task AwaitableServerStop(bool stopWatchdog);
         string GetServerName();
         void WriteToStandardIn(string command);
-        bool RestartServer(bool shouldPerformBackup);
+        void RestartServer();
         bool RollbackToBackup(byte serverIndex, string folderName);
-        Task StopServer(bool stopWatchdog);
         void InitializeBackup();
-        BedrockServer.ServerStatus GetServerStatus();
-        void SetServerStatus(BedrockServer.ServerStatus newStatus);
-        IPlayerManager GetPlayerManager();
         IBedrockLogger GetLogger();
     }
 }

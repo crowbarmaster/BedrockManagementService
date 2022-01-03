@@ -101,106 +101,91 @@ namespace BedrockService.Client.Networking {
                             continue;
                         int srvCurLen = 0;
                         JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-                        switch (source) {
-                            case NetworkMessageSource.Service:
-                                switch (msgType) {
-                                    case NetworkMessageTypes.Connect:
-                                        try {
-                                            _logger.AppendLine("Connection to Host successful!");
-                                            FormManager.MainWindow.connectedHost = null;
-                                            FormManager.MainWindow.connectedHost = JsonConvert.DeserializeObject<IServiceConfiguration>(data, settings);
-                                            Connected = true;
-                                            FormManager.MainWindow.RefreshServerContents();
-                                        }
-                                        catch (Exception e) {
-                                            _logger.AppendLine($"Error: ConnectMan reported error: {e.Message}\n{e.StackTrace}");
-                                        }
-                                        break;
-
-                                    case NetworkMessageTypes.EnumBackups:
-
-                                        BackupList = JsonConvert.DeserializeObject<List<Property>>(data, settings);
-                                        EnumBackupsArrived = true;
-
-                                        break;
-                                    case NetworkMessageTypes.CheckUpdates:
-
-                                        //TODO: Ask user if update now or perform later.
-                                        UnlockUI();
-
-                                        break;
-                                    case NetworkMessageTypes.UICallback:
-
-                                        UnlockUI();
-
-                                        break;
+                        switch (msgType) {
+                            case NetworkMessageTypes.Connect:
+                                try {
+                                    if (!string.IsNullOrEmpty(data)) {
+                                        _logger.AppendLine("Connection to Host successful!");
+                                        FormManager.MainWindow.connectedHost = JsonConvert.DeserializeObject<IServiceConfiguration>(data, settings);
+                                        Connected = true;
+                                        FormManager.MainWindow.RefreshServerContents();
+                                    }
+                                } catch (Exception e) {
+                                    _logger.AppendLine($"Error: ConnectMan reported error: {e.Message}\n{e.StackTrace}");
                                 }
                                 break;
-                            case NetworkMessageSource.Server:
-                                switch (msgType) {
-                                    case NetworkMessageTypes.ConsoleLogUpdate:
-                                        string[] strings = data.Split('|');
-                                        for (int i = 0; i < strings.Length; i++) {
-                                            string[] srvSplit = strings[i].Split(';');
-                                            string srvName = srvSplit[0];
-                                            string srvText = srvSplit[1];
-                                            srvCurLen = int.Parse(srvSplit[2]);
-                                            if (srvName != "Service") {
-                                                IServerConfiguration bedrockServer = FormManager.MainWindow.connectedHost.GetServerInfoByName(srvName);
-                                                int curCount = bedrockServer.GetLog().Count;
-                                                if (curCount == srvCurLen) {
-                                                    bedrockServer.GetLog().Add(new LogEntry(srvText));
-                                                }
-                                            }
-                                            else {
-                                                int curCount = FormManager.MainWindow.connectedHost.GetLog().Count;
-                                                if (curCount == srvCurLen) {
-                                                    FormManager.MainWindow.connectedHost.GetLog().Add(new LogEntry(srvText));
-                                                }
-                                            }
+
+                            case NetworkMessageTypes.EnumBackups:
+
+                                BackupList = JsonConvert.DeserializeObject<List<Property>>(data, settings);
+                                EnumBackupsArrived = true;
+
+                                break;
+                            case NetworkMessageTypes.CheckUpdates:
+
+                                //TODO: Ask user if update now or perform later.
+                                UnlockUI();
+
+                                break;
+                            case NetworkMessageTypes.UICallback:
+
+                                UnlockUI();
+
+                                break;
+                            case NetworkMessageTypes.ConsoleLogUpdate:
+                                string[] strings = data.Split('|');
+                                for (int i = 0; i < strings.Length; i++) {
+                                    string[] srvSplit = strings[i].Split(';');
+                                    string srvName = srvSplit[0];
+                                    string srvText = srvSplit[1];
+                                    srvCurLen = int.Parse(srvSplit[2]);
+                                    if (srvName != "Service") {
+                                        IServerConfiguration bedrockServer = FormManager.MainWindow.connectedHost.GetServerInfoByName(srvName);
+                                        int curCount = bedrockServer.GetLog().Count;
+                                        if (curCount == srvCurLen) {
+                                            bedrockServer.GetLog().Add(new LogEntry(srvText));
                                         }
-                                        break;
-                                    case NetworkMessageTypes.Backup:
-
-                                        _logger.AppendLine(msgStatus.ToString());
-
-                                        break;
-                                    case NetworkMessageTypes.UICallback:
-
-                                        UnlockUI();
-
-                                        break;
-                                    case NetworkMessageTypes.PackList:
-
-                                        List<MinecraftPackContainer> temp = new List<MinecraftPackContainer>();
-                                        JArray jArray = JArray.Parse(data);
-                                        foreach (JToken token in jArray)
-                                            temp.Add(token.ToObject<MinecraftPackContainer>());
-                                        RecievedPacks = temp;
-
-                                        break;
-                                    case NetworkMessageTypes.PlayersRequest:
-
-                                        List<IPlayer> fetchedPlayers = JsonConvert.DeserializeObject<List<IPlayer>>(data, settings);
-                                        FormManager.MainWindow.connectedHost.GetServerInfoByIndex(serverIndex).SetPlayerList(fetchedPlayers);
-                                        PlayerInfoArrived = true;
-
-                                        break;
-                                    case NetworkMessageTypes.LevelEditFile:
-
-                                        byte[] stripHeaderFromBuffer = new byte[buffer.Length - 5];
-                                        Buffer.BlockCopy(buffer, 5, stripHeaderFromBuffer, 0, stripHeaderFromBuffer.Length);
-                                        string pathToLevelDat = $@"{Path.GetTempPath()}\level.dat";
-                                        File.WriteAllBytes(pathToLevelDat, stripHeaderFromBuffer);
-                                        UnlockUI();
-
-                                        break;
+                                    } else {
+                                        int curCount = FormManager.MainWindow.connectedHost.GetLog().Count;
+                                        if (curCount == srvCurLen) {
+                                            FormManager.MainWindow.connectedHost.GetLog().Add(new LogEntry(srvText));
+                                        }
+                                    }
                                 }
+                                break;
+                            case NetworkMessageTypes.Backup:
+
+                                _logger.AppendLine(msgStatus.ToString());
+
+                                break;
+                            case NetworkMessageTypes.PackList:
+
+                                List<MinecraftPackContainer> temp = new List<MinecraftPackContainer>();
+                                JArray jArray = JArray.Parse(data);
+                                foreach (JToken token in jArray)
+                                    temp.Add(token.ToObject<MinecraftPackContainer>());
+                                RecievedPacks = temp;
+
+                                break;
+                            case NetworkMessageTypes.PlayersRequest:
+
+                                List<IPlayer> fetchedPlayers = JsonConvert.DeserializeObject<List<IPlayer>>(data, settings);
+                                FormManager.MainWindow.connectedHost.GetServerInfoByIndex(serverIndex).SetPlayerList(fetchedPlayers);
+                                PlayerInfoArrived = true;
+
+                                break;
+                            case NetworkMessageTypes.LevelEditFile:
+
+                                byte[] stripHeaderFromBuffer = new byte[buffer.Length - 5];
+                                Buffer.BlockCopy(buffer, 5, stripHeaderFromBuffer, 0, stripHeaderFromBuffer.Length);
+                                string pathToLevelDat = $@"{Path.GetTempPath()}\level.dat";
+                                File.WriteAllBytes(pathToLevelDat, stripHeaderFromBuffer);
+                                UnlockUI();
+
                                 break;
                         }
                     }
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     _logger.AppendLine($"TCPClient error! Stacktrace: {e.Message}\n{e.StackTrace}");
                 }
                 Thread.Sleep(200);

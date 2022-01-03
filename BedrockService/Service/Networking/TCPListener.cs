@@ -4,7 +4,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 
 namespace BedrockService.Service.Networking {
-    public class TCPListener : ITCPListener, IMessageSender {
+    public class TCPListener : ITCPListener {
         private TcpClient? _client;
         private TcpListener? _inListener;
         private NetworkStream? _stream;
@@ -156,7 +156,7 @@ namespace BedrockService.Service.Networking {
 
         public void SendData(NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type) => SendData(new byte[0], source, destination, serverIndex, type, NetworkMessageFlags.None);
 
-        public void SendData(NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type, NetworkMessageFlags status) => SendData(new byte[0], source, destination, 0xFF, type, status);
+        public void SendData((byte[] data, byte srvIndex, NetworkMessageTypes type) tuple) => SendData(tuple.data, NetworkMessageSource.Service, NetworkMessageDestination.Client, tuple.srvIndex, tuple.type);
 
         private Task IncomingListener() {
             return new Task(() => {
@@ -196,9 +196,9 @@ namespace BedrockService.Service.Networking {
                                         Task.Delay(100).Wait();
                                     }
                                     if (_standardMessageLookup.ContainsKey(msgType))
-                                        _standardMessageLookup[msgType].ParseMessage(buffer, serverIndex);
+                                        SendData(_standardMessageLookup[msgType].ParseMessage(buffer, serverIndex));
                                     else
-                                        _flaggedMessageLookup[msgType].ParseMessage(buffer, serverIndex, msgFlag);
+                                        SendData(_flaggedMessageLookup[msgType].ParseMessage(buffer, serverIndex, msgFlag));
 
                                 }
                                 catch { }
@@ -227,6 +227,18 @@ namespace BedrockService.Service.Networking {
                     catch { }
                 }
             }, _cancelTokenSource.Token);
+        }
+
+        public Task CancelAllTasks() {
+            return Task.Run(() => {
+                _cancelTokenSource.Cancel();
+                while (_tcpTask?.Status == TaskStatus.Running || _recieverTask?.Status == TaskStatus.Running) {
+                    Task.Delay(100).Wait();
+                }
+                if(_inListener != null) {
+                    _inListener.Stop();
+                }
+            });
         }
     }
 }

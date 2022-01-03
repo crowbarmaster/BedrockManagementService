@@ -8,12 +8,15 @@ namespace BedrockService.Service.Core {
         private Topshelf.Host _host;
         private readonly IBedrockLogger _logger;
         private readonly IHostApplicationLifetime _applicationLifetime;
+        TopshelfExitCode _exitCode;
 
         public Service(IBedrockLogger logger, IBedrockService bedrockService, NetworkStrategyLookup networkStrategyLookup, IHostApplicationLifetime appLifetime) {
             _logger = logger;
             _bedrockService = bedrockService;
             _applicationLifetime = appLifetime;
             appLifetime.ApplicationStarted.Register(OnStarted);
+            appLifetime.ApplicationStopping.Register(OnStopping);
+            appLifetime.ApplicationStopped.Register(OnShutdown);
         }
 
         public async Task InitializeHost() {
@@ -24,17 +27,9 @@ namespace BedrockService.Service.Core {
                     hostConfig.UseAssemblyInfoForServiceInfo();
                     hostConfig.Service(settings => _bedrockService, s => {
                         s.BeforeStartingService(_ => _logger.AppendLine("Starting service..."));
-                        s.BeforeStoppingService(_ => {
-                            _logger.AppendLine("Stopping service...");
-                            foreach (IBedrockServer server in _bedrockService.GetAllServers()) {
-                                server.SetServerStatus(BedrockServer.ServerStatus.Stopping);
-                                while (server.GetServerStatus() != BedrockServer.ServerStatus.Stopped)
-                                    Thread.Sleep(100);
-                            }
-                        });
+                        s.BeforeStoppingService(_ => _logger.AppendLine("Stopping service..."));
+                        s.AfterStoppingService(_ => _applicationLifetime.StopApplication());
                     });
-                    hostConfig.EnableShutdown();
-                    hostConfig.EnableHandleCtrlBreak();
                     hostConfig.RunAsLocalSystem();
                     hostConfig.SetDescription("Windows Service Wrapper for Windows Bedrock Server");
                     hostConfig.SetDisplayName("BedrockService");
@@ -73,8 +68,22 @@ namespace BedrockService.Service.Core {
 
         private void OnStarted() {
             Task.Run(() => { 
-                _host.Run();
+                _exitCode = _host.Run();
             });
+        }
+
+        private void OnStopping() {
+            if (Environment.UserInteractive) {
+                _bedrockService.Stop(null);
+                while (_bedrockService.GetServiceStatus() != ServiceStatus.Stopped) {
+                    Task.Delay(100).Wait();
+                }
+            }
+        }
+
+        private void OnShutdown() {
+            int exitCode = (int)Convert.ChangeType(_exitCode, _exitCode.GetTypeCode());
+            Environment.ExitCode = exitCode;
         }
     }
 }
