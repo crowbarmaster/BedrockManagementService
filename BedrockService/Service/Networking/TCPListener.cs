@@ -141,7 +141,7 @@ namespace BedrockService.Service.Networking {
                     _logger.AppendLine("Error writing to network stream!");
                     _heartbeatFailTimeout++;
                     if (_heartbeatFailTimeout >= _heartbeatFailTimeoutLimit) {
-                        Initialize();
+                        Task.Run(() => Initialize());
                         _heartbeatFailTimeout = 0;
                     }
                 }
