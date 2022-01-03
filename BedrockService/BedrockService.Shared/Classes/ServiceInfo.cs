@@ -40,6 +40,7 @@ namespace BedrockService.Shared.Classes {
             globals.Add(new Property("UpdateCron", "0 2 * * *"));
             globals.Add(new Property("LogServerOutput", "true"));
             globals.Add(new Property("LogApplicationOutput", "true"));
+            _defaultServerProps.Clear();
             try {
                 File.ReadAllLines($@"{_processInfo.GetDirectory()}\Server\stock_props.conf")
                    .ToList()
