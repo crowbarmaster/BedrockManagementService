@@ -1,9 +1,11 @@
 name: Changelogs
 
+
 on:
   push:
-    branches: 
-        [master, working]
+    branches: [ "*" ]
+  pull_request:
+    branches: [ "*" ]
 
 jobs:
   build:
