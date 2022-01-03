@@ -7,5 +7,6 @@ namespace BedrockService.Service.Networking {
         void BlockClientConnections();
         void UnblockClientConnections();
         void SetStrategyDictionaries(Dictionary<NetworkMessageTypes, IMessageParser> standard, Dictionary<NetworkMessageTypes, IFlaggedMessageParser> flagged);
+        Task CancelAllTasks();
     }
 }

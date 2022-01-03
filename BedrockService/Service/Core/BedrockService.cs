@@ -104,11 +104,18 @@ namespace BedrockService.Service.Core {
         }
 
         public void TestStop() {
-            Task.Run(() => ServiceShutdown());
+            Task.Run(() => Stop(null));
         }
 
         public bool Stop(HostControl? hostControl) {
-            return ServiceShutdown();
+            if (ServiceShutdown()) {
+                if(_tCPListener.CancelAllTasks().Wait(5000)){ 
+                    _logger.AppendLine("Service shutdown completed successfully.");
+                }
+                return true;
+            }
+            _logger.AppendLine("Service shutdown completed with errors. Check logs!");
+            return false;
         }
 
         public bool ServiceShutdown() {

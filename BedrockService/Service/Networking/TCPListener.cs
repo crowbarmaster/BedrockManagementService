@@ -228,5 +228,17 @@ namespace BedrockService.Service.Networking {
                 }
             }, _cancelTokenSource.Token);
         }
+
+        public Task CancelAllTasks() {
+            return Task.Run(() => {
+                _cancelTokenSource.Cancel();
+                while (_tcpTask?.Status == TaskStatus.Running || _recieverTask?.Status == TaskStatus.Running) {
+                    Task.Delay(100).Wait();
+                }
+                if(_inListener != null) {
+                    _inListener.Stop();
+                }
+            });
+        }
     }
 }

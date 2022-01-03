@@ -15,6 +15,7 @@ namespace BedrockService.Service.Core {
             _applicationLifetime = appLifetime;
             appLifetime.ApplicationStarted.Register(OnStarted);
             appLifetime.ApplicationStopping.Register(OnStopping);
+            appLifetime.ApplicationStopped.Register(OnShutdown);
         }
 
         public async Task InitializeHost() {
@@ -72,10 +73,14 @@ namespace BedrockService.Service.Core {
         }
 
         private void OnStopping() {
-            _bedrockService.ServiceShutdown();
+            _bedrockService.Stop(null);
             while (_bedrockService.GetServiceStatus() != ServiceStatus.Stopped) {
                 Task.Delay(100).Wait();
             }
+        }
+
+        private void OnShutdown() {
+            Environment.Exit(0);
         }
     }
 }
