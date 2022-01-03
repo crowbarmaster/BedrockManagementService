@@ -20,7 +20,6 @@ namespace BedrockService.Client.Forms {
         public IClientSideServiceConfiguration clientSideServiceConfiguration;
         public bool ShowsSvcLog = false;
         public bool ServerBusy = false;
-        private PropEditorForm _editDialog;
         private int _connectTimeout;
         private bool _followTail = false;
         private bool _blockConnect = false;
@@ -243,15 +242,15 @@ namespace BedrockService.Client.Forms {
         }
 
         private void EditCfg_Click(object sender, EventArgs e) {
-            _editDialog = new PropEditorForm();
-            _editDialog.PopulateBoxes(selectedServer.GetAllProps());
-            if (_editDialog.ShowDialog() == DialogResult.OK) {
-                JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-                byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_editDialog.workingProps, Formatting.Indented, settings));
-                FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PropUpdate);
-                selectedServer.SetAllProps(_editDialog.workingProps);
-                _editDialog.Close();
-                _editDialog.Dispose();
+            using (PropEditorForm _editDialog = new PropEditorForm()) {
+                DisableUI();
+                _editDialog.PopulateBoxes(selectedServer.GetAllProps());
+                if (_editDialog.ShowDialog() == DialogResult.OK) {
+                    JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
+                    byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_editDialog.workingProps, Formatting.Indented, settings));
+                    FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PropUpdate);
+                    selectedServer.SetAllProps(_editDialog.workingProps);
+                }
             }
         }
 
@@ -261,17 +260,16 @@ namespace BedrockService.Client.Forms {
         }
 
         private void EditGlobals_Click(object sender, EventArgs e) {
-            _editDialog = new PropEditorForm();
-            _editDialog.PopulateBoxes(connectedHost.GetAllProps());
-            if (_editDialog.ShowDialog() == DialogResult.OK) {
-                JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-                byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_editDialog.workingProps, Formatting.Indented, settings));
-                FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.PropUpdate);
-                connectedHost.SetAllProps(_editDialog.workingProps);
-                ServerBusy = true;
-                DisableUI();
-                _editDialog.Close();
-                _editDialog.Dispose();
+            using (PropEditorForm _editDialog = new PropEditorForm()) {
+                _editDialog.PopulateBoxes(connectedHost.GetAllProps());
+                if (_editDialog.ShowDialog() == DialogResult.OK) {
+                    JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
+                    byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_editDialog.workingProps, Formatting.Indented, settings));
+                    FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.PropUpdate);
+                    connectedHost.SetAllProps(_editDialog.workingProps);
+                    ServerBusy = true;
+                    DisableUI();
+                }
             }
         }
 
@@ -284,6 +282,7 @@ namespace BedrockService.Client.Forms {
             if (clientSideServiceConfiguration == null) {
                 clientSideServiceConfiguration = _configManager.HostConnectList.First(host => host.GetHostName() == HostListBox.Text);
             }
+            DisableUI();
             AddNewServerForm newServerForm = new AddNewServerForm(clientSideServiceConfiguration, connectedHost.GetServerList());
             if (newServerForm.ShowDialog() == DialogResult.OK) {
                 JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };

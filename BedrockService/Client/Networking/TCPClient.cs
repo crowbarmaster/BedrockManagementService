@@ -109,6 +109,7 @@ namespace BedrockService.Client.Networking {
                                         FormManager.MainWindow.connectedHost = JsonConvert.DeserializeObject<IServiceConfiguration>(data, settings);
                                         Connected = true;
                                         FormManager.MainWindow.RefreshServerContents();
+                                        FormManager.MainWindow.ServerBusy = false;
                                     }
                                 } catch (Exception e) {
                                     _logger.AppendLine($"Error: ConnectMan reported error: {e.Message}\n{e.StackTrace}");
