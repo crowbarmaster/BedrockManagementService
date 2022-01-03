@@ -363,3 +363,4 @@ MigrationBackup/
 /BedrockService/ServiceTests/TestFiles/Server/MCSFiles/Update_1.0.zip
 /BedrockService/ServiceTests/TestFiles/Temp/ServerFileTemp
 /BedrockService/ServiceTests/TestFiles/Output/stock_props.conf
+GenerateLog.bat
