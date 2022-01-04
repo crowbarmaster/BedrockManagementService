@@ -9,7 +9,7 @@ namespace BedrockService.Service.Server {
         private CancellationTokenSource _serverCanceler = new CancellationTokenSource();
         private CancellationTokenSource _watchdogCanceler = new CancellationTokenSource();
         private StreamWriter _stdInStream;
-        private Process _serverProcess;
+        private Process? _serverProcess;
         private ServerStatus _currentServerStatus;
         private readonly IServerConfiguration _serverConfiguration;
         private readonly IServiceConfiguration _serviceConfiguration;
@@ -224,19 +224,22 @@ namespace BedrockService.Service.Server {
 
         private void CreateProcess() {
             string fileName = $@"{_serverConfiguration.GetProp("ServerPath")}\{_serverConfiguration.GetProp("ServerExeName")}";
-            _serverProcess = Process.Start(new ProcessStartInfo {
+            ProcessStartInfo processStartInfo = new ProcessStartInfo {
                 UseShellExecute = false,
                 RedirectStandardError = true,
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true,
                 FileName = fileName
-            });
-            _serverProcess.PriorityClass = ProcessPriorityClass.High;
-            _serverProcess.OutputDataReceived += StdOutToLog;
-            _serverProcess.BeginOutputReadLine();
-            _stdInStream = _serverProcess.StandardInput;
-            _serverProcess.EnableRaisingEvents = false;
+            };
+            _serverProcess = Process.Start(processStartInfo);
+            if (_serverProcess != null) {
+                _serverProcess.PriorityClass = ProcessPriorityClass.High;
+                _serverProcess.OutputDataReceived += StdOutToLog;
+                _serverProcess.BeginOutputReadLine();
+                _stdInStream = _serverProcess.StandardInput;
+                _serverProcess.EnableRaisingEvents = false;
+            }
         }
 
         private void KillProcesses(Process[] processList) {
