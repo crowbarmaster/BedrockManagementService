@@ -171,6 +171,9 @@ namespace BedrockService.Client.Forms {
             }
             HostListBox.Refresh();
             FormClosing += MainWindow_FormClosing;
+            if (_configManager.DefaultScrollLock) {
+                scrollLockChkBox.Checked = true;
+            }
         }
 
         public void HeartbeatFailDisconnect() {
