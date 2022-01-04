@@ -44,8 +44,8 @@ namespace BedrockService.Shared.PackParser {
             }
             if(jsonWorldPackEnablerPath != null) {
                 WorldPackFileModel worldPackFile = new WorldPackFileModel(jsonWorldPackEnablerPath);
-                List<WorldKnownPackEntryJsonModel> worldPacks = worldPackFile.Contents;
-                WorldKnownPackEntryJsonModel foundEntry = worldPacks.FirstOrDefault(x => x.pack_id.Equals(pack.JsonManifest.header.uuid));
+                List<WorldPackEntryJsonModel> worldPacks = worldPackFile.Contents;
+                WorldPackEntryJsonModel foundEntry = worldPacks.FirstOrDefault(x => x.pack_id.Equals(pack.JsonManifest.header.uuid));
                 if (foundEntry != null) {
                     worldPacks.Remove(foundEntry);
                     worldPackFile.SaveToFile(worldPacks);

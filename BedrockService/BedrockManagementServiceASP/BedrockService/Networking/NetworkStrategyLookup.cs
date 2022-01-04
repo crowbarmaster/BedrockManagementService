@@ -197,7 +197,7 @@ namespace BedrockManagementServiceASP.BedrockService.Networking {
                 MinecraftKnownPacksClass knownPacks = new MinecraftKnownPacksClass($@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath")}\valid_known_packs.json", $@"{_processInfo.GetDirectory()}\Server\stock_packs.json");
                 List<MinecraftPackContainer> list = new List<MinecraftPackContainer>();
                 foreach (KnownPacksJsonModel pack in knownPacks.InstalledPacks.Contents) {
-                    MinecraftPackParser currentParser = new MinecraftPackParser(_logger, _processInfo);
+                    MinecraftPackParser currentParser = new MinecraftPackParser(_processInfo);
                     currentParser.ParseDirectory($@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath")}\{pack.path.Replace(@"/", @"\")}");
                     list.AddRange(currentParser.FoundPacks);
                 }
@@ -293,7 +293,7 @@ namespace BedrockManagementServiceASP.BedrockService.Networking {
             }
 
             public void ParseMessage(byte[] data, byte serverIndex) {
-                MinecraftPackParser archiveParser = new MinecraftPackParser(data, _logger, _serviceProcessInfo);
+                MinecraftPackParser archiveParser = new MinecraftPackParser(data, _serviceProcessInfo);
                 foreach (MinecraftPackContainer container in archiveParser.FoundPacks) {
                     string serverPath = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath").ToString();
                     string levelName = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("level-name").ToString();
@@ -312,7 +312,7 @@ namespace BedrockManagementServiceASP.BedrockService.Networking {
                     }
                     if (filePath != null) {
                         WorldPackFileModel worldPackFile = new WorldPackFileModel(filePath);
-                        worldPackFile.Contents.Add(new WorldKnownPackEntryJsonModel(container.JsonManifest.header.uuid, container.JsonManifest.header.version));
+                        worldPackFile.Contents.Add(new WorldPackEntryJsonModel(container.JsonManifest.header.uuid, container.JsonManifest.header.version));
                         worldPackFile.SaveToFile(worldPackFile.Contents);
                         _messageSender.SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.UICallback);
                     }

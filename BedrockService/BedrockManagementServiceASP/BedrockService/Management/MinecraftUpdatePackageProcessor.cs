@@ -64,7 +64,7 @@ namespace BedrockManagementServiceASP.BedrockService.Management {
             string resouceFolder = $@"{_workingDirectory}\resource_packs";
             string behaviorFolder = $@"{_workingDirectory}\behavior_packs";
             string propFile = $@"{_workingDirectory}\server.properties";
-            MinecraftPackParser packParser = new MinecraftPackParser(_logger, _processInfo);
+            MinecraftPackParser packParser = new MinecraftPackParser(_processInfo);
             packParser.ParseDirectory(resouceFolder);
             packParser.ParseDirectory(behaviorFolder);
             KnownPacksFileModel fileModel = new KnownPacksFileModel();

@@ -96,7 +96,7 @@ namespace BedrockService.Client.Forms {
             openFileDialog.Title = "Select pack file(s)";
             openFileDialog.Multiselect = true;
             if (openFileDialog.ShowDialog() == DialogResult.OK) {
-                MinecraftPackParser parser = new MinecraftPackParser(openFileDialog.FileNames, PackExtractDir.FullName, Logger, ProcessInfo);
+                MinecraftPackParser parser = new MinecraftPackParser(openFileDialog.FileNames, PackExtractDir.FullName, ProcessInfo);
                 parsedPacksListBox.Items.Clear();
                 foreach (MinecraftPackContainer container in parser.FoundPacks)
                     parsedPacksListBox.Items.Add(container);
