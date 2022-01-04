@@ -35,6 +35,7 @@ namespace BedrockService.Service.Networking {
                     _recieverTask = IncomingListener();
                     _tcpTask.Start();
                     _resettingListener = false;
+                    _canClientConnect = true;
                 }
             }
         }
@@ -69,6 +70,7 @@ namespace BedrockService.Service.Networking {
                 while (true) {
                     try {
                         if (_inListener != null && _inListener.Pending() && _canClientConnect) {
+                            _canClientConnect = false;
                             _cancelTokenSource = new CancellationTokenSource();
                             _client = _inListener.AcceptTcpClient();
                             _stream = _client.GetStream();
@@ -76,7 +78,9 @@ namespace BedrockService.Service.Networking {
                                 _recieverTask.Start();
                             }
                         }
-                        
+                        if (_inListener.Pending() && !_canClientConnect) {
+                            _inListener.AcceptTcpClient().Close();
+                        }
                         if (_cancelTokenSource.IsCancellationRequested) {
                             _logger.AppendLine("TCP Listener task canceled!");
                             if (_inListener != null) {
