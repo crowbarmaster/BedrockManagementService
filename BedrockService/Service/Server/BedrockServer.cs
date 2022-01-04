@@ -122,7 +122,7 @@ namespace BedrockService.Service.Server {
                         dates.Add(Convert.ToInt64(folderNameSplit[1]));
                     }
                     dates.Sort();
-                    Directory.Delete($@"{backupDir}\Backup_{dates[dates.Count - 1]}", true);
+                    Directory.Delete($@"{backupDir}\Backup_{dates.First()}", true);
                 }
             } catch (Exception e) {
                 if (e.GetType() == typeof(FormatException)) {
