@@ -29,6 +29,7 @@ namespace BedrockService.Client.Forms
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -37,6 +38,7 @@ namespace BedrockService.Client.Forms
             this.label2 = new System.Windows.Forms.Label();
             this.gridView = new System.Windows.Forms.DataGridView();
             this.registerPlayerBtn = new System.Windows.Forms.Button();
+            this.entryTextToolTip = new System.Windows.Forms.ToolTip(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.gridView)).BeginInit();
             this.SuspendLayout();
             // 
@@ -157,5 +159,6 @@ namespace BedrockService.Client.Forms
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.DataGridView gridView;
         private System.Windows.Forms.Button registerPlayerBtn;
+        private System.Windows.Forms.ToolTip entryTextToolTip;
     }
 }

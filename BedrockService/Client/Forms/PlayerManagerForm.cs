@@ -33,6 +33,7 @@ namespace BedrockService.Client.Forms {
             gridView.Columns[7].CellTemplate.Style.BackColor = System.Drawing.Color.FromArgb(225, 225, 225);
             gridView.AllowUserToAddRows = false;
             RefreshGridContents();
+            entryTextToolTip.
         }
 
         private void RefreshGridContents() {
@@ -40,8 +41,14 @@ namespace BedrockService.Client.Forms {
             foreach (IPlayer player in playersFound) {
                 var playerTimes = player.GetTimes();
                 string playerPermission = player.GetPermissionLevel();
-                TimeSpan timeSpent = TimeSpan.FromTicks(long.Parse(playerTimes.Conn) - long.Parse(playerTimes.Disconn));
-                string[] list = new string[] { player.GetXUID(), player.GetUsername(), playerPermission, player.IsPlayerWhitelisted().ToString(), player.PlayerIgnoresLimit().ToString(), playerTimes.First, playerTimes.Conn, timeSpent.ToString("hhmmss") };
+                long firstConnTime = long.Parse(playerTimes.First);
+                long connectTime = long.Parse(playerTimes.Conn);
+                long disconnTime = long.Parse(playerTimes.Disconn);
+                TimeSpan timeSpent = TimeSpan.FromTicks(disconnTime - connectTime);
+                DateTime firstConnDateTime = new DateTime(firstConnTime);
+                DateTime connectDateTime = new DateTime(disconnTime);
+                string timeString = timeSpent.TotalSeconds > 59.5 ? $"{timeSpent.TotalMinutes.ToString("N2")} Minutes" : $"{timeSpent.TotalSeconds.ToString("N2")} Seconds";
+                string[] list = new string[] { player.GetXUID(), player.GetUsername(), playerPermission, player.IsPlayerWhitelisted().ToString(), player.PlayerIgnoresLimit().ToString(), firstConnDateTime.ToString("G"), connectDateTime.ToString("G"), timeString };
                 gridView.Rows.Add(list);
             }
             gridView.Refresh();
