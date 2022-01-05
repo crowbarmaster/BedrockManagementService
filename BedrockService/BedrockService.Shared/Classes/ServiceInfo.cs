@@ -19,7 +19,7 @@ namespace BedrockService.Shared.Classes {
         [JsonProperty]
         private List<Property> globals = new List<Property>();
         [JsonProperty]
-        private List<Property> _defaultServerProps = new List<Property>();
+        private readonly List<Property> _defaultServerProps = new List<Property>();
         private readonly IProcessInfo _processInfo;
 
         public ServiceInfo(IProcessInfo processInfo) {

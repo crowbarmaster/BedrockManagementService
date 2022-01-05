@@ -1,4 +1,4 @@
-﻿using BedrockService.Service.Networking.MessageInterfaces;
+﻿using BedrockService.Service.Networking.Interfaces;
 using System.Net;
 using System.Net.Sockets;
 

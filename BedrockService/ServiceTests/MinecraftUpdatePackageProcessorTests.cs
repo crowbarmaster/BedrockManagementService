@@ -7,7 +7,7 @@ using Xunit;
 namespace ServiceTests {
     public class MinecraftUpdatePackageProcessorTests {
         const string _testFilePath = @"..\..\..\..\..\TestFiles";
-        private DirectoryInfo _directory = new(_testFilePath);
+        private readonly DirectoryInfo _directory = new(_testFilePath);
         [Fact]
         public void Can_Create_JsonFiles() {
             IProcessInfo processInfo = new ServiceProcessInfo("TestHost", _directory.FullName, 0, true, true);

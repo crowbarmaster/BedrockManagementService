@@ -1,5 +1,4 @@
-﻿using BedrockService.Service.Core.Interfaces;
-using BedrockService.Service.Networking.MessageInterfaces;
+﻿using BedrockService.Service.Networking.Interfaces;
 
 namespace BedrockService.Service.Networking.NetworkStrategies {
     public class ServerRestart : IMessageParser {

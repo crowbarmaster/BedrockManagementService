@@ -1,6 +1,4 @@
-﻿using BedrockService.Service.Networking.MessageInterfaces;
-
-namespace BedrockService.Service.Networking {
+﻿namespace BedrockService.Service.Networking.Interfaces {
     public interface ITCPListener {
         void Initialize();
         Task StartListening();

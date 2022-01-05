@@ -6,7 +6,7 @@ namespace BedrockService.Shared.Classes {
         private readonly string _serviceDirectory;
         private readonly string _serverName;
         private readonly int _processPid;
-        private bool _debugEnabled;
+        private readonly bool _debugEnabled;
 
         public ServiceProcessInfo(string declaredType, string serviceDirectory, int processPid, bool debugEnabled, bool shouldStartService, string serverName = null) {
             _declaredType = declaredType;

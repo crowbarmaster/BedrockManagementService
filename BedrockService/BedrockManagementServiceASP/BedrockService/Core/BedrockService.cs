@@ -82,7 +82,7 @@ namespace BedrockManagementServiceASP.BedrockService.Core {
                     if (hostControl != null)
                         try {
                             _hostControl.RequestAdditionalTime(TimeSpan.FromSeconds(30));
-                        } catch (Exception ex) {
+                        } catch (Exception) {
                             _logger.AppendLine("Error!");
                         }
                     brs.SetServerStatus(BedrockServer.ServerStatus.Starting);

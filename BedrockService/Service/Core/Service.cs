@@ -1,5 +1,4 @@
-﻿using BedrockService.Service.Core.Interfaces;
-using Topshelf.Runtime;
+﻿using Topshelf.Runtime;
 
 namespace BedrockService.Service.Core {
     public class Service : IService {

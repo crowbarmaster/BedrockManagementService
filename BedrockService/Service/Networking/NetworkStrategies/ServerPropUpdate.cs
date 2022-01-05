@@ -1,5 +1,5 @@
-﻿using BedrockService.Service.Core.Interfaces;
-using BedrockService.Service.Networking.MessageInterfaces;
+﻿using BedrockService.Service.Management.Interfaces;
+using BedrockService.Service.Networking.Interfaces;
 using Newtonsoft.Json;
 using System.Text;
 

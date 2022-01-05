@@ -13,7 +13,7 @@ namespace BedrockService.Shared.Classes {
         public Property ServerExeName { get; set; }
         public List<IPlayer> PlayersList = new List<IPlayer>();
         public List<Property> ServerPropList = new List<Property>();
-        private List<Property> _defaultPropList = new List<Property>();
+        private readonly List<Property> _defaultPropList = new List<Property>();
         public List<StartCmdEntry> StartCmds = new List<StartCmdEntry>();
 
         public ServerInfo(string coreServersPath, List<Property> defaultPropList) {

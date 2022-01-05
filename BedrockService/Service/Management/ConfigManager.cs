@@ -1,13 +1,13 @@
-﻿using BedrockService.Shared.MinecraftJsonModels.FileModels;
+﻿using BedrockService.Service.Management.Interfaces;
+using BedrockService.Shared.MinecraftJsonModels.FileModels;
 using BedrockService.Shared.MinecraftJsonModels.JsonModels;
-using BedrockService.Shared.Utilities;
 using System.IO.Compression;
 
 namespace BedrockService.Service.Management {
     public class ConfigManager : IConfigurator {
         private readonly string _serverConfigDir;
         private readonly string _globalFile;
-        private string _loadedVersion;
+        private readonly string _loadedVersion;
         private static readonly object _fileLock = new object();
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IProcessInfo _processInfo;
@@ -128,7 +128,7 @@ namespace BedrockService.Service.Management {
                         int fileCount = archive.Entries.Count;
                         for (int i = 0; i < fileCount; i++) {
                             if (i % (RoundOff(fileCount) / 6) == 0) {
-                                _logger.AppendLine($"Extracting server files for server {server.GetServerName()}, {Math.Round((double)i / (double)fileCount, 2) * 100}% completed...");
+                                _logger.AppendLine($"Extracting server files for server {server.GetServerName()}, {Math.Round(i / (double)fileCount, 2) * 100}% completed...");
                             }
                             if (!archive.Entries[i].FullName.EndsWith("/")) {
                                 string fixedPath = $@"{server.GetProp("ServerPath")}\{archive.Entries[i].FullName.Replace('/', '\\')}";

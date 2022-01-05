@@ -1,4 +1,4 @@
-﻿namespace BedrockService.Service.Networking {
+﻿namespace BedrockService.Service.Networking.Interfaces {
     public interface IUpdater {
         void Initialize();
         Task CheckUpdates();

@@ -1,6 +1,5 @@
-﻿using BedrockService.Service.Core.Interfaces;
-using BedrockService.Service.Networking.MessageInterfaces;
-using BedrockService.Service.Server;
+﻿using BedrockService.Service.Networking.Interfaces;
+using BedrockService.Service.Server.Interfaces;
 
 namespace BedrockService.Service.Networking.NetworkStrategies {
     class ServerBackupAll : IMessageParser {

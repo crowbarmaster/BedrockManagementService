@@ -32,7 +32,7 @@ namespace BedrockService.Service.Management {
                         percentResult = i % (((int)Math.Round(fileCount / 10.0)) * 10 / 6);
                     } catch (DivideByZeroException) { }
                     if (percentResult == 0) {
-                        _logger.AppendLine($"Extracting server files to build core files, {Math.Round((double)i / (double)fileCount, 2) * 100}% completed...");
+                        _logger.AppendLine($"Extracting server files to build core files, {Math.Round(i / (double)fileCount, 2) * 100}% completed...");
                     }
                     string fixedPath = $@"{_workingDirectory}\{archive.Entries[i].FullName.Replace('/', '\\')}";
                     if (!archive.Entries[i].FullName.EndsWith("/")) {

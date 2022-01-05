@@ -32,7 +32,7 @@ namespace ServiceTests {
         }
 
         public class RunningServiceTests : IClassFixture<TestFixture> {
-            TestFixture _testFixture;
+            readonly TestFixture _testFixture;
 
             public RunningServiceTests(TestFixture testFixture) {
                 _testFixture = testFixture;

@@ -1,4 +1,4 @@
-﻿namespace BedrockService.Service.Server.Management {
+﻿namespace BedrockService.Service.Server.Interfaces {
     public interface IPlayerManager {
         IPlayer GetPlayerByXUID(string xuid);
         void PlayerConnected(string username, string xuid);

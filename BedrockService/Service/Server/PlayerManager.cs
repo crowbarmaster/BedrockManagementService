@@ -1,4 +1,6 @@
-﻿namespace BedrockService.Service.Server.Management {
+﻿using BedrockService.Service.Server.Interfaces;
+
+namespace BedrockService.Service.Server {
     public class PlayerManager : IPlayerManager {
         readonly IServerConfiguration _serverConfiguration;
 

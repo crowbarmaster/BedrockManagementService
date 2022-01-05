@@ -1,4 +1,4 @@
-﻿namespace BedrockService.Service.Management {
+﻿namespace BedrockService.Service.Management.Interfaces {
     public interface IConfigurator {
         void DeleteBackupsForServer(byte serverIndex, List<string> list);
         List<Property> EnumerateBackupsForServer(byte serverIndex);

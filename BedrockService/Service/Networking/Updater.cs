@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using BedrockService.Service.Networking.Interfaces;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 
 namespace BedrockService.Service.Networking {
