@@ -3,6 +3,7 @@ using BedrockManagementServiceASP.BedrockService.Management;
 using BedrockManagementServiceASP.BedrockService.Networking;
 using BedrockManagementServiceASP.BedrockService.Server;
 using BedrockService.Shared.Interfaces;
+using BedrockService.Shared.Utilities;
 using NCrontab;
 using System.Timers;
 using Topshelf;
@@ -57,7 +58,7 @@ namespace BedrockManagementServiceASP.BedrockService.Core {
                 try {
                     List<IServerConfiguration> temp = _serviceConfiguration.GetServerList();
                     foreach (IServerConfiguration server in temp) {
-                        IBedrockServer bedrockServer = new BedrockServer(server, _configurator, _logger, _serviceConfiguration, _processInfo);
+                        IBedrockServer bedrockServer = new BedrockServer(server, _configurator, _logger, _serviceConfiguration, _processInfo, new FileUtilities(_processInfo));
                         bedrockServer.Initialize();
                         _bedrockServers.Add(bedrockServer);
                     }
@@ -141,7 +142,7 @@ namespace BedrockManagementServiceASP.BedrockService.Core {
         public List<IBedrockServer> GetAllServers() => _bedrockServers;
 
         public void InitializeNewServer(IServerConfiguration server) {
-            IBedrockServer bedrockServer = new BedrockServer(server, _configurator, _logger, _serviceConfiguration, _processInfo);
+            IBedrockServer bedrockServer = new BedrockServer(server, _configurator, _logger, _serviceConfiguration, _processInfo, new FileUtilities(_processInfo));
             bedrockServer.Initialize();
             _bedrockServers.Add(bedrockServer);
             _serviceConfiguration.AddNewServerInfo(server);
