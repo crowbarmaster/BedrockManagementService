@@ -38,7 +38,6 @@ namespace BedrockService.Service.Core {
         public Task<bool> Initialize() {
             return Task.Run(() => {
                 _CurrentServiceStatus = ServiceStatus.Starting;
-                _tCPListener.BlockClientConnections();
                 _updater.Initialize();
                 _configurator.LoadGlobals().Wait();
                 _logger.Initialize();
@@ -89,7 +88,7 @@ namespace BedrockService.Service.Core {
                         brs.StartWatchdog();
                     }
                 }
-                _tCPListener.UnblockClientConnections();
+                _tCPListener.SetServiceStarted();
                 _CurrentServiceStatus = ServiceStatus.Started;
                 return true;
             }
@@ -135,7 +134,7 @@ namespace BedrockService.Service.Core {
         public Task RestartService() { 
             return Task.Run(() => {
                 try {
-                    _tCPListener.BlockClientConnections();
+                    _tCPListener.SetServiceStopped();
                     foreach (IBedrockServer brs in _bedrockServers) {
                         brs.AwaitableServerStop(true).Wait();
                     }

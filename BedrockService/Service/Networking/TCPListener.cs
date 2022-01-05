@@ -1,4 +1,6 @@
-﻿using BedrockService.Service.Networking.MessageInterfaces;
+﻿using BedrockService.Service.Core;
+using BedrockService.Service.Core.Interfaces;
+using BedrockService.Service.Networking.MessageInterfaces;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
@@ -20,6 +22,7 @@ namespace BedrockService.Service.Networking {
         private Task? _recieverTask;
         private bool _resettingListener = false;
         private bool _canClientConnect = true;
+        private bool _serviceStarted = false;
 
         public TCPListener(IServiceConfiguration serviceConfiguration, IBedrockLogger logger, IProcessInfo processInfo) {
             _logger = logger;
@@ -40,18 +43,14 @@ namespace BedrockService.Service.Networking {
             }
         }
 
-        public void BlockClientConnections() {
-            _canClientConnect = false;
-        }
-
-        public void UnblockClientConnections() {
-            _canClientConnect = true;
-        }
-
         public void SetStrategyDictionaries(Dictionary<NetworkMessageTypes, IMessageParser> standard, Dictionary<NetworkMessageTypes, IFlaggedMessageParser> flagged) {
             _standardMessageLookup = standard;
             _flaggedMessageLookup = flagged;
         }
+
+        public void SetServiceStarted() => _serviceStarted = true;
+        
+        public void SetServiceStopped() => _serviceStarted = false;
 
         public Task StartListening() {
             return new Task(() => {
@@ -69,7 +68,7 @@ namespace BedrockService.Service.Networking {
                 }
                 while (true) {
                     try {
-                        if (_inListener != null && _inListener.Pending() && _canClientConnect) {
+                        if (_inListener != null && _inListener.Pending() && _canClientConnect && _serviceStarted) {
                             _canClientConnect = false;
                             _cancelTokenSource = new CancellationTokenSource();
                             _client = _inListener.AcceptTcpClient();
@@ -78,7 +77,7 @@ namespace BedrockService.Service.Networking {
                                 _recieverTask.Start();
                             }
                         }
-                        if (_inListener.Pending() && !_canClientConnect) {
+                        if (_inListener.Pending() && !_canClientConnect && _serviceStarted) {
                             _inListener.AcceptTcpClient().Close();
                         }
                         if (_cancelTokenSource.IsCancellationRequested) {
