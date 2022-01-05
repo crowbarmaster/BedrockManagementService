@@ -77,8 +77,7 @@ namespace BedrockService.Client.Forms {
                             prop.Value = (string)row.Cells[1].Value;
                         }
                     }
-                }
-                else {
+                } else {
                     if ((string)row.Cells[0].Value != null)
                         startCmds.Add(new StartCmdEntry((string)row.Cells[0].Value));
                 }

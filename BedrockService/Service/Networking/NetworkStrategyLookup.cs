@@ -250,8 +250,7 @@ namespace BedrockService.Service.Networking {
                 foreach (IPlayer player in fetchedPlayers) {
                     try {
                         _serviceConfiguration.GetServerInfoByIndex(serverIndex).AddUpdatePlayer(player);
-                    }
-                    catch (Exception) {
+                    } catch (Exception) {
                     }
                 }
                 _configurator.SaveKnownPlayerDatabase(_serviceConfiguration.GetServerInfoByIndex(serverIndex));
@@ -289,7 +288,7 @@ namespace BedrockService.Service.Networking {
                     }
                     if (container.ManifestType == "data") {
                         filePath = $@"{serverPath}\worlds\{levelName}\world_behavior_packs.json";
-                        if(MinecraftFileUtilities.UpdateWorldPackFile(filePath, container.JsonManifest) && MinecraftFileUtilities.UpdateKnownPackFile(knownPacksFile, container)) {
+                        if (MinecraftFileUtilities.UpdateWorldPackFile(filePath, container.JsonManifest) && MinecraftFileUtilities.UpdateKnownPackFile(knownPacksFile, container)) {
                             _fileUtils.CopyFilesRecursively(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($@"{serverPath}\behavior_packs\{container.FolderName}"));
                         }
                     }
@@ -403,7 +402,7 @@ namespace BedrockService.Service.Networking {
             private readonly IBedrockService _bedrockService;
 
             public AddNewServer(IProcessInfo processInfo, IConfigurator configurator, IServiceConfiguration serviceConfiguration, IBedrockService bedrockService) {
-                _processInfo = processInfo;    
+                _processInfo = processInfo;
                 _bedrockService = bedrockService;
                 _configurator = configurator;
 

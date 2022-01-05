@@ -68,7 +68,7 @@ namespace BedrockService.Client.Forms {
         private void removeAllPacksBtn_Click(object sender, EventArgs e) {
             List<MinecraftPackContainer> temp = new List<MinecraftPackContainer>();
             foreach (object item in serverListBox.Items)
-                temp.Add((MinecraftPackContainer)item); 
+                temp.Add((MinecraftPackContainer)item);
             JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
             FormManager.TCPClient.SendData(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(temp, Formatting.Indented, settings)), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.RemovePack);
             DialogResult = DialogResult.OK;

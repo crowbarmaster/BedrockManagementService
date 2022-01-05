@@ -2,7 +2,6 @@
 using BedrockService.Shared.MinecraftJsonModels.FileModels;
 using BedrockService.Shared.MinecraftJsonModels.JsonModels;
 using BedrockService.Shared.PackParser;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -61,8 +60,7 @@ namespace BedrockService.Shared.Utilities {
             foreach (string file in fileList)
                 try {
                     File.Delete($@"{serverPath}\{file}");
-                }
-                catch { }
+                } catch { }
             List<string> exesInPath = Directory.EnumerateFiles(serverPath, "*.exe", SearchOption.AllDirectories).ToList();
             foreach (string exe in exesInPath)
                 File.Delete(exe);
@@ -117,8 +115,7 @@ namespace BedrockService.Shared.Utilities {
                         File.WriteAllBytes(destFilePath, fileData);
                     }
                     return true;
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     Console.WriteLine($"Error! {ex.Message}");
                 }
                 return false;

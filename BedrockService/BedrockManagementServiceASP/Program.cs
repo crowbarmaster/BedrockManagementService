@@ -1,4 +1,3 @@
-using BedrockManagementServiceASP;
 using BedrockManagementServiceASP.BedrockService.Core.Interfaces;
 using BedrockManagementServiceASP.BedrockService.Management;
 using BedrockManagementServiceASP.BedrockService.Networking;
@@ -12,13 +11,13 @@ builder.Services.AddControllersWithViews();
 IProcessInfo processInfo = new ServiceProcessInfo("Test", Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), Process.GetCurrentProcess().Id, true, true);
 builder.Services.AddHostedService<BedrockManagementServiceASP.BedrockService.Core.Service>()
     .AddSingleton(processInfo)
-  //.AddSingleton<NetworkStrategyLookup>()
+    //.AddSingleton<NetworkStrategyLookup>()
     .AddSingleton<ServiceInfo>()
     .AddSingleton<IServiceConfiguration>(x => x.GetRequiredService<ServiceInfo>())
     .AddSingleton<IBedrockConfiguration>(x => x.GetRequiredService<ServiceInfo>())
     .AddSingleton<IBedrockLogger, BedrockLogger>()
     .AddSingleton<IBedrockService, BedrockManagementServiceASP.BedrockService.Core.BedrockService>()
-  //.AddSingleton<ITCPListener, TCPListener>()
+    //.AddSingleton<ITCPListener, TCPListener>()
     .AddSingleton<IConfigurator, ConfigManager>()
     .AddSingleton<IUpdater, Updater>();
 

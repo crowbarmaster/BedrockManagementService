@@ -1,5 +1,4 @@
 ﻿using BedrockService.Service.Core.Interfaces;
-using BedrockService.Service.Server;
 using Topshelf.Runtime;
 
 namespace BedrockService.Service.Core {
@@ -67,7 +66,7 @@ namespace BedrockService.Service.Core {
         }
 
         private void OnStarted() {
-            Task.Run(() => { 
+            Task.Run(() => {
                 _exitCode = _host.Run();
             });
         }

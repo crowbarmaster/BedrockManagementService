@@ -2,9 +2,6 @@
 using BedrockService.Shared.MinecraftJsonModels.JsonModels;
 using BedrockService.Shared.Utilities;
 using System.IO.Compression;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace BedrockService.Service.Management {
     public class ConfigManager : IConfigurator {
@@ -40,7 +37,7 @@ namespace BedrockService.Service.Management {
             LoadGlobals();
             LoadServerConfigurations();
         });
-        
+
 
         public Task LoadServerConfigurations() => Task.Run(() => {
             ServerInfo serverInfo;
@@ -66,7 +63,7 @@ namespace BedrockService.Service.Management {
                 _serviceConfiguration.AddNewServerInfo(serverInfo);
             }
         });
-        
+
 
         public void SaveGlobalFile() {
             string[] output = new string[_serviceConfiguration.GetAllProps().Count + 3];
@@ -113,7 +110,7 @@ namespace BedrockService.Service.Management {
             _logger.AppendLine("Globals.conf was not found. Loaded defaults and saved to file.");
             SaveGlobalFile();
         });
-        
+
 
         private int RoundOff(int i) {
             return ((int)Math.Round(i / 10.0)) * 10;
@@ -139,8 +136,7 @@ namespace BedrockService.Service.Management {
                                     File.Delete(fixedPath);
                                 }
                                 archive.Entries[i].ExtractToFile($@"{server.GetProp("ServerPath")}\{archive.Entries[i].FullName.Replace('/', '\\')}");
-                            }
-                            else {
+                            } else {
                                 if (!Directory.Exists($@"{server.GetProp("ServerPath")}\{archive.Entries[i].FullName.Replace('/', '\\')}")) {
                                     Directory.CreateDirectory($@"{server.GetProp("ServerPath")}\{archive.Entries[i].FullName.Replace('/', '\\')}");
                                 }
@@ -149,8 +145,7 @@ namespace BedrockService.Service.Management {
                         _logger.AppendLine($"Extraction of files for {server.GetServerName()} completed.");
                     }
                     File.Copy(server.GetProp("ServerPath").ToString() + "\\bedrock_server.exe", server.GetProp("ServerPath").ToString() + "\\" + server.GetProp("ServerExeName").ToString(), true);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     _logger.AppendLine($"ERROR: Got an exception deleting entire directory! {e.Message}");
                 }
             });
@@ -211,8 +206,8 @@ namespace BedrockService.Service.Management {
         public void WriteJSONFiles(IServerConfiguration server) {
             string permFilePath = $@"{server.GetProp("ServerPath")}\permissions.json";
             string whitelistFilePath = $@"{server.GetProp("ServerPath")}\whitelist.json";
-            PermissionsFileModel permissionsFile = new() {FilePath = permFilePath};
-            WhitelistFileModel whitelistFile = new() {FilePath = whitelistFilePath};
+            PermissionsFileModel permissionsFile = new() { FilePath = permFilePath };
+            WhitelistFileModel whitelistFile = new() { FilePath = whitelistFilePath };
             server.GetPlayerList()
                 .Where(x => x.IsPlayerWhitelisted())
                 .Select(x => (xuid: x.GetXUID(), userName: x.GetUsername(), ignoreLimits: x.PlayerIgnoresLimit()))
@@ -297,8 +292,7 @@ namespace BedrockService.Service.Management {
                 }
                 _serviceConfiguration.RemoveServerInfo(serverInfo);
 
-            }
-            catch { }
+            } catch { }
         }
 
         public List<Property> EnumerateBackupsForServer(byte serverIndex) {
@@ -309,8 +303,7 @@ namespace BedrockService.Service.Management {
                     string[] splitName = dir.Name.Split('_');
                     newList.Add(new Property(dir.Name, new DateTime(long.Parse(splitName[1])).ToString("G")));
                 }
-            }
-            catch (IOException) {
+            } catch (IOException) {
                 return newList;
             }
             return newList;
@@ -325,8 +318,7 @@ namespace BedrockService.Service.Management {
                             new FileUtilities(_processInfo).DeleteFilesRecursively(new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{serverName}\{deleteDir}"), true);
                             _logger.AppendLine($"Deleted backup {deleteDir}.");
                         }
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 _logger.AppendLine($"Error deleting selected backups! {e.Message}");
             }
         }
@@ -347,16 +339,14 @@ namespace BedrockService.Service.Management {
                     }
                 }
                 return true;
-            }
-            catch { return false; }
+            } catch { return false; }
         }
 
         private bool DeleteServerFiles(IServerConfiguration serverInfo) {
             try {
                 new FileUtilities(_processInfo).DeleteFilesRecursively(new DirectoryInfo(serverInfo.GetProp("ServerPath").ToString()), false);
                 return true;
-            }
-            catch { return false; }
+            } catch { return false; }
         }
 
         private bool DeletePlayerFiles(IServerConfiguration serverInfo) {
@@ -372,8 +362,7 @@ namespace BedrockService.Service.Management {
                     }
                 }
                 return true;
-            }
-            catch { return false; }
+            } catch { return false; }
         }
     }
 }

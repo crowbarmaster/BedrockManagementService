@@ -1,10 +1,7 @@
 ﻿using BedrockService.Service.Server.Management;
-using BedrockService.Shared.MinecraftJsonModels.FileModels;
-using BedrockService.Shared.MinecraftJsonModels.JsonModels;
 using BedrockService.Shared.PackParser;
 using BedrockService.Shared.Utilities;
 using System.IO.Compression;
-using System.Text.RegularExpressions;
 
 namespace BedrockService.Service.Server {
     public class BedrockServer : IBedrockServer {
@@ -178,7 +175,7 @@ namespace BedrockService.Service.Server {
 
         public Task AwaitableServerStop(bool stopWatchdog) {
             return Task.Run(() => {
-                while(_backupRunning) {
+                while (_backupRunning) {
                     Task.Delay(100).Wait();
                 }
                 if (stopWatchdog) {
@@ -220,12 +217,10 @@ namespace BedrockService.Service.Server {
                         }
                         // Fires up a new process to run inside this one
                         CreateProcess();
-                    }
-                    else {
+                    } else {
                         _logger.AppendLine($"The Bedrock Server is not accessible at {$@"{_serverConfiguration.GetProp("ServerPath")}\{_serverConfiguration.GetProp("ServerExeName")}"}\r\nCheck if the file is at that location and that permissions are correct.");
                     }
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     _logger.AppendLine($"Error Running Bedrock Server: {e.Message}\n{e.StackTrace}");
                 }
             }, _serverCanceler.Token);
@@ -257,8 +252,7 @@ namespace BedrockService.Service.Server {
                     process.Kill();
                     Thread.Sleep(1000);
                     _logger.AppendLine($@"App {_serverConfiguration.GetProp("ServerExeName")} killed!");
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     _logger.AppendLine($"Killing proccess resulted in error: {e.StackTrace}");
                 }
             }
@@ -269,12 +263,10 @@ namespace BedrockService.Service.Server {
                 Process[] processList = Process.GetProcessesByName(monitoredAppName);
                 if (processList.Length == 0) {
                     return false;
-                }
-                else {
+                } else {
                     return true;
                 }
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 _logger.AppendLine("ApplicationWatcher MonitoredAppExists Exception: " + ex.StackTrace);
                 return true;
             }
@@ -297,7 +289,7 @@ namespace BedrockService.Service.Server {
                             RunStartupCommands();
                         }
                     }
-                    if(dataMsg.Equals("Quit correctly")) {
+                    if (dataMsg.Equals("Quit correctly")) {
                         _logger.AppendLine($"Server {GetServerName()} received quit signal.");
                         _AwaitingStopSignal = false;
                     }
@@ -347,7 +339,7 @@ namespace BedrockService.Service.Server {
             }
         }
 
-        private (string username, string xuid) ExtractPlayerInfoFromString (string dataMsg) {
+        private (string username, string xuid) ExtractPlayerInfoFromString(string dataMsg) {
             int msgStartIndex = dataMsg.IndexOf(']') + 2;
             int usernameStart = dataMsg.IndexOf(':', msgStartIndex) + 2;
             int usernameEnd = dataMsg.IndexOf(',', usernameStart);
@@ -368,7 +360,7 @@ namespace BedrockService.Service.Server {
             DirectoryInfo worldsDir = new DirectoryInfo($@"{server.GetProp("ServerPath")}\worlds\{server.GetProp("level-name")}");
             DirectoryInfo backupLevelDir = new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{server.GetServerName()}\{folderName}\{server.GetProp("level-name")}");
             DirectoryInfo backupPacksDir = new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{server.GetServerName()}\{folderName}\InstalledPacks");
-                AwaitableServerStop(false).Wait();
+            AwaitableServerStop(false).Wait();
             try {
                 _fileUtils.DeleteFilesRecursively(worldsDir, true);
                 _logger.AppendLine($"Deleted world folder \"{worldsDir.Name}\"");
@@ -391,8 +383,7 @@ namespace BedrockService.Service.Server {
                 }
                 AwaitableServerStart().Wait();
                 return true;
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 _logger.AppendLine($"Error deleting selected backups! {e.Message}");
             }
             return false;

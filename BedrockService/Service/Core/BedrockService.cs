@@ -69,8 +69,7 @@ namespace BedrockService.Service.Core {
                         bedrockServer.Initialize();
                         _bedrockServers.Add(bedrockServer);
                     }
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     _logger.AppendLine($"Error Instantiating BedrockServiceWrapper: {e.StackTrace}");
                 }
                 _tCPListener.Initialize();
@@ -94,15 +93,14 @@ namespace BedrockService.Service.Core {
                 _tCPListener.SetServiceStarted();
                 _CurrentServiceStatus = ServiceStatus.Started;
                 return true;
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 _logger.AppendLine($"Error: {e.Message}.\n{e.StackTrace}");
                 return false;
             }
         }
 
         public void TestStart() {
-            Task.Run(()=>Start(null));
+            Task.Run(() => Start(null));
         }
 
         public void TestStop() {
@@ -134,7 +132,7 @@ namespace BedrockService.Service.Core {
             }
         }
 
-        public Task RestartService() { 
+        public Task RestartService() {
             return Task.Run(() => {
                 try {
                     _tCPListener.SetServiceStopped();
@@ -204,8 +202,7 @@ namespace BedrockService.Service.Core {
             try {
                 BackupAllServers();
                 InitializeTimers();
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 _logger.AppendLine($"Error in BackupTimer_Elapsed {ex}");
             }
         }
@@ -220,8 +217,7 @@ namespace BedrockService.Service.Core {
                     }
                 }
                 InitializeTimers();
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 _logger.AppendLine($"Error in UpdateTimer_Elapsed {ex}");
             }
         }
@@ -257,9 +253,9 @@ namespace BedrockService.Service.Core {
                     if (duplicateNameList.Count() > 0) {
                         throw new Exception($"Duplicate server name {duplicateNameList.First().First().GetServerName()} was found. Please check configuration files");
                     }
-                    if(duplicatePortList.Count() > 0) {
-                        string serverPorts = string.Join(", ", duplicatePortList.Select(x=>x.Key).ToArray());
-                        throw new Exception($"Duplicate ports used! Check server configurations targeting port(s) {serverPorts}"); 
+                    if (duplicatePortList.Count() > 0) {
+                        string serverPorts = string.Join(", ", duplicatePortList.Select(x => x.Key).ToArray());
+                        throw new Exception($"Duplicate ports used! Check server configurations targeting port(s) {serverPorts}");
                     }
                     foreach (var server in _serviceConfiguration.GetServerList()) {
                         if (_updater.CheckVersionChanged() || !File.Exists(server.GetProp("ServerPath") + "\\bedrock_server.exe")) {

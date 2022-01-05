@@ -3,7 +3,6 @@ using BedrockService.Shared.Classes;
 using BedrockService.Shared.Interfaces;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography;
 
 namespace BedrockManagementServiceASP.BedrockService.Networking {
     public class TCPListener : ITCPListener, IMessageSender {

@@ -61,10 +61,10 @@ namespace BedrockService.Shared.Classes {
                     if (split.Length == 1) {
                         split[1] = "";
                     }
-                    if(split[0] == "LogServiceToFile") {
+                    if (split[0] == "LogServiceToFile") {
                         split[0] = "LogApplicationOutput";
                     }
-                    if(split[0] == "LogServersToFile") {
+                    if (split[0] == "LogServersToFile") {
                         split[0] = "LogServerOutput";
                     }
                     if (split[0] == "BackupPath") {
@@ -83,8 +83,7 @@ namespace BedrockService.Shared.Classes {
                 Property GlobalToEdit = globals.First(glob => glob.KeyName == name);
                 globals[globals.IndexOf(GlobalToEdit)].SetValue(newValue);
                 return true;
-            }
-            catch {
+            } catch {
                 // handle soon.
                 return false;
             }
@@ -94,8 +93,7 @@ namespace BedrockService.Shared.Classes {
             try {
                 Property GlobalToEdit = globals.First(glob => glob.KeyName == propToSet.KeyName);
                 globals[globals.IndexOf(GlobalToEdit)] = propToSet;
-            }
-            catch {
+            } catch {
                 // handle soon.
                 return false;
             }

@@ -5,8 +5,6 @@ using BedrockService.Shared.MinecraftJsonModels.JsonModels;
 using BedrockService.Shared.Utilities;
 using System.IO.Compression;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace BedrockManagementServiceASP.BedrockService.Management {
     public class ConfigManager : IConfigurator {

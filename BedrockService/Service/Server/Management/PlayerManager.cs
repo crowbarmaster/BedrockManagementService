@@ -42,8 +42,7 @@
         public void SetPlayer(IPlayer player) {
             try {
                 _serverConfiguration.GetPlayerList()[_serverConfiguration.GetPlayerList().IndexOf(player)] = player;
-            }
-            catch {
+            } catch {
                 _serverConfiguration.GetPlayerList().Add(player);
             }
         }

@@ -1,6 +1,4 @@
-﻿using BedrockService.Service.Server.Management;
-
-namespace BedrockService.Service.Server {
+﻿namespace BedrockService.Service.Server {
     public interface IBedrockServer {
         void Initialize();
         void StartWatchdog();

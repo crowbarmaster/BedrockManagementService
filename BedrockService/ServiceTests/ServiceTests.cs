@@ -1,18 +1,12 @@
 using BedrockService.Service;
 using BedrockService.Service.Core;
 using BedrockService.Service.Core.Interfaces;
-using BedrockService.Service.Networking;
-using BedrockService.Service.Networking.MessageInterfaces;
-using BedrockService.Shared.Classes;
-using BedrockService.Shared.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
 using Xunit;
-using Newtonsoft.Json;
-using System.Text;
-using Xunit.Abstractions;
 
 namespace ServiceTests {
     public class ServiceTests {
@@ -21,10 +15,10 @@ namespace ServiceTests {
             public static IHost Host = Program.CreateHostBuilder(new string[] { }).Build();
             public IBedrockService BedrockService = Host.Services.GetRequiredService<IBedrockService>();
             public JsonSerializerSettings SerializerSettings = new() { TypeNameHandling = TypeNameHandling.All };
-            
+
             public TestFixture() {
                 BedrockService.TestStart();
-                while(BedrockService.GetServiceStatus() != ServiceStatus.Started) {
+                while (BedrockService.GetServiceStatus() != ServiceStatus.Started) {
                     Task.Delay(100).Wait();
                 }
             }

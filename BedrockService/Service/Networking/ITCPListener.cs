@@ -1,5 +1,4 @@
-﻿using BedrockService.Service.Core;
-using BedrockService.Service.Networking.MessageInterfaces;
+﻿using BedrockService.Service.Networking.MessageInterfaces;
 
 namespace BedrockService.Service.Networking {
     public interface ITCPListener {

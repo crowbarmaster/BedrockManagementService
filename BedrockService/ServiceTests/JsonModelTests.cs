@@ -1,13 +1,6 @@
-﻿using BedrockService.Shared.MinecraftJsonModels.JsonModels;
-using BedrockService.Shared.MinecraftJsonModels.FileModels;
-using System;
+﻿using BedrockService.Shared.MinecraftJsonModels.FileModels;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
-using Newtonsoft.Json;
 
 namespace ServiceTests {
     public class JsonModelTests {

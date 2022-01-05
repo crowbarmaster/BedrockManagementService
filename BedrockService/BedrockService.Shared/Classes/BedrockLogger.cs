@@ -1,6 +1,5 @@
-﻿using Newtonsoft.Json;
-using System.Text;
-using BedrockService.Shared.Interfaces;
+﻿using BedrockService.Shared.Interfaces;
+using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Linq;
@@ -54,8 +53,7 @@ namespace BedrockService.Shared.Classes {
             try {
                 if (_serverConfiguration != null) {
                     _serverConfiguration.GetLog().Add(new LogEntry(newText));
-                }
-                else {
+                } else {
                     if (_serviceConfiguration != null) {
                         _serviceConfiguration.GetLog().Add(new LogEntry(newText));
                     }
@@ -64,8 +62,7 @@ namespace BedrockService.Shared.Classes {
                     _logWriter.WriteLine(newText);
                     _logWriter.Flush();
                 }
-            }
-            catch {
+            } catch {
             }
         }
 

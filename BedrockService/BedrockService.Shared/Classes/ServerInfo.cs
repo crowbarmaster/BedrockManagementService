@@ -1,7 +1,5 @@
 ﻿using BedrockService.Shared.Interfaces;
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace BedrockService.Shared.Classes {
@@ -29,7 +27,7 @@ namespace BedrockService.Shared.Classes {
             ServerPath = new Property("ServerPath", $@"{ServersPath}\{ServerName}");
             ServerExeName = new Property("ServerExeName", $"BedrockService.{ServerName}.exe");
             ServerPropList.Clear();
-            _defaultPropList.ForEach(p =>  ServerPropList.Add(new Property(p.KeyName, p.DefaultValue)));
+            _defaultPropList.ForEach(p => ServerPropList.Add(new Property(p.KeyName, p.DefaultValue)));
             return true;
         }
 
@@ -70,8 +68,7 @@ namespace BedrockService.Shared.Classes {
                 Property serverProp = ServerPropList.First(prop => prop.KeyName == name);
                 ServerPropList[ServerPropList.IndexOf(serverProp)].SetValue(newValue);
                 return true;
-            }
-            catch {
+            } catch {
 
             }
             return false;
@@ -82,10 +79,7 @@ namespace BedrockService.Shared.Classes {
                 Property serverProp = ServerPropList.First(prop => prop.KeyName == propToSet.KeyName);
                 ServerPropList[ServerPropList.IndexOf(serverProp)] = propToSet;
                 return true;
-            }
-            catch {
-
-            }
+            } catch { }
             return false;
         }
 

@@ -1,8 +1,6 @@
 ﻿using BedrockService.Shared.Classes;
-using BedrockService.Shared.Interfaces;
-using System;
-using System.Collections.Generic;
 using BedrockService.Shared.MinecraftJsonModels.JsonModels;
+using System.Collections.Generic;
 
 namespace BedrockService.Shared.MinecraftJsonModels.FileModels {
     public class KnownPacksFileModel : BaseJsonFile {

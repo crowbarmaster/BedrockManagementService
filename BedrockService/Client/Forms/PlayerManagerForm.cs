@@ -49,7 +49,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void SearchEntryBox_Click(object sender, EventArgs e) {
-            
+
             entryTextToolTip.Show(_searchLegendText, searchEntryBox, 30000);
         }
 
@@ -88,7 +88,7 @@ namespace BedrockService.Client.Forms {
             playersFound = _server.GetPlayerList();
             string curText = searchEntryBox.Text.ToLower();
             List<IPlayer> tempList = new List<IPlayer>();
-            string[] splitCommands = new string[1] {curText};
+            string[] splitCommands = new string[1] { curText };
             string cmd;
             string value;
 

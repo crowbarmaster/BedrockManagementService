@@ -1,10 +1,7 @@
-﻿using BedrockService.Shared.Classes;
-using BedrockService.Shared.Interfaces;
+﻿using BedrockService.Shared.Interfaces;
 using BedrockService.Shared.MinecraftJsonModels.FileModels;
 using BedrockService.Shared.MinecraftJsonModels.JsonModels;
 using BedrockService.Shared.Utilities;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -43,7 +40,7 @@ namespace BedrockService.Shared.PackParser {
                 jsonWorldPackEnablerPath = $@"{serverPath}\worlds\{serverFolderName}\world_resource_packs.json";
                 Directory.Delete(jsonPackPath, true);
             }
-            if(jsonWorldPackEnablerPath != null) {
+            if (jsonWorldPackEnablerPath != null) {
                 WorldPackFileModel worldPackFile = new WorldPackFileModel(jsonWorldPackEnablerPath);
                 List<WorldPackEntryJsonModel> worldPacks = worldPackFile.Contents;
                 WorldPackEntryJsonModel foundEntry = worldPacks.FirstOrDefault(x => x.pack_id.Equals(pack.JsonManifest.header.uuid));

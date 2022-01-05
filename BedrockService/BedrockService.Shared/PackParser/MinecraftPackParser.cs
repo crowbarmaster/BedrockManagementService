@@ -60,8 +60,7 @@ namespace BedrockService.Shared.PackParser {
                                 iconBytes = File.ReadAllBytes($@"{file.Directory.FullName}\world_icon.jpeg");
                             else
                                 iconBytes = File.ReadAllBytes($@"{file.Directory.FullName}\world_icon.png");
-                        }
-                        catch {
+                        } catch {
                             iconBytes = null;
                         }
 
@@ -88,7 +87,7 @@ namespace BedrockService.Shared.PackParser {
                             FolderName = file.Directory.Name,
                             IconBytes = iconBytes
                         };
-                        JsonSerializerSettings settings = new() {TypeNameHandling = TypeNameHandling.All};
+                        JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                         container.JsonManifest = JsonConvert.DeserializeObject<PackManifestJsonModel>(File.ReadAllText(file.FullName), settings);
                         container.ManifestType = container.JsonManifest.modules[0].type;
                         FoundPacks.Add(container);
