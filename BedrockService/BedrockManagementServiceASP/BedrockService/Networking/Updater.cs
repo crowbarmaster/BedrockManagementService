@@ -10,9 +10,11 @@ namespace BedrockManagementServiceASP.BedrockService.Networking {
         private readonly IBedrockLogger _logger;
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IProcessInfo _processInfo;
+        private readonly FileUtilities _fileUtils;
         private string _version;
 
-        public Updater(IProcessInfo processInfo, IBedrockLogger logger, IServiceConfiguration serviceConfiguration) {
+        public Updater(IProcessInfo processInfo, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, FileUtilities fileUtils) {
+            _fileUtils = fileUtils;
             _serviceConfiguration = serviceConfiguration;
             _processInfo = processInfo;
             _logger = logger;
@@ -111,14 +113,15 @@ namespace BedrockManagementServiceASP.BedrockService.Networking {
         public async Task ReplaceBuild(IServerConfiguration server) {
             await Task.Run(() => {
                 try {
-                    if (!Directory.Exists(server.GetProp("ServerPath").ToString())) {
-                        Directory.CreateDirectory(server.GetProp("ServerPath").ToString());
+                    string servicePath = server.GetProp("ServerPath").ToString();
+                    if (!Directory.Exists(servicePath)) {
+                        Directory.CreateDirectory(servicePath);
                     } else if (File.Exists($@"{_processInfo.GetDirectory()}\Server\MCSFiles\stock_filelist.ini")) {
-                        new FileUtils(_processInfo.GetDirectory()).DeleteFilelist(File.ReadAllLines($@"{_processInfo.GetDirectory()}\Server\MCSFiles\stock_filelist.ini"), server.GetProp("ServerPath").ToString());
+                        _fileUtils.DeleteFilelist(File.ReadAllLines($@"{_processInfo.GetDirectory()}\Server\MCSFiles\stock_filelist.ini"), servicePath);
                     } else {
-                        new FileUtils(_processInfo.GetDirectory()).DeleteFilesRecursively(new DirectoryInfo(server.GetProp("ServerPath").ToString()), false);
-                        ZipFile.ExtractToDirectory($@"{_processInfo.GetDirectory()}\Server\MCSFiles\Update_{_version}.zip", server.GetProp("ServerPath").ToString());
-                        File.Copy(server.GetProp("ServerPath") + "\\bedrock_server.exe", server.GetProp("ServerPath") + "\\" + server.GetProp("ServerExeName"), true);
+                        _fileUtils.DeleteFilesRecursively(new DirectoryInfo(servicePath), false);
+                        ZipFile.ExtractToDirectory($@"{_processInfo.GetDirectory()}\Server\MCSFiles\Update_{_version}.zip", servicePath);
+                        File.Copy(servicePath + "\\bedrock_server.exe", servicePath + "\\" + server.GetProp("ServerExeName"), true);
                     }
                 } catch (Exception e) {
                     _logger.AppendLine($"ERROR: Got an exception deleting entire directory! {e.Message}");

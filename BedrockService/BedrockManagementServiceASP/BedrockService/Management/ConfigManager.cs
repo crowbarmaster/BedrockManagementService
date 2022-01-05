@@ -17,8 +17,10 @@ namespace BedrockManagementServiceASP.BedrockService.Management {
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IProcessInfo _processInfo;
         private readonly IBedrockLogger _logger;
+        private readonly FileUtilities _fileUtils;
 
-        public ConfigManager(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, IBedrockLogger logger) {
+        public ConfigManager(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, IBedrockLogger logger, FileUtilities fileUtils) {
+            _fileUtils = fileUtils;
             _processInfo = processInfo;
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
@@ -330,7 +332,7 @@ namespace BedrockManagementServiceASP.BedrockService.Management {
                 foreach (string deleteDir in list)
                     foreach (DirectoryInfo dir in new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{serverName}").GetDirectories())
                         if (dir.Name == deleteDir) {
-                            new FileUtils(_processInfo.GetDirectory()).DeleteFilesRecursively(new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{serverName}\{deleteDir}"), true);
+                            _fileUtils.DeleteFilesRecursively(new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{serverName}\{deleteDir}"), true);
                             _logger.AppendLine($"Deleted backup {deleteDir}.");
                         }
             } catch (IOException e) {
@@ -359,7 +361,7 @@ namespace BedrockManagementServiceASP.BedrockService.Management {
 
         private bool DeleteServerFiles(IServerConfiguration serverInfo) {
             try {
-                new FileUtils(_processInfo.GetDirectory()).DeleteFilesRecursively(new DirectoryInfo(serverInfo.GetProp("ServerPath").ToString()), false);
+                _fileUtils.DeleteFilesRecursively(new DirectoryInfo(serverInfo.GetProp("ServerPath").ToString()), false);
                 return true;
             } catch { return false; }
         }

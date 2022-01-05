@@ -1,5 +1,6 @@
 ﻿using BedrockService.Service.Core.Interfaces;
 using BedrockService.Service.Server;
+using BedrockService.Shared.Utilities;
 using NCrontab;
 using System.Timers;
 
@@ -18,6 +19,7 @@ namespace BedrockService.Service.Core {
         private readonly IConfigurator _configurator;
         private readonly IUpdater _updater;
         private readonly ITCPListener _tCPListener;
+        private readonly FileUtilities _fileUtils;
         private CrontabSchedule? _backupCron { get; set; }
         private CrontabSchedule? _updaterCron { get; set; }
         private List<IBedrockServer> _bedrockServers { get; set; } = new();
@@ -25,14 +27,15 @@ namespace BedrockService.Service.Core {
         private System.Timers.Timer? _backupTimer { get; set; }
         private ServiceStatus _CurrentServiceStatus { get; set; }
 
-        public BedrockService(IConfigurator configurator, IUpdater updater, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ITCPListener tCPListener) {
-                _tCPListener = tCPListener;
-                _configurator = configurator;
-                _logger = logger;
-                _serviceConfiguration = serviceConfiguration;
-                _processInfo = serviceProcessInfo;
-                _updater = updater;
-                _logger = logger;
+        public BedrockService(IConfigurator configurator, IUpdater updater, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ITCPListener tCPListener, FileUtilities fileUtils) {
+            _fileUtils = fileUtils;
+            _tCPListener = tCPListener;
+            _configurator = configurator;
+            _logger = logger;
+            _serviceConfiguration = serviceConfiguration;
+            _processInfo = serviceProcessInfo;
+            _updater = updater;
+            _logger = logger;
         }
 
         public Task<bool> Initialize() {
@@ -62,7 +65,7 @@ namespace BedrockService.Service.Core {
                 try {
                     List<IServerConfiguration> temp = _serviceConfiguration.GetServerList();
                     foreach (IServerConfiguration server in temp) {
-                        IBedrockServer bedrockServer = new BedrockServer(server, _configurator, _logger, _serviceConfiguration, _processInfo);
+                        IBedrockServer bedrockServer = new BedrockServer(server, _configurator, _logger, _serviceConfiguration, _processInfo, _fileUtils);
                         bedrockServer.Initialize();
                         _bedrockServers.Add(bedrockServer);
                     }
@@ -158,7 +161,7 @@ namespace BedrockService.Service.Core {
         public List<IBedrockServer> GetAllServers() => _bedrockServers;
 
         public void InitializeNewServer(IServerConfiguration server) {
-            IBedrockServer bedrockServer = new BedrockServer(server, _configurator, _logger, _serviceConfiguration, _processInfo);
+            IBedrockServer bedrockServer = new BedrockServer(server, _configurator, _logger, _serviceConfiguration, _processInfo, _fileUtils);
             bedrockServer.Initialize();
             _bedrockServers.Add(bedrockServer);
             _serviceConfiguration.AddNewServerInfo(server);
