@@ -20,6 +20,7 @@ namespace BedrockService.Service.Server {
         private readonly IConfigurator _configurator;
         private readonly IBedrockLogger _logger;
         private readonly IProcessInfo _processInfo;
+        private readonly FileUtilities _fileUtils;
         private IBedrockLogger _serverLogger;
         private IPlayerManager _playerManager;
         private string _servicePath;
@@ -33,7 +34,8 @@ namespace BedrockService.Service.Server {
             Started
         }
 
-        public BedrockServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo) {
+        public BedrockServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, FileUtilities fileUtils) {
+            _fileUtils = fileUtils;
             _serverConfiguration = serverConfiguration;
             _processInfo = processInfo;
             _serviceConfiguration = serviceConfiguration;
@@ -84,7 +86,7 @@ namespace BedrockService.Service.Server {
 
         private bool PerformBackup(string queryString) {
             try {
-                FileUtils fileUtils = new FileUtils(_servicePath);
+                FileUtilities fileUtils = new FileUtilities(_servicePath);
                 string serverPath = _serverConfiguration.GetProp("ServerPath").ToString();
                 string backupPath = _serviceConfiguration.GetProp("BackupPath").ToString();
                 string levelName = _serverConfiguration.GetProp("level-name").ToString();
@@ -105,7 +107,7 @@ namespace BedrockService.Service.Server {
                 bool resuilt = fileUtils.BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, $@"{targetDirectory.FullName}").Result;
                 fileUtils.CopyFilesMatchingExtension(worldsDir.FullName + levelDir, targetDirectory.FullName + levelDir, ".json");
                 WriteToStandardIn("save resume");
-                CreatePackBackupFiles(serverPath, levelName, targetDirectory);
+                _fileUtils.CreatePackBackupFiles(serverPath, levelName, targetDirectory.FullName);
                 _backupRunning = false;
                 return resuilt;
 
@@ -114,27 +116,6 @@ namespace BedrockService.Service.Server {
                 WriteToStandardIn("save resume");
                 _backupRunning = false;
                 return false;
-            }
-        }
-
-        private void CreatePackBackupFiles(string serverPath, string levelName, DirectoryInfo targetDirectory) {
-            string resouceFolderPath = $@"{serverPath}\resource_packs";
-            string behaviorFolderPath = $@"{serverPath}\behavior_packs";
-            string behaviorFilePath = $@"{serverPath}\worlds\{levelName}\world_behavior_packs.json";
-            string resoruceFilePath = $@"{serverPath}\worlds\{levelName}\world_resource_packs.json";
-            MinecraftPackParser packParser = new(_processInfo);
-            packParser.ParseDirectory(resouceFolderPath);
-            packParser.ParseDirectory(behaviorFolderPath);
-            WorldPackFileModel worldPacks = new(resoruceFilePath);
-            worldPacks.Contents.AddRange(new WorldPackFileModel(behaviorFilePath).Contents);
-            string packBackupFolderPath = $@"{targetDirectory.FullName}\InstalledPacks";
-            Directory.CreateDirectory(packBackupFolderPath);
-            if (worldPacks.Contents.Count > 0) {
-                foreach (WorldPackEntryJsonModel model in worldPacks.Contents) {
-                    MinecraftPackContainer container = packParser.FoundPacks.First(x => x.JsonManifest.header.uuid == model.pack_id);
-                    string packLocation = container.PackContentLocation;
-                    ZipFile.CreateFromDirectory(packLocation, $@"{packBackupFolderPath}\{container.PackContentLocation[container.PackContentLocation.LastIndexOf('\\')..]}.zip");
-                }
             }
         }
 
@@ -385,7 +366,7 @@ namespace BedrockService.Service.Server {
 
         public bool RollbackToBackup(byte serverIndex, string folderName) {
             IServerConfiguration server = _serviceConfiguration.GetServerInfoByIndex(serverIndex);
-            FileUtils fileUtils = new FileUtils(_servicePath);
+            FileUtilities fileUtils = new FileUtilities(_servicePath);
             DirectoryInfo worldsDir = new DirectoryInfo($@"{server.GetProp("ServerPath")}\worlds\{server.GetProp("level-name")}");
             DirectoryInfo backupLevelDir = new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{server.GetServerName()}\{folderName}\{server.GetProp("level-name")}");
             DirectoryInfo backupPacksDir = new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{server.GetServerName()}\{folderName}\InstalledPacks");

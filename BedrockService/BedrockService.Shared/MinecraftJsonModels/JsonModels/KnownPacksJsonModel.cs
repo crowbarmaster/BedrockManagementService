@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BedrockService.Shared.PackParser;
+using System;
 using System.Collections.Generic;
 
 namespace BedrockService.Shared.MinecraftJsonModels.JsonModels {
@@ -10,6 +11,16 @@ namespace BedrockService.Shared.MinecraftJsonModels.JsonModels {
         public string path { get; set; }
         public string uuid { get; set; }
         public string version { get; set; }
+
+        public KnownPacksJsonModel() { }
+
+        public KnownPacksJsonModel(MinecraftPackContainer container) {
+            file_system = "RawPath";
+            from_disk = true;
+            path = $@"{container.GetFixedManifestType()}_packs/{container.FolderName}";
+            uuid = container.JsonManifest.header.uuid;
+            version = string.Join(".", container.JsonManifest.header.version);
+        }
 
         public override bool Equals(object obj) {
             return obj is KnownPacksJsonModel model &&

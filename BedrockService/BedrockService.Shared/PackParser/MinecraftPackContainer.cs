@@ -11,5 +11,11 @@ namespace BedrockService.Shared.PackParser {
         public override string ToString() {
             return JsonManifest != null ? JsonManifest.header.name : "WorldPack";
         }
+
+        public string GetFixedManifestType() {
+            return ManifestType == "data" ?
+                "behavior" : ManifestType == "resources" ?
+                "resource" : ManifestType;
+        }
     }
 }

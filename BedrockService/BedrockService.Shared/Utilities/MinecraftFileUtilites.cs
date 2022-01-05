@@ -2,6 +2,7 @@
 using BedrockService.Shared.Interfaces;
 using BedrockService.Shared.MinecraftJsonModels.FileModels;
 using BedrockService.Shared.MinecraftJsonModels.JsonModels;
+using BedrockService.Shared.PackParser;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,6 +23,16 @@ namespace BedrockService.Shared.Utilities {
             return true;
         }
 
+        public static bool UpdateKnownPackFile(string filePath, MinecraftPackContainer contentToAdd) {
+            KnownPacksFileModel fileModel = new(filePath);
+            if (fileModel.Contents.Where(x => x.uuid == contentToAdd.JsonManifest.header.uuid).Count() > 0) {
+                return false;
+            }
+            fileModel.Contents.Add(new KnownPacksJsonModel(contentToAdd));
+            fileModel.SaveToFile();
+            return true;
+        }
+
         public static void WriteServerJsonFiles(IServerConfiguration server) {
             string permFilePath = $@"{server.GetProp("ServerPath")}\permissions.json";
             string whitelistFilePath = $@"{server.GetProp("ServerPath")}\whitelist.json";
@@ -29,15 +40,13 @@ namespace BedrockService.Shared.Utilities {
             WhitelistFileModel whitelistFile = new() { FilePath = whitelistFilePath };
             server.GetPlayerList()
                 .Where(x => x.IsPlayerWhitelisted())
-                .Select(x => (xuid: x.GetXUID(), userName: x.GetUsername(), ignoreLimits: x.PlayerIgnoresLimit()))
                 .ToList().ForEach(x => {
-                    whitelistFile.Contents.Add(new WhitelistEntryJsonModel(x.ignoreLimits, x.xuid, x.userName));
+                    whitelistFile.Contents.Add(new WhitelistEntryJsonModel(x.PlayerIgnoresLimit(), x.GetXUID(), x.GetUsername()));
                 });
             server.GetPlayerList()
                 .Where(x => !x.IsDefaultRegistration())
-                .Select(x => (xuid: x.GetXUID(), permLevel: x.GetPermissionLevel()))
                 .ToList().ForEach(x => {
-                    permissionsFile.Contents.Add(new PermissionsEntryJsonModel(x.permLevel, x.xuid));
+                    permissionsFile.Contents.Add(new PermissionsEntryJsonModel(x.GetPermissionLevel(), x.GetXUID()));
                 });
             permissionsFile.SaveToFile(permissionsFile.Contents);
             whitelistFile.SaveToFile(whitelistFile.Contents);

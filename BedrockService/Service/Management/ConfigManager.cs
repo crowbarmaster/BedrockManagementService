@@ -322,7 +322,7 @@ namespace BedrockService.Service.Management {
                 foreach (string deleteDir in list)
                     foreach (DirectoryInfo dir in new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{serverName}").GetDirectories())
                         if (dir.Name == deleteDir) {
-                            new FileUtils(_processInfo.GetDirectory()).DeleteFilesRecursively(new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{serverName}\{deleteDir}"), true);
+                            new FileUtilities(_processInfo.GetDirectory()).DeleteFilesRecursively(new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{serverName}\{deleteDir}"), true);
                             _logger.AppendLine($"Deleted backup {deleteDir}.");
                         }
             }
@@ -353,7 +353,7 @@ namespace BedrockService.Service.Management {
 
         private bool DeleteServerFiles(IServerConfiguration serverInfo) {
             try {
-                new FileUtils(_processInfo.GetDirectory()).DeleteFilesRecursively(new DirectoryInfo(serverInfo.GetProp("ServerPath").ToString()), false);
+                new FileUtilities(_processInfo.GetDirectory()).DeleteFilesRecursively(new DirectoryInfo(serverInfo.GetProp("ServerPath").ToString()), false);
                 return true;
             }
             catch { return false; }
