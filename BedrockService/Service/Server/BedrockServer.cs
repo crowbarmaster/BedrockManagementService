@@ -1,5 +1,9 @@
 ﻿using BedrockService.Service.Server.Management;
+using BedrockService.Shared.MinecraftJsonModels.FileModels;
+using BedrockService.Shared.MinecraftJsonModels.JsonModels;
+using BedrockService.Shared.PackParser;
 using BedrockService.Shared.Utilities;
+using System.IO.Compression;
 using System.Text.RegularExpressions;
 
 namespace BedrockService.Service.Server {
@@ -9,13 +13,14 @@ namespace BedrockService.Service.Server {
         private CancellationTokenSource _serverCanceler = new CancellationTokenSource();
         private CancellationTokenSource _watchdogCanceler = new CancellationTokenSource();
         private StreamWriter _stdInStream;
-        private Process _serverProcess;
+        private Process? _serverProcess;
         private ServerStatus _currentServerStatus;
         private readonly IServerConfiguration _serverConfiguration;
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IConfigurator _configurator;
         private readonly IBedrockLogger _logger;
         private readonly IProcessInfo _processInfo;
+        private readonly FileUtilities _fileUtils;
         private IBedrockLogger _serverLogger;
         private IPlayerManager _playerManager;
         private string _servicePath;
@@ -29,7 +34,8 @@ namespace BedrockService.Service.Server {
             Started
         }
 
-        public BedrockServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo) {
+        public BedrockServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, FileUtilities fileUtils) {
+            _fileUtils = fileUtils;
             _serverConfiguration = serverConfiguration;
             _processInfo = processInfo;
             _serviceConfiguration = serviceConfiguration;
@@ -80,9 +86,11 @@ namespace BedrockService.Service.Server {
 
         private bool PerformBackup(string queryString) {
             try {
-                FileUtils fileUtils = new FileUtils(_servicePath);
-                DirectoryInfo worldsDir = new DirectoryInfo($@"{_serverConfiguration.GetProp("ServerPath")}\worlds");
-                DirectoryInfo backupDir = new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{_serverConfiguration.GetServerName()}");
+                string serverPath = _serverConfiguration.GetProp("ServerPath").ToString();
+                string backupPath = _serviceConfiguration.GetProp("BackupPath").ToString();
+                string levelName = _serverConfiguration.GetProp("level-name").ToString();
+                DirectoryInfo worldsDir = new DirectoryInfo($@"{serverPath}\worlds");
+                DirectoryInfo backupDir = new DirectoryInfo($@"{backupPath}\{_serverConfiguration.GetServerName()}");
                 Dictionary<string, int> backupFileInfoPairs = new Dictionary<string, int>();
                 string[] files = queryString.Split(", ");
                 foreach (string file in files) {
@@ -95,14 +103,15 @@ namespace BedrockService.Service.Server {
                 DirectoryInfo targetDirectory = backupDir.CreateSubdirectory($"Backup_{DateTime.Now.Ticks}");
                 _logger.AppendLine($"Backing up files for server {_serverConfiguration.GetServerName()}. Please wait!");
                 string levelDir = @$"\{_serverConfiguration.GetProp("level-name")}";
-                bool resuilt = fileUtils.BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, $@"{targetDirectory.FullName}").Result;
-                fileUtils.CopyFilesMatchingExtension(worldsDir.FullName + levelDir, targetDirectory.FullName + levelDir, ".json");
+                bool resuilt = _fileUtils.BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, $@"{targetDirectory.FullName}").Result;
+                _fileUtils.CopyFilesMatchingExtension(worldsDir.FullName + levelDir, targetDirectory.FullName + levelDir, ".json");
                 WriteToStandardIn("save resume");
+                _fileUtils.CreatePackBackupFiles(serverPath, levelName, targetDirectory.FullName);
                 _backupRunning = false;
                 return resuilt;
 
             } catch (Exception e) {
-                _logger.AppendLine($"Error with Backup: {e.StackTrace}");
+                _logger.AppendLine($"Error with Backup: {e.Message} {e.StackTrace}");
                 WriteToStandardIn("save resume");
                 _backupRunning = false;
                 return false;
@@ -122,7 +131,7 @@ namespace BedrockService.Service.Server {
                         dates.Add(Convert.ToInt64(folderNameSplit[1]));
                     }
                     dates.Sort();
-                    Directory.Delete($@"{backupDir}\Backup_{dates[dates.Count - 1]}", true);
+                    Directory.Delete($@"{backupDir}\Backup_{dates.First()}", true);
                 }
             } catch (Exception e) {
                 if (e.GetType() == typeof(FormatException)) {
@@ -198,7 +207,7 @@ namespace BedrockService.Service.Server {
                 string exeName = _serverConfiguration.GetProp("ServerExeName").ToString();
                 string appName = exeName.Substring(0, exeName.Length - 4);
                 _configurator.WriteJSONFiles(_serverConfiguration);
-                _configurator.SaveServerProps(_serverConfiguration, false);
+                MinecraftFileUtilities.WriteServerPropsFile(_serverConfiguration);
 
                 try {
                     if (File.Exists($@"{_serverConfiguration.GetProp("ServerPath")}\{_serverConfiguration.GetProp("ServerExeName")}")) {
@@ -224,19 +233,22 @@ namespace BedrockService.Service.Server {
 
         private void CreateProcess() {
             string fileName = $@"{_serverConfiguration.GetProp("ServerPath")}\{_serverConfiguration.GetProp("ServerExeName")}";
-            _serverProcess = Process.Start(new ProcessStartInfo {
+            ProcessStartInfo processStartInfo = new ProcessStartInfo {
                 UseShellExecute = false,
                 RedirectStandardError = true,
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true,
                 FileName = fileName
-            });
-            _serverProcess.PriorityClass = ProcessPriorityClass.High;
-            _serverProcess.OutputDataReceived += StdOutToLog;
-            _serverProcess.BeginOutputReadLine();
-            _stdInStream = _serverProcess.StandardInput;
-            _serverProcess.EnableRaisingEvents = false;
+            };
+            _serverProcess = Process.Start(processStartInfo);
+            if (_serverProcess != null) {
+                _serverProcess.PriorityClass = ProcessPriorityClass.High;
+                _serverProcess.OutputDataReceived += StdOutToLog;
+                _serverProcess.BeginOutputReadLine();
+                _stdInStream = _serverProcess.StandardInput;
+                _serverProcess.EnableRaisingEvents = false;
+            }
         }
 
         private void KillProcesses(Process[] processList) {
@@ -353,16 +365,31 @@ namespace BedrockService.Service.Server {
 
         public bool RollbackToBackup(byte serverIndex, string folderName) {
             IServerConfiguration server = _serviceConfiguration.GetServerInfoByIndex(serverIndex);
-            FileUtils fileUtils = new FileUtils(_servicePath);
             DirectoryInfo worldsDir = new DirectoryInfo($@"{server.GetProp("ServerPath")}\worlds\{server.GetProp("level-name")}");
-            DirectoryInfo backupDir = new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{server.GetServerName()}\{folderName}\{server.GetProp("level-name")}");
+            DirectoryInfo backupLevelDir = new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{server.GetServerName()}\{folderName}\{server.GetProp("level-name")}");
+            DirectoryInfo backupPacksDir = new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{server.GetServerName()}\{folderName}\InstalledPacks");
                 AwaitableServerStop(false).Wait();
             try {
-                fileUtils.DeleteFilesRecursively(worldsDir, true);
+                _fileUtils.DeleteFilesRecursively(worldsDir, true);
                 _logger.AppendLine($"Deleted world folder \"{worldsDir.Name}\"");
-                fileUtils.CopyFilesRecursively(backupDir, worldsDir);
-                _logger.AppendLine($"Copied files from backup \"{backupDir.Name}\" to server worlds directory.");
-                _currentServerStatus = ServerStatus.Starting;
+                _fileUtils.CopyFilesRecursively(backupLevelDir, worldsDir);
+                _logger.AppendLine($"Copied files from backup \"{backupLevelDir.Name}\" to server worlds directory.");
+                MinecraftPackParser parser = new MinecraftPackParser(_processInfo);
+                foreach (FileInfo file in backupPacksDir.GetFiles()) {
+                    _fileUtils.ClearTempDir();
+                    ZipFile.ExtractToDirectory(file.FullName, $@"{_servicePath}\Temp\PackTemp", true);
+                    parser.FoundPacks.Clear();
+                    parser.ParseDirectory($@"{_servicePath}\Temp\PackTemp");
+                    if (parser.FoundPacks[0].ManifestType == "data") {
+                        string folderPath = $@"{server.GetProp("ServerPath")}\behavior_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
+                        ZipFile.ExtractToDirectory(file.FullName, folderPath, true);
+                    }
+                    if (parser.FoundPacks[0].ManifestType == "resources") {
+                        string folderPath = $@"{server.GetProp("ServerPath")}\resource_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
+                        ZipFile.ExtractToDirectory(file.FullName, folderPath, true);
+                    }
+                }
+                AwaitableServerStart().Wait();
                 return true;
             }
             catch (IOException e) {

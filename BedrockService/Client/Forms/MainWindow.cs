@@ -171,6 +171,9 @@ namespace BedrockService.Client.Forms {
             }
             HostListBox.Refresh();
             FormClosing += MainWindow_FormClosing;
+            if (_configManager.DefaultScrollLock) {
+                scrollLockChkBox.Checked = true;
+            }
         }
 
         public void HeartbeatFailDisconnect() {
@@ -252,6 +255,7 @@ namespace BedrockService.Client.Forms {
                     selectedServer.SetAllProps(_editDialog.workingProps);
                 }
             }
+            ServerBusy = false;
         }
 
         private void RestartSrv_Click(object sender, EventArgs e) {
@@ -271,6 +275,7 @@ namespace BedrockService.Client.Forms {
                     DisableUI();
                 }
             }
+            ServerBusy = false;
         }
 
         private void GlobBackup_Click(object sender, EventArgs e) {
@@ -283,14 +288,16 @@ namespace BedrockService.Client.Forms {
                 clientSideServiceConfiguration = _configManager.HostConnectList.First(host => host.GetHostName() == HostListBox.Text);
             }
             DisableUI();
-            AddNewServerForm newServerForm = new AddNewServerForm(clientSideServiceConfiguration, connectedHost.GetServerList());
-            if (newServerForm.ShowDialog() == DialogResult.OK) {
-                JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-                byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(newServerForm.DefaultProps, Formatting.Indented, settings));
-                FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.AddNewServer);
-                newServerForm.Close();
-                newServerForm.Dispose();
+            using (AddNewServerForm newServerForm = new AddNewServerForm(clientSideServiceConfiguration, connectedHost.GetServerList())) {
+                if (newServerForm.ShowDialog() == DialogResult.OK) {
+                    JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
+                    byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(newServerForm.DefaultProps, Formatting.Indented, settings));
+                    FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.AddNewServer);
+                    newServerForm.Close();
+                    newServerForm.Dispose();
+                }
             }
+            ServerBusy = false;
         }
 
         private void RemoveSrvBtn_Click(object sender, EventArgs e) {

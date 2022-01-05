@@ -50,16 +50,17 @@ namespace BedrockService.Shared.Classes {
         public string GetUsername() => Username;
 
         public string SearchForProperty(string input) {
+            input = input.ToLower();
             if (input == "name" || input == "username" || input == "un")
-                return Username;
+                return Username.ToLower();
             if (input == "xuid" || input == "id")
                 return XUID;
             if (input == "perm" || input == "permission" || input == "pl")
-                return PermissionLevel;
+                return PermissionLevel.ToLower();
             if (input == "whitelist" || input == "white" || input == "wl")
-                return Whitelisted.ToString();
+                return Whitelisted.ToString().ToLower();
             if (input == "ignoreslimit" || input == "il")
-                return IgnorePlayerLimits.ToString();
+                return IgnorePlayerLimits.ToString().ToLower();
             return null;
         }
 

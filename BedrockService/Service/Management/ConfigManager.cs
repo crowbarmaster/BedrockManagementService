@@ -62,7 +62,7 @@ namespace BedrockService.Service.Management {
                 if (!serverInfo.InitializeDefaults()) {
                     _logger.AppendLine("Error creating default server!");
                 }
-                SaveServerProps(serverInfo, true);
+                SaveServerConfiguration(serverInfo);
                 _serviceConfiguration.AddNewServerInfo(serverInfo);
             }
         });
@@ -229,36 +229,25 @@ namespace BedrockService.Service.Management {
             whitelistFile.SaveToFile(whitelistFile.Contents);
         }
 
-        public void SaveServerProps(IServerConfiguration server, bool SaveServerInfo) {
+        public void SaveServerConfiguration(IServerConfiguration server) {
             int index = 0;
             string[] output = new string[5 + server.GetAllProps().Count + server.GetStartCommands().Count];
-            output[index++] = "#Server";
-            foreach (Property prop in server.GetAllProps()) {
-                output[index++] = $"{prop.KeyName}={prop}";
-            }
-            if (!SaveServerInfo) {
-                if (!Directory.Exists(server.GetProp("ServerPath").ToString())) {
-                    Directory.CreateDirectory(server.GetProp("ServerPath").ToString());
-                }
-                File.WriteAllLines($@"{server.GetProp("ServerPath")}\server.properties", output);
-            }
-            else {
-                output[index++] = string.Empty;
-                output[index++] = "#StartCmds";
+            output[index++] = string.Empty;
+            output[index++] = "#StartCmds";
 
-                foreach (StartCmdEntry startCmd in server.GetStartCommands()) {
-                    output[index++] = $"AddStartCmd={startCmd.Command}";
-                }
-                output[index++] = string.Empty;
-
-                File.WriteAllLines($@"{_serverConfigDir}\{server.GetFileName()}", output);
-                if (server.GetProp("ServerPath").ToString() == null)
-                    server.GetProp("ServerPath").SetValue(server.GetProp("ServerPath").DefaultValue);
-                if (!Directory.Exists(server.GetProp("ServerPath").ToString())) {
-                    Directory.CreateDirectory(server.GetProp("ServerPath").ToString());
-                }
-                File.WriteAllLines($@"{server.GetProp("ServerPath")}\server.properties", output);
+            foreach (StartCmdEntry startCmd in server.GetStartCommands()) {
+                output[index++] = $"AddStartCmd={startCmd.Command}";
             }
+            output[index++] = string.Empty;
+
+            File.WriteAllLines($@"{_serverConfigDir}\{server.GetFileName()}", output);
+            if (server.GetProp("ServerPath").ToString() == null)
+                server.GetProp("ServerPath").SetValue(server.GetProp("ServerPath").DefaultValue);
+            if (!Directory.Exists(server.GetProp("ServerPath").ToString())) {
+                Directory.CreateDirectory(server.GetProp("ServerPath").ToString());
+            }
+            File.WriteAllLines($@"{server.GetProp("ServerPath")}\server.properties", output);
+
         }
 
         public void RemoveServerConfigs(IServerConfiguration serverInfo, NetworkMessageFlags flag) {
@@ -333,7 +322,7 @@ namespace BedrockService.Service.Management {
                 foreach (string deleteDir in list)
                     foreach (DirectoryInfo dir in new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{serverName}").GetDirectories())
                         if (dir.Name == deleteDir) {
-                            new FileUtils(_processInfo.GetDirectory()).DeleteFilesRecursively(new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{serverName}\{deleteDir}"), true);
+                            new FileUtilities(_processInfo).DeleteFilesRecursively(new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{serverName}\{deleteDir}"), true);
                             _logger.AppendLine($"Deleted backup {deleteDir}.");
                         }
             }
@@ -364,7 +353,7 @@ namespace BedrockService.Service.Management {
 
         private bool DeleteServerFiles(IServerConfiguration serverInfo) {
             try {
-                new FileUtils(_processInfo.GetDirectory()).DeleteFilesRecursively(new DirectoryInfo(serverInfo.GetProp("ServerPath").ToString()), false);
+                new FileUtilities(_processInfo).DeleteFilesRecursively(new DirectoryInfo(serverInfo.GetProp("ServerPath").ToString()), false);
                 return true;
             }
             catch { return false; }

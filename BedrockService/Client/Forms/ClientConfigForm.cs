@@ -13,6 +13,7 @@ namespace BedrockService.Client.Forms {
             InitializeComponent();
             _configManager = configManager;
             _clientConfigs = _configManager.HostConnectList;
+            scrollLockCheckbox.Checked = _configManager.DefaultScrollLock;
             if (!string.IsNullOrEmpty(_configManager.NBTStudioPath)) {
                 nbtPathLabel.Text = $"NBT Studio path: {_configManager.NBTStudioPath}";
             }
@@ -45,7 +46,7 @@ namespace BedrockService.Client.Forms {
                 }
             }
             _configManager.HostConnectList = newConfigs;
-
+            _configManager.DefaultScrollLock = scrollLockCheckbox.Checked;
             _configManager.SaveConfigFile();
             DialogResult = DialogResult.OK;
             Close();

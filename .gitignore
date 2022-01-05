@@ -364,3 +364,4 @@ MigrationBackup/
 /BedrockService/ServiceTests/TestFiles/Temp/ServerFileTemp
 /BedrockService/ServiceTests/TestFiles/Output/stock_props.conf
 GenerateLog.bat
+/commitlog.exe

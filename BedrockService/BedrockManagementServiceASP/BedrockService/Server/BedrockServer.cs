@@ -22,10 +22,12 @@ namespace BedrockManagementServiceASP.BedrockService.Server {
         private readonly IConfigurator _configurator;
         private readonly IBedrockLogger _logger;
         private readonly IProcessInfo _processInfo;
+        private readonly FileUtilities _fileUtils;
         private IBedrockLogger _serverLogger;
         private IPlayerManager _playerManager;
         private string _servicePath;
         private const string _startupMessage = "INFO] Server started.";
+
         public enum ServerStatus {
             Stopped,
             Starting,
@@ -33,7 +35,8 @@ namespace BedrockManagementServiceASP.BedrockService.Server {
             Started
         }
 
-        public BedrockServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo) {
+        public BedrockServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, FileUtilities fileUtils) {
+            _fileUtils = fileUtils;
             _serverConfiguration = serverConfiguration;
             _processInfo = processInfo;
             _serviceConfiguration = serviceConfiguration;
@@ -88,7 +91,6 @@ namespace BedrockManagementServiceASP.BedrockService.Server {
 
         private bool PerformBackup(string queryString) {
             try {
-                FileUtils fileUtils = new FileUtils(_servicePath);
                 FileInfo exe = new FileInfo($@"{_serverConfiguration.GetProp("ServerPath")}\{_serverConfiguration.GetProp("ServerExeName")}");
                 string configBackupPath = _serviceConfiguration.GetProp("BackupPath").ToString();
                 DirectoryInfo backupDir = new DirectoryInfo($@"{configBackupPath}\{_serverConfiguration.GetServerName()}");
@@ -137,13 +139,13 @@ namespace BedrockManagementServiceASP.BedrockService.Server {
                 _logger.AppendLine($"Backing up files for server {_serverConfiguration.GetServerName()}. Please wait!");
                 if (_serviceConfiguration.GetProp("EntireBackups").ToString() == "false") {
                     string levelDir = @$"\{_serverConfiguration.GetProp("level-name")}";
-                    bool resuilt = fileUtils.BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, $@"{targetDirectory.FullName}").Result;
-                    fileUtils.CopyFilesMatchingExtension(worldsDir.FullName + levelDir, targetDirectory.FullName + levelDir, ".json");
+                    bool resuilt = _fileUtils.BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, $@"{targetDirectory.FullName}").Result;
+                    _fileUtils.CopyFilesMatchingExtension(worldsDir.FullName + levelDir, targetDirectory.FullName + levelDir, ".json");
                     WriteToStandardIn("save resume");
                     return resuilt;
                 }
-                fileUtils.CopyFilesRecursively(serverDir, targetDirectory);
-                bool result = fileUtils.BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, $@"{targetDirectory.FullName}\{_serverConfiguration.GetProp("level-name")}").Result;
+                _fileUtils.CopyFilesRecursively(serverDir, targetDirectory);
+                bool result = _fileUtils.BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, $@"{targetDirectory.FullName}\{_serverConfiguration.GetProp("level-name")}").Result;
                 WriteToStandardIn("save resume");
                 return result;
             } catch (Exception e) {
@@ -377,10 +379,10 @@ namespace BedrockManagementServiceASP.BedrockService.Server {
             try {
                 foreach (DirectoryInfo dir in new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{server.GetServerName()}").GetDirectories())
                     if (dir.Name == folderName) {
-                        new FileUtils(_servicePath).DeleteFilesRecursively(new DirectoryInfo($@"{server.GetProp("ServerPath")}\worlds"), false);
+                        _fileUtils.DeleteFilesRecursively(new DirectoryInfo($@"{server.GetProp("ServerPath")}\worlds"), false);
                         _logger.AppendLine($"Deleted world folder contents.");
                         foreach (DirectoryInfo worldDir in new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{server.GetServerName()}\{folderName}").GetDirectories()) {
-                            new FileUtils(_servicePath).CopyFilesRecursively(worldDir, new DirectoryInfo($@"{server.GetProp("ServerPath")}\worlds\{worldDir.Name}"));
+                            _fileUtils.CopyFilesRecursively(worldDir, new DirectoryInfo($@"{server.GetProp("ServerPath")}\worlds\{worldDir.Name}"));
                             _logger.AppendLine($@"Copied {worldDir.Name} to path {server.GetProp("ServerPath")}\worlds");
                         }
                         SetServerStatus(ServerStatus.Starting);

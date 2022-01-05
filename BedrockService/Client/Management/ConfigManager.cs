@@ -10,6 +10,7 @@ namespace BedrockService.Client.Management {
         public string ConfigFile;
         public List<IClientSideServiceConfiguration> HostConnectList = new List<IClientSideServiceConfiguration>();
         public string NBTStudioPath;
+        public bool DefaultScrollLock = false;
         private readonly IBedrockLogger Logger;
 
         public ConfigManager(IBedrockLogger logger) {
@@ -25,8 +26,6 @@ namespace BedrockService.Client.Management {
             if (!File.Exists(ConfigFile)) {
                 Logger.AppendLine("Config file missing! Regenerating default file...");
                 CreateDefaultConfig();
-                LoadConfigs();
-                return;
             }
             string[] lines = File.ReadAllLines(ConfigFile);
             foreach (string line in lines) {
@@ -40,6 +39,9 @@ namespace BedrockService.Client.Management {
                     }
                     if (entrySplit[0] == "NBTStudioPath") {
                         NBTStudioPath = entrySplit[1];
+                    }
+                    if (entrySplit[0] == "EnableScrollbarLockDefault") {
+                        DefaultScrollLock = entrySplit[1].ToLower().Equals(bool.TrueString.ToLower());
                     }
                 }
             }
@@ -57,6 +59,7 @@ namespace BedrockService.Client.Management {
             }
             builder.Append("\n# Settings\n");
             builder.Append("NBTStudioPath=\n");
+            builder.Append($"EnableScrollbarLockDefault={DefaultScrollLock}\n");
             File.WriteAllText(ConfigFile, builder.ToString());
         }
 
@@ -67,7 +70,8 @@ namespace BedrockService.Client.Management {
                 fileContent.Append($"HostEntry={host.GetHostName()};{host.GetAddress()}:{host.GetPort()}\n");
             }
             fileContent.Append("\n# Settings\n");
-            fileContent.Append($"NBTStudioPath={NBTStudioPath}");
+            fileContent.Append($"NBTStudioPath={NBTStudioPath}\n");
+            fileContent.Append($"EnableScrollbarLockDefault={DefaultScrollLock}\n");
             File.WriteAllText(ConfigFile, fileContent.ToString());
         }
     }

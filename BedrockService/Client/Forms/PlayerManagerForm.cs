@@ -14,6 +14,18 @@ namespace BedrockService.Client.Forms {
         private List<IPlayer> playersFound = new List<IPlayer>();
         private readonly List<IPlayer> modifiedPlayers = new List<IPlayer>();
         private IPlayer playerToEdit;
+        private const string _searchLegendText =
+            "Search Legend:\n" +
+            "Syntax: \"function:search text\"\n" +
+            "Use commas for extra filters. Case insensitive.\n" +
+            "Useable filter patterns:\n" +
+            "By username: \"username\", \"name\", or \"un\"\n" +
+            "By perm level: \"permission\", \"perm\", or \"pl\"\n" +
+            "By Whitelist state: \"whitelist\", \"white\", \"wl\"\n" +
+            "By ignores max player limits: \"ignoreslimit\" or \"il\"\n" +
+            "Example: To find Crowbarmast3r with level operator:\n" +
+            "un:crowbarmas3r, pl:operator";
+
 
         public PlayerManagerForm(IServerConfiguration server) {
             InitializeComponent();
@@ -25,14 +37,20 @@ namespace BedrockService.Client.Forms {
             foreach (string s in RegisteredPlayerColumnArray) {
                 gridView.Columns.Add(s.Replace(" ", "").Replace(":", ""), s);
             }
-            gridView.Columns[5].ReadOnly = true;
-            gridView.Columns[6].ReadOnly = true;
-            gridView.Columns[7].ReadOnly = true;
-            gridView.Columns[5].CellTemplate.Style.BackColor = System.Drawing.Color.FromArgb(225, 225, 225);
-            gridView.Columns[6].CellTemplate.Style.BackColor = System.Drawing.Color.FromArgb(225, 225, 225);
-            gridView.Columns[7].CellTemplate.Style.BackColor = System.Drawing.Color.FromArgb(225, 225, 225);
+            for (int i = 5; i < 8; i++) {
+                gridView.Columns[i].ReadOnly = true;
+                gridView.Columns[i].CellTemplate.Style.BackColor = System.Drawing.Color.FromArgb(225, 225, 225);
+            }
             gridView.AllowUserToAddRows = false;
             RefreshGridContents();
+            entryTextToolTip.InitialDelay = 0;
+            entryTextToolTip.ReshowDelay = 0;
+            searchEntryBox.Click += SearchEntryBox_Click;
+        }
+
+        private void SearchEntryBox_Click(object sender, EventArgs e) {
+            
+            entryTextToolTip.Show(_searchLegendText, searchEntryBox, 30000);
         }
 
         private void RefreshGridContents() {
@@ -40,8 +58,14 @@ namespace BedrockService.Client.Forms {
             foreach (IPlayer player in playersFound) {
                 var playerTimes = player.GetTimes();
                 string playerPermission = player.GetPermissionLevel();
-                TimeSpan timeSpent = TimeSpan.FromTicks(long.Parse(playerTimes.Conn) - long.Parse(playerTimes.Disconn));
-                string[] list = new string[] { player.GetXUID(), player.GetUsername(), playerPermission, player.IsPlayerWhitelisted().ToString(), player.PlayerIgnoresLimit().ToString(), playerTimes.First, playerTimes.Conn, timeSpent.ToString("hhmmss") };
+                long firstConnTime = long.Parse(playerTimes.First);
+                long connectTime = long.Parse(playerTimes.Conn);
+                long disconnTime = long.Parse(playerTimes.Disconn);
+                TimeSpan timeSpent = TimeSpan.FromTicks(disconnTime - connectTime);
+                DateTime firstConnDateTime = new DateTime(firstConnTime);
+                DateTime connectDateTime = new DateTime(disconnTime);
+                string timeString = timeSpent.TotalSeconds > 59.5 ? $"{timeSpent.TotalMinutes.ToString("N2")} Minutes" : $"{timeSpent.TotalSeconds.ToString("N2")} Seconds";
+                string[] list = new string[] { player.GetXUID(), player.GetUsername(), playerPermission, player.IsPlayerWhitelisted().ToString(), player.PlayerIgnoresLimit().ToString(), firstConnDateTime.ToString("G"), connectDateTime.ToString("G"), timeString };
                 gridView.Rows.Add(list);
             }
             gridView.Refresh();
@@ -58,29 +82,30 @@ namespace BedrockService.Client.Forms {
             FormManager.TCPClient.SendData(sendBytes, NetworkMessageSource.Client, NetworkMessageDestination.Server, FormManager.MainWindow.connectedHost.GetServerIndex(_server), NetworkMessageTypes.PlayersUpdate);
             FormManager.MainWindow.DisableUI();
             DialogResult = DialogResult.OK;
-            Close();
-            Dispose();
         }
 
         private void searchEntryBox_TextChanged(object sender, EventArgs e) {
             playersFound = _server.GetPlayerList();
-            string curText = searchEntryBox.Text;
+            string curText = searchEntryBox.Text.ToLower();
             List<IPlayer> tempList = new List<IPlayer>();
-            string[] splitCommands;
+            string[] splitCommands = new string[1] {curText};
             string cmd;
             string value;
 
             if (curText.Contains(":")) {
-                splitCommands = curText.Split(',');
-                if (splitCommands.Length > 1) {
+                if (curText.Contains(",")) {
+                    splitCommands = curText.Split(',', StringSplitOptions.TrimEntries);
+                }
+                if (splitCommands.Length > 0) {
                     foreach (string s in splitCommands) {
                         if (s.Contains(":")) {
-                            string[] finalSplit = s.Split(':');
-                            cmd = finalSplit[0];
-                            value = finalSplit[1];
+                            string[] finalSplit = s.Split(':', StringSplitOptions.TrimEntries);
+                            cmd = finalSplit[0].ToLower();
+                            value = finalSplit[1].ToLower();
                             tempList = new List<IPlayer>();
                             foreach (IPlayer player in playersFound) {
-                                if (player.SearchForProperty(cmd).Contains(value)) {
+                                string key = player.SearchForProperty(cmd);
+                                if (key != null && key.Contains(value)) {
                                     tempList.Add(player);
                                 }
                             }
@@ -89,18 +114,12 @@ namespace BedrockService.Client.Forms {
                         }
                     }
                 }
-                splitCommands = curText.Split(':');
-                cmd = splitCommands[0];
-                value = splitCommands[1];
-                foreach (IPlayer player in playersFound) {
-                    if (player.SearchForProperty(cmd).Contains(value)) {
-                        tempList.Add(player);
-                    }
-                }
                 playersFound = tempList;
-                gridView.Refresh();
-                RefreshGridContents();
+            } else {
+                playersFound = _server.GetPlayerList();
             }
+            gridView.Refresh();
+            RefreshGridContents();
         }
 
         private void gridView_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e) {
@@ -129,7 +148,6 @@ namespace BedrockService.Client.Forms {
                     _server.GetPlayerList().Add(form.PlayerToAdd);
                     modifiedPlayers.Add(form.PlayerToAdd);
                     RefreshGridContents();
-                    form.Close();
                 }
             }
         }

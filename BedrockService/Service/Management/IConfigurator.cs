@@ -11,7 +11,7 @@
         Task ReplaceServerBuild(IServerConfiguration server);
         void SaveGlobalFile();
         void SaveKnownPlayerDatabase(IServerConfiguration server);
-        void SaveServerProps(IServerConfiguration server, bool SaveServerInfo);
+        void SaveServerConfiguration(IServerConfiguration server);
         void WriteJSONFiles(IServerConfiguration server);
     }
 }

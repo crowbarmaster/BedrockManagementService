@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.56.8038.12577](https://github.com/crowbarmaster/BedrockManagementService/tree/2.56.8038.12577) (2022-01-03)
+
+[Full Changelog](https://github.com/crowbarmaster/BedrockManagementService/compare/2.56.8038.9288...2.56.8038.12577)
+
+**Merged pull requests:**
+
+- Test possible changelog generation. [\#40](https://github.com/crowbarmaster/BedrockManagementService/pull/40) ([crowbarmaster](https://github.com/crowbarmaster))
+
 ## [2.56.8038.9288](https://github.com/crowbarmaster/BedrockManagementService/tree/2.56.8038.9288) (2022-01-03)
 
 [Full Changelog](https://github.com/crowbarmaster/BedrockManagementService/compare/2.56.8038.5061...2.56.8038.9288)

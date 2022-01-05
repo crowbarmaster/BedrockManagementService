@@ -20,6 +20,7 @@ global using System.Threading;
 global using System.Threading.Tasks;
 global using Topshelf;
 using BedrockService.Service.Core.Interfaces;
+using BedrockService.Shared.Utilities;
 
 namespace BedrockService.Service {
     public class Program {
@@ -46,7 +47,8 @@ namespace BedrockService.Service {
                     IProcessInfo processInfo = new ServiceProcessInfo(_declaredType, Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), Process.GetCurrentProcess().Id, _isDebugEnabled, _shouldStartService);
                     services.AddHostedService<Core.Service>()
                         .AddSingleton(processInfo)
-                        .AddSingleton<NetworkStrategyLookup>()
+                        .AddTransient<NetworkStrategyLookup>()
+                        .AddTransient<FileUtilities>()
                         .AddSingleton<ServiceInfo>()
                         .AddSingleton<IServiceConfiguration>(x => x.GetRequiredService<ServiceInfo>())
                         .AddSingleton<IBedrockConfiguration>(x => x.GetRequiredService<ServiceInfo>())
