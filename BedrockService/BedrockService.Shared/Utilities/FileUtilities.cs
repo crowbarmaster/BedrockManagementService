@@ -17,11 +17,9 @@ namespace BedrockService.Shared.Utilities {
 
         public FileUtilities(IProcessInfo processInfo) {
             _processInfo = processInfo;
+            _servicePath = _processInfo.GetDirectory();
         }
 
-        public FileUtilities(string servicePath) {
-            _servicePath = servicePath;
-        }
         public void CopyFilesRecursively(DirectoryInfo source, DirectoryInfo target) {
             foreach (DirectoryInfo dir in source.GetDirectories())
                 CopyFilesRecursively(dir, target.CreateSubdirectory(dir.Name));
@@ -56,10 +54,7 @@ namespace BedrockService.Shared.Utilities {
             DirectoryInfo tempDirectory = new($@"{_servicePath}\Temp");
             if (!tempDirectory.Exists)
                 tempDirectory.Create();
-            foreach (FileInfo file in tempDirectory.GetFiles("*", SearchOption.AllDirectories))
-                file.Delete();
-            foreach (DirectoryInfo directory in tempDirectory.GetDirectories())
-                directory.Delete(true);
+            DeleteFilesRecursively(tempDirectory, false);
         }
 
         public void DeleteFilelist(string[] fileList, string serverPath) {
