@@ -4,8 +4,8 @@ namespace BedrockService.Service.Networking {
     public interface ITCPListener {
         void Initialize();
         Task StartListening();
-        void SetStrategyDictionaries(Dictionary<NetworkMessageTypes, IMessageParser> standard, Dictionary<NetworkMessageTypes, IFlaggedMessageParser> flagged);
         Task CancelAllTasks();
+        void SetStrategyDictionaries(Dictionary<NetworkMessageTypes, IMessageParser> standard, Dictionary<NetworkMessageTypes, IFlaggedMessageParser> flagged);
         void SetServiceStarted();
         void SetServiceStopped();
     }

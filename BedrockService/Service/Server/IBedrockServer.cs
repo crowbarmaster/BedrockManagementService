@@ -4,9 +4,9 @@
         void StartWatchdog();
         Task AwaitableServerStart();
         Task AwaitableServerStop(bool stopWatchdog);
+        Task RestartServer();
         string GetServerName();
         void WriteToStandardIn(string command);
-        Task RestartServer();
         bool RollbackToBackup(byte serverIndex, string folderName);
         void InitializeBackup();
         IBedrockLogger GetLogger();

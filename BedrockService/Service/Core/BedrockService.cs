@@ -49,33 +49,19 @@ namespace BedrockService.Service.Core {
                     return false;
                 }
                 _updater.CheckUpdates().Wait();
-                if (!File.Exists($@"{_processInfo.GetDirectory()}\Server\stock_packs.json") || !File.Exists($@"{_processInfo.GetDirectory()}\Server\stock_props.conf")) {
-                    _logger.AppendLine("Core file(s) found missing. Rebuilding!");
-                    string version = _serviceConfiguration.GetServerVersion();
-                    MinecraftUpdatePackageProcessor packageProcessor = new(_logger, _processInfo, _serviceConfiguration.GetServerVersion(), $@"{_processInfo.GetDirectory()}\Server");
-                    packageProcessor.ExtractFilesToDirectory();
-                    _configurator.LoadGlobals().Wait();
-                    _serviceConfiguration.SetServerVersion(version);
-                }
+                VerifyCoreFiles();
                 _configurator.LoadServerConfigurations().Wait();
                 _backupCron = CrontabSchedule.TryParse(_serviceConfiguration.GetProp("BackupCron").ToString());
                 _updaterCron = CrontabSchedule.TryParse(_serviceConfiguration.GetProp("UpdateCron").ToString());
                 _bedrockServers.Clear();
                 InitializeTimers();
-                try {
-                    List<IServerConfiguration> temp = _serviceConfiguration.GetServerList();
-                    foreach (IServerConfiguration server in temp) {
-                        IBedrockServer bedrockServer = new BedrockServer(server, _configurator, _logger, _serviceConfiguration, _processInfo, _fileUtils);
-                        bedrockServer.Initialize();
-                        _bedrockServers.Add(bedrockServer);
-                    }
-                } catch (Exception e) {
-                    _logger.AppendLine($"Error Instantiating BedrockServiceWrapper: {e.StackTrace}");
-                }
+                InstanciateServers();
                 _tCPListener.Initialize();
                 return true;
             });
         }
+
+        public ServiceStatus GetServiceStatus() => _CurrentServiceStatus;
 
         public bool Start(HostControl? hostControl) {
             if (!Initialize().Result) {
@@ -103,10 +89,6 @@ namespace BedrockService.Service.Core {
             Task.Run(() => Start(null));
         }
 
-        public void TestStop() {
-            Task.Run(() => Stop(null));
-        }
-
         public bool Stop(HostControl? hostControl) {
             if (ServiceShutdown()) {
                 _tCPListener.CancelAllTasks().Wait();
@@ -115,6 +97,10 @@ namespace BedrockService.Service.Core {
             }
             _logger.AppendLine("Service shutdown completed with errors. Check logs!");
             return false;
+        }
+
+        public void TestStop() {
+            Task.Run(() => Stop(null));
         }
 
         public bool ServiceShutdown() {
@@ -146,14 +132,16 @@ namespace BedrockService.Service.Core {
             });
         }
 
-        public ServiceStatus GetServiceStatus() => _CurrentServiceStatus;
-
         public IBedrockServer GetBedrockServerByIndex(int serverIndex) {
             return _bedrockServers[serverIndex];
         }
 
         public IBedrockServer? GetBedrockServerByName(string name) {
             return _bedrockServers.FirstOrDefault(brs => brs.GetServerName() == name);
+        }
+
+        public void RemoveBedrockServerByIndex(int serverIndex) {
+            _bedrockServers.RemoveAt(serverIndex);
         }
 
         public List<IBedrockServer> GetAllServers() => _bedrockServers;
@@ -169,56 +157,16 @@ namespace BedrockService.Service.Core {
             }
         }
 
-        private void InitializeTimers() {
-            if (_backupTimer != null) {
-                _backupTimer.Stop();
-                _backupTimer = null;
-            }
-            if (_updaterTimer != null) {
-                _updaterTimer.Stop();
-                _updaterTimer = null;
-            }
-            if (_serviceConfiguration.GetProp("BackupEnabled").ToString().ToLower() == "true" && _backupCron != null) {
-                double interval = (_backupCron.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds;
-                if (interval >= 0) {
-                    _backupTimer = new System.Timers.Timer(interval);
-                    _logger.AppendLine($"Automatic backups Enabled, next backup in: {((float)_backupTimer.Interval / 1000)} seconds.");
-                    _backupTimer.Elapsed += BackupTimer_Elapsed;
-                    _backupTimer.Start();
-                }
-            }
-            if (_serviceConfiguration.GetProp("CheckUpdates").ToString().ToLower() == "true" && _updaterCron != null) {
-                double interval = (_updaterCron.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds;
-                if (interval >= 0) {
-                    _updaterTimer = new System.Timers.Timer(interval);
-                    _updaterTimer.Elapsed += UpdateTimer_Elapsed;
-                    _logger.AppendLine($"Automatic updates Enabled, will be checked in: {((float)_updaterTimer.Interval / 1000)} seconds.");
-                    _updaterTimer.Start();
-                }
-            }
-        }
-
-        private void BackupTimer_Elapsed(object sender, ElapsedEventArgs e) {
+        private void InstanciateServers() {
             try {
-                BackupAllServers();
-                InitializeTimers();
-            } catch (Exception ex) {
-                _logger.AppendLine($"Error in BackupTimer_Elapsed {ex}");
-            }
-        }
-
-        private void UpdateTimer_Elapsed(object sender, ElapsedEventArgs e) {
-            try {
-                _updater.CheckUpdates().Wait();
-                if (_updater.CheckVersionChanged()) {
-                    _logger.AppendLine("Version change detected! Restarting server(s) to apply update...");
-                    foreach (IBedrockServer server in _bedrockServers) {
-                        server.RestartServer();
-                    }
+                List<IServerConfiguration> temp = _serviceConfiguration.GetServerList();
+                foreach (IServerConfiguration server in temp) {
+                    IBedrockServer bedrockServer = new BedrockServer(server, _configurator, _logger, _serviceConfiguration, _processInfo, _fileUtils);
+                    bedrockServer.Initialize();
+                    _bedrockServers.Add(bedrockServer);
                 }
-                InitializeTimers();
-            } catch (Exception ex) {
-                _logger.AppendLine($"Error in UpdateTimer_Elapsed {ex}");
+            } catch (Exception e) {
+                _logger.AppendLine($"Error creating server instances: {e.Message} {e.StackTrace}");
             }
         }
 
@@ -275,8 +223,68 @@ namespace BedrockService.Service.Core {
             return true;
         }
 
-        public void RemoveBedrockServerByIndex(int serverIndex) {
-            _bedrockServers.RemoveAt(serverIndex);
+        private void VerifyCoreFiles() {
+            if (!File.Exists($@"{_processInfo.GetDirectory()}\Server\stock_packs.json") || !File.Exists($@"{_processInfo.GetDirectory()}\Server\stock_props.conf")) {
+                _logger.AppendLine("Core file(s) found missing. Rebuilding!");
+                string version = _serviceConfiguration.GetServerVersion();
+                MinecraftUpdatePackageProcessor packageProcessor = new(_logger, _processInfo, _serviceConfiguration.GetServerVersion(), $@"{_processInfo.GetDirectory()}\Server");
+                packageProcessor.ExtractFilesToDirectory();
+                _configurator.LoadGlobals().Wait();
+                _serviceConfiguration.SetServerVersion(version);
+            }
+        }
+
+        private void InitializeTimers() {
+            if (_backupTimer != null) {
+                _backupTimer.Stop();
+                _backupTimer = null;
+            }
+            if (_updaterTimer != null) {
+                _updaterTimer.Stop();
+                _updaterTimer = null;
+            }
+            if (_serviceConfiguration.GetProp("BackupEnabled").ToString().ToLower() == "true" && _backupCron != null) {
+                double interval = (_backupCron.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds;
+                if (interval >= 0) {
+                    _backupTimer = new System.Timers.Timer(interval);
+                    _logger.AppendLine($"Automatic backups Enabled, next backup in: {((float)_backupTimer.Interval / 1000)} seconds.");
+                    _backupTimer.Elapsed += BackupTimer_Elapsed;
+                    _backupTimer.Start();
+                }
+            }
+            if (_serviceConfiguration.GetProp("CheckUpdates").ToString().ToLower() == "true" && _updaterCron != null) {
+                double interval = (_updaterCron.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds;
+                if (interval >= 0) {
+                    _updaterTimer = new System.Timers.Timer(interval);
+                    _updaterTimer.Elapsed += UpdateTimer_Elapsed;
+                    _logger.AppendLine($"Automatic updates Enabled, will be checked in: {((float)_updaterTimer.Interval / 1000)} seconds.");
+                    _updaterTimer.Start();
+                }
+            }
+        }
+
+        private void BackupTimer_Elapsed(object sender, ElapsedEventArgs e) {
+            try {
+                BackupAllServers();
+                InitializeTimers();
+            } catch (Exception ex) {
+                _logger.AppendLine($"Error in BackupTimer_Elapsed {ex}");
+            }
+        }
+
+        private void UpdateTimer_Elapsed(object sender, ElapsedEventArgs e) {
+            try {
+                _updater.CheckUpdates().Wait();
+                if (_updater.CheckVersionChanged()) {
+                    _logger.AppendLine("Version change detected! Restarting server(s) to apply update...");
+                    foreach (IBedrockServer server in _bedrockServers) {
+                        server.RestartServer();
+                    }
+                }
+                InitializeTimers();
+            } catch (Exception ex) {
+                _logger.AppendLine($"Error in UpdateTimer_Elapsed {ex}");
+            }
         }
     }
 }

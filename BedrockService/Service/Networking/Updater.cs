@@ -73,7 +73,11 @@ namespace BedrockService.Service.Networking {
             });
         }
 
-        public async Task FetchBuild(string path, string version) {
+        public bool CheckVersionChanged() => _versionChanged;
+
+        public void MarkUpToDate() => _versionChanged = false;
+
+        private async Task FetchBuild(string path, string version) {
             string ZipDir = $@"{_processInfo.GetDirectory()}\Server\MCSFiles\Update_{version}.zip";
             if (!Directory.Exists($@"{_processInfo.GetDirectory()}\Server\MCSFiles")) {
                 Directory.CreateDirectory($@"{_processInfo.GetDirectory()}\Server\MCSFiles");
@@ -98,10 +102,6 @@ namespace BedrockService.Service.Networking {
                 }
             }
         }
-
-        public bool CheckVersionChanged() => _versionChanged;
-
-        public void MarkUpToDate() => _versionChanged = false;
 
         private async Task<string> FetchHTTPContent(HttpClient client) {
             try {

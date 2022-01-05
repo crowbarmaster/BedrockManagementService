@@ -6,6 +6,12 @@
             _serverConfiguration = serverConfiguration;
         }
 
+        public IPlayer GetPlayerByXUID(string xuid) {
+            if (GetPlayers().Count > 0)
+                return _serverConfiguration.GetPlayerByXuid(xuid);
+            return null;
+        }
+
         public void PlayerConnected(string username, string xuid) {
             string currentTimeInTicks = DateTime.Now.Ticks.ToString();
             IPlayer playerFound = _serverConfiguration.GetPlayerByXuid(xuid);
@@ -31,12 +37,6 @@
                 playerFound.Initialize(xuid, username);
             }
             playerFound.UpdateRegistration(permission, whitelisted, ignoreMaxPlayerLimit);
-        }
-
-        public IPlayer GetPlayerByXUID(string xuid) {
-            if (GetPlayers().Count > 0)
-                return _serverConfiguration.GetPlayerByXuid(xuid);
-            return null;
         }
 
         public void SetPlayer(IPlayer player) {

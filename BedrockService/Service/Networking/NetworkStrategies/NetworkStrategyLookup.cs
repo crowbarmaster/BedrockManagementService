@@ -1,6 +1,6 @@
 ﻿using BedrockService.Service.Core.Interfaces;
 using BedrockService.Service.Networking.MessageInterfaces;
-using BedrockService.Service.Server;
+using BedrockService.Service.Networking.NetworkStrategies;
 using BedrockService.Shared.MinecraftJsonModels.JsonModels;
 using BedrockService.Shared.PackParser;
 using BedrockService.Shared.Utilities;
@@ -8,29 +8,29 @@ using Newtonsoft.Json;
 using System.Text;
 
 namespace BedrockService.Service.Networking {
-    public class NetworkStrategyLookup {
+    public partial class NetworkStrategyLookup {
         private readonly Dictionary<NetworkMessageTypes, IMessageParser> _standardMessageLookup;
         private readonly Dictionary<NetworkMessageTypes, IFlaggedMessageParser> _flaggedMessageLookup;
 
         public NetworkStrategyLookup(ITCPListener listener, IBedrockService service, IBedrockLogger logger, IConfigurator configurator, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, IUpdater updater, FileUtilities fileUtils) {
             _standardMessageLookup = new Dictionary<NetworkMessageTypes, IMessageParser>()
             {
-                {NetworkMessageTypes.DelBackups, new DeleteBackups(configurator) },
+                {NetworkMessageTypes.Connect, new Connect(serviceConfiguration) },
+                {NetworkMessageTypes.AddNewServer, new AddNewServer(processInfo, configurator, serviceConfiguration, service) },
+                {NetworkMessageTypes.Command, new ServerCommand(service, logger) },
+                {NetworkMessageTypes.Restart, new ServerRestart(service) },
+                {NetworkMessageTypes.Backup, new ServerBackup(service) },
                 {NetworkMessageTypes.BackupAll, new ServerBackupAll(service) },
                 {NetworkMessageTypes.EnumBackups, new EnumBackups(configurator) },
-                {NetworkMessageTypes.Backup, new ServerBackup(service) },
-                {NetworkMessageTypes.PropUpdate, new ServerPropUpdate(configurator, serviceConfiguration, service) },
-                {NetworkMessageTypes.Restart, new ServerRestart(service) },
-                {NetworkMessageTypes.Command, new ServerCommand(service, logger) },
-                {NetworkMessageTypes.PackList, new PackList(processInfo, serviceConfiguration, logger) },
-                {NetworkMessageTypes.RemovePack, new RemovePack(processInfo, serviceConfiguration, logger) },
-                {NetworkMessageTypes.PackFile, new PackFile(serviceConfiguration, processInfo, logger, fileUtils) },
-                {NetworkMessageTypes.Connect, new Connect(serviceConfiguration) },
-                {NetworkMessageTypes.StartCmdUpdate, new StartCmdUpdate(configurator, serviceConfiguration) },
-                {NetworkMessageTypes.CheckUpdates, new CheckUpdates(updater) },
                 {NetworkMessageTypes.BackupRollback, new BackupRollback(service) },
-                {NetworkMessageTypes.AddNewServer, new AddNewServer(processInfo, configurator, serviceConfiguration, service) },
+                {NetworkMessageTypes.DelBackups, new DeleteBackups(configurator) },
+                {NetworkMessageTypes.PropUpdate, new ServerPropUpdate(configurator, serviceConfiguration, service) },
+                {NetworkMessageTypes.StartCmdUpdate, new StartCmdUpdate(configurator, serviceConfiguration) },
                 {NetworkMessageTypes.ConsoleLogUpdate, new ConsoleLogUpdate(logger, serviceConfiguration, service) },
+                {NetworkMessageTypes.PackList, new PackList(processInfo, serviceConfiguration, logger) },
+                {NetworkMessageTypes.PackFile, new PackFile(serviceConfiguration, processInfo, logger, fileUtils) },
+                {NetworkMessageTypes.RemovePack, new RemovePack(processInfo, serviceConfiguration, logger) },
+                {NetworkMessageTypes.CheckUpdates, new CheckUpdates(updater) },
                 {NetworkMessageTypes.PlayersRequest, new PlayerRequest(serviceConfiguration) },
                 {NetworkMessageTypes.PlayersUpdate, new PlayersUpdate(configurator, serviceConfiguration, service) },
                 {NetworkMessageTypes.LevelEditRequest, new LevelEditRequest(serviceConfiguration) },
@@ -43,109 +43,7 @@ namespace BedrockService.Service.Networking {
             listener.SetStrategyDictionaries(_standardMessageLookup, _flaggedMessageLookup);
         }
 
-        class DeleteBackups : IMessageParser {
-            private readonly IConfigurator _configurator;
 
-            public DeleteBackups(IConfigurator configurator) {
-                _configurator = configurator;
-            }
-
-            public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
-                JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-                string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
-                List<string> backupFileNames = JsonConvert.DeserializeObject<List<string>>(stringData, settings);
-                _configurator.DeleteBackupsForServer(serverIndex, backupFileNames);
-                return (Array.Empty<byte>(), 0, 0);
-            }
-        }
-
-        class ServerBackupAll : IMessageParser {
-
-            private readonly IBedrockService _service;
-
-            public ServerBackupAll(IBedrockService service) {
-
-                _service = service;
-            }
-
-            public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
-                foreach (IBedrockServer server in _service.GetAllServers())
-                    server.InitializeBackup();
-                return (Array.Empty<byte>(), 0, NetworkMessageTypes.UICallback);
-            }
-        }
-
-        class ServerBackup : IMessageParser {
-
-            private readonly IBedrockService _service;
-            public ServerBackup(IBedrockService service) {
-
-                _service = service;
-            }
-
-            public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
-                _service.GetBedrockServerByIndex(serverIndex).InitializeBackup();
-                return (Array.Empty<byte>(), 0, NetworkMessageTypes.UICallback);
-            }
-        }
-
-        class EnumBackups : IMessageParser {
-            private readonly IConfigurator _configurator;
-
-            public EnumBackups(IConfigurator configurator) {
-                _configurator = configurator;
-            }
-
-            public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
-                Formatting indented = Formatting.Indented;
-                JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-                byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_configurator.EnumerateBackupsForServer(serverIndex), indented, settings));
-                return (serializeToBytes, 0, NetworkMessageTypes.EnumBackups);
-
-            }
-        }
-
-        class ServerPropUpdate : IMessageParser {
-            private readonly IServiceConfiguration _serviceConfiguration;
-            private readonly IBedrockService _bedrockService;
-            private readonly IConfigurator _configurator;
-
-            public ServerPropUpdate(IConfigurator configurator, IServiceConfiguration serviceConfiguration, IBedrockService bedrockService) {
-                _configurator = configurator;
-                _serviceConfiguration = serviceConfiguration;
-                _bedrockService = bedrockService;
-            }
-
-            public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
-                JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-                string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
-                List<Property> propList = JsonConvert.DeserializeObject<List<Property>>(stringData, settings);
-                Property prop = propList.FirstOrDefault(p => p.KeyName == "server-name");
-                if (prop == null) {
-                    _serviceConfiguration.SetAllProps(propList);
-                    _configurator.SaveGlobalFile();
-                    _bedrockService.RestartService();
-                    return (Array.Empty<byte>(), 0, 0);
-                }
-                _serviceConfiguration.GetServerInfoByIndex(serverIndex).SetAllProps(propList);
-                _configurator.SaveServerConfiguration(_serviceConfiguration.GetServerInfoByIndex(serverIndex));
-                _bedrockService.GetBedrockServerByIndex(serverIndex).RestartServer().Wait();
-                return (Array.Empty<byte>(), 0, NetworkMessageTypes.UICallback);
-            }
-        }
-
-        class ServerRestart : IMessageParser {
-            private readonly IBedrockService _service;
-
-            public ServerRestart(IBedrockService service) {
-                _service = service;
-            }
-
-            public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
-                _service.GetBedrockServerByIndex(serverIndex).RestartServer().Wait();
-                return (Array.Empty<byte>(), 0, NetworkMessageTypes.UICallback);
-            }
-        }
 
         class ServerCommand : IMessageParser {
             private readonly IBedrockService _service;
