@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace BedrockService.Shared.Utilities {
-    public class MinecraftFileUtilites {
+    public class MinecraftFileUtilities {
 
         public static bool UpdateWorldPackFile(string filePath, PackManifestJsonModel manifest) {
             WorldPackFileModel worldPackFile = new WorldPackFileModel(filePath);
@@ -29,6 +29,17 @@ namespace BedrockService.Shared.Utilities {
                 return false;
             }
             fileModel.Contents.Add(new KnownPacksJsonModel(contentToAdd));
+            fileModel.SaveToFile();
+            return true;
+        }
+
+        public static bool RemoveEntryFromKnownPacks(string filePath, MinecraftPackContainer contentToRemove) {
+            KnownPacksFileModel fileModel = new(filePath);
+            KnownPacksJsonModel modelToRemove = fileModel.Contents.Where(x => x.uuid == contentToRemove.JsonManifest.header.uuid).FirstOrDefault();
+            if (modelToRemove == null) {
+                return false;
+            }
+            fileModel.Contents.Remove(modelToRemove);
             fileModel.SaveToFile();
             return true;
         }
