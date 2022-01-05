@@ -2,6 +2,7 @@
 using BedrockService.Shared.Interfaces;
 using BedrockService.Shared.MinecraftJsonModels.FileModels;
 using BedrockService.Shared.MinecraftJsonModels.JsonModels;
+using BedrockService.Shared.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
@@ -48,14 +49,10 @@ namespace BedrockService.Shared.PackParser {
                 WorldPackEntryJsonModel foundEntry = worldPacks.FirstOrDefault(x => x.pack_id.Equals(pack.JsonManifest.header.uuid));
                 if (foundEntry != null) {
                     worldPacks.Remove(foundEntry);
-                    worldPackFile.SaveToFile(worldPacks);
+                    worldPackFile.SaveFile();
                 }
             }
-            InstalledPacks.Contents.Remove(InstalledPacks.Contents.First(p => p.uuid != null || p.uuid == pack.JsonManifest.header.uuid));
-            List<KnownPacksJsonModel> packsToWrite = new(_stockDataModel.Contents);
-            if (InstalledPacks.Contents.Count > 0)
-                packsToWrite.AddRange(InstalledPacks.Contents);
-            File.WriteAllText($@"{serverPath}\valid_known_packs.json", JsonConvert.SerializeObject(packsToWrite));
+            MinecraftFileUtilities.RemoveEntryFromKnownPacks($@"{serverPath}\valid_known_packs.json", pack);
         }
     }
 }
