@@ -94,7 +94,6 @@ namespace BedrockService.Service.Networking {
 
             public EnumBackups(IConfigurator configurator) {
                 _configurator = configurator;
-
             }
 
             public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
@@ -108,7 +107,6 @@ namespace BedrockService.Service.Networking {
 
         class ServerPropUpdate : IMessageParser {
             private readonly IServiceConfiguration _serviceConfiguration;
-
             private readonly IBedrockService _bedrockService;
             private readonly IConfigurator _configurator;
 
@@ -137,10 +135,9 @@ namespace BedrockService.Service.Networking {
         }
 
         class ServerRestart : IMessageParser {
-
             private readonly IBedrockService _service;
-            public ServerRestart(IBedrockService service) {
 
+            public ServerRestart(IBedrockService service) {
                 _service = service;
             }
 
@@ -156,7 +153,6 @@ namespace BedrockService.Service.Networking {
 
 
             public ServerCommand(IBedrockService service, IBedrockLogger logger) {
-
                 _service = service;
                 _logger = logger;
             }
@@ -177,7 +173,6 @@ namespace BedrockService.Service.Networking {
 
             public PackList(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, IBedrockLogger logger) {
                 _logger = logger;
-
                 _serviceConfiguration = serviceConfiguration;
                 _processInfo = processInfo;
             }
@@ -202,7 +197,6 @@ namespace BedrockService.Service.Networking {
             private readonly IBedrockLogger _logger;
 
             public RemovePack(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, IBedrockLogger logger) {
-
                 _serviceConfiguration = serviceConfiguration;
                 _processInfo = processInfo;
                 _logger = logger;
@@ -226,7 +220,6 @@ namespace BedrockService.Service.Networking {
             private readonly IServiceConfiguration _serviceConfiguration;
 
             public LevelEditRequest(IServiceConfiguration serviceConfiguration) {
-
                 _serviceConfiguration = serviceConfiguration;
             }
 
@@ -247,7 +240,6 @@ namespace BedrockService.Service.Networking {
             public PlayersUpdate(IConfigurator configurator, IServiceConfiguration serviceConfiguration, IBedrockService service) {
                 _service = service;
                 _configurator = configurator;
-
                 _serviceConfiguration = serviceConfiguration;
             }
 
@@ -291,19 +283,19 @@ namespace BedrockService.Service.Networking {
                     string serverPath = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath").ToString();
                     string levelName = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("level-name").ToString();
                     string knownPacksFile = $@"{serverPath}\valid_known_packs.json";
-                    string filePath = "";
+                    string filePath;
                     if (container.ManifestType == "WorldPack") {
                         _fileUtils.CopyFilesRecursively(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($@"{serverPath}\worlds\{container.FolderName}"));
                     }
                     if (container.ManifestType == "data") {
                         filePath = $@"{serverPath}\worlds\{levelName}\world_behavior_packs.json";
-                        if(MinecraftFileUtilites.UpdateWorldPackFile(filePath, container.JsonManifest) && MinecraftFileUtilites.UpdateKnownPackFile(knownPacksFile, container)) {
+                        if(MinecraftFileUtilities.UpdateWorldPackFile(filePath, container.JsonManifest) && MinecraftFileUtilities.UpdateKnownPackFile(knownPacksFile, container)) {
                             _fileUtils.CopyFilesRecursively(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($@"{serverPath}\behavior_packs\{container.FolderName}"));
                         }
                     }
                     if (container.ManifestType == "resources") {
                         filePath = $@"{serverPath}\worlds\{levelName}\world_resource_packs.json";
-                        if (MinecraftFileUtilites.UpdateWorldPackFile(filePath, container.JsonManifest) && MinecraftFileUtilites.UpdateKnownPackFile(knownPacksFile, container)) {
+                        if (MinecraftFileUtilities.UpdateWorldPackFile(filePath, container.JsonManifest) && MinecraftFileUtilities.UpdateKnownPackFile(knownPacksFile, container)) {
                             _fileUtils.CopyFilesRecursively(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($@"{serverPath}\resource_packs\{container.FolderName}"));
                         }
                     }
@@ -377,7 +369,6 @@ namespace BedrockService.Service.Networking {
 
             public CheckUpdates(IUpdater updater) {
                 _updater = updater;
-
             }
 
             public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
@@ -395,7 +386,6 @@ namespace BedrockService.Service.Networking {
 
             public BackupRollback(IBedrockService service) {
                 _service = service;
-
             }
 
             public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {

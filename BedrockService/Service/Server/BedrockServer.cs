@@ -86,7 +86,6 @@ namespace BedrockService.Service.Server {
 
         private bool PerformBackup(string queryString) {
             try {
-                FileUtilities fileUtils = new FileUtilities(_servicePath);
                 string serverPath = _serverConfiguration.GetProp("ServerPath").ToString();
                 string backupPath = _serviceConfiguration.GetProp("BackupPath").ToString();
                 string levelName = _serverConfiguration.GetProp("level-name").ToString();
@@ -104,8 +103,8 @@ namespace BedrockService.Service.Server {
                 DirectoryInfo targetDirectory = backupDir.CreateSubdirectory($"Backup_{DateTime.Now.Ticks}");
                 _logger.AppendLine($"Backing up files for server {_serverConfiguration.GetServerName()}. Please wait!");
                 string levelDir = @$"\{_serverConfiguration.GetProp("level-name")}";
-                bool resuilt = fileUtils.BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, $@"{targetDirectory.FullName}").Result;
-                fileUtils.CopyFilesMatchingExtension(worldsDir.FullName + levelDir, targetDirectory.FullName + levelDir, ".json");
+                bool resuilt = _fileUtils.BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, $@"{targetDirectory.FullName}").Result;
+                _fileUtils.CopyFilesMatchingExtension(worldsDir.FullName + levelDir, targetDirectory.FullName + levelDir, ".json");
                 WriteToStandardIn("save resume");
                 _fileUtils.CreatePackBackupFiles(serverPath, levelName, targetDirectory.FullName);
                 _backupRunning = false;
@@ -208,7 +207,7 @@ namespace BedrockService.Service.Server {
                 string exeName = _serverConfiguration.GetProp("ServerExeName").ToString();
                 string appName = exeName.Substring(0, exeName.Length - 4);
                 _configurator.WriteJSONFiles(_serverConfiguration);
-                MinecraftFileUtilites.WriteServerPropsFile(_serverConfiguration);
+                MinecraftFileUtilities.WriteServerPropsFile(_serverConfiguration);
 
                 try {
                     if (File.Exists($@"{_serverConfiguration.GetProp("ServerPath")}\{_serverConfiguration.GetProp("ServerExeName")}")) {
@@ -366,19 +365,18 @@ namespace BedrockService.Service.Server {
 
         public bool RollbackToBackup(byte serverIndex, string folderName) {
             IServerConfiguration server = _serviceConfiguration.GetServerInfoByIndex(serverIndex);
-            FileUtilities fileUtils = new FileUtilities(_servicePath);
             DirectoryInfo worldsDir = new DirectoryInfo($@"{server.GetProp("ServerPath")}\worlds\{server.GetProp("level-name")}");
             DirectoryInfo backupLevelDir = new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{server.GetServerName()}\{folderName}\{server.GetProp("level-name")}");
             DirectoryInfo backupPacksDir = new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{server.GetServerName()}\{folderName}\InstalledPacks");
                 AwaitableServerStop(false).Wait();
             try {
-                fileUtils.DeleteFilesRecursively(worldsDir, true);
+                _fileUtils.DeleteFilesRecursively(worldsDir, true);
                 _logger.AppendLine($"Deleted world folder \"{worldsDir.Name}\"");
-                fileUtils.CopyFilesRecursively(backupLevelDir, worldsDir);
+                _fileUtils.CopyFilesRecursively(backupLevelDir, worldsDir);
                 _logger.AppendLine($"Copied files from backup \"{backupLevelDir.Name}\" to server worlds directory.");
                 MinecraftPackParser parser = new MinecraftPackParser(_processInfo);
                 foreach (FileInfo file in backupPacksDir.GetFiles()) {
-                    fileUtils.ClearTempDir();
+                    _fileUtils.ClearTempDir();
                     ZipFile.ExtractToDirectory(file.FullName, $@"{_servicePath}\Temp\PackTemp", true);
                     parser.FoundPacks.Clear();
                     parser.ParseDirectory($@"{_servicePath}\Temp\PackTemp");
