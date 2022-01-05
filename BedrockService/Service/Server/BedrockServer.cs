@@ -1,5 +1,9 @@
 ﻿using BedrockService.Service.Server.Management;
+using BedrockService.Shared.MinecraftJsonModels.FileModels;
+using BedrockService.Shared.MinecraftJsonModels.JsonModels;
+using BedrockService.Shared.PackParser;
 using BedrockService.Shared.Utilities;
+using System.IO.Compression;
 using System.Text.RegularExpressions;
 
 namespace BedrockService.Service.Server {
@@ -81,8 +85,11 @@ namespace BedrockService.Service.Server {
         private bool PerformBackup(string queryString) {
             try {
                 FileUtils fileUtils = new FileUtils(_servicePath);
-                DirectoryInfo worldsDir = new DirectoryInfo($@"{_serverConfiguration.GetProp("ServerPath")}\worlds");
-                DirectoryInfo backupDir = new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{_serverConfiguration.GetServerName()}");
+                string serverPath = _serverConfiguration.GetProp("ServerPath").ToString();
+                string backupPath = _serviceConfiguration.GetProp("BackupPath").ToString();
+                string levelName = _serverConfiguration.GetProp("level-name").ToString();
+                DirectoryInfo worldsDir = new DirectoryInfo($@"{serverPath}\worlds");
+                DirectoryInfo backupDir = new DirectoryInfo($@"{backupPath}\{_serverConfiguration.GetServerName()}");
                 Dictionary<string, int> backupFileInfoPairs = new Dictionary<string, int>();
                 string[] files = queryString.Split(", ");
                 foreach (string file in files) {
@@ -98,14 +105,36 @@ namespace BedrockService.Service.Server {
                 bool resuilt = fileUtils.BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, $@"{targetDirectory.FullName}").Result;
                 fileUtils.CopyFilesMatchingExtension(worldsDir.FullName + levelDir, targetDirectory.FullName + levelDir, ".json");
                 WriteToStandardIn("save resume");
+                CreatePackBackupFiles(serverPath, levelName, targetDirectory);
                 _backupRunning = false;
                 return resuilt;
 
             } catch (Exception e) {
-                _logger.AppendLine($"Error with Backup: {e.StackTrace}");
+                _logger.AppendLine($"Error with Backup: {e.Message} {e.StackTrace}");
                 WriteToStandardIn("save resume");
                 _backupRunning = false;
                 return false;
+            }
+        }
+
+        private void CreatePackBackupFiles(string serverPath, string levelName, DirectoryInfo targetDirectory) {
+            string resouceFolderPath = $@"{serverPath}\resource_packs";
+            string behaviorFolderPath = $@"{serverPath}\behavior_packs";
+            string behaviorFilePath = $@"{serverPath}\worlds\{levelName}\world_behavior_packs.json";
+            string resoruceFilePath = $@"{serverPath}\worlds\{levelName}\world_resource_packs.json";
+            MinecraftPackParser packParser = new(_processInfo);
+            packParser.ParseDirectory(resouceFolderPath);
+            packParser.ParseDirectory(behaviorFolderPath);
+            WorldPackFileModel worldPacks = new(resoruceFilePath);
+            worldPacks.Contents.AddRange(new WorldPackFileModel(behaviorFilePath).Contents);
+            string packBackupFolderPath = $@"{targetDirectory.FullName}\InstalledPacks";
+            Directory.CreateDirectory(packBackupFolderPath);
+            if (worldPacks.Contents.Count > 0) {
+                foreach (WorldPackEntryJsonModel model in worldPacks.Contents) {
+                    MinecraftPackContainer container = packParser.FoundPacks.First(x => x.JsonManifest.header.uuid == model.pack_id);
+                    string packLocation = container.PackContentLocation;
+                    ZipFile.CreateFromDirectory(packLocation, $@"{packBackupFolderPath}\{container.PackContentLocation[container.PackContentLocation.LastIndexOf('\\')..]}.zip");
+                }
             }
         }
 
@@ -198,7 +227,7 @@ namespace BedrockService.Service.Server {
                 string exeName = _serverConfiguration.GetProp("ServerExeName").ToString();
                 string appName = exeName.Substring(0, exeName.Length - 4);
                 _configurator.WriteJSONFiles(_serverConfiguration);
-                _configurator.SaveServerProps(_serverConfiguration, false);
+                MinecraftFileUtilites.WriteServerPropsFile(_serverConfiguration);
 
                 try {
                     if (File.Exists($@"{_serverConfiguration.GetProp("ServerPath")}\{_serverConfiguration.GetProp("ServerExeName")}")) {
@@ -358,14 +387,30 @@ namespace BedrockService.Service.Server {
             IServerConfiguration server = _serviceConfiguration.GetServerInfoByIndex(serverIndex);
             FileUtils fileUtils = new FileUtils(_servicePath);
             DirectoryInfo worldsDir = new DirectoryInfo($@"{server.GetProp("ServerPath")}\worlds\{server.GetProp("level-name")}");
-            DirectoryInfo backupDir = new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{server.GetServerName()}\{folderName}\{server.GetProp("level-name")}");
+            DirectoryInfo backupLevelDir = new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{server.GetServerName()}\{folderName}\{server.GetProp("level-name")}");
+            DirectoryInfo backupPacksDir = new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{server.GetServerName()}\{folderName}\InstalledPacks");
                 AwaitableServerStop(false).Wait();
             try {
                 fileUtils.DeleteFilesRecursively(worldsDir, true);
                 _logger.AppendLine($"Deleted world folder \"{worldsDir.Name}\"");
-                fileUtils.CopyFilesRecursively(backupDir, worldsDir);
-                _logger.AppendLine($"Copied files from backup \"{backupDir.Name}\" to server worlds directory.");
-                _currentServerStatus = ServerStatus.Starting;
+                fileUtils.CopyFilesRecursively(backupLevelDir, worldsDir);
+                _logger.AppendLine($"Copied files from backup \"{backupLevelDir.Name}\" to server worlds directory.");
+                MinecraftPackParser parser = new MinecraftPackParser(_processInfo);
+                foreach (FileInfo file in backupPacksDir.GetFiles()) {
+                    fileUtils.ClearTempDir();
+                    ZipFile.ExtractToDirectory(file.FullName, $@"{_servicePath}\Temp\PackTemp", true);
+                    parser.FoundPacks.Clear();
+                    parser.ParseDirectory($@"{_servicePath}\Temp\PackTemp");
+                    if (parser.FoundPacks[0].ManifestType == "data") {
+                        string folderPath = $@"{server.GetProp("ServerPath")}\behavior_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
+                        ZipFile.ExtractToDirectory(file.FullName, folderPath, true);
+                    }
+                    if (parser.FoundPacks[0].ManifestType == "resources") {
+                        string folderPath = $@"{server.GetProp("ServerPath")}\resource_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
+                        ZipFile.ExtractToDirectory(file.FullName, folderPath, true);
+                    }
+                }
+                AwaitableServerStart().Wait();
                 return true;
             }
             catch (IOException e) {
