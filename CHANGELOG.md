@@ -1,32 +1,16 @@
 # Changelog
 
-## [2.56.8038.12577](https://github.com/crowbarmaster/BedrockManagementService/tree/2.56.8038.12577) (2022-01-03)
+## [Unreleased](https://github.com/crowbarmaster/BedrockManagementService/tree/HEAD)
 
-[Full Changelog](https://github.com/crowbarmaster/BedrockManagementService/compare/2.56.8038.9288...2.56.8038.12577)
+[Full Changelog](https://github.com/crowbarmaster/BedrockManagementService/compare/2.56.8038.9288...HEAD)
 
-**Merged pull requests:**
+**Closed issues:**
 
-- Test possible changelog generation. [\#40](https://github.com/crowbarmaster/BedrockManagementService/pull/40) ([crowbarmaster](https://github.com/crowbarmaster))
+- Service no longer allows client connections [\#31](https://github.com/crowbarmaster/BedrockManagementService/issues/31)
 
 ## [2.56.8038.9288](https://github.com/crowbarmaster/BedrockManagementService/tree/2.56.8038.9288) (2022-01-03)
 
-[Full Changelog](https://github.com/crowbarmaster/BedrockManagementService/compare/2.56.8038.5061...2.56.8038.9288)
-
-**Merged pull requests:**
-
-- Fix issues with server restarts from various client commands. [\#39](https://github.com/crowbarmaster/BedrockManagementService/pull/39) ([crowbarmaster](https://github.com/crowbarmaster))
-
-## [2.56.8038.5061](https://github.com/crowbarmaster/BedrockManagementService/tree/2.56.8038.5061) (2022-01-03)
-
-[Full Changelog](https://github.com/crowbarmaster/BedrockManagementService/compare/2.56.8038.4059...2.56.8038.5061)
-
-**Merged pull requests:**
-
-- Fix client connection issues. [\#38](https://github.com/crowbarmaster/BedrockManagementService/pull/38) ([crowbarmaster](https://github.com/crowbarmaster))
-
-## [2.56.8038.4059](https://github.com/crowbarmaster/BedrockManagementService/tree/2.56.8038.4059) (2022-01-03)
-
-[Full Changelog](https://github.com/crowbarmaster/BedrockManagementService/compare/2.56.8036.35499...2.56.8038.4059)
+[Full Changelog](https://github.com/crowbarmaster/BedrockManagementService/compare/2.56.8036.35499...2.56.8038.9288)
 
 **Fixed bugs:**
 
@@ -34,19 +18,13 @@
 
 **Merged pull requests:**
 
+- Fix issues with server restarts from various client commands. [\#39](https://github.com/crowbarmaster/BedrockManagementService/pull/39) ([crowbarmaster](https://github.com/crowbarmaster))
+- Fix client connection issues. [\#38](https://github.com/crowbarmaster/BedrockManagementService/pull/38) ([crowbarmaster](https://github.com/crowbarmaster))
 - Many fixes related to startup/shutdown [\#37](https://github.com/crowbarmaster/BedrockManagementService/pull/37) ([crowbarmaster](https://github.com/crowbarmaster))
 
 ## [2.56.8036.35499](https://github.com/crowbarmaster/BedrockManagementService/tree/2.56.8036.35499) (2022-01-01)
 
-[Full Changelog](https://github.com/crowbarmaster/BedrockManagementService/compare/2.56.8036.27620...2.56.8036.35499)
-
-**Merged pull requests:**
-
-- Fix critical issues with latest release. [\#36](https://github.com/crowbarmaster/BedrockManagementService/pull/36) ([crowbarmaster](https://github.com/crowbarmaster))
-
-## [2.56.8036.27620](https://github.com/crowbarmaster/BedrockManagementService/tree/2.56.8036.27620) (2022-01-01)
-
-[Full Changelog](https://github.com/crowbarmaster/BedrockManagementService/compare/2.56.8031.12504...2.56.8036.27620)
+[Full Changelog](https://github.com/crowbarmaster/BedrockManagementService/compare/2.56.8031.12492...2.56.8036.35499)
 
 **Fixed bugs:**
 
@@ -60,19 +38,13 @@
 
 **Merged pull requests:**
 
+- Fix critical issues with latest release. [\#36](https://github.com/crowbarmaster/BedrockManagementService/pull/36) ([crowbarmaster](https://github.com/crowbarmaster))
 - Fix ASP layer to build solution properly. [\#34](https://github.com/crowbarmaster/BedrockManagementService/pull/34) ([crowbarmaster](https://github.com/crowbarmaster))
 - Updates to fix current issues. [\#33](https://github.com/crowbarmaster/BedrockManagementService/pull/33) ([crowbarmaster](https://github.com/crowbarmaster))
 - Test pull request merge and build. [\#30](https://github.com/crowbarmaster/BedrockManagementService/pull/30) ([crowbarmaster](https://github.com/crowbarmaster))
 - Test build on merge pull request [\#29](https://github.com/crowbarmaster/BedrockManagementService/pull/29) ([crowbarmaster](https://github.com/crowbarmaster))
 - Working [\#28](https://github.com/crowbarmaster/BedrockManagementService/pull/28) ([crowbarmaster](https://github.com/crowbarmaster))
 - Only perform build if a pull request was merged to master. [\#27](https://github.com/crowbarmaster/BedrockManagementService/pull/27) ([crowbarmaster](https://github.com/crowbarmaster))
-
-## [2.56.8031.12504](https://github.com/crowbarmaster/BedrockManagementService/tree/2.56.8031.12504) (2021-12-27)
-
-[Full Changelog](https://github.com/crowbarmaster/BedrockManagementService/compare/2.56.8031.12492...2.56.8031.12504)
-
-**Merged pull requests:**
-
 - Working commits pushed to master. [\#26](https://github.com/crowbarmaster/BedrockManagementService/pull/26) ([crowbarmaster](https://github.com/crowbarmaster))
 
 ## [2.56.8031.12492](https://github.com/crowbarmaster/BedrockManagementService/tree/2.56.8031.12492) (2021-12-27)
