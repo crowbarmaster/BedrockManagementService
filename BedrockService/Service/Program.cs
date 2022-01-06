@@ -32,13 +32,7 @@ namespace BedrockService.Service {
         private static bool _shouldStartService = true;
         public static void Main(string[] args) {
             if (args.Length > 0) {
-                Console.WriteLine(string.Join(" ", args));
                 _isDebugEnabled = args[0].ToLower() == "-debug";
-                _shouldStartService =
-                    args[0].ToLower() != "install" &&
-                    args[0].ToLower() != "uninstall" &&
-                    args[0].ToLower() != "start" &&
-                    args[0].ToLower() != "stop";
             }
             CreateHostBuilder(args).Build().Run();
         }
