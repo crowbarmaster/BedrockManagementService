@@ -63,7 +63,7 @@ namespace BedrockService.Client.Forms {
                 long disconnTime = long.Parse(playerTimes.Disconn);
                 TimeSpan timeSpent = TimeSpan.FromTicks(disconnTime - connectTime);
                 DateTime firstConnDateTime = new DateTime(firstConnTime);
-                DateTime connectDateTime = new DateTime(disconnTime);
+                DateTime connectDateTime = new DateTime(connectTime);
                 string timeString = timeSpent.TotalSeconds > 59.5 ? $"{timeSpent.TotalMinutes.ToString("N2")} Minutes" : $"{timeSpent.TotalSeconds.ToString("N2")} Seconds";
                 string[] list = new string[] { player.GetXUID(), player.GetUsername(), playerPermission, player.IsPlayerWhitelisted().ToString(), player.PlayerIgnoresLimit().ToString(), firstConnDateTime.ToString("G"), connectDateTime.ToString("G"), timeString };
                 gridView.Rows.Add(list);
