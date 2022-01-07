@@ -50,8 +50,7 @@ namespace BedrockService.Client.Networking {
                 stream = OpenedTcpClient.GetStream();
                 EstablishedLink = true;
                 ClientReciever = Task.Factory.StartNew(new Action(ReceiveListener), _netCancelSource.Token);
-            }
-            catch {
+            } catch {
                 _logger.AppendLine("Could not connect to Server");
                 if (ClientReciever != null)
                     _netCancelSource.Cancel();
@@ -69,12 +68,10 @@ namespace BedrockService.Client.Networking {
                 Connected = false;
                 EstablishedLink = false;
                 _netCancelSource.Cancel();
-            }
-            catch (NullReferenceException) {
+            } catch (NullReferenceException) {
                 Connected = false;
                 EstablishedLink = false;
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 _logger.AppendLine($"Error closing connection: {e.StackTrace}");
             }
         }
@@ -100,7 +97,7 @@ namespace BedrockService.Client.Networking {
                         if (destination != NetworkMessageDestination.Client)
                             continue;
                         int srvCurLen = 0;
-                        JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
+                        JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All, ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
                         switch (msgType) {
                             case NetworkMessageTypes.Connect:
                                 try {
@@ -209,8 +206,7 @@ namespace BedrockService.Client.Networking {
                     stream.Flush();
                     _heartbeatFailTimeout = 0;
                     return true;
-                }
-                catch {
+                } catch {
                     _logger.AppendLine("Error writing to network stream!");
                     Thread.Sleep(100);
                     _heartbeatFailTimeout++;

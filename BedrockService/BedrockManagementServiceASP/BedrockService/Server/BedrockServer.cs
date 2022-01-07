@@ -144,7 +144,7 @@ namespace BedrockManagementServiceASP.BedrockService.Server {
                     WriteToStandardIn("save resume");
                     return resuilt;
                 }
-                _fileUtils.CopyFilesRecursively(serverDir, targetDirectory);
+                _fileUtils.CopyFolderTree(serverDir, targetDirectory);
                 bool result = _fileUtils.BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, $@"{targetDirectory.FullName}\{_serverConfiguration.GetProp("level-name")}").Result;
                 WriteToStandardIn("save resume");
                 return result;
@@ -382,7 +382,7 @@ namespace BedrockManagementServiceASP.BedrockService.Server {
                         _fileUtils.DeleteFilesRecursively(new DirectoryInfo($@"{server.GetProp("ServerPath")}\worlds"), false);
                         _logger.AppendLine($"Deleted world folder contents.");
                         foreach (DirectoryInfo worldDir in new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{server.GetServerName()}\{folderName}").GetDirectories()) {
-                            _fileUtils.CopyFilesRecursively(worldDir, new DirectoryInfo($@"{server.GetProp("ServerPath")}\worlds\{worldDir.Name}"));
+                            _fileUtils.CopyFolderTree(worldDir, new DirectoryInfo($@"{server.GetProp("ServerPath")}\worlds\{worldDir.Name}"));
                             _logger.AppendLine($@"Copied {worldDir.Name} to path {server.GetProp("ServerPath")}\worlds");
                         }
                         SetServerStatus(ServerStatus.Starting);

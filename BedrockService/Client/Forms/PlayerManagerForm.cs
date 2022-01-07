@@ -4,6 +4,7 @@ using BedrockService.Shared.Interfaces;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
@@ -49,26 +50,23 @@ namespace BedrockService.Client.Forms {
         }
 
         private void SearchEntryBox_Click(object sender, EventArgs e) {
-            
+
             entryTextToolTip.Show(_searchLegendText, searchEntryBox, 30000);
         }
 
         private void RefreshGridContents() {
-            gridView.Rows.Clear();
-            foreach (IPlayer player in playersFound) {
-                var playerTimes = player.GetTimes();
-                string playerPermission = player.GetPermissionLevel();
-                long firstConnTime = long.Parse(playerTimes.First);
-                long connectTime = long.Parse(playerTimes.Conn);
-                long disconnTime = long.Parse(playerTimes.Disconn);
-                TimeSpan timeSpent = TimeSpan.FromTicks(disconnTime - connectTime);
-                DateTime firstConnDateTime = new DateTime(firstConnTime);
-                DateTime connectDateTime = new DateTime(disconnTime);
-                string timeString = timeSpent.TotalSeconds > 59.5 ? $"{timeSpent.TotalMinutes.ToString("N2")} Minutes" : $"{timeSpent.TotalSeconds.ToString("N2")} Seconds";
-                string[] list = new string[] { player.GetXUID(), player.GetUsername(), playerPermission, player.IsPlayerWhitelisted().ToString(), player.PlayerIgnoresLimit().ToString(), firstConnDateTime.ToString("G"), connectDateTime.ToString("G"), timeString };
-                gridView.Rows.Add(list);
-            }
-            gridView.Refresh();
+           gridView.Rows.Clear();
+           foreach (IPlayer player in playersFound) {
+               var playerTimes = player.GetTimes();
+               string playerPermission = player.GetPermissionLevel();
+               TimeSpan timeSpent = TimeSpan.FromTicks(playerTimes.Disconn - playerTimes.Conn);
+               DateTime firstConnDateTime = new DateTime(playerTimes.First);
+               DateTime connectDateTime = new DateTime(playerTimes.Conn);
+               string timeString = timeSpent.TotalSeconds > 59.5 ? $"{timeSpent.TotalMinutes.ToString("N2")} Minutes" : $"{timeSpent.TotalSeconds.ToString("N2")} Seconds";
+               string[] list = new string[] { player.GetXUID(), player.GetUsername(), playerPermission, player.IsPlayerWhitelisted().ToString(), player.PlayerIgnoresLimit().ToString(), firstConnDateTime.ToString("G"), connectDateTime.ToString("G"), timeString };
+               gridView.Rows.Add(list);
+           }
+           gridView.Refresh();
         }
 
         private void saveBtn_Click(object sender, EventArgs e) {
@@ -88,7 +86,7 @@ namespace BedrockService.Client.Forms {
             playersFound = _server.GetPlayerList();
             string curText = searchEntryBox.Text.ToLower();
             List<IPlayer> tempList = new List<IPlayer>();
-            string[] splitCommands = new string[1] {curText};
+            string[] splitCommands = new string[1] { curText };
             string cmd;
             string value;
 
@@ -124,22 +122,19 @@ namespace BedrockService.Client.Forms {
 
         private void gridView_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e) {
             DataGridViewRow focusedRow = gridView.Rows[e.RowIndex];
-            playerToEdit = _server.GetPlayerByXuid((string)focusedRow.Cells[0].Value);
+            playerToEdit = _server.GetOrCreatePlayer((string)focusedRow.Cells[0].Value);
         }
 
         private void gridView_CellEndEdit(object sender, DataGridViewCellEventArgs e) {
-            DataGridViewRow focusedRow = gridView.Rows[e.RowIndex];
-            var playerTimes = playerToEdit.GetTimes();
-            string playerFirstConnect = playerTimes.First;
-            string playerConnectTime = playerTimes.Conn;
-            string playerDisconnectTime = playerTimes.Disconn;
-            string playerWhitelist = playerToEdit.IsPlayerWhitelisted().ToString();
-            string playerPermission = playerToEdit.GetPermissionLevel();
-            string playerIgnoreLimit = playerToEdit.PlayerIgnoresLimit().ToString();
-            if ((string)focusedRow.Cells[0].Value != playerToEdit.GetXUID() || (string)focusedRow.Cells[1].Value != playerToEdit.GetUsername() || (string)focusedRow.Cells[2].Value != playerPermission || (string)focusedRow.Cells[3].Value != playerWhitelist || (string)focusedRow.Cells[4].Value != playerIgnoreLimit) {
-                playerToEdit = new Player((string)focusedRow.Cells[0].Value, (string)focusedRow.Cells[1].Value, playerFirstConnect, playerConnectTime, playerDisconnectTime, bool.Parse((string)focusedRow.Cells[3].Value), (string)focusedRow.Cells[2].Value, bool.Parse((string)focusedRow.Cells[4].Value));
-                modifiedPlayers.Add(playerToEdit);
-            }
+          DataGridViewRow focusedRow = gridView.Rows[e.RowIndex];
+          var playerTimes = playerToEdit.GetTimes();
+          string playerWhitelist = playerToEdit.IsPlayerWhitelisted().ToString();
+          string playerPermission = playerToEdit.GetPermissionLevel();
+          string playerIgnoreLimit = playerToEdit.PlayerIgnoresLimit().ToString();
+          if ((string)focusedRow.Cells[0].Value != playerToEdit.GetXUID() || (string)focusedRow.Cells[1].Value != playerToEdit.GetUsername() || (string)focusedRow.Cells[2].Value != playerPermission || (string)focusedRow.Cells[3].Value != playerWhitelist || (string)focusedRow.Cells[4].Value != playerIgnoreLimit) {
+              playerToEdit = new Player((string)focusedRow.Cells[0].Value, (string)focusedRow.Cells[1].Value, playerTimes.First, playerTimes.Conn, playerTimes.Disconn, bool.Parse((string)focusedRow.Cells[3].Value), (string)focusedRow.Cells[2].Value, bool.Parse((string)focusedRow.Cells[4].Value));
+              modifiedPlayers.Add(playerToEdit);
+          }
         }
 
         private void registerPlayerBtn_Click(object sender, EventArgs e) {

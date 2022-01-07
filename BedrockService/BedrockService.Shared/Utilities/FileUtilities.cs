@@ -2,7 +2,6 @@
 using BedrockService.Shared.MinecraftJsonModels.FileModels;
 using BedrockService.Shared.MinecraftJsonModels.JsonModels;
 using BedrockService.Shared.PackParser;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,32 +19,45 @@ namespace BedrockService.Shared.Utilities {
             _servicePath = _processInfo.GetDirectory();
         }
 
-        public void CopyFilesRecursively(DirectoryInfo source, DirectoryInfo target) {
-            foreach (DirectoryInfo dir in source.GetDirectories())
-                CopyFilesRecursively(dir, target.CreateSubdirectory(dir.Name));
-            foreach (FileInfo file in source.GetFiles())
-                file.CopyTo(Path.Combine(target.FullName, file.Name), true);
+        public void CreateInexistantFile(string filePath) {
+            if (!File.Exists(filePath)) {
+                File.Create(filePath).Close();
+            }
+        }
+
+        public void CreateInexistantDirectory(string DirectoryPath) {
+            if (!Directory.Exists(DirectoryPath)) { 
+                Directory.CreateDirectory(DirectoryPath);
+            }
+        }
+
+        public void CopyFolderTree(DirectoryInfo source, DirectoryInfo target) {
+            source.EnumerateFiles("*", SearchOption.AllDirectories)
+                .ToList().ForEach(x => {
+                    FileInfo newFile = new(x.FullName.Replace(source.FullName, target.FullName));
+                    CreateInexistantDirectory(newFile.DirectoryName);
+                    x.CopyTo(newFile.FullName, true); 
+                });
         }
 
         public void CopyFilesMatchingExtension(string source, string target, string extension) {
-            DirectoryInfo sourceDirInfo = new(source);
             if (!extension.StartsWith('.')) {
                 extension = $".{extension}";
             }
-            foreach (FileInfo file in sourceDirInfo.GetFiles()) {
-                if (file.Extension == extension) {
-                    file.CopyTo(Path.Combine(target, file.Name), true);
-                }
-            }
+            new DirectoryInfo(source).EnumerateFiles("*", SearchOption.TopDirectoryOnly)
+                .Where(x => x.Extension.Equals(extension))
+                .ToList()
+                .ForEach(x => x.CopyTo(Path.Combine(target, x.Name), true));
         }
 
         public void DeleteFilesRecursively(DirectoryInfo source, bool removeSourceFolder) {
-            foreach (DirectoryInfo dir in source.GetDirectories())
-                DeleteFilesRecursively(dir, removeSourceFolder);
-            foreach (FileInfo file in source.GetFiles())
-                file.Delete();
-            foreach (DirectoryInfo emptyDir in source.GetDirectories())
-                emptyDir.Delete(true);
+            var files = source.EnumerateFiles("*", SearchOption.AllDirectories)
+                .ToList();
+            files.ForEach(x => x.Delete());
+            var dirs = source.EnumerateDirectories("*", SearchOption.AllDirectories)
+                .Reverse()
+                .ToList();
+            dirs.ForEach(x => x.Delete());
             if (removeSourceFolder)
                 source.Delete(true);
         }
@@ -61,8 +73,7 @@ namespace BedrockService.Shared.Utilities {
             foreach (string file in fileList)
                 try {
                     File.Delete($@"{serverPath}\{file}");
-                }
-                catch { }
+                } catch { }
             List<string> exesInPath = Directory.EnumerateFiles(serverPath, "*.exe", SearchOption.AllDirectories).ToList();
             foreach (string exe in exesInPath)
                 File.Delete(exe);
@@ -117,8 +128,7 @@ namespace BedrockService.Shared.Utilities {
                         File.WriteAllBytes(destFilePath, fileData);
                     }
                     return true;
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     Console.WriteLine($"Error! {ex.Message}");
                 }
                 return false;

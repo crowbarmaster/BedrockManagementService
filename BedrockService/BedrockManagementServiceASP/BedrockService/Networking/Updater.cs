@@ -1,7 +1,6 @@
 ﻿using BedrockService.Shared.Interfaces;
 using BedrockService.Shared.Utilities;
 using System.IO.Compression;
-using System.Net.Http;
 using System.Text.RegularExpressions;
 
 namespace BedrockManagementServiceASP.BedrockService.Networking {

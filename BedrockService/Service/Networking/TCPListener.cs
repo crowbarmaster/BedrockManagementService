@@ -1,9 +1,6 @@
-﻿using BedrockService.Service.Core;
-using BedrockService.Service.Core.Interfaces;
-using BedrockService.Service.Networking.MessageInterfaces;
+﻿using BedrockService.Service.Networking.Interfaces;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography;
 
 namespace BedrockService.Service.Networking {
     public class TCPListener : ITCPListener {
@@ -43,15 +40,6 @@ namespace BedrockService.Service.Networking {
             }
         }
 
-        public void SetStrategyDictionaries(Dictionary<NetworkMessageTypes, IMessageParser> standard, Dictionary<NetworkMessageTypes, IFlaggedMessageParser> flagged) {
-            _standardMessageLookup = standard;
-            _flaggedMessageLookup = flagged;
-        }
-
-        public void SetServiceStarted() => _serviceStarted = true;
-        
-        public void SetServiceStopped() => _serviceStarted = false;
-
         public Task StartListening() {
             return new Task(() => {
                 _logger.AppendLine("TCP listener task started.");
@@ -60,8 +48,7 @@ namespace BedrockService.Service.Networking {
 
                     while (_standardMessageLookup == null) { Task.Delay(100).Wait(); }
                     _inListener.Start();
-                }
-                catch (SocketException e) {
+                } catch (SocketException e) {
                     _logger.AppendLine($"Error! {e.Message}");
                     Thread.Sleep(2000);
                     Environment.Exit(1);
@@ -89,24 +76,41 @@ namespace BedrockService.Service.Networking {
                             return;
                         }
                         Task.Delay(500).Wait();
-                    }
-                    catch (NullReferenceException) { }
-                    catch (InvalidOperationException) {
+                    } catch (NullReferenceException) { } catch (InvalidOperationException) {
                         _inListener = null;
                         return;
-                    }
-                    catch (SocketException) { }
-                    catch (Exception e) {
+                    } catch (SocketException) { } catch (Exception e) {
                         _logger.AppendLine(e.ToString());
                     }
                 }
             }, _cancelTokenSource.Token);
         }
 
+        public Task CancelAllTasks() {
+            return Task.Run(() => {
+                _cancelTokenSource.Cancel();
+                while (_tcpTask?.Status == TaskStatus.Running || _recieverTask?.Status == TaskStatus.Running) {
+                    Task.Delay(100).Wait();
+                }
+                if (_inListener != null) {
+                    _inListener.Stop();
+                }
+            });
+        }
+
+        public void SetStrategyDictionaries(Dictionary<NetworkMessageTypes, IMessageParser> standard, Dictionary<NetworkMessageTypes, IFlaggedMessageParser> flagged) {
+            _standardMessageLookup = standard;
+            _flaggedMessageLookup = flagged;
+        }
+
+        public void SetServiceStarted() => _serviceStarted = true;
+
+        public void SetServiceStopped() => _serviceStarted = false;
+
         private Task ResetListener() {
             return Task.Run(() => {
                 if (!_resettingListener) {
-                    _resettingListener = true;                    
+                    _resettingListener = true;
                     _inListener?.Stop();
                     _logger?.AppendLine("Resetting listener!");
                     _stream?.Close();
@@ -123,7 +127,7 @@ namespace BedrockService.Service.Networking {
             });
         }
 
-        public void SendData(byte[] bytesToSend, NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type, NetworkMessageFlags status) {
+        private void SendData(byte[] bytesToSend, NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type, NetworkMessageFlags status) {
             byte[] byteHeader = new byte[9 + bytesToSend.Length];
             byte[] len = BitConverter.GetBytes(5 + bytesToSend.Length);
             Buffer.BlockCopy(len, 0, byteHeader, 0, 4);
@@ -139,8 +143,7 @@ namespace BedrockService.Service.Networking {
                     _stream.Write(byteHeader, 0, byteHeader.Length);
                     _stream.Flush();
                     _heartbeatFailTimeout = 0;
-                }
-                catch {
+                } catch {
                     _logger.AppendLine("Error writing to network stream!");
                     _heartbeatFailTimeout++;
                     if (_heartbeatFailTimeout >= _heartbeatFailTimeoutLimit) {
@@ -151,15 +154,9 @@ namespace BedrockService.Service.Networking {
             }
         }
 
-        public void SendData(byte[] bytes, NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type) => SendData(bytes, source, destination, serverIndex, type, NetworkMessageFlags.None);
+        private void SendData((byte[] data, byte srvIndex, NetworkMessageTypes type) tuple) => SendData(tuple.data, NetworkMessageSource.Service, NetworkMessageDestination.Client, tuple.srvIndex, tuple.type, NetworkMessageFlags.None);
 
-        public void SendData(byte[] bytes, NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type) => SendData(bytes, source, destination, 0xFF, type, NetworkMessageFlags.None);
-
-        public void SendData(NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type) => SendData(new byte[0], source, destination, 0xFF, type, NetworkMessageFlags.None);
-
-        public void SendData(NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type) => SendData(new byte[0], source, destination, serverIndex, type, NetworkMessageFlags.None);
-
-        public void SendData((byte[] data, byte srvIndex, NetworkMessageTypes type) tuple) => SendData(tuple.data, NetworkMessageSource.Service, NetworkMessageDestination.Client, tuple.srvIndex, tuple.type);
+        private void SendData(NetworkMessageTypes type) => SendData(Array.Empty<byte>(), NetworkMessageSource.Service, NetworkMessageDestination.Client, 0, type, NetworkMessageFlags.None);
 
         private Task IncomingListener() {
             return new Task(() => {
@@ -172,7 +169,7 @@ namespace BedrockService.Service.Networking {
                 NetworkMessageTypes msgType = 0;
                 NetworkMessageFlags msgFlag = 0;
                 while (true) {
-                    SendData(NetworkMessageSource.Service, NetworkMessageDestination.Client, NetworkMessageTypes.Heartbeat);
+                    SendData(NetworkMessageTypes.Heartbeat);
                     if (_cancelTokenSource.IsCancellationRequested) {
                         _logger.AppendLine("TCP Client packet listener canceled!");
                         return;
@@ -203,45 +200,29 @@ namespace BedrockService.Service.Networking {
                                     else
                                         SendData(_flaggedMessageLookup[msgType].ParseMessage(buffer, serverIndex, msgFlag));
 
+                                } catch (Exception e) {
+                                    _logger.AppendLine($"{e.Message} {e.StackTrace}");
                                 }
-                                catch { }
                             }
                         }
                         Task.Delay(500).Wait();
-                    }
-                    catch (OutOfMemoryException) {
+                    } catch (OutOfMemoryException) {
                         _logger.AppendLine("Out of memory exception thrown.");
-                    }
-                    catch (ObjectDisposedException) {
+                    } catch (ObjectDisposedException) {
                         _logger.AppendLine("Client was disposed!");
-                    }
-                    catch (InvalidOperationException e) {
+                    } catch (InvalidOperationException e) {
                         if (msgType != NetworkMessageTypes.ConsoleLogUpdate) {
                             _logger.AppendLine(e.Message);
                             _logger.AppendLine(e.StackTrace);
                         }
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         _logger.AppendLine($"Error: {e.Message} {e.StackTrace}");
                     }
                     try {
                         AvailBytes = _client.Client != null ? _client.Client.Available : 0;
-                    }
-                    catch { }
+                    } catch { }
                 }
             }, _cancelTokenSource.Token);
-        }
-
-        public Task CancelAllTasks() {
-            return Task.Run(() => {
-                _cancelTokenSource.Cancel();
-                while (_tcpTask?.Status == TaskStatus.Running || _recieverTask?.Status == TaskStatus.Running) {
-                    Task.Delay(100).Wait();
-                }
-                if(_inListener != null) {
-                    _inListener.Stop();
-                }
-            });
         }
     }
 }

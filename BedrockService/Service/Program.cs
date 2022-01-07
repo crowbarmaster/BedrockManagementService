@@ -3,10 +3,12 @@
 // This file may need updated according to the specific scenario of the application being upgraded.
 // For more information on ASP.NET Core hosting, see https://docs.microsoft.com/aspnet/core/fundamentals/host/web-host
 
+global using BedrockService.Service.Core.Interfaces;
 global using BedrockService.Service.Management;
 global using BedrockService.Service.Networking;
 global using BedrockService.Shared.Classes;
 global using BedrockService.Shared.Interfaces;
+global using BedrockService.Shared.Utilities;
 global using Microsoft.AspNetCore.Hosting;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
@@ -19,24 +21,18 @@ global using System.Reflection;
 global using System.Threading;
 global using System.Threading.Tasks;
 global using Topshelf;
-using BedrockService.Service.Core.Interfaces;
-using BedrockService.Shared.Utilities;
+using BedrockService.Service.Management.Interfaces;
+using BedrockService.Service.Networking.Interfaces;
 
 namespace BedrockService.Service {
     public class Program {
         public static bool IsExiting = false;
-        private static string _declaredType = "Service";
+        private static readonly string _declaredType = "Service";
         private static bool _isDebugEnabled = false;
         private static bool _shouldStartService = true;
         public static void Main(string[] args) {
             if (args.Length > 0) {
-                Console.WriteLine(string.Join(" ", args));
                 _isDebugEnabled = args[0].ToLower() == "-debug";
-                _shouldStartService =
-                    args[0].ToLower() != "install" &&
-                    args[0].ToLower() != "uninstall" &&
-                    args[0].ToLower() != "start" &&
-                    args[0].ToLower() != "stop";
             }
             CreateHostBuilder(args).Build().Run();
         }
@@ -49,9 +45,9 @@ namespace BedrockService.Service {
                         .AddSingleton(processInfo)
                         .AddTransient<NetworkStrategyLookup>()
                         .AddTransient<FileUtilities>()
-                        .AddSingleton<ServiceInfo>()
-                        .AddSingleton<IServiceConfiguration>(x => x.GetRequiredService<ServiceInfo>())
-                        .AddSingleton<IBedrockConfiguration>(x => x.GetRequiredService<ServiceInfo>())
+                        .AddSingleton<ServiceConfigurator>()
+                        .AddSingleton<IServiceConfiguration>(x => x.GetRequiredService<ServiceConfigurator>())
+                        .AddSingleton<IBedrockConfiguration>(x => x.GetRequiredService<ServiceConfigurator>())
                         .AddSingleton<IBedrockLogger, BedrockLogger>()
                         .AddSingleton<IBedrockService, Core.BedrockService>()
                         .AddSingleton<ITCPListener, TCPListener>()

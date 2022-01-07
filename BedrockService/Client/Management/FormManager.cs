@@ -15,7 +15,7 @@ namespace BedrockService.Client.Management {
         private static TCPClient client;
 
         static FormManager() {
-            _configuration = new ServiceInfo(processInfo);
+            _configuration = new ServiceConfigurator(processInfo);
             _configuration.InitializeDefaults();
             _configuration.SetProp(new Property("LogApplicationOutput", "true") { Value = "true" });
             _logger = new BedrockLogger(processInfo, _configuration);

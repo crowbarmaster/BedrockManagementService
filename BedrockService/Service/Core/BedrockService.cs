@@ -1,6 +1,7 @@
-﻿using BedrockService.Service.Core.Interfaces;
+﻿using BedrockService.Service.Management.Interfaces;
+using BedrockService.Service.Networking.Interfaces;
 using BedrockService.Service.Server;
-using BedrockService.Shared.Utilities;
+using BedrockService.Service.Server.Interfaces;
 using NCrontab;
 using System.Timers;
 
@@ -49,34 +50,19 @@ namespace BedrockService.Service.Core {
                     return false;
                 }
                 _updater.CheckUpdates().Wait();
-                if (!File.Exists($@"{_processInfo.GetDirectory()}\Server\stock_packs.json") || !File.Exists($@"{_processInfo.GetDirectory()}\Server\stock_props.conf")) {
-                    _logger.AppendLine("Core file(s) found missing. Rebuilding!");
-                    string version = _serviceConfiguration.GetServerVersion();
-                    MinecraftUpdatePackageProcessor packageProcessor = new(_logger, _processInfo, _serviceConfiguration.GetServerVersion(), $@"{_processInfo.GetDirectory()}\Server");
-                    packageProcessor.ExtractFilesToDirectory();
-                    _configurator.LoadGlobals().Wait();
-                    _serviceConfiguration.SetServerVersion(version);
-                }
+                VerifyCoreFiles();
                 _configurator.LoadServerConfigurations().Wait();
                 _backupCron = CrontabSchedule.TryParse(_serviceConfiguration.GetProp("BackupCron").ToString());
                 _updaterCron = CrontabSchedule.TryParse(_serviceConfiguration.GetProp("UpdateCron").ToString());
                 _bedrockServers.Clear();
                 InitializeTimers();
-                try {
-                    List<IServerConfiguration> temp = _serviceConfiguration.GetServerList();
-                    foreach (IServerConfiguration server in temp) {
-                        IBedrockServer bedrockServer = new BedrockServer(server, _configurator, _logger, _serviceConfiguration, _processInfo, _fileUtils);
-                        bedrockServer.Initialize();
-                        _bedrockServers.Add(bedrockServer);
-                    }
-                }
-                catch (Exception e) {
-                    _logger.AppendLine($"Error Instantiating BedrockServiceWrapper: {e.StackTrace}");
-                }
+                InstanciateServers();
                 _tCPListener.Initialize();
                 return true;
             });
         }
+
+        public ServiceStatus GetServiceStatus() => _CurrentServiceStatus;
 
         public bool Start(HostControl? hostControl) {
             if (!Initialize().Result) {
@@ -94,19 +80,14 @@ namespace BedrockService.Service.Core {
                 _tCPListener.SetServiceStarted();
                 _CurrentServiceStatus = ServiceStatus.Started;
                 return true;
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 _logger.AppendLine($"Error: {e.Message}.\n{e.StackTrace}");
                 return false;
             }
         }
 
         public void TestStart() {
-            Task.Run(()=>Start(null));
-        }
-
-        public void TestStop() {
-            Task.Run(() => Stop(null));
+            Task.Run(() => Start(null));
         }
 
         public bool Stop(HostControl? hostControl) {
@@ -117,6 +98,10 @@ namespace BedrockService.Service.Core {
             }
             _logger.AppendLine("Service shutdown completed with errors. Check logs!");
             return false;
+        }
+
+        public void TestStop() {
+            Task.Run(() => Stop(null));
         }
 
         public bool ServiceShutdown() {
@@ -134,7 +119,7 @@ namespace BedrockService.Service.Core {
             }
         }
 
-        public Task RestartService() { 
+        public Task RestartService() {
             return Task.Run(() => {
                 try {
                     _tCPListener.SetServiceStopped();
@@ -148,14 +133,16 @@ namespace BedrockService.Service.Core {
             });
         }
 
-        public ServiceStatus GetServiceStatus() => _CurrentServiceStatus;
-
         public IBedrockServer GetBedrockServerByIndex(int serverIndex) {
             return _bedrockServers[serverIndex];
         }
 
         public IBedrockServer? GetBedrockServerByName(string name) {
             return _bedrockServers.FirstOrDefault(brs => brs.GetServerName() == name);
+        }
+
+        public void RemoveBedrockServerByIndex(int serverIndex) {
+            _bedrockServers.RemoveAt(serverIndex);
         }
 
         public List<IBedrockServer> GetAllServers() => _bedrockServers;
@@ -168,6 +155,83 @@ namespace BedrockService.Service.Core {
             if (ValidSettingsCheck()) {
                 bedrockServer.AwaitableServerStart().Wait();
                 bedrockServer.StartWatchdog();
+            }
+        }
+
+        private void InstanciateServers() {
+            try {
+                List<IServerConfiguration> temp = _serviceConfiguration.GetServerList();
+                foreach (IServerConfiguration server in temp) {
+                    IBedrockServer bedrockServer = new BedrockServer(server, _configurator, _logger, _serviceConfiguration, _processInfo, _fileUtils);
+                    bedrockServer.Initialize();
+                    _bedrockServers.Add(bedrockServer);
+                }
+            } catch (Exception e) {
+                _logger.AppendLine($"Error creating server instances: {e.Message} {e.StackTrace}");
+            }
+        }
+
+        private void BackupAllServers() {
+            _logger.AppendLine("Service started backup of all servers...");
+            foreach (var brs in _bedrockServers) {
+                brs.InitializeBackup();
+            }
+            _logger.AppendLine("Backups have been completed.");
+        }
+
+        private bool ValidSettingsCheck() {
+            bool validating = true;
+            while (validating) {
+                if (_serviceConfiguration.GetServerList().Count() < 1) {
+                    throw new Exception("No Servers Configured");
+                } else {
+                    var duplicatePortList = _serviceConfiguration.GetServerList()
+                        .Select(x => x.GetAllProps()
+                            .GroupBy(z => z.Value)
+                            .SelectMany(z => z
+                                .Where(y => y.KeyName.StartsWith("server-port"))))
+                        .GroupBy(z => z.Select(x => x.Value))
+                        .SelectMany(x => x.Key)
+                        .GroupBy(x => x)
+                        .Where(x => x.Count() > 1)
+                        .ToList();
+                    var duplicateNameList = _serviceConfiguration.GetServerList()
+                        .GroupBy(x => x.GetServerName())
+                        .Where(x => x.Count() > 1)
+                        .ToList();
+                    if (duplicateNameList.Count() > 0) {
+                        throw new Exception($"Duplicate server name {duplicateNameList.First().First().GetServerName()} was found. Please check configuration files");
+                    }
+                    if (duplicatePortList.Count() > 0) {
+                        string serverPorts = string.Join(", ", duplicatePortList.Select(x => x.Key).ToArray());
+                        throw new Exception($"Duplicate ports used! Check server configurations targeting port(s) {serverPorts}");
+                    }
+                    foreach (var server in _serviceConfiguration.GetServerList()) {
+                        if (_updater.CheckVersionChanged() || !File.Exists(server.GetProp("ServerPath") + "\\bedrock_server.exe")) {
+                            _configurator.ReplaceServerBuild(server).Wait();
+                        }
+                        if (server.GetProp("ServerExeName").ToString() != "bedrock_server.exe" && File.Exists(server.GetProp("ServerPath") + "\\bedrock_server.exe") && !File.Exists(server.GetProp("ServerPath") + "\\" + server.GetProp("ServerExeName"))) {
+                            File.Copy(server.GetProp("ServerPath") + "\\bedrock_server.exe", server.GetProp("ServerPath") + "\\" + server.GetProp("ServerExeName"));
+                        }
+                    }
+                    if (_updater.CheckVersionChanged())
+                        _updater.MarkUpToDate();
+                    else {
+                        validating = false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        private void VerifyCoreFiles() {
+            if (!File.Exists($@"{_processInfo.GetDirectory()}\Server\stock_packs.json") || !File.Exists($@"{_processInfo.GetDirectory()}\Server\stock_props.conf")) {
+                _logger.AppendLine("Core file(s) found missing. Rebuilding!");
+                string version = _serviceConfiguration.GetServerVersion();
+                MinecraftUpdatePackageProcessor packageProcessor = new(_logger, _processInfo, _serviceConfiguration.GetServerVersion(), $@"{_processInfo.GetDirectory()}\Server");
+                packageProcessor.ExtractFilesToDirectory();
+                _configurator.LoadGlobals().Wait();
+                _serviceConfiguration.SetServerVersion(version);
             }
         }
 
@@ -204,8 +268,7 @@ namespace BedrockService.Service.Core {
             try {
                 BackupAllServers();
                 InitializeTimers();
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 _logger.AppendLine($"Error in BackupTimer_Elapsed {ex}");
             }
         }
@@ -220,67 +283,9 @@ namespace BedrockService.Service.Core {
                     }
                 }
                 InitializeTimers();
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 _logger.AppendLine($"Error in UpdateTimer_Elapsed {ex}");
             }
-        }
-
-        private void BackupAllServers() {
-            _logger.AppendLine("Service started backup of all servers...");
-            foreach (var brs in _bedrockServers) {
-                brs.InitializeBackup();
-            }
-            _logger.AppendLine("Backups have been completed.");
-        }
-
-        private bool ValidSettingsCheck() {
-            bool validating = true;
-            while (validating) {
-                if (_serviceConfiguration.GetServerList().Count() < 1) {
-                    throw new Exception("No Servers Configured");
-                } else {
-                    var duplicatePortList = _serviceConfiguration.GetServerList()
-                        .Select(x => x.GetAllProps()
-                            .GroupBy(z => z.Value)
-                            .SelectMany(z => z
-                                .Where(y => y.KeyName.StartsWith("server-port"))))
-                        .GroupBy(z => z.Select(x => x.Value))
-                        .SelectMany(x => x.Key)
-                        .GroupBy(x => x)
-                        .Where(x => x.Count() > 1)
-                        .ToList();
-                    var duplicateNameList = _serviceConfiguration.GetServerList()
-                        .GroupBy(x => x.GetServerName())
-                        .Where(x => x.Count() > 1)
-                        .ToList();
-                    if (duplicateNameList.Count() > 0) {
-                        throw new Exception($"Duplicate server name {duplicateNameList.First().First().GetServerName()} was found. Please check configuration files");
-                    }
-                    if(duplicatePortList.Count() > 0) {
-                        string serverPorts = string.Join(", ", duplicatePortList.Select(x=>x.Key).ToArray());
-                        throw new Exception($"Duplicate ports used! Check server configurations targeting port(s) {serverPorts}"); 
-                    }
-                    foreach (var server in _serviceConfiguration.GetServerList()) {
-                        if (_updater.CheckVersionChanged() || !File.Exists(server.GetProp("ServerPath") + "\\bedrock_server.exe")) {
-                            _configurator.ReplaceServerBuild(server).Wait();
-                        }
-                        if (server.GetProp("ServerExeName").ToString() != "bedrock_server.exe" && File.Exists(server.GetProp("ServerPath") + "\\bedrock_server.exe") && !File.Exists(server.GetProp("ServerPath") + "\\" + server.GetProp("ServerExeName"))) {
-                            File.Copy(server.GetProp("ServerPath") + "\\bedrock_server.exe", server.GetProp("ServerPath") + "\\" + server.GetProp("ServerExeName"));
-                        }
-                    }
-                    if (_updater.CheckVersionChanged())
-                        _updater.MarkUpToDate();
-                    else {
-                        validating = false;
-                    }
-                }
-            }
-            return true;
-        }
-
-        public void RemoveBedrockServerByIndex(int serverIndex) {
-            _bedrockServers.RemoveAt(serverIndex);
         }
     }
 }

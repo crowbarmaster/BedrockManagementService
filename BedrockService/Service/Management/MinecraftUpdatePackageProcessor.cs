@@ -1,13 +1,7 @@
-﻿using BedrockService.Shared.PackParser;
-using BedrockService.Shared.MinecraftJsonModels.FileModels;
+﻿using BedrockService.Shared.MinecraftJsonModels.FileModels;
 using BedrockService.Shared.MinecraftJsonModels.JsonModels;
-using System;
-using System.Collections.Generic;
+using BedrockService.Shared.PackParser;
 using System.IO.Compression;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace BedrockService.Service.Management {
     public class MinecraftUpdatePackageProcessor {
@@ -28,7 +22,7 @@ namespace BedrockService.Service.Management {
             Directory.CreateDirectory(_workingDirectory);
             _logger = logger;
         }
-        
+
         public void ExtractFilesToDirectory() {
             using (ZipArchive archive = ZipFile.OpenRead($@"{_serviceDirectory}\Server\MCSFiles\Update_{_packageVersion}.zip")) {
                 int fileCount = archive.Entries.Count;
@@ -38,15 +32,15 @@ namespace BedrockService.Service.Management {
                         percentResult = i % (((int)Math.Round(fileCount / 10.0)) * 10 / 6);
                     } catch (DivideByZeroException) { }
                     if (percentResult == 0) {
-                        _logger.AppendLine($"Extracting server files to build core files, {Math.Round((double)i / (double)fileCount, 2) * 100}% completed...");
+                        _logger.AppendLine($"Extracting server files to build core files, {Math.Round(i / (double)fileCount, 2) * 100}% completed...");
                     }
                     string fixedPath = $@"{_workingDirectory}\{archive.Entries[i].FullName.Replace('/', '\\')}";
                     if (!archive.Entries[i].FullName.EndsWith("/")) {
                         if (File.Exists(fixedPath)) {
                             File.Delete(fixedPath);
                         }
-                        if (fixedPath.Contains("bedrock_server.pdb")) { 
-                            continue; 
+                        if (fixedPath.Contains("bedrock_server.pdb")) {
+                            continue;
                         }
                         archive.Entries[i].ExtractToFile(fixedPath);
                     } else {
@@ -73,7 +67,7 @@ namespace BedrockService.Service.Management {
             fileModel.FilePath = $@"{_fileTargetDirectory}\stock_packs.json";
             foreach (MinecraftPackContainer pack in packParser.FoundPacks) {
                 string fixedPath = pack.PackContentLocation
-                        .Replace(_workingDirectory+'\\', "")
+                        .Replace(_workingDirectory + '\\', "")
                         .Replace('\\', '/');
                 KnownPacksJsonModel jsonModel = new() {
                     file_system = "RawPath",

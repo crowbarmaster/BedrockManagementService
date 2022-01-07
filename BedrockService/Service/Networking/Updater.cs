@@ -1,5 +1,4 @@
-﻿using BedrockService.Shared.Utilities;
-using System.IO.Compression;
+﻿using BedrockService.Service.Networking.Interfaces;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 
@@ -75,7 +74,11 @@ namespace BedrockService.Service.Networking {
             });
         }
 
-        public async Task FetchBuild(string path, string version) {
+        public bool CheckVersionChanged() => _versionChanged;
+
+        public void MarkUpToDate() => _versionChanged = false;
+
+        private async Task FetchBuild(string path, string version) {
             string ZipDir = $@"{_processInfo.GetDirectory()}\Server\MCSFiles\Update_{version}.zip";
             if (!Directory.Exists($@"{_processInfo.GetDirectory()}\Server\MCSFiles")) {
                 Directory.CreateDirectory($@"{_processInfo.GetDirectory()}\Server\MCSFiles");
@@ -89,8 +92,7 @@ namespace BedrockService.Service.Networking {
                     using (Stream contentStream = await (await httpClient.SendAsync(request)).Content.ReadAsStreamAsync(), stream = new FileStream(ZipDir, FileMode.Create, FileAccess.Write, FileShare.None, 256000, true)) {
                         try {
                             await contentStream.CopyToAsync(stream);
-                        }
-                        catch (Exception e) {
+                        } catch (Exception e) {
                             _logger.AppendLine($"Download zip resulted in error: {e.StackTrace}");
                         }
                         httpClient.Dispose();
@@ -102,22 +104,15 @@ namespace BedrockService.Service.Networking {
             }
         }
 
-        public bool CheckVersionChanged() => _versionChanged;
-
-        public void MarkUpToDate() => _versionChanged = false;
-
         private async Task<string> FetchHTTPContent(HttpClient client) {
             try {
                 return await client.GetStringAsync("https://www.minecraft.net/en-us/download/server/bedrock");
-            }
-            catch (HttpRequestException) {
+            } catch (HttpRequestException) {
                 _logger.AppendLine($"Error! could not fetch current webpage content!");
-            }
-            catch (TaskCanceledException) {
+            } catch (TaskCanceledException) {
                 Thread.Sleep(200);
                 return await FetchHTTPContent(client);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 _logger.AppendLine($"Updater resulted in error: {e.Message}\n{e.InnerException}\n{e.StackTrace}");
             }
             return null;

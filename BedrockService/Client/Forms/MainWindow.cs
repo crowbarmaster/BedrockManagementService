@@ -151,7 +151,7 @@ namespace BedrockService.Client.Forms {
             ServerSelectBox.Items.Clear();
             if (connectedHost != null) {
                 _logManager.InitLogThread(connectedHost);
-                foreach (ServerInfo server in connectedHost.GetServerList())
+                foreach (ServerConfigurator server in connectedHost.GetServerList())
                     ServerSelectBox.Items.Add(server.ServerName);
                 if (ServerSelectBox.Items.Count > 0) {
                     ServerSelectBox.SelectedIndex = 0;
@@ -183,8 +183,7 @@ namespace BedrockService.Client.Forms {
                 ServerInfoBox.Invoke((MethodInvoker)delegate { ServerInfoBox.Text = "Lost connection to host!"; });
                 ServerBusy = false;
                 ComponentEnableManager();
-            }
-            catch (InvalidOperationException) { }
+            } catch (InvalidOperationException) { }
 
             selectedServer = null;
             connectedHost = null;
@@ -229,7 +228,7 @@ namespace BedrockService.Client.Forms {
 
         private void ServerSelectBox_SelectedIndexChanged(object sender, EventArgs e) {
             if (connectedHost != null) {
-                foreach (ServerInfo server in connectedHost.GetServerList()) {
+                foreach (ServerConfigurator server in connectedHost.GetServerList()) {
                     if (ServerSelectBox.SelectedItem != null && ServerSelectBox.SelectedItem.ToString() == server.GetServerName()) {
                         selectedServer = server;
                         ServerInfoBox.Text = server.GetServerName();
@@ -301,8 +300,8 @@ namespace BedrockService.Client.Forms {
         }
 
         private void RemoveSrvBtn_Click(object sender, EventArgs e) {
-            using(RemoveServerControl form = new RemoveServerControl()) {
-                if(form.ShowDialog() == DialogResult.OK) {
+            using (RemoveServerControl form = new RemoveServerControl()) {
+                if (form.ShowDialog() == DialogResult.OK) {
                     FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.RemoveServer, form.SelectedFlag);
                     form.Close();
                 }
@@ -341,8 +340,7 @@ namespace BedrockService.Client.Forms {
                         ServerInfoBox.Text = "";
                         HostInfoLabel.Text = $"Select a host below:";
                     });
-                }
-                catch (Exception) { }
+                } catch (Exception) { }
 
             }
         }
@@ -503,8 +501,7 @@ namespace BedrockService.Client.Forms {
                 if (editDialog.ShowDialog() == DialogResult.OK) {
                     FormManager.TCPClient.SendData(Encoding.UTF8.GetBytes(editDialog.RollbackFolderName), NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.BackupRollback);
                     ServerBusy = true;
-                }
-                else {
+                } else {
                     ServerBusy = false;
                 }
                 editDialog.Close();
@@ -531,8 +528,7 @@ namespace BedrockService.Client.Forms {
                     if (openFile.ShowDialog() == DialogResult.OK) {
                         _configManager.NBTStudioPath = openFile.FileName;
                         _configManager.SaveConfigFile();
-                    }
-                    else return;
+                    } else return;
                 }
             ServerBusy = true;
             FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.LevelEditRequest);

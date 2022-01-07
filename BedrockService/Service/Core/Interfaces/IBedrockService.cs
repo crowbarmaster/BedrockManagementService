@@ -1,4 +1,4 @@
-﻿using BedrockService.Service.Server;
+﻿using BedrockService.Service.Server.Interfaces;
 
 namespace BedrockService.Service.Core.Interfaces {
     public interface IBedrockService : ServiceControl {

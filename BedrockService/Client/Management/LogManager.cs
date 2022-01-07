@@ -2,8 +2,8 @@
 using BedrockService.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -28,7 +28,7 @@ namespace BedrockService.Client.Management {
                 try {
                     Working = true;
                     StringBuilder sendString = new StringBuilder();
-                    foreach (ServerInfo server in _connectedHost.GetServerList()) {
+                    foreach (ServerConfigurator server in _connectedHost.GetServerList()) {
                         server.ConsoleBuffer = server.ConsoleBuffer ?? new List<LogEntry>();
                         sendString.Append($"{server.ServerName};{server.ConsoleBuffer.Count}|");
                     }
@@ -49,8 +49,7 @@ namespace BedrockService.Client.Management {
                     FormManager.MainWindow.LogBox.Invoke((MethodInvoker)delegate {
                         currentLogBoxLength = FormManager.MainWindow.LogBox.TextLength;
                     });
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     _logger.AppendLine($"LogManager Error! Stacetrace: {e.StackTrace}");
                 }
             }
@@ -71,8 +70,7 @@ namespace BedrockService.Client.Management {
                 LogTask = Task.Factory.StartNew(new Action(LogManagerTask), _logTaskCancelSource.Token);
                 _logger.AppendLine("LogThread started");
                 return true;
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 _logger.AppendLine($"Error starting LogThread: {e.StackTrace}");
             }
             return false;
@@ -84,8 +82,7 @@ namespace BedrockService.Client.Management {
             }
             try {
                 _logTaskCancelSource.Cancel();
-            }
-            catch (ThreadAbortException e) {
+            } catch (ThreadAbortException e) {
                 _logger.AppendLine(e.StackTrace);
             }
             _logger.AppendLine("LogThread stopped");
