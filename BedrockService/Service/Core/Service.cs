@@ -20,8 +20,8 @@ namespace BedrockService.Service.Core {
         public async Task InitializeHost() {
             await Task.Run(() => {
                 _host = HostFactory.New(hostConfig => {
-                    hostConfig.SetStartTimeout(TimeSpan.FromSeconds(10));
-                    hostConfig.SetStopTimeout(TimeSpan.FromSeconds(10));
+                    hostConfig.SetStartTimeout(TimeSpan.FromSeconds(120));
+                    hostConfig.SetStopTimeout(TimeSpan.FromSeconds(120));
                     hostConfig.UseAssemblyInfoForServiceInfo();
                     hostConfig.Service(settings => _bedrockService, s => {
                         s.BeforeStartingService(_ => _logger.AppendLine("Starting service..."));
