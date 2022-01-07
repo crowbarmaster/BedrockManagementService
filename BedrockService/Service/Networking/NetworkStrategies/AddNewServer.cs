@@ -24,7 +24,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
             JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
             List<Property> propList = JsonConvert.DeserializeObject<List<Property>>(stringData, settings);
             Property serverNameProp = propList.First(p => p.KeyName == "server-name");
-            ServerInfo newServer = new ServerInfo(_serviceConfiguration.GetProp("ServersPath").ToString(), _serviceConfiguration.GetServerDefaultPropList()) {
+            ServerConfigurator newServer = new ServerConfigurator(_serviceConfiguration.GetProp("ServersPath").ToString(), _serviceConfiguration.GetServerDefaultPropList()) {
                 ServerName = serverNameProp.ToString(),
                 ServerPropList = propList,
                 ServerPath = new Property("ServerPath", "") {

@@ -97,7 +97,7 @@ namespace BedrockService.Client.Networking {
                         if (destination != NetworkMessageDestination.Client)
                             continue;
                         int srvCurLen = 0;
-                        JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
+                        JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All, ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
                         switch (msgType) {
                             case NetworkMessageTypes.Connect:
                                 try {

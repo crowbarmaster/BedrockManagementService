@@ -151,7 +151,7 @@ namespace BedrockService.Client.Forms {
             ServerSelectBox.Items.Clear();
             if (connectedHost != null) {
                 _logManager.InitLogThread(connectedHost);
-                foreach (ServerInfo server in connectedHost.GetServerList())
+                foreach (ServerConfigurator server in connectedHost.GetServerList())
                     ServerSelectBox.Items.Add(server.ServerName);
                 if (ServerSelectBox.Items.Count > 0) {
                     ServerSelectBox.SelectedIndex = 0;
@@ -228,7 +228,7 @@ namespace BedrockService.Client.Forms {
 
         private void ServerSelectBox_SelectedIndexChanged(object sender, EventArgs e) {
             if (connectedHost != null) {
-                foreach (ServerInfo server in connectedHost.GetServerList()) {
+                foreach (ServerConfigurator server in connectedHost.GetServerList()) {
                     if (ServerSelectBox.SelectedItem != null && ServerSelectBox.SelectedItem.ToString() == server.GetServerName()) {
                         selectedServer = server;
                         ServerInfoBox.Text = server.GetServerName();

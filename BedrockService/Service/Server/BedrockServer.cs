@@ -185,13 +185,13 @@ namespace BedrockService.Service.Server {
                         var playerInfo = ExtractPlayerInfoFromString(dataMsg);
                         _logger.AppendLine($"Player {playerInfo.username} connected with XUID: {playerInfo.xuid}");
                         _playerManager.PlayerConnected(playerInfo.username, playerInfo.xuid);
-                        _configurator.SaveKnownPlayerDatabase(_serverConfiguration);
+                        _configurator.SavePlayerDatabase(_serverConfiguration);
                     }
                     if (dataMsg.Contains("Player disconnected")) {
                         var playerInfo = ExtractPlayerInfoFromString(dataMsg);
                         _logger.AppendLine($"Player {playerInfo.username} disconnected with XUID: {playerInfo.xuid}");
                         _playerManager.PlayerDisconnected(playerInfo.xuid);
-                        _configurator.SaveKnownPlayerDatabase(_serverConfiguration);
+                        _configurator.SavePlayerDatabase(_serverConfiguration);
                     }
                     if (dataMsg.Contains("Failed to load Vanilla")) {
                         AwaitableServerStop(false).Wait();

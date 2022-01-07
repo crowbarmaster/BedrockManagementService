@@ -14,7 +14,7 @@ namespace BedrockService.Client.Forms {
             this.serviceConfiguration = serviceConfiguration;
             this.serverConfigurations = serverConfigurations;
             InitializeComponent();
-            IServerConfiguration server = new ServerInfo(FormManager.MainWindow.connectedHost.GetProp("ServersPath").ToString(), FormManager.MainWindow.connectedHost.GetServerDefaultPropList());
+            IServerConfiguration server = new ServerConfigurator(FormManager.MainWindow.connectedHost.GetProp("ServersPath").ToString(), FormManager.MainWindow.connectedHost.GetServerDefaultPropList());
             server.InitializeDefaults();
             DefaultProps = FormManager.MainWindow.connectedHost.GetServerDefaultPropList();
         }

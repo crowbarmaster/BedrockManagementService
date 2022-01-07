@@ -26,7 +26,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
                 } catch (Exception) {
                 }
             }
-            _configurator.SaveKnownPlayerDatabase(_serviceConfiguration.GetServerInfoByIndex(serverIndex));
+            _configurator.SavePlayerDatabase(_serviceConfiguration.GetServerInfoByIndex(serverIndex));
             _configurator.WriteJSONFiles(_serviceConfiguration.GetServerInfoByIndex(serverIndex));
             Task.Delay(500).Wait();
             _service.GetBedrockServerByIndex(serverIndex).WriteToStandardIn("ops reload");
