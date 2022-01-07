@@ -42,12 +42,12 @@ namespace BedrockManagementServiceASP.BedrockService.Management {
                 if (File.Exists($@"{_serverConfigDir}\..\bedrock_ver.ini"))
                     _loadedVersion = File.ReadAllText($@"{_serverConfigDir}\..\bedrock_ver.ini");
 
-                ServerInfo serverInfo;
+                ServerConfigurator serverInfo;
                 LoadGlobals();
 
                 LoadServerConfigurations();
                 if (_serviceConfiguration.GetServerList().Count == 0) {
-                    serverInfo = new ServerInfo(null, _serviceConfiguration.GetServerDefaultPropList());
+                    serverInfo = new ServerConfigurator(null, _serviceConfiguration.GetServerDefaultPropList());
                     serverInfo.InitializeDefaults();
                     SaveServerProps(serverInfo, true);
                     _serviceConfiguration.AddNewServerInfo(serverInfo);
@@ -59,10 +59,10 @@ namespace BedrockManagementServiceASP.BedrockService.Management {
             _serviceConfiguration.GetServerList().Clear();
             string[] files = Directory.GetFiles(_serverConfigDir, "*.conf");
             foreach (string file in files) {
-                ServerInfo serverInfo;
+                ServerConfigurator serverInfo;
                 FileInfo FInfo = new FileInfo(file);
                 string[] fileEntries = File.ReadAllLines(file);
-                serverInfo = new ServerInfo($@"{_processInfo.GetDirectory()}\Server", _serviceConfiguration.GetServerDefaultPropList());
+                serverInfo = new ServerConfigurator($@"{_processInfo.GetDirectory()}\Server", _serviceConfiguration.GetServerDefaultPropList());
                 LoadPlayerDatabase(serverInfo);
                 LoadRegisteredPlayers(serverInfo);
                 _serviceConfiguration.AddNewServerInfo(serverInfo);
@@ -83,25 +83,7 @@ namespace BedrockManagementServiceASP.BedrockService.Management {
         }
 
         public void LoadRegisteredPlayers(IServerConfiguration server) {
-            string serverName = server.GetServerName();
-            string filePath = $@"{_serverConfigDir}\RegisteredPlayers\{serverName}.preg";
-            if (!File.Exists(filePath)) {
-                File.Create(filePath).Close();
-                return;
-            }
-            foreach (string entry in File.ReadLines(filePath)) {
-                if (entry.StartsWith("#") || string.IsNullOrWhiteSpace(entry))
-                    continue;
-                string[] split = entry.Split(',');
-                _logger.AppendLine($"Server \"{server.GetServerName()}\" Loaded registered player: {split[1]}");
-                IPlayer playerFound = server.GetPlayerByXuid(split[0]);
-                if (playerFound == null) {
-                    server.AddUpdatePlayer(new Player(split[0], split[1], DateTime.Now.Ticks.ToString(), "0", "0", split[3].ToLower() == "true", split[2], split[4].ToLower() == "true"));
-                    continue;
-                }
-                var playerTimes = playerFound.GetTimes();
-                server.AddUpdatePlayer(new Player(split[0], split[1], playerTimes.First, playerTimes.Conn, playerTimes.Disconn, split[3].ToLower() == "true", split[2], split[4].ToLower() == "true"));
-            }
+
         }
 
         private void LoadGlobals() {
@@ -156,24 +138,7 @@ namespace BedrockManagementServiceASP.BedrockService.Management {
         }
 
         public void LoadPlayerDatabase(IServerConfiguration server) {
-            string filePath = $@"{_serverConfigDir}\KnownPlayers\{server.GetServerName()}.playerdb";
-            if (!File.Exists(filePath)) {
-                File.Create(filePath).Close();
-                return;
-            }
-            foreach (string entry in File.ReadLines(filePath)) {
-                if (entry.StartsWith("#") || string.IsNullOrWhiteSpace(entry))
-                    continue;
-                string[] split = entry.Split(',');
-                _logger.AppendLine($"Server \"{server.GetServerName()}\" loaded known player: {split[1]}");
-                IPlayer playerFound = server.GetPlayerByXuid(split[0]);
-                if (playerFound == null) {
-                    server.AddUpdatePlayer(new Player(split[0], split[1], split[2], split[3], split[4], false, server.GetProp("default-player-permission-level").ToString(), false));
-                    continue;
-                }
-                var playerTimes = playerFound.GetTimes();
-                server.AddUpdatePlayer(new Player(split[0], split[1], playerTimes.First, playerTimes.Conn, playerTimes.Disconn, playerFound.IsPlayerWhitelisted(), playerFound.GetPermissionLevel(), playerFound.PlayerIgnoresLimit()));
-            }
+
         }
 
         public void SaveKnownPlayerDatabase(IServerConfiguration server) {
