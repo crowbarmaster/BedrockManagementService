@@ -200,7 +200,9 @@ namespace BedrockService.Service.Networking {
                                     else
                                         SendData(_flaggedMessageLookup[msgType].ParseMessage(buffer, serverIndex, msgFlag));
 
-                                } catch { }
+                                } catch (Exception e) {
+                                    _logger.AppendLine($"{e.Message} {e.StackTrace}");
+                                }
                             }
                         }
                         Task.Delay(500).Wait();
