@@ -12,11 +12,13 @@ namespace BedrockService.Service.Management {
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IProcessInfo _processInfo;
         private readonly IBedrockLogger _logger;
+        private readonly FileUtilities _fileUtilities;
 
-        public ConfigManager(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, IBedrockLogger logger) {
+        public ConfigManager(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, IBedrockLogger logger, FileUtilities fileUtilities) {
             _processInfo = processInfo;
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
+            _fileUtilities = fileUtilities;
             _serverConfigDir = $@"{_processInfo.GetDirectory()}\Server\Configs";
             _globalFile = $@"{_processInfo.GetDirectory()}\Service\Globals.conf";
             if (!Directory.Exists(_serverConfigDir))
@@ -33,72 +35,6 @@ namespace BedrockService.Service.Management {
                 _loadedVersion = File.ReadAllText($@"{_serverConfigDir}\..\bedrock_ver.ini");
         }
 
-        public Task LoadAllConfigurations() => Task.Run(() => {
-            LoadGlobals();
-            LoadServerConfigurations();
-        });
-
-
-        public Task LoadServerConfigurations() => Task.Run(() => {
-            ServerInfo serverInfo;
-            _serviceConfiguration.GetServerList().Clear();
-            string[] files = Directory.GetFiles(_serverConfigDir, "*.conf");
-            foreach (string file in files) {
-                FileInfo FInfo = new FileInfo(file);
-                string[] fileEntries = File.ReadAllLines(file);
-                serverInfo = new ServerInfo(_serviceConfiguration.GetProp("ServersPath").ToString(), _serviceConfiguration.GetServerDefaultPropList());
-                if (serverInfo.InitializeDefaults()) {
-                    serverInfo.ProcessConfiguration(fileEntries);
-                }
-                LoadPlayerDatabase(serverInfo);
-                LoadRegisteredPlayers(serverInfo);
-                _serviceConfiguration.AddNewServerInfo(serverInfo);
-            }
-            if (_serviceConfiguration.GetServerList().Count == 0) {
-                serverInfo = new ServerInfo(_serviceConfiguration.GetProp("ServersPath").ToString(), _serviceConfiguration.GetServerDefaultPropList());
-                if (!serverInfo.InitializeDefaults()) {
-                    _logger.AppendLine("Error creating default server!");
-                }
-                SaveServerConfiguration(serverInfo);
-                _serviceConfiguration.AddNewServerInfo(serverInfo);
-            }
-        });
-
-
-        public void SaveGlobalFile() {
-            string[] output = new string[_serviceConfiguration.GetAllProps().Count + 3];
-            int index = 0;
-            output[index++] = "#Globals";
-            output[index++] = string.Empty;
-            foreach (Property prop in _serviceConfiguration.GetAllProps()) {
-                output[index++] = $"{prop.KeyName}={prop}";
-            }
-            output[index++] = string.Empty;
-
-            File.WriteAllLines(_globalFile, output);
-        }
-
-        public void LoadRegisteredPlayers(IServerConfiguration server) {
-            string serverName = server.GetServerName();
-            string filePath = $@"{_serverConfigDir}\RegisteredPlayers\{serverName}.preg";
-            if (!File.Exists(filePath)) {
-                File.Create(filePath).Close();
-                return;
-            }
-            foreach (string entry in File.ReadLines(filePath)) {
-                if (entry.StartsWith("#") || string.IsNullOrWhiteSpace(entry))
-                    continue;
-                string[] split = entry.Split(',');
-                IPlayer playerFound = server.GetPlayerByXuid(split[0]);
-                if (playerFound == null) {
-                    server.AddUpdatePlayer(new Player(split[0], split[1], DateTime.Now.Ticks.ToString(), "0", "0", split[3].ToLower() == "true", split[2], split[4].ToLower() == "true"));
-                    continue;
-                }
-                var playerTimes = playerFound.GetTimes();
-                server.AddUpdatePlayer(new Player(split[0], split[1], playerTimes.First, playerTimes.Conn, playerTimes.Disconn, split[3].ToLower() == "true", split[2], split[4].ToLower() == "true"));
-            }
-        }
-
         public Task LoadGlobals() => Task.Run(() => {
             _serviceConfiguration.InitializeDefaults();
             if (File.Exists(_globalFile)) {
@@ -111,10 +47,29 @@ namespace BedrockService.Service.Management {
             SaveGlobalFile();
         });
 
-
-        private int RoundOff(int i) {
-            return ((int)Math.Round(i / 10.0)) * 10;
-        }
+        public Task LoadServerConfigurations() => Task.Run(() => {
+            ServerConfigurator serverInfo;
+            _serviceConfiguration.GetServerList().Clear();
+            string[] files = Directory.GetFiles(_serverConfigDir, "*.conf");
+            foreach (string file in files) {
+                FileInfo FInfo = new FileInfo(file);
+                string[] fileEntries = File.ReadAllLines(file);
+                serverInfo = new ServerConfigurator(_serviceConfiguration.GetProp("ServersPath").ToString(), _serviceConfiguration.GetServerDefaultPropList());
+                if (serverInfo.InitializeDefaults()) {
+                    serverInfo.ProcessConfiguration(fileEntries);
+                }
+                LoadPlayerDatabase(serverInfo);
+                _serviceConfiguration.AddNewServerInfo(serverInfo);
+            }
+            if (_serviceConfiguration.GetServerList().Count == 0) {
+                serverInfo = new ServerConfigurator(_serviceConfiguration.GetProp("ServersPath").ToString(), _serviceConfiguration.GetServerDefaultPropList());
+                if (!serverInfo.InitializeDefaults()) {
+                    _logger.AppendLine("Error creating default server!");
+                }
+                SaveServerConfiguration(serverInfo);
+                _serviceConfiguration.AddNewServerInfo(serverInfo);
+            }
+        });
 
         public async Task ReplaceServerBuild(IServerConfiguration server) {
             await Task.Run(() => {
@@ -151,27 +106,20 @@ namespace BedrockService.Service.Management {
             });
         }
 
-        public void LoadPlayerDatabase(IServerConfiguration server) {
-            string filePath = $@"{_serverConfigDir}\KnownPlayers\{server.GetServerName()}.playerdb";
-            if (!File.Exists(filePath)) {
-                File.Create(filePath).Close();
-                return;
+        public void SaveGlobalFile() {
+            string[] output = new string[_serviceConfiguration.GetAllProps().Count + 3];
+            int index = 0;
+            output[index++] = "#Globals";
+            output[index++] = string.Empty;
+            foreach (Property prop in _serviceConfiguration.GetAllProps()) {
+                output[index++] = $"{prop.KeyName}={prop}";
             }
-            foreach (string entry in File.ReadLines(filePath)) {
-                if (entry.StartsWith("#") || string.IsNullOrWhiteSpace(entry))
-                    continue;
-                string[] split = entry.Split(',');
-                IPlayer playerFound = server.GetPlayerByXuid(split[0]);
-                if (playerFound == null) {
-                    server.AddUpdatePlayer(new Player(split[0], split[1], split[2], split[3], split[4], false, server.GetProp("default-player-permission-level").ToString(), false));
-                    continue;
-                }
-                var playerTimes = playerFound.GetTimes();
-                server.AddUpdatePlayer(new Player(split[0], split[1], playerTimes.First, playerTimes.Conn, playerTimes.Disconn, playerFound.IsPlayerWhitelisted(), playerFound.GetPermissionLevel(), playerFound.PlayerIgnoresLimit()));
-            }
+            output[index++] = string.Empty;
+
+            File.WriteAllLines(_globalFile, output);
         }
 
-        public void SaveKnownPlayerDatabase(IServerConfiguration server) {
+        public void SavePlayerDatabase(IServerConfiguration server) {
             lock (_fileLock) {
                 string filePath = $@"{_serverConfigDir}\KnownPlayers\{server.GetServerName()}.playerdb";
                 if (File.Exists(filePath)) {
@@ -203,6 +151,27 @@ namespace BedrockService.Service.Management {
             }
         }
 
+        public void SaveServerConfiguration(IServerConfiguration server) {
+            int index = 0;
+            string[] output = new string[5 + server.GetAllProps().Count + server.GetStartCommands().Count];
+            output[index++] = string.Empty;
+            output[index++] = "#StartCmds";
+
+            foreach (StartCmdEntry startCmd in server.GetStartCommands()) {
+                output[index++] = $"AddStartCmd={startCmd.Command}";
+            }
+            output[index++] = string.Empty;
+
+            File.WriteAllLines($@"{_serverConfigDir}\{server.GetFileName()}", output);
+            if (server.GetProp("ServerPath").ToString() == null)
+                server.GetProp("ServerPath").SetValue(server.GetProp("ServerPath").DefaultValue);
+            if (!Directory.Exists(server.GetProp("ServerPath").ToString())) {
+                Directory.CreateDirectory(server.GetProp("ServerPath").ToString());
+            }
+            File.WriteAllLines($@"{server.GetProp("ServerPath")}\server.properties", output);
+
+        }
+
         public void WriteJSONFiles(IServerConfiguration server) {
             string permFilePath = $@"{server.GetProp("ServerPath")}\permissions.json";
             string whitelistFilePath = $@"{server.GetProp("ServerPath")}\whitelist.json";
@@ -224,25 +193,18 @@ namespace BedrockService.Service.Management {
             whitelistFile.SaveToFile(whitelistFile.Contents);
         }
 
-        public void SaveServerConfiguration(IServerConfiguration server) {
-            int index = 0;
-            string[] output = new string[5 + server.GetAllProps().Count + server.GetStartCommands().Count];
-            output[index++] = string.Empty;
-            output[index++] = "#StartCmds";
-
-            foreach (StartCmdEntry startCmd in server.GetStartCommands()) {
-                output[index++] = $"AddStartCmd={startCmd.Command}";
+        public List<Property> EnumerateBackupsForServer(byte serverIndex) {
+            string serverName = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetServerName();
+            List<Property> newList = new List<Property>();
+            try {
+                foreach (DirectoryInfo dir in new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{serverName}").GetDirectories()) {
+                    string[] splitName = dir.Name.Split('_');
+                    newList.Add(new Property(dir.Name, new DateTime(long.Parse(splitName[1])).ToString("G")));
+                }
+            } catch (IOException) {
+                return newList;
             }
-            output[index++] = string.Empty;
-
-            File.WriteAllLines($@"{_serverConfigDir}\{server.GetFileName()}", output);
-            if (server.GetProp("ServerPath").ToString() == null)
-                server.GetProp("ServerPath").SetValue(server.GetProp("ServerPath").DefaultValue);
-            if (!Directory.Exists(server.GetProp("ServerPath").ToString())) {
-                Directory.CreateDirectory(server.GetProp("ServerPath").ToString());
-            }
-            File.WriteAllLines($@"{server.GetProp("ServerPath")}\server.properties", output);
-
+            return newList;
         }
 
         public void RemoveServerConfigs(IServerConfiguration serverInfo, NetworkMessageFlags flag) {
@@ -295,20 +257,6 @@ namespace BedrockService.Service.Management {
             } catch { }
         }
 
-        public List<Property> EnumerateBackupsForServer(byte serverIndex) {
-            string serverName = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetServerName();
-            List<Property> newList = new List<Property>();
-            try {
-                foreach (DirectoryInfo dir in new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{serverName}").GetDirectories()) {
-                    string[] splitName = dir.Name.Split('_');
-                    newList.Add(new Property(dir.Name, new DateTime(long.Parse(splitName[1])).ToString("G")));
-                }
-            } catch (IOException) {
-                return newList;
-            }
-            return newList;
-        }
-
         public void DeleteBackupsForServer(byte serverIndex, List<string> list) {
             string serverName = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetServerName();
             try {
@@ -321,6 +269,30 @@ namespace BedrockService.Service.Management {
             } catch (IOException e) {
                 _logger.AppendLine($"Error deleting selected backups! {e.Message}");
             }
+        }
+
+        private void LoadPlayerDatabase(IServerConfiguration server) {
+            string serverName = server.GetServerName();
+            string dbPath = $@"{_serverConfigDir}\KnownPlayers\{serverName}.playerdb";
+            string regPath = $@"{_serverConfigDir}\RegisteredPlayers\{serverName}.preg";
+            _fileUtilities.CreateInexistantFile(regPath);
+            _fileUtilities.CreateInexistantFile(dbPath);
+            List<string[]> playerDbEntries = File.ReadAllLines(dbPath)
+                .Where(x => !x.StartsWith("#"))
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(x => x.Split(','))
+                .ToList();
+            List<string[]> playerRegEntries = File.ReadAllLines(regPath)
+                .Where(x => !x.StartsWith("#"))
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(x => x.Split(','))
+                .ToList();
+            playerDbEntries.ForEach(x => {
+                server.GetOrCreatePlayer(x[0]).UpdatePlayerFromDbStrings(x);
+            });
+            playerRegEntries.ForEach(x => {
+                server.GetOrCreatePlayer(x[0]).UpdatePlayerFromRegStrings(x);
+            });
         }
 
         private bool DeleteBackups(IServerConfiguration serverInfo) {
@@ -340,6 +312,10 @@ namespace BedrockService.Service.Management {
                 }
                 return true;
             } catch { return false; }
+        }
+
+        private int RoundOff(int i) {
+            return ((int)Math.Round(i / 10.0)) * 10;
         }
 
         private bool DeleteServerFiles(IServerConfiguration serverInfo) {
