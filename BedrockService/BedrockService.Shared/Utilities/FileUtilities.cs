@@ -31,10 +31,13 @@ namespace BedrockService.Shared.Utilities {
             }
         }
 
-        public void CopyFilesRecursively(DirectoryInfo source, DirectoryInfo target) {
-            source.EnumerateFiles("*", new EnumerationOptions() { RecurseSubdirectories = true })
-                .ToList()
-                .ForEach(x => x.CopyTo(Path.Combine(target.FullName, x.Name), true));
+        public void CopyFolderTree(DirectoryInfo source, DirectoryInfo target) {
+            source.EnumerateFiles("*", SearchOption.AllDirectories)
+                .ToList().ForEach(x => {
+                    FileInfo newFile = new(x.FullName.Replace(source.FullName, target.FullName));
+                    CreateInexistantDirectory(newFile.DirectoryName);
+                    x.CopyTo(newFile.FullName, true); 
+                });
         }
 
         public void CopyFilesMatchingExtension(string source, string target, string extension) {
@@ -48,12 +51,13 @@ namespace BedrockService.Shared.Utilities {
         }
 
         public void DeleteFilesRecursively(DirectoryInfo source, bool removeSourceFolder) {
-            source.EnumerateFiles("*", SearchOption.AllDirectories)
-                .ToList()
-                .ForEach(x => x.Delete());
-            source.EnumerateDirectories("*", SearchOption.AllDirectories)
-                .ToList()
-                .ForEach(x => x.Delete());
+            var files = source.EnumerateFiles("*", SearchOption.AllDirectories)
+                .ToList();
+            files.ForEach(x => x.Delete());
+            var dirs = source.EnumerateDirectories("*", SearchOption.AllDirectories)
+                .Reverse()
+                .ToList();
+            dirs.ForEach(x => x.Delete());
             if (removeSourceFolder)
                 source.Delete(true);
         }
