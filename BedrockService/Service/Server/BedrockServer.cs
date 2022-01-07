@@ -110,7 +110,7 @@ namespace BedrockService.Service.Server {
             try {
                 _fileUtils.DeleteFilesRecursively(worldsDir, true);
                 _logger.AppendLine($"Deleted world folder \"{worldsDir.Name}\"");
-                _fileUtils.CopyFilesRecursively(backupLevelDir, worldsDir);
+                _fileUtils.CopyFolderTree(backupLevelDir, worldsDir);
                 _logger.AppendLine($"Copied files from backup \"{backupLevelDir.Name}\" to server worlds directory.");
                 MinecraftPackParser parser = new MinecraftPackParser(_processInfo);
                 foreach (FileInfo file in backupPacksDir.GetFiles()) {
