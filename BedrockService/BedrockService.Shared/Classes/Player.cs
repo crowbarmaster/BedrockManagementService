@@ -11,22 +11,20 @@ namespace BedrockService.Shared.Classes {
         [JsonProperty]
         private string PermissionLevel;
         [JsonProperty]
-        private string FirstConnectedTime { get; set; }
+        private long FirstConnectedTime { get; set; }
         [JsonProperty]
-        private string LastConnectedTime { get; set; }
+        private long LastConnectedTime { get; set; }
         [JsonProperty]
-        private string LastDisconnectTime { get; set; }
+        private long LastDisconnectTime { get; set; }
         [JsonProperty]
         private string ServerDefaultPerm { get; set; }
         [JsonProperty]
         private bool Whitelisted { get; set; }
         [JsonProperty]
         private bool IgnorePlayerLimits { get; set; }
-        [JsonProperty]
-        private bool FromConfig { get; set; }
 
         [JsonConstructor]
-        public Player(string xuid, string username, string firstConn, string lastConn, string lastDiscon, bool whtlist, string perm, bool ignoreLimit) {
+        public Player(string xuid, string username, long firstConn, long lastConn, long lastDiscon, bool whtlist, string perm, bool ignoreLimit) {
             Username = username;
             XUID = xuid;
             FirstConnectedTime = firstConn;
@@ -42,9 +40,13 @@ namespace BedrockService.Shared.Classes {
             PermissionLevel = serverDefaultPermission;
         }
 
-        public void Initialize(string xuid, string username) {
+        public IPlayer Initialize(string xuid, string username) {
             XUID = xuid;
             Username = username;
+            FirstConnectedTime = DateTime.Now.Ticks;
+            LastConnectedTime = DateTime.Now.Ticks;
+            LastDisconnectTime = DateTime.Now.Ticks;
+            return this;
         }
 
         public string GetUsername() => Username;
@@ -66,21 +68,13 @@ namespace BedrockService.Shared.Classes {
 
         public string GetXUID() => XUID;
 
-        public void UpdateTimes(string lastConn, string lastDiscon) {
-            if (FirstConnectedTime == "")
-                FirstConnectedTime = DateTime.Now.Ticks.ToString();
-            LastConnectedTime = lastConn;
-            LastDisconnectTime = lastDiscon;
-        }
-
-        public void UpdateRegistration(string whtlist, string perm, string ignoreLimit) {
-            Whitelisted = bool.Parse(whtlist);
-            PermissionLevel = perm;
-            IgnorePlayerLimits = bool.Parse(ignoreLimit);
-        }
-
-        public (string First, string Conn, string Disconn) GetTimes() {
+        public (long First, long Conn, long Disconn) GetTimes() {
             return (FirstConnectedTime, LastConnectedTime, LastDisconnectTime);
+        }
+
+        public void UpdateTimes(long conn, long disconn) {
+            LastConnectedTime = conn;
+            LastDisconnectTime = disconn;
         }
 
         public bool IsDefaultRegistration() {
@@ -95,6 +89,34 @@ namespace BedrockService.Shared.Classes {
                 return $"{XUID},{Username},{PermissionLevel},{Whitelisted},{IgnorePlayerLimits}";
             }
             return null;
+        }
+
+        public IPlayer UpdatePlayerFromDbStrings(string[] dbString) {
+            if (dbString == null || dbString[0] != XUID) {
+                throw new ArgumentException("Input null or Player update attempted with incorrect xuid!");
+            }
+            Username = dbString[1];
+            if (!long.TryParse(dbString[2], out long first) || !long.TryParse(dbString[3], out long conn) || !long.TryParse(dbString[4], out long disconn)) {
+                throw new InvalidOperationException("Could not parse player times, check logs!");
+            }
+            FirstConnectedTime = first;
+            LastConnectedTime = conn;
+            LastDisconnectTime = disconn;
+            return this;
+        }
+
+        public IPlayer UpdatePlayerFromRegStrings(string[] regString) {
+            if (regString == null || regString[0] != XUID) {
+                throw new ArgumentException("Input null or Player update attempted with incorrect xuid!");
+            }
+            Username = regString[1];
+            PermissionLevel = regString[2];
+            if (!bool.TryParse(regString[3], out bool whiteList) || !bool.TryParse(regString[3], out bool ignoreLimits)) {
+                throw new InvalidOperationException("Could not parse registration bools, check configs!");
+            }
+            Whitelisted = whiteList;
+            IgnorePlayerLimits = ignoreLimits;
+            return this;
         }
 
         public bool IsPlayerWhitelisted() => Whitelisted;
