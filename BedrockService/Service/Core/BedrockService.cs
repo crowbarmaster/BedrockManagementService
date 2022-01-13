@@ -46,8 +46,16 @@ namespace BedrockService.Service.Core {
                 _configurator.LoadGlobals().Wait();
                 _logger.Initialize();
                 if (!bool.Parse(_serviceConfiguration.GetProp("AcceptedMojangLic").ToString())) {
-                    _logger.AppendLine("You have not accepted the license. Please visit the readme for more info!");
-                    return false;
+                    if(Environment.UserInteractive == true) {
+                    _logger.AppendLine("You must agree to the terms set by Mojang for use of this software.\nRead terms at: https://minecraft.net/terms \nType \"Yes\" to affirm you agree to afformentioned terms to continue:");
+                        string answer = Console.ReadLine();
+                        if (answer != null && answer == "Yes") {
+                            _serviceConfiguration.GetProp("AcceptedMojangLic").SetValue("True");
+                            _configurator.SaveGlobalFile();
+                        }
+                    } else {
+                        return false;
+                    }
                 }
                 _updater.CheckUpdates().Wait();
                 VerifyCoreFiles();
