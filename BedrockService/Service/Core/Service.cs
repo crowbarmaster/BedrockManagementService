@@ -26,9 +26,9 @@ namespace BedrockService.Service.Core {
                     hostConfig.Service(settings => _bedrockService, s => {
                         s.BeforeStartingService(_ => _logger.AppendLine("Starting service..."));
                         s.BeforeStoppingService(_ => _logger.AppendLine("Stopping service..."));
-                        s.AfterStoppingService(_ => _applicationLifetime.StopApplication());
+                        s.AfterStoppingService(_ => _applicationLifetime.StopApplication());                     
                     });
-                    hostConfig.RunAsLocalSystem();
+                    hostConfig.RunAsLocalService();
                     hostConfig.SetDescription("Windows Service Wrapper for Windows Bedrock Server");
                     hostConfig.SetDisplayName("BedrockService");
                     hostConfig.SetServiceName("BedrockService");
