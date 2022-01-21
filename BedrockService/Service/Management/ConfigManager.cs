@@ -153,10 +153,17 @@ namespace BedrockService.Service.Management {
 
         public void SaveServerConfiguration(IServerConfiguration server) {
             int index = 0;
+            string serverPath = server.GetProp("ServerPath").ToString();
             string[] output = new string[5 + server.GetAllProps().Count + server.GetStartCommands().Count];
+            output[index++] = "#Server";
+            server.GetAllProps().ForEach(prop => {
+                output[index++] = $"{prop.KeyName}={prop}";
+            });
+            if (!Directory.Exists(serverPath)) {
+                Directory.CreateDirectory(serverPath);
+            }
             output[index++] = string.Empty;
             output[index++] = "#StartCmds";
-
             foreach (StartCmdEntry startCmd in server.GetStartCommands()) {
                 output[index++] = $"AddStartCmd={startCmd.Command}";
             }
