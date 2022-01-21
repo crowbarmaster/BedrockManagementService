@@ -47,7 +47,9 @@ namespace BedrockService.Service.Core {
                 _logger.Initialize();
                 if (!bool.Parse(_serviceConfiguration.GetProp("AcceptedMojangLic").ToString())) {
                     if(Environment.UserInteractive == true) {
-                    _logger.AppendLine("You must agree to the terms set by Mojang for use of this software.\nRead terms at: https://minecraft.net/terms \nType \"Yes\" to affirm you agree to afformentioned terms to continue:");
+                    _logger.AppendLine("You must agree to the terms set by Mojang for use of this software.\n" +
+                        "Read terms at: https://minecraft.net/terms \n" +
+                        "Type \"Yes\" to affirm you agree to afformentioned terms to continue:");
                         string answer = Console.ReadLine();
                         if (answer != null && answer == "Yes") {
                             _serviceConfiguration.GetProp("AcceptedMojangLic").SetValue("True");
