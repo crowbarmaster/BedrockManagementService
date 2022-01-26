@@ -10,5 +10,7 @@
         bool RollbackToBackup(byte serverIndex, string folderName);
         void InitializeBackup();
         IBedrockLogger GetLogger();
+        bool IsServerModified();
+        void ForceServerModified();
     }
 }

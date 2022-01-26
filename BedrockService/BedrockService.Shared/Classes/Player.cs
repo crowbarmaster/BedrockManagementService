@@ -124,6 +124,16 @@ namespace BedrockService.Shared.Classes {
         public bool PlayerIgnoresLimit() => IgnorePlayerLimits;
 
         public string GetPermissionLevel() => PermissionLevel;
+
+        public override bool Equals(object obj) {
+            return obj is Player player &&
+                   Username == player.Username &&
+                   XUID == player.XUID;
+        }
+
+        public override int GetHashCode() {
+            return HashCode.Combine(Username, XUID);
+        }
     }
 
 }

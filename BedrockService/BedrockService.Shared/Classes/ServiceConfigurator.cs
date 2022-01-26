@@ -27,6 +27,7 @@ namespace BedrockService.Shared.Classes {
             globals.Add(new Property("UpdateCron", "0 2 * * *"));
             globals.Add(new Property("LogServerOutput", "true"));
             globals.Add(new Property("LogApplicationOutput", "true"));
+            globals.Add(new Property("IgnoreInactiveBackups", "true"));
             _defaultServerProps.Clear();
             try {
                 File.ReadAllLines($@"{_processInfo.GetDirectory()}\Server\stock_props.conf")
@@ -58,9 +59,7 @@ namespace BedrockService.Shared.Classes {
                         if (split[1] == "Default")
                             split[1] = $@"{_processInfo.GetDirectory()}\Server\Backups";
                     }
-                    if (!SetProp(split[0], split[1])) {
-                        //Logger.AppendLine($"Error! Key \"{split[0]}\" was not found! Check configs!");
-                    }
+                    SetProp(split[0], split[1]);
                 }
             }
         }

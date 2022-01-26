@@ -1,4 +1,5 @@
 ﻿using BedrockService.Service.Networking.Interfaces;
+using BedrockService.Service.Server.Interfaces;
 
 namespace BedrockService.Service.Networking.NetworkStrategies {
     public class ServerBackup : IMessageParser {
@@ -10,7 +11,9 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
         }
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
-            _service.GetBedrockServerByIndex(serverIndex).InitializeBackup();
+            IBedrockServer server = _service.GetBedrockServerByIndex(serverIndex);
+            server.ForceServerModified();
+            server.InitializeBackup();
             return (Array.Empty<byte>(), 0, NetworkMessageTypes.UICallback);
         }
     }
