@@ -187,6 +187,8 @@ namespace BedrockService.Service.Core {
             foreach (var brs in _bedrockServers) {
                 if((shouldBackup && brs.IsServerModified()) || !shouldBackup) {
                     brs.InitializeBackup();
+                } else {
+                    _logger.AppendLine($"Backup for server {brs.GetServerName()} was skipped due to inactivity.");
                 }
             }
             _logger.AppendLine("Backups have been completed.");
