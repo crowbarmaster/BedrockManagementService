@@ -8,14 +8,16 @@ namespace BedrockService.Service.Server {
             _serverConfiguration = serverConfiguration;
         }
 
-        public void PlayerConnected(string username, string xuid) {
+        public IPlayer PlayerConnected(string username, string xuid) {
             IPlayer playerFound = _serverConfiguration.GetOrCreatePlayer(xuid, username);
             playerFound.UpdateTimes(DateTime.Now.Ticks, playerFound.GetTimes().Disconn);
+            return playerFound;
         }
 
-        public void PlayerDisconnected(string xuid) {
+        public IPlayer PlayerDisconnected(string xuid) {
             IPlayer playerFound = _serverConfiguration.GetOrCreatePlayer(xuid);
             playerFound.UpdateTimes(playerFound.GetTimes().Conn, DateTime.Now.Ticks);
+            return playerFound;
         }
     }
 }

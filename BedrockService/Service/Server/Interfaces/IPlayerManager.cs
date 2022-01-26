@@ -1,6 +1,6 @@
 ﻿namespace BedrockService.Service.Server.Interfaces {
     public interface IPlayerManager {
-        void PlayerConnected(string username, string xuid);
-        void PlayerDisconnected(string xuid);
+        IPlayer PlayerConnected(string username, string xuid);
+        IPlayer PlayerDisconnected(string xuid);
     }
 }

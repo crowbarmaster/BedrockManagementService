@@ -183,8 +183,11 @@ namespace BedrockService.Service.Core {
 
         private void BackupAllServers() {
             _logger.AppendLine("Service started backup of all servers...");
+            bool shouldBackup = _serviceConfiguration.GetProp("IgnoreBackupsWithoutChange").ToString() == "true";
             foreach (var brs in _bedrockServers) {
-                brs.InitializeBackup();
+                if((shouldBackup && brs.IsServerModified()) || !shouldBackup) {
+                    brs.InitializeBackup();
+                }
             }
             _logger.AppendLine("Backups have been completed.");
         }

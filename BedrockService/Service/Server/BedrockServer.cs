@@ -20,10 +20,12 @@ namespace BedrockService.Service.Server {
         private readonly FileUtilities _fileUtils;
         private IBedrockLogger _serverLogger;
         private IPlayerManager _playerManager;
+        private List<IPlayer> _connectedPlayers = new List<IPlayer>();
         private string _servicePath;
         private const string _startupMessage = "INFO] Server started.";
         private bool _AwaitingStopSignal = true;
         private bool _backupRunning = false;
+        private bool _serverModifiedFlag = true;
         public enum ServerStatus {
             Stopped,
             Starting,
@@ -144,6 +146,10 @@ namespace BedrockService.Service.Server {
 
         public IBedrockLogger GetLogger() => _serverLogger;
 
+        public bool IsServerModified() => _serverModifiedFlag;
+
+        public void ForceServerModified() => _serverModifiedFlag = true;
+
         private Task StopWatchdog() {
             return Task.Run(() => {
                 _watchdogCanceler.Cancel();
@@ -184,13 +190,14 @@ namespace BedrockService.Service.Server {
                     if (dataMsg.Contains("Player connected")) {
                         var playerInfo = ExtractPlayerInfoFromString(dataMsg);
                         _logger.AppendLine($"Player {playerInfo.username} connected with XUID: {playerInfo.xuid}");
-                        _playerManager.PlayerConnected(playerInfo.username, playerInfo.xuid);
+                        _serverModifiedFlag = true;
+                        _connectedPlayers.Add(_playerManager.PlayerConnected(playerInfo.username, playerInfo.xuid));
                         _configurator.SavePlayerDatabase(_serverConfiguration);
                     }
                     if (dataMsg.Contains("Player disconnected")) {
                         var playerInfo = ExtractPlayerInfoFromString(dataMsg);
                         _logger.AppendLine($"Player {playerInfo.username} disconnected with XUID: {playerInfo.xuid}");
-                        _playerManager.PlayerDisconnected(playerInfo.xuid);
+                        _connectedPlayers.Remove(_playerManager.PlayerDisconnected(playerInfo.xuid));
                         _configurator.SavePlayerDatabase(_serverConfiguration);
                     }
                     if (dataMsg.Contains("Failed to load Vanilla")) {
@@ -251,6 +258,9 @@ namespace BedrockService.Service.Server {
                 WriteToStandardIn("save resume");
                 _fileUtils.CreatePackBackupFiles(serverPath, levelName, targetDirectory.FullName);
                 _backupRunning = false;
+                if (_connectedPlayers.Count == 0) {
+                    _serverModifiedFlag = false;
+                }
                 return resuilt;
 
             } catch (Exception e) {
