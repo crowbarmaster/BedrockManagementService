@@ -83,6 +83,9 @@ namespace BedrockService.Service.Core {
             try {
                 if (ValidSettingsCheck()) {
                     foreach (var brs in _bedrockServers) {
+                        if (!brs.ServerAutostartEnabled() && brs.IsPrimaryServer()) {
+                            continue;
+                        }
                         brs.AwaitableServerStart().Wait();
                         brs.StartWatchdog();
                     }

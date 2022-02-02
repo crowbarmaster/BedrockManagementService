@@ -117,6 +117,10 @@ namespace BedrockService.Shared.Classes {
         }
 
         public void AddNewServerInfo(IServerConfiguration serverConfiguration) {
+            if (serverConfiguration.GetProp("server-port").Value == "19132" && serverConfiguration.GetProp("server-portv6").Value == "19133") {
+                ServerList.Insert(0, serverConfiguration);
+                return;
+            }
             ServerList.Add(serverConfiguration);
         }
 

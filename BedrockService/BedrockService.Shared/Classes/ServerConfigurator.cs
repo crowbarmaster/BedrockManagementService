@@ -17,6 +17,7 @@ namespace BedrockService.Shared.Classes {
             FileName = "Dedicated Server.conf";
             ServerPath = new Property("ServerPath", $@"{ServersPath}\{ServerName}");
             ServerExeName = new Property("ServerExeName", $"BedrockService.{ServerName}.exe");
+            ServerAutostartEnabled = new Property("ServerAutostartEnabled", "true");
             ServerPropList.Clear();
             _defaultPropList.ForEach(p => ServerPropList.Add(new Property(p.KeyName, p.DefaultValue)));
             return true;
@@ -38,6 +39,13 @@ namespace BedrockService.Shared.Classes {
                         SetProp(split[0], split[1]);
                     }
                     switch (split[0]) {
+                        case "ServerAutostartEnabled":
+                            bool result = true;
+                            if(bool.TryParse(split[1], out result)) {
+                                ServerAutostartEnabled.SetValue(result.ToString());
+                            }
+                            break;  
+                            
                         case "server-name":
                             ServerName = split[1];
                             ServerPath.SetValue($@"{ServersPath}\{ServerName}");
@@ -66,8 +74,14 @@ namespace BedrockService.Shared.Classes {
 
         public bool SetProp(Property propToSet) {
             try {
-                Property serverProp = ServerPropList.First(prop => prop.KeyName == propToSet.KeyName);
-                ServerPropList[ServerPropList.IndexOf(serverProp)] = propToSet;
+                Property serverProp = ServerPropList.FirstOrDefault(prop => prop.KeyName == propToSet.KeyName);
+                if(serverProp != null) {
+                    ServerPropList[ServerPropList.IndexOf(serverProp)] = propToSet;
+                } else {
+                    if(propToSet.KeyName == "ServerAutostartEnabled") {
+                        ServerAutostartEnabled.Value = propToSet.Value;
+                    }
+                }
                 return true;
             } catch { }
             return false;
@@ -81,6 +95,8 @@ namespace BedrockService.Shared.Classes {
                         return ServerPath;
                     case "ServerExeName":
                         return ServerExeName;
+                    case "ServerAutostartEnabled":
+                        return ServerAutostartEnabled;
                 }
             }
             return foundProp;
@@ -156,5 +172,9 @@ namespace BedrockService.Shared.Classes {
         public void SetPlayerList(List<IPlayer> newList) => PlayersList = newList;
 
         public IServerConfiguration GetServerInfo() => this;
+
+        public void SetStatus (ServerStatusModel status) => ServerStatus = status;
+
+        public ServerStatusModel GetStatus() => ServerStatus;
     }
 }

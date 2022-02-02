@@ -3,6 +3,7 @@ using BedrockService.Shared.Classes;
 using BedrockService.Shared.Interfaces;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -24,21 +25,26 @@ namespace BedrockService.Client.Forms {
         private bool _followTail = false;
         private bool _blockConnect = false;
         private const int _connectTimeoutLimit = 3;
-        private readonly IBedrockLogger _logger;
+        public IBedrockLogger ClientLogger;
         private readonly IProcessInfo _processInfo;
         private readonly System.Timers.Timer _connectTimer = new System.Timers.Timer(100.0);
         private readonly LogManager _logManager;
         private readonly ConfigManager _configManager;
         public MainWindow(IProcessInfo processInfo, IBedrockLogger logger) {
             _processInfo = processInfo;
-            _logger = logger;
-            _logger.Initialize();
-            _logManager = new LogManager(_logger);
-            _configManager = new ConfigManager(_logger);
+            ClientLogger = logger;
+            ClientLogger.Initialize();
+            _logManager = new LogManager(ClientLogger);
+            _configManager = new ConfigManager(ClientLogger);
             InitializeComponent();
             InitForm();
-            SvcLog.CheckedChanged += SvcLog_CheckedChanged;
             _connectTimer.Elapsed += ConnectTimer_Elapsed;
+            Shown += MainWindow_Shown;
+            
+        }
+
+        private void MainWindow_Shown(object sender, EventArgs e) {
+            StartClientLogUpdate();
         }
 
         private void ConnectTimer_Elapsed(object sender, ElapsedEventArgs e) {
@@ -123,8 +129,8 @@ namespace BedrockService.Client.Forms {
 
         const int SetRedraw = 0x000B;
         const int User = 0x400;
-        const int GetEventMask = (User + 59);
-        const int SetEventMask = (User + 69);
+        const int GetEventMask = User + 59;
+        const int SetEventMask = User + 69;
 
 #pragma warning restore 649
 #pragma warning restore 169
@@ -151,8 +157,10 @@ namespace BedrockService.Client.Forms {
             ServerSelectBox.Items.Clear();
             if (connectedHost != null) {
                 _logManager.InitLogThread(connectedHost);
-                foreach (ServerConfigurator server in connectedHost.GetServerList())
+                foreach (ServerConfigurator server in connectedHost.GetServerList()) {
                     ServerSelectBox.Items.Add(server.ServerName);
+                }
+
                 if (ServerSelectBox.Items.Count > 0) {
                     ServerSelectBox.SelectedIndex = 0;
                     selectedServer = connectedHost.GetServerInfoByName((string)ServerSelectBox.SelectedItem);
@@ -176,6 +184,22 @@ namespace BedrockService.Client.Forms {
             }
         }
 
+        private Task StartClientLogUpdate() => Task.Run(() => {
+            while (!IsDisposed && clientLogBox != null) {
+                try {
+                    if (FormManager.ClientLogContainer.GetLog().Count != clientLogBox.TextLength) {
+                        Invoke(() => {
+
+                            UpdateServerLogBox(clientLogBox, string.Join("\r\n", FormManager.ClientLogContainer.GetLog().Select(x => x.Text).ToList()));
+                        });
+                    }
+                } catch (Exception ex) {
+                    ClientLogger.AppendLine($"Error! {ex.Message} {ex.StackTrace}");
+                }
+                Task.Delay(300);
+            }
+        });
+
         public void HeartbeatFailDisconnect() {
             Disconn_Click(null, null);
             try {
@@ -189,28 +213,30 @@ namespace BedrockService.Client.Forms {
             connectedHost = null;
         }
 
-        public void UpdateLogBox(string contents) {
-            int curPos = HorizontalScrollPosition;
-            LogBox.Text = contents;
-            HorizontalScrollPosition = curPos;
+        public void UpdateServerLogBox(TextBox targetBox, string contents) {
+            
+            int curPos = 0;
+            if (contents.Length > 0 && targetBox.TextLength != contents.Length) {
+                curPos = GetScrollPosition(targetBox);
+            }
+            targetBox.Text = contents;
+            if (contents.Length > 0 && targetBox.TextLength != contents.Length) {
+                SetScrollPosition(targetBox, curPos);
+            }
             if (_followTail)
-                ScrollToEnd();
+                ScrollToEnd(targetBox);
         }
 
         private static void OnExit(object sender, EventArgs e) {
             FormManager.TCPClient.Dispose();
         }
 
-        private void SvcLog_CheckedChanged(object sender, EventArgs e) {
-            ShowsSvcLog = SvcLog.Checked;
-        }
-
         private void MainWindow_FormClosing(object sender, FormClosingEventArgs e) {
-            _logger.AppendLine("Stopping log thread...");
+            ClientLogger.AppendLine("Stopping log thread...");
             if (_logManager.StopLogThread()) {
-                _logger.AppendLine("Sending disconnect msg...");
+                ClientLogger.AppendLine("Sending disconnect msg...");
                 FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Disconnect);
-                _logger.AppendLine("Closing connection...");
+                ClientLogger.AppendLine("Closing connection...");
                 FormManager.TCPClient.CloseConnection();
                 selectedServer = null;
                 connectedHost = null;
@@ -231,7 +257,7 @@ namespace BedrockService.Client.Forms {
                 foreach (ServerConfigurator server in connectedHost.GetServerList()) {
                     if (ServerSelectBox.SelectedItem != null && ServerSelectBox.SelectedItem.ToString() == server.GetServerName()) {
                         selectedServer = server;
-                        ServerInfoBox.Text = server.GetServerName();
+                        FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Server, NetworkMessageTypes.ServerStatusRequest);
                         ComponentEnableManager();
                     }
                 }
@@ -356,8 +382,8 @@ namespace BedrockService.Client.Forms {
         private void EditStCmd_Click(object sender, EventArgs e) {
             PropEditorForm editSrvDialog = new PropEditorForm();
             editSrvDialog.PopulateStartCmds(selectedServer.GetStartCommands());
-            JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
             if (editSrvDialog.ShowDialog() == DialogResult.OK) {
+                JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                 byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(editSrvDialog.startCmds, Formatting.Indented, settings));
                 DisableUI();
                 FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.StartCmdUpdate);
@@ -372,75 +398,74 @@ namespace BedrockService.Client.Forms {
             DisableUI();
         }
 
-        private int HorizontalScrollPosition {
-            get {
-                ScrollInfo si = new ScrollInfo();
-                si.Size = (uint)Marshal.SizeOf(si);
-                si.Mask = (uint)ScrollInfoMask.All;
-                GetScrollInfo(LogBox.Handle, (int)ScrollBarDirection.Vertical, ref si);
-                return si.Pos;
-            }
-            set {
-                ScrollInfo si = new ScrollInfo();
-                si.Size = (uint)Marshal.SizeOf(si);
-                si.Mask = (uint)ScrollInfoMask.All;
-                GetScrollInfo(LogBox.Handle, (int)ScrollBarDirection.Vertical, ref si);
-                si.Pos = value;
-                SetScrollInfo(LogBox.Handle, (int)ScrollBarDirection.Vertical, ref si, true);
-                SendMessage(LogBox.Handle, VerticalScroll, new IntPtr(Thumbtrack + 0x10000 * si.Pos), new IntPtr(0));
-            }
+        public int GetScrollPosition (TextBox targetBox) {
+            ScrollInfo si = new ScrollInfo();
+            si.Size = (uint)Marshal.SizeOf(si);
+            si.Mask = (uint)ScrollInfoMask.All;
+            GetScrollInfo(targetBox.Handle, (int)ScrollBarDirection.Vertical, ref si);
+            return si.Pos;
         }
 
-        public void ScrollToEnd() {
+        public void SetScrollPosition (TextBox targetBox, int pos) {
+            ScrollInfo si = new ScrollInfo();
+            si.Size = (uint)Marshal.SizeOf(si);
+            si.Mask = (uint)ScrollInfoMask.All;
+            GetScrollInfo(targetBox.Handle, (int)ScrollBarDirection.Vertical, ref si);
+            si.Pos = pos;
+            SetScrollInfo(targetBox.Handle, (int)ScrollBarDirection.Vertical, ref si, true);
+            SendMessage(targetBox.Handle, VerticalScroll, new IntPtr(Thumbtrack + 0x10000 * si.Pos), new IntPtr(0));
+        }
+
+        public void ScrollToEnd(TextBox targetBox) {
 
             // Get the current scroll info.
             ScrollInfo si = new ScrollInfo();
             si.Size = (uint)Marshal.SizeOf(si);
             si.Mask = (uint)ScrollInfoMask.All;
-            GetScrollInfo(LogBox.Handle, (int)ScrollBarDirection.Vertical, ref si);
+            GetScrollInfo(targetBox.Handle, (int)ScrollBarDirection.Vertical, ref si);
 
             // Set the scroll position to maximum.
             si.Pos = si.Max - (int)si.Page;
-            SetScrollInfo(LogBox.Handle, (int)ScrollBarDirection.Vertical, ref si, true);
-            SendMessage(LogBox.Handle, VerticalScroll, new IntPtr(Thumbtrack + 0x20000 * si.Pos), new IntPtr(0));
-
+            if(si.Pos > 0) {
+                SetScrollInfo(targetBox.Handle, (int)ScrollBarDirection.Vertical, ref si, true);
+                SendMessage(targetBox.Handle, VerticalScroll, new IntPtr(Thumbtrack + 0x20000 * si.Pos), new IntPtr(0));
+            }
             _followTail = true;
         }
 
-        public void PerformBackupTests() {
-            HostListBox.SelectedIndex = 0;
-            Connect_Click(null, null);
-            GlobBackup_Click(null, null);
-            DisableUI();
-            ServerSelectBox.SelectedIndex = 0;
-            FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.EnumBackups);
-            FormManager.TCPClient.EnumBackupsArrived = false;
-            JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-            byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new string[] { FormManager.TCPClient.BackupList[0].ToString() }, Formatting.Indented, settings));
-            FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, FormManager.MainWindow.connectedHost.GetServerIndex(FormManager.MainWindow.selectedServer), NetworkMessageTypes.DelBackups);
-        }
-
         private void ComponentEnableManager() {
+            bool hostConnectedIdle = connectedHost != null && !ServerBusy;
+            bool serverConnectedIdle = connectedHost != null && selectedServer != null && !ServerBusy;
             Connect.Enabled = connectedHost == null;
             Disconn.Enabled = connectedHost != null;
-            newSrvBtn.Enabled = connectedHost != null && !ServerBusy;
-            ChkUpdates.Enabled = connectedHost != null && !ServerBusy;
-            GlobBackup.Enabled = connectedHost != null && !ServerBusy;
-            EditGlobals.Enabled = connectedHost != null && !ServerBusy;
-            BackupManagerBtn.Enabled = (connectedHost != null && selectedServer != null && !ServerBusy);
-            nbtStudioBtn.Enabled = (connectedHost != null && selectedServer != null && !ServerBusy);
-            ManPacks.Enabled = (connectedHost != null && selectedServer != null && !ServerBusy);
-            scrollLockChkBox.Enabled = (connectedHost != null && selectedServer != null && !ServerBusy);
-            removeSrvBtn.Enabled = (connectedHost != null && selectedServer != null && !ServerBusy);
-            EditCfg.Enabled = (connectedHost != null && selectedServer != null && !ServerBusy);
-            PlayerManagerBtn.Enabled = (connectedHost != null && selectedServer != null && !ServerBusy);
-            EditStCmd.Enabled = (connectedHost != null && selectedServer != null && !ServerBusy);
-            SingBackup.Enabled = (connectedHost != null && selectedServer != null && !ServerBusy);
-            RestartSrv.Enabled = (connectedHost != null && selectedServer != null && !ServerBusy);
-            ServerInfoBox.Enabled = (connectedHost != null && selectedServer != null && !ServerBusy);
-            SendCmd.Enabled = (connectedHost != null && selectedServer != null && !ServerBusy);
-            cmdTextBox.Enabled = (connectedHost != null && selectedServer != null && !ServerBusy);
-            SvcLog.Enabled = (connectedHost != null && selectedServer != null && !ServerBusy);
+            newSrvBtn.Enabled = hostConnectedIdle;
+            ChkUpdates.Enabled = hostConnectedIdle;
+            GlobBackup.Enabled = hostConnectedIdle;
+            EditGlobals.Enabled = hostConnectedIdle;
+            BackupManagerBtn.Enabled = serverConnectedIdle;
+            nbtStudioBtn.Enabled = serverConnectedIdle;
+            ManPacks.Enabled = serverConnectedIdle;
+            scrollLockChkBox.Enabled = serverConnectedIdle;
+            removeSrvBtn.Enabled = serverConnectedIdle;
+            EditCfg.Enabled = serverConnectedIdle;
+            PlayerManagerBtn.Enabled = serverConnectedIdle;
+            EditStCmd.Enabled = serverConnectedIdle;
+            SingBackup.Enabled = serverConnectedIdle;
+            RestartSrv.Enabled = serverConnectedIdle;
+            ServerInfoBox.Enabled = serverConnectedIdle;
+            SendCmd.Enabled = serverConnectedIdle;
+            cmdTextBox.Enabled = serverConnectedIdle;
+            startStopBtn.Enabled = serverConnectedIdle;
+            startStopBtn.ForeColor = serverConnectedIdle && !IsPrimaryServer() ?
+                System.Drawing.Color.Black :
+                System.Drawing.Color.LightGray;
+
+            startStopBtn.Text = selectedServer == null ?
+                "Start/Stop" :
+                selectedServer.GetStatus() != null && selectedServer.GetStatus().ServerStatus == ServerStatus.Stopped ?
+                "Start" :
+                "Stop";
+            expertOptionsBtn.Enabled = serverConnectedIdle;
         }
 
         public Task DisableUI() {
@@ -512,7 +537,7 @@ namespace BedrockService.Client.Forms {
             FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PackList);
             DisableUI();
             WaitForServerData().Wait();
-            using (ManagePacksForms form = new ManagePacksForms(connectedHost.GetServerIndex(selectedServer), _logger, _processInfo)) {
+            using (ManagePacksForms form = new ManagePacksForms(connectedHost.GetServerIndex(selectedServer), ClientLogger, _processInfo)) {
                 form.PopulateServerPacks(FormManager.TCPClient.RecievedPacks);
                 form.ShowDialog();
                 ServerBusy = false;
@@ -558,6 +583,51 @@ namespace BedrockService.Client.Forms {
                 if (form.ShowDialog() == DialogResult.OK) {
                     form.Close();
                     InitForm();
+                }
+            }
+        }
+
+        private void startStopBtn_Click(object sender, EventArgs e) {
+            if(!IsPrimaryServer()) {
+                DisableUI();
+                FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.StartStop);
+            } else {
+                startStopBtnToolTip.Active = true;
+                startStopBtnToolTip.Show("Start/Stop feature is disabled to servers using the primary ports 19132 and 19133.", startStopBtn, 2000);
+                Task.Run(() => {
+                    Task.Delay(2500).Wait();
+                    startStopBtnToolTip.Active = false;
+                });
+            }
+        }
+
+        private bool IsPrimaryServer() {
+            return selectedServer.GetProp("server-port").Value == "19132" ||
+            selectedServer.GetProp("server-port").Value == "19133" ||
+            selectedServer.GetProp("server-portv6").Value == "19132" ||
+            selectedServer.GetProp("server-portv6").Value == "19133";
+        }
+
+        private void expertOptionsBtn_Click(object sender, EventArgs e) {
+            DisableUI();
+            List<Property> properties = new List<Property>();
+
+            if (!IsPrimaryServer()) {
+                properties.Add(selectedServer.GetProp("ServerAutostartEnabled"));
+            }
+            using (ExpertOptionsForm form = new ExpertOptionsForm()) {
+                form.PropertiesToList = properties;
+                form.PopulateOptions();
+                if (form.ShowDialog() == DialogResult.OK) {
+                    foreach (Property property in form.PropertiesToList) {
+                        Property foundProp = properties.Where(x => x.KeyName == property.KeyName).FirstOrDefault();
+                        selectedServer.GetProp(property.KeyName).SetValue(property.Value);
+                    }
+                    JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
+                    byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(form.PropertiesToList, Formatting.Indented, settings));
+                    FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PropUpdate);
+                } else {
+                    ServerBusy = false;
                 }
             }
         }

@@ -26,12 +26,6 @@ namespace BedrockService.Service.Server {
         private bool _AwaitingStopSignal = true;
         private bool _backupRunning = false;
         private bool _serverModifiedFlag = true;
-        public enum ServerStatus {
-            Stopped,
-            Starting,
-            Stopping,
-            Started
-        }
 
         public BedrockServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, FileUtilities fileUtils) {
             _fileUtils = fileUtils;
@@ -100,7 +94,9 @@ namespace BedrockService.Service.Server {
         public string GetServerName() => _serverConfiguration.GetServerName();
 
         public void WriteToStandardIn(string command) {
-            _stdInStream.WriteLine(command);
+            if(_stdInStream != null) {
+                _stdInStream.WriteLine(command);
+            }
         }
 
         public bool RollbackToBackup(byte serverIndex, string folderName) {
@@ -138,11 +134,19 @@ namespace BedrockService.Service.Server {
         }
 
         public void InitializeBackup() {
-            _backupRunning = true;
-            WriteToStandardIn("save hold");
-            Task.Delay(1000).Wait();
-            WriteToStandardIn("save query");
+            if(!_backupRunning && _currentServerStatus == ServerStatus.Started) {
+                _backupRunning = true;
+                WriteToStandardIn("save hold");
+                Task.Delay(1000).Wait();
+                WriteToStandardIn("save query");
+            }
         }
+
+        public ServerStatusModel GetServerStatus() => new ServerStatusModel() {
+            ServerStatus = _currentServerStatus,
+            ActivePlayerList = _connectedPlayers,
+            ServerIndex = _serviceConfiguration.GetServerIndex(_serverConfiguration)
+        };
 
         public IBedrockLogger GetLogger() => _serverLogger;
 
@@ -150,10 +154,19 @@ namespace BedrockService.Service.Server {
 
         public void ForceServerModified() => _serverModifiedFlag = true;
 
+        public bool ServerAutostartEnabled() => bool.Parse(_serverConfiguration.GetProp("ServerAutostartEnabled").ToString());
+
+        public bool IsPrimaryServer() {
+            return _serverConfiguration.GetProp("server-port").Value == "19132" ||
+            _serverConfiguration.GetProp("server-port").Value == "19133" ||
+            _serverConfiguration.GetProp("server-portv6").Value == "19132" ||
+            _serverConfiguration.GetProp("server-portv6").Value == "19133";
+        }
+
         private Task StopWatchdog() {
             return Task.Run(() => {
                 _watchdogCanceler.Cancel();
-                while (!_watchdogTask.IsCompleted) {
+                while (_watchdogTask != null && !_watchdogTask.IsCompleted) {
                     Task.Delay(200);
                 }
             });
