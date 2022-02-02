@@ -5,20 +5,23 @@ using BedrockService.Shared.Interfaces;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Windows.Forms;
 
 namespace BedrockService.Client.Management {
     public sealed class FormManager {
-        private static readonly IProcessInfo processInfo = new ServiceProcessInfo("Client", Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Process.GetCurrentProcess().Id, false, true);
-        private static readonly IServiceConfiguration _configuration;
+        private static readonly IProcessInfo processInfo = new ServiceProcessInfo("Client", Path.GetDirectoryName(Application.ExecutablePath), Process.GetCurrentProcess().Id, false, true);
+        public static readonly IServiceConfiguration ClientLogContainer;
         private static readonly IBedrockLogger _logger;
         private static MainWindow main;
         private static TCPClient client;
 
         static FormManager() {
-            _configuration = new ServiceConfigurator(processInfo);
-            _configuration.InitializeDefaults();
-            _configuration.SetProp(new Property("LogApplicationOutput", "true") { Value = "true" });
-            _logger = new BedrockLogger(processInfo, _configuration);
+            ClientLogContainer = new ServiceConfigurator(processInfo);
+            ClientLogContainer.InitializeDefaults();
+            ClientLogContainer.SetProp(new Property("LogApplicationOutput", "true") { Value = "true" });
+            _logger = new BedrockLogger(processInfo, ClientLogContainer);
+            _logger.AppendLine($"Bedrock Client version {Application.ProductVersion} has started.");
+            _logger.AppendLine($"Working directory: {processInfo.GetDirectory()}");
         }
 
         public static MainWindow MainWindow {

@@ -4,12 +4,14 @@ namespace BedrockService.Service.Core {
     public class Service : IService {
         private readonly IBedrockService _bedrockService;
         private Topshelf.Host _host;
+        private readonly IProcessInfo _processInfo;
         private readonly IBedrockLogger _logger;
         private readonly IHostApplicationLifetime _applicationLifetime;
         TopshelfExitCode _exitCode;
 
-        public Service(IBedrockLogger logger, IBedrockService bedrockService, NetworkStrategyLookup networkStrategyLookup, IHostApplicationLifetime appLifetime) {
+        public Service(IProcessInfo processInfo, IBedrockLogger logger, IBedrockService bedrockService, NetworkStrategyLookup networkStrategyLookup, IHostApplicationLifetime appLifetime) {
             _logger = logger;
+            _processInfo = processInfo;
             _bedrockService = bedrockService;
             _applicationLifetime = appLifetime;
             appLifetime.ApplicationStarted.Register(OnStarted);
@@ -25,6 +27,10 @@ namespace BedrockService.Service.Core {
                     hostConfig.UseAssemblyInfoForServiceInfo();
                     hostConfig.Service(settings => _bedrockService, s => {
                         s.BeforeStartingService(_ => _logger.AppendLine("Starting service..."));
+                        s.AfterStartingService(_ => {
+                            _logger.AppendLine($"Bedrock Management Service version {Process.GetCurrentProcess().MainModule.FileVersionInfo.ProductVersion} has started.");
+                            _logger.AppendLine($"Working directory: {_processInfo.GetDirectory()}");
+                        });
                         s.BeforeStoppingService(_ => _logger.AppendLine("Stopping service..."));
                         s.AfterStoppingService(_ => _applicationLifetime.StopApplication());                     
                     });

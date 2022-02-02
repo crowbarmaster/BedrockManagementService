@@ -4,13 +4,15 @@ using System.Linq;
 
 namespace BedrockService.Shared.Classes {
     public class ServerInfo {
-        public string ServersPath;
-        public string DefaultPropFilePath;
+        public string ServersPath { get; set; }
+        public string DefaultPropFilePath { get; set; }
         public string ServerName { get; set; }
         public string FileName { get; set; }
-        public List<LogEntry> ConsoleBuffer = new List<LogEntry>();
+        public ServerStatusModel ServerStatus { get; set; }
         public Property ServerPath { get; set; }
         public Property ServerExeName { get; set; }
+        public Property ServerAutostartEnabled { get; set; }
+        public List<LogEntry> ConsoleBuffer = new List<LogEntry>();
         public List<IPlayer> PlayersList = new List<IPlayer>();
         public List<Property> ServerPropList = new List<Property>();
         public List<Property> _defaultPropList = new List<Property>();

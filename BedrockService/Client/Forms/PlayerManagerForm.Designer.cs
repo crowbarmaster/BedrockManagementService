@@ -37,6 +37,14 @@ namespace BedrockService.Client.Forms
             this.saveBtn = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.gridView = new System.Windows.Forms.DataGridView();
+            this.xuidColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.usernameColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.permColumn = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.whitelistColumn = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.ignorePlayerColumn = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.firstConnColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.lastConnColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.disconnTimeColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.registerPlayerBtn = new System.Windows.Forms.Button();
             this.entryTextToolTip = new System.Windows.Forms.ToolTip(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.gridView)).BeginInit();
@@ -95,6 +103,15 @@ namespace BedrockService.Client.Forms
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.gridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.gridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.gridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.xuidColumn,
+            this.usernameColumn,
+            this.permColumn,
+            this.whitelistColumn,
+            this.ignorePlayerColumn,
+            this.firstConnColumn,
+            this.lastConnColumn,
+            this.disconnTimeColumn});
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
             dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -116,8 +133,66 @@ namespace BedrockService.Client.Forms
             this.gridView.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.gridView.Size = new System.Drawing.Size(926, 289);
             this.gridView.TabIndex = 3;
-            this.gridView.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.gridView_CellBeginEdit);
-            this.gridView.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.gridView_CellEndEdit);
+            // 
+            // xuidColumn
+            // 
+            this.xuidColumn.HeaderText = "XUID";
+            this.xuidColumn.Name = "xuidColumn";
+            this.xuidColumn.ReadOnly = true;
+            this.xuidColumn.Width = 58;
+            // 
+            // usernameColumn
+            // 
+            this.usernameColumn.HeaderText = "Username";
+            this.usernameColumn.Name = "usernameColumn";
+            this.usernameColumn.Width = 80;
+            // 
+            // permColumn
+            // 
+            this.permColumn.HeaderText = "Permission";
+            this.permColumn.Items.AddRange(new object[] {
+            "visitor",
+            "member",
+            "operator"});
+            this.permColumn.MaxDropDownItems = 4;
+            this.permColumn.Name = "permColumn";
+            this.permColumn.Width = 63;
+            // 
+            // whitelistColumn
+            // 
+            this.whitelistColumn.FalseValue = "False";
+            this.whitelistColumn.HeaderText = "Whitelisted";
+            this.whitelistColumn.Name = "whitelistColumn";
+            this.whitelistColumn.TrueValue = "True";
+            this.whitelistColumn.Width = 65;
+            // 
+            // ignorePlayerColumn
+            // 
+            this.ignorePlayerColumn.FalseValue = "False";
+            this.ignorePlayerColumn.HeaderText = "Ignores max players";
+            this.ignorePlayerColumn.Name = "ignorePlayerColumn";
+            this.ignorePlayerColumn.TrueValue = "True";
+            this.ignorePlayerColumn.Width = 96;
+            // 
+            // firstConnColumn
+            // 
+            this.firstConnColumn.HeaderText = "First connected on";
+            this.firstConnColumn.Name = "firstConnColumn";
+            this.firstConnColumn.ReadOnly = true;
+            this.firstConnColumn.Width = 99;
+            // 
+            // lastConnColumn
+            // 
+            this.lastConnColumn.HeaderText = "Last connected on";
+            this.lastConnColumn.Name = "lastConnColumn";
+            this.lastConnColumn.ReadOnly = true;
+            // 
+            // disconnTimeColumn
+            // 
+            this.disconnTimeColumn.HeaderText = "Time spent in game";
+            this.disconnTimeColumn.Name = "disconnTimeColumn";
+            this.disconnTimeColumn.ReadOnly = true;
+            this.disconnTimeColumn.Width = 90;
             // 
             // registerPlayerBtn
             // 
@@ -160,5 +235,13 @@ namespace BedrockService.Client.Forms
         private System.Windows.Forms.DataGridView gridView;
         private System.Windows.Forms.Button registerPlayerBtn;
         private System.Windows.Forms.ToolTip entryTextToolTip;
+        private System.Windows.Forms.DataGridViewTextBoxColumn xuidColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn usernameColumn;
+        private System.Windows.Forms.DataGridViewComboBoxColumn permColumn;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn whitelistColumn;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn ignorePlayerColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn firstConnColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn lastConnColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn disconnTimeColumn;
     }
 }

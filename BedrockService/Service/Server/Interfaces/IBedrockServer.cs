@@ -12,5 +12,8 @@
         IBedrockLogger GetLogger();
         bool IsServerModified();
         void ForceServerModified();
+        bool ServerAutostartEnabled();
+        ServerStatusModel GetServerStatus();
+        bool IsPrimaryServer();
     }
 }

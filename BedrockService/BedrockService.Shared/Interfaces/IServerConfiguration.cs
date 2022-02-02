@@ -14,5 +14,7 @@ namespace BedrockService.Shared.Interfaces {
         List<IPlayer> GetPlayerList();
         void SetPlayerList(List<IPlayer> newList);
         IServerConfiguration GetServerInfo();
+        void SetStatus(ServerStatusModel status);
+        ServerStatusModel GetStatus();
     }
 }

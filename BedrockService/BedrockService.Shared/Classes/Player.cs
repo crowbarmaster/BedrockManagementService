@@ -111,7 +111,7 @@ namespace BedrockService.Shared.Classes {
             }
             Username = regString[1];
             PermissionLevel = regString[2];
-            if (!bool.TryParse(regString[3], out bool whiteList) || !bool.TryParse(regString[3], out bool ignoreLimits)) {
+            if (!bool.TryParse(regString[3], out bool whiteList) || !bool.TryParse(regString[4], out bool ignoreLimits)) {
                 throw new InvalidOperationException("Could not parse registration bools, check configs!");
             }
             Whitelisted = whiteList;

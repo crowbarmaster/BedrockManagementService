@@ -181,6 +181,14 @@ namespace BedrockService.Client.Networking {
                                 UnlockUI();
 
                                 break;
+                            case NetworkMessageTypes.ServerStatusRequest:
+
+                                ServerStatusModel serverStatus = JsonConvert.DeserializeObject<ServerStatusModel>(data, settings);
+                                if(serverStatus != null && serverStatus.ServerIndex != 255) {
+                                    FormManager.MainWindow.connectedHost.GetServerInfoByIndex(serverStatus.ServerIndex).SetStatus(serverStatus);
+                                }
+
+                                break;
                         }
                     }
                 } catch (Exception e) {

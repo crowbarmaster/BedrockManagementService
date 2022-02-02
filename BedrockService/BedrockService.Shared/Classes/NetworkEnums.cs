@@ -34,6 +34,8 @@
         DelBackups,
         EnumBackups,
         Restart,
+        StartStop,
+        ServerStatusRequest,
         Heartbeat,
         Disconnect,
         UICallback

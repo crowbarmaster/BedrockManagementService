@@ -5,11 +5,13 @@ using System.Text;
 
 namespace BedrockService.Service.Networking.NetworkStrategies {
     public class ServerPropUpdate : IMessageParser {
+        private readonly IBedrockLogger _logger;
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IBedrockService _bedrockService;
         private readonly IConfigurator _configurator;
 
-        public ServerPropUpdate(IConfigurator configurator, IServiceConfiguration serviceConfiguration, IBedrockService bedrockService) {
+        public ServerPropUpdate(IBedrockLogger logger, IConfigurator configurator, IServiceConfiguration serviceConfiguration, IBedrockService bedrockService) {
+            _logger = logger;
             _configurator = configurator;
             _serviceConfiguration = serviceConfiguration;
             _bedrockService = bedrockService;
@@ -19,16 +21,19 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
             JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
             string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
             List<Property> propList = JsonConvert.DeserializeObject<List<Property>>(stringData, settings);
-            Property prop = propList.FirstOrDefault(p => p.KeyName == "server-name");
-            if (prop == null) {
+            Property prop = propList.FirstOrDefault(p => p.KeyName == "AcceptedMojangLic");
+            if (prop != null) {
                 _serviceConfiguration.SetAllProps(propList);
                 _configurator.SaveGlobalFile();
+                _logger.AppendLine("Successfully wrote service configuration to file! Restarting service to apply changes!");
                 _bedrockService.RestartService();
                 return (Array.Empty<byte>(), 0, 0);
             }
-            _serviceConfiguration.GetServerInfoByIndex(serverIndex).SetAllProps(propList);
+            foreach (Property property in propList) {
+                _serviceConfiguration.GetServerInfoByIndex(serverIndex).SetProp(property);
+            }
             _configurator.SaveServerConfiguration(_serviceConfiguration.GetServerInfoByIndex(serverIndex));
-            _bedrockService.GetBedrockServerByIndex(serverIndex).RestartServer().Wait();
+            _logger.AppendLine("Successfully wrote server configuration to file! Restart server to apply changes!");
             return (Array.Empty<byte>(), 0, NetworkMessageTypes.UICallback);
         }
     }

@@ -11,13 +11,13 @@ using System.Windows.Forms;
 namespace BedrockService.Client.Management {
     class LogManager {
         public Task LogTask;
-        public bool EnableFlag;
         public bool Working = false;
         public List<string> ServiceLogs = new List<string>();
         private CancellationTokenSource _logTaskCancelSource;
         private IServiceConfiguration _connectedHost;
         private readonly IBedrockLogger _logger;
-        private int currentLogBoxLength;
+        private int currentServerLogLength;
+        private int currentServiceLogLength;
 
         public LogManager(IBedrockLogger logger) {
             _logger = logger;
@@ -38,20 +38,35 @@ namespace BedrockService.Client.Management {
                     Task.Delay(300).Wait();
 
                     if (FormManager.MainWindow.selectedServer == null) {
-                        UpdateLogBoxInvoked("");
+                        UpdateLogBoxInvoked(FormManager.MainWindow.LogBox, "");
                     }
-                    if (FormManager.MainWindow.ShowsSvcLog && _connectedHost.GetLog().Count != currentLogBoxLength) {
-                        UpdateLogBoxInvoked(string.Join("\r\n", _connectedHost.GetLog().Select(x => x.Text).ToList()));
+                    if (_connectedHost.GetLog().Count != currentServiceLogLength) {
+                        UpdateLogBoxInvoked(FormManager.MainWindow.serviceTextbox, string.Join("\r\n", _connectedHost.GetLog().Select(x => x.Text).ToList()));
                     }
-                    if (!FormManager.MainWindow.ShowsSvcLog && FormManager.MainWindow.selectedServer != null && FormManager.MainWindow.selectedServer.GetLog() != null && FormManager.MainWindow.selectedServer.GetLog().Count != currentLogBoxLength) {
-                        UpdateLogBoxInvoked(string.Join("\r\n", FormManager.MainWindow.selectedServer.GetLog().Select(x => x.Text).ToList()));
+                    if (FormManager.MainWindow.selectedServer != null && FormManager.MainWindow.selectedServer.GetLog() != null && FormManager.MainWindow.selectedServer.GetLog().Count != currentServerLogLength) {
+                        UpdateLogBoxInvoked(FormManager.MainWindow.LogBox, string.Join("\r\n", FormManager.MainWindow.selectedServer.GetLog().Select(x => x.Text).ToList()));
                     }
                     FormManager.MainWindow.LogBox.Invoke((MethodInvoker)delegate {
-                        currentLogBoxLength = FormManager.MainWindow.LogBox.TextLength;
+                        currentServerLogLength = FormManager.MainWindow.LogBox.TextLength;
+                        currentServiceLogLength = FormManager.MainWindow.serviceTextbox.TextLength;
                     });
+                    if (FormManager.MainWindow.selectedServer != null && FormManager.MainWindow.selectedServer.GetStatus() != null) {
+                        IServerConfiguration serverConfiguration = FormManager.MainWindow.selectedServer;
+                        bool autoStartEnabled = bool.Parse(serverConfiguration.GetProp("ServerAutostartEnabled").ToString());
+                        ServerStatusModel status = serverConfiguration.GetStatus();
+                        string statusMsg = $"{serverConfiguration.GetServerName()} {status.ServerStatus}\r\n{status.ActivePlayerList.Count} players online";
+                        if (!autoStartEnabled) {
+                            statusMsg = statusMsg + $"\r\nAutoStart disabled for this server!";
+                        }
+                        UpdateLogBoxInvoked(FormManager.MainWindow.ServerInfoBox, statusMsg);
+                    }
+                    if(FormManager.MainWindow.selectedServer != null) {
+                        FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Server, FormManager.MainWindow.connectedHost.GetServerIndex(FormManager.MainWindow.selectedServer), NetworkMessageTypes.ServerStatusRequest);
+                    }
                 } catch (Exception e) {
                     _logger.AppendLine($"LogManager Error! Stacetrace: {e.StackTrace}");
                 }
+                Task.Delay(1000).Wait();
             }
         }
 
@@ -90,9 +105,9 @@ namespace BedrockService.Client.Management {
             return true;
         }
 
-        private static void UpdateLogBoxInvoked(string contents) {
+        private static void UpdateLogBoxInvoked(TextBox targetBox, string contents) {
             FormManager.MainWindow.LogBox.Invoke((MethodInvoker)delegate {
-                FormManager.MainWindow.UpdateLogBox(contents);
+                FormManager.MainWindow.UpdateServerLogBox(targetBox, contents);
             });
         }
     }
