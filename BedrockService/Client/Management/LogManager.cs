@@ -66,7 +66,6 @@ namespace BedrockService.Client.Management {
                 } catch (Exception e) {
                     _logger.AppendLine($"LogManager Error! Stacetrace: {e.StackTrace}");
                 }
-                Task.Delay(1000).Wait();
             }
         }
 
