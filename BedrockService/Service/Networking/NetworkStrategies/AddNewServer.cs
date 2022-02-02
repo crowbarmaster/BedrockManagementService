@@ -27,7 +27,8 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
             ServerConfigurator newServer = new ServerConfigurator(_serviceConfiguration.GetProp("ServersPath").ToString(), _serviceConfiguration.GetServerDefaultPropList()) {
                 ServerName = serverNameProp.ToString(),
                 ServerPropList = propList,
-                ServerPath = new Property("ServerPath", "") {
+                ServerAutostartEnabled = new Property("ServerAutostartEnabled", "true"),
+            ServerPath = new Property("ServerPath", "") {
                     Value = $@"{_serviceConfiguration.GetProp("ServersPath")}\{serverNameProp}"
                 },
                 ServerExeName = new Property("ServerExeName", "") {
@@ -35,6 +36,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
                 },
                 FileName = $@"{serverNameProp}.conf"
             };
+            
             _configurator.SaveServerConfiguration(newServer);
             _bedrockService.InitializeNewServer(newServer);
 
