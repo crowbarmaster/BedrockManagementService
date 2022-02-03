@@ -320,9 +320,7 @@
             // 
             // clientLogBox
             // 
-            this.clientLogBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.clientLogBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.clientLogBox.Location = new System.Drawing.Point(0, 0);
             this.clientLogBox.Margin = new System.Windows.Forms.Padding(0);
             this.clientLogBox.Multiline = true;
@@ -340,16 +338,13 @@
             this.servicePage.Location = new System.Drawing.Point(4, 24);
             this.servicePage.Margin = new System.Windows.Forms.Padding(9, 13, 9, 13);
             this.servicePage.Name = "servicePage";
-            this.servicePage.Padding = new System.Windows.Forms.Padding(9, 13, 9, 13);
             this.servicePage.Size = new System.Drawing.Size(563, 476);
             this.servicePage.TabIndex = 1;
             this.servicePage.Text = "Service log";
             // 
             // serviceTextbox
             // 
-            this.serviceTextbox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.serviceTextbox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.serviceTextbox.Location = new System.Drawing.Point(0, 0);
             this.serviceTextbox.Margin = new System.Windows.Forms.Padding(0);
             this.serviceTextbox.Multiline = true;
@@ -367,16 +362,13 @@
             this.serverPage.Location = new System.Drawing.Point(4, 24);
             this.serverPage.Margin = new System.Windows.Forms.Padding(9, 13, 9, 13);
             this.serverPage.Name = "serverPage";
-            this.serverPage.Padding = new System.Windows.Forms.Padding(9, 13, 9, 13);
             this.serverPage.Size = new System.Drawing.Size(563, 476);
             this.serverPage.TabIndex = 0;
             this.serverPage.Text = "Server log";
             // 
             // LogBox
             // 
-            this.LogBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.LogBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.LogBox.Location = new System.Drawing.Point(0, 0);
             this.LogBox.Margin = new System.Windows.Forms.Padding(0);
             this.LogBox.Multiline = true;
@@ -524,7 +516,7 @@
             this.Controls.Add(this.HostInfoLabel);
             this.Controls.Add(this.Connect);
             this.Margin = new System.Windows.Forms.Padding(7, 10, 7, 10);
-            this.MinimumSize = new System.Drawing.Size(915, 457);
+            this.MinimumSize = new System.Drawing.Size(1022, 563);
             this.Name = "MainWindow";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Bedrock Service Management";
