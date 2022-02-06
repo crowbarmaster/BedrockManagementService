@@ -30,7 +30,7 @@ namespace BedrockService.Shared.Classes {
             globals.Add(new Property("IgnoreInactiveBackups", "true"));
             _defaultServerProps.Clear();
             try {
-                File.ReadAllLines($@"{_processInfo.GetDirectory()}\Server\stock_props.conf")
+                File.ReadAllLines($@"{_processInfo.GetDirectory()}\BmsConfig\stock_props.conf")
                    .ToList()
                    .ForEach(x => {
                        string[] s = x.Split('=');
@@ -57,7 +57,7 @@ namespace BedrockService.Shared.Classes {
                     }
                     if (split[0] == "BackupPath") {
                         if (split[1] == "Default")
-                            split[1] = $@"{_processInfo.GetDirectory()}\Server\Backups";
+                            split[1] = $@"{_processInfo.GetDirectory()}\ServerBackups";
                     }
                     SetProp(split[0], split[1]);
                 }

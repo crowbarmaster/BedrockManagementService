@@ -113,9 +113,9 @@ namespace BedrockService.Service.Server {
                 MinecraftPackParser parser = new MinecraftPackParser(_processInfo);
                 foreach (FileInfo file in backupPacksDir.GetFiles()) {
                     _fileUtils.ClearTempDir();
-                    ZipFile.ExtractToDirectory(file.FullName, $@"{_servicePath}\Temp\PackTemp", true);
+                    ZipFile.ExtractToDirectory(file.FullName, $@"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}\Temp\BMSTemp\PackTemp", true);
                     parser.FoundPacks.Clear();
-                    parser.ParseDirectory($@"{_servicePath}\Temp\PackTemp");
+                    parser.ParseDirectory($@"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}\Temp\BMSTemp\PackTemp");
                     if (parser.FoundPacks[0].ManifestType == "data") {
                         string folderPath = $@"{server.GetProp("ServerPath")}\behavior_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
                         ZipFile.ExtractToDirectory(file.FullName, folderPath, true);
@@ -131,15 +131,6 @@ namespace BedrockService.Service.Server {
                 _logger.AppendLine($"Error deleting selected backups! {e.Message}");
             }
             return false;
-        }
-
-        public void InitializeBackup() {
-            if(!_backupRunning && _currentServerStatus == ServerStatus.Started) {
-                _backupRunning = true;
-                WriteToStandardIn("save hold");
-                Task.Delay(1000).Wait();
-                WriteToStandardIn("save query");
-            }
         }
 
         public ServerStatusModel GetServerStatus() => new ServerStatusModel() {
@@ -247,6 +238,16 @@ namespace BedrockService.Service.Server {
             }
         }
 
+        public void InitializeBackup() {
+            if(!_backupRunning && _currentServerStatus == ServerStatus.Started) {
+                _backupRunning = true;
+                WriteToStandardIn("save hold");
+                Task.Delay(1000).Wait();
+                WriteToStandardIn("say Server backup started.");
+                WriteToStandardIn("save query");
+            }
+        }
+
         private bool PerformBackup(string queryString) {
             try {
                 string serverPath = _serverConfiguration.GetProp("ServerPath").ToString();
@@ -263,7 +264,7 @@ namespace BedrockService.Service.Server {
                     backupFileInfoPairs.Add(fileName, fileSize);
                 }
                 PruneBackups(backupDir);
-                DirectoryInfo targetDirectory = backupDir.CreateSubdirectory($"Backup_{DateTime.Now.Ticks}");
+                DirectoryInfo targetDirectory = backupDir.CreateSubdirectory($"Backup_{DateTime.Now:yyyyMMdd_HHmmss}");
                 _logger.AppendLine($"Backing up files for server {_serverConfiguration.GetServerName()}. Please wait!");
                 string levelDir = @$"\{_serverConfiguration.GetProp("level-name")}";
                 bool resuilt = _fileUtils.BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, $@"{targetDirectory.FullName}").Result;
@@ -279,6 +280,7 @@ namespace BedrockService.Service.Server {
             } catch (Exception e) {
                 _logger.AppendLine($"Error with Backup: {e.Message} {e.StackTrace}");
                 WriteToStandardIn("save resume");
+                WriteToStandardIn("say Server backup complete.");
                 _backupRunning = false;
                 return false;
             }
@@ -291,10 +293,10 @@ namespace BedrockService.Service.Server {
             int dirCount = backupDir.GetDirectories().Length;
             try {
                 if (dirCount >= int.Parse(_serviceConfiguration.GetProp("MaxBackupCount").ToString())) {
-                    List<long> dates = new List<long>();
+                    List<string> dates = new List<string>();
                     foreach (DirectoryInfo dir in backupDir.GetDirectories()) {
                         string[] folderNameSplit = dir.Name.Split('_');
-                        dates.Add(Convert.ToInt64(folderNameSplit[1]));
+                        dates.Add(folderNameSplit[1]);
                     }
                     dates.Sort();
                     Directory.Delete($@"{backupDir}\Backup_{dates.First()}", true);

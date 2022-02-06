@@ -41,6 +41,15 @@ namespace BedrockService.Service.Core {
 
         public Task<bool> Initialize() {
             return Task.Run(() => {
+                if (!File.Exists($@"{_processInfo.GetDirectory()}\ServiceVersion.ini")) {
+                    if (UpgradeAssistant_26RC2.IsUpgradeRequired(_processInfo.GetDirectory())) {
+                        UpgradeAssistant_26RC2.PerformUpgrade(_processInfo.GetDirectory());
+                    }
+                }
+                string? startedVersion = Process.GetCurrentProcess().MainModule?.FileVersionInfo.ProductVersion;
+                if (startedVersion != null) {
+                    File.WriteAllText($@"{_processInfo.GetDirectory()}\ServiceVersion.ini", startedVersion);
+                }
                 _CurrentServiceStatus = ServiceStatus.Starting;
                 _updater.Initialize();
                 _configurator.LoadGlobals().Wait();
@@ -243,10 +252,10 @@ namespace BedrockService.Service.Core {
         }
 
         private void VerifyCoreFiles() {
-            if (!File.Exists($@"{_processInfo.GetDirectory()}\Server\stock_packs.json") || !File.Exists($@"{_processInfo.GetDirectory()}\Server\stock_props.conf")) {
+            if (!File.Exists($@"{_processInfo.GetDirectory()}\BmsConfig\stock_packs.json") || !File.Exists($@"{_processInfo.GetDirectory()}\BmsConfig\stock_props.conf")) {
                 _logger.AppendLine("Core file(s) found missing. Rebuilding!");
                 string version = _serviceConfiguration.GetServerVersion();
-                MinecraftUpdatePackageProcessor packageProcessor = new(_logger, _processInfo, _serviceConfiguration.GetServerVersion(), $@"{_processInfo.GetDirectory()}\Server");
+                MinecraftUpdatePackageProcessor packageProcessor = new(_logger, _processInfo, _serviceConfiguration.GetServerVersion(), $@"{_processInfo.GetDirectory()}\BmsConfig");
                 packageProcessor.ExtractFilesToDirectory();
                 _configurator.LoadGlobals().Wait();
                 _serviceConfiguration.SetServerVersion(version);

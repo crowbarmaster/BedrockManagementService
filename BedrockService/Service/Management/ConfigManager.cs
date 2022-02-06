@@ -1,42 +1,37 @@
 ﻿using BedrockService.Service.Management.Interfaces;
 using BedrockService.Shared.MinecraftJsonModels.FileModels;
 using BedrockService.Shared.MinecraftJsonModels.JsonModels;
+using System.Globalization;
 using System.IO.Compression;
 
 namespace BedrockService.Service.Management {
     public class ConfigManager : IConfigurator {
         private readonly string _serverConfigDir;
         private readonly string _globalFile;
-        private readonly string _loadedVersion;
         private static readonly object _fileLock = new object();
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IProcessInfo _processInfo;
         private readonly IBedrockLogger _logger;
         private readonly FileUtilities _fileUtilities;
+        private string _loadedVersion;
 
         public ConfigManager(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, IBedrockLogger logger, FileUtilities fileUtilities) {
             _processInfo = processInfo;
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
             _fileUtilities = fileUtilities;
-            _serverConfigDir = $@"{_processInfo.GetDirectory()}\Server\Configs";
-            _globalFile = $@"{_processInfo.GetDirectory()}\Service\Globals.conf";
-            if (!Directory.Exists(_serverConfigDir))
-                Directory.CreateDirectory(_serverConfigDir);
-            if (!Directory.Exists($@"{_processInfo.GetDirectory()}\Service"))
-                Directory.CreateDirectory($@"{_processInfo.GetDirectory()}\Service");
-            if (!Directory.Exists($@"{_serverConfigDir}\KnownPlayers\Backups"))
-                Directory.CreateDirectory($@"{_serverConfigDir}\KnownPlayers\Backups");
-            if (!Directory.Exists($@"{_serverConfigDir}\RegisteredPlayers\Backups"))
-                Directory.CreateDirectory($@"{_serverConfigDir}\RegisteredPlayers\Backups");
-            if (!Directory.Exists($@"{_serverConfigDir}\Backups"))
-                Directory.CreateDirectory($@"{_serverConfigDir}\Backups");
-            if (File.Exists($@"{_serverConfigDir}\..\bedrock_ver.ini"))
-                _loadedVersion = File.ReadAllText($@"{_serverConfigDir}\..\bedrock_ver.ini");
+            _serverConfigDir = $@"{_processInfo.GetDirectory()}\BmsConfig\ServerConfigs";
+            _globalFile = $@"{_processInfo.GetDirectory()}\Service.conf";
         }
 
         public Task LoadGlobals() => Task.Run(() => {
             _serviceConfiguration.InitializeDefaults();
+            if (!Directory.Exists(_serverConfigDir))
+                Directory.CreateDirectory(_serverConfigDir);
+            if (!Directory.Exists($@"{_serverConfigDir}\PlayerRecords"))
+                Directory.CreateDirectory($@"{_serverConfigDir}\PlayerRecords");
+            if (File.Exists($@"{_serverConfigDir}\..\bedrock_ver.ini"))
+                _loadedVersion = File.ReadAllText($@"{_serverConfigDir}\..\bedrock_ver.ini");
             if (File.Exists(_globalFile)) {
                 _logger.AppendLine("Loading Globals...");
                 _serviceConfiguration.ProcessConfiguration(File.ReadAllLines(_globalFile));
@@ -79,7 +74,7 @@ namespace BedrockService.Service.Management {
                     while (_serviceConfiguration.GetServerVersion() == null || _serviceConfiguration.GetServerVersion() == "None") {
                         Task.Delay(200).Wait();
                     }
-                    using (ZipArchive archive = ZipFile.OpenRead($@"{_processInfo.GetDirectory()}\Server\MCSFiles\Update_{ _serviceConfiguration.GetServerVersion()}.zip")) {
+                    using (ZipArchive archive = ZipFile.OpenRead($@"{_processInfo.GetDirectory()}\BmsConfig\BDSUpdates\Update_{ _serviceConfiguration.GetServerVersion()}.zip")) {
                         int fileCount = archive.Entries.Count;
                         for (int i = 0; i < fileCount; i++) {
                             if (i % (RoundOff(fileCount) / 6) == 0) {
@@ -121,10 +116,7 @@ namespace BedrockService.Service.Management {
 
         public void SavePlayerDatabase(IServerConfiguration server) {
             lock (_fileLock) {
-                string filePath = $@"{_serverConfigDir}\KnownPlayers\{server.GetServerName()}.playerdb";
-                if (File.Exists(filePath)) {
-                    File.Copy(filePath, $@"{_serverConfigDir}\KnownPlayers\Backups\{server.GetServerName()}_{DateTime.Now:mmddyyhhmmssff}.dbbak", true);
-                }
+                string filePath = $@"{_serverConfigDir}\PlayerRecords\{server.GetServerName()}.playerdb";
                 TextWriter writer = new StreamWriter(filePath);
                 foreach (Player entry in server.GetPlayerList()) {
                     writer.WriteLine(entry.ToString("Known"));
@@ -133,10 +125,7 @@ namespace BedrockService.Service.Management {
                 writer.Close();
             }
             lock (_fileLock) {
-                string filePath = $@"{_serverConfigDir}\RegisteredPlayers\{server.GetServerName()}.preg";
-                if (File.Exists(filePath)) {
-                    File.Copy(filePath, $@"{_serverConfigDir}\RegisteredPlayers\Backups\{server.GetServerName()}_{DateTime.Now:mmddyyhhmmssff}.bak", true);
-                }
+                string filePath = $@"{_serverConfigDir}\PlayerRecords\{server.GetServerName()}.preg";
                 TextWriter writer = new StreamWriter(filePath);
                 writer.WriteLine("# Registered player list");
                 writer.WriteLine("# Register player entries: PlayerEntry=xuid,username,permission,isWhitelisted,ignoreMaxPlayers");
@@ -212,7 +201,7 @@ namespace BedrockService.Service.Management {
             try {
                 foreach (DirectoryInfo dir in new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{serverName}").GetDirectories()) {
                     string[] splitName = dir.Name.Split('_');
-                    newList.Add(new Property(dir.Name, new DateTime(long.Parse(splitName[1])).ToString("G")));
+                    newList.Add(new Property(dir.Name, DateTime.ParseExact(splitName[1], "yyyyMMdd_HHmmss", CultureInfo.InvariantCulture).ToString("G")));
                 }
             } catch (IOException) {
                 return newList;
@@ -286,8 +275,8 @@ namespace BedrockService.Service.Management {
 
         private void LoadPlayerDatabase(IServerConfiguration server) {
             string serverName = server.GetServerName();
-            string dbPath = $@"{_serverConfigDir}\KnownPlayers\{serverName}.playerdb";
-            string regPath = $@"{_serverConfigDir}\RegisteredPlayers\{serverName}.preg";
+            string dbPath = $@"{_serverConfigDir}\PlayerRecords\{serverName}.playerdb";
+            string regPath = $@"{_serverConfigDir}\PlayerRecords\{serverName}.preg";
             _fileUtilities.CreateInexistantFile(regPath);
             _fileUtilities.CreateInexistantFile(dbPath);
             List<string[]> playerDbEntries = File.ReadAllLines(dbPath)

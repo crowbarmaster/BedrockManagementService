@@ -18,13 +18,13 @@ namespace BedrockService.Service.Management {
             _packageVersion = packageVersion;
             _fileTargetDirectory = fileTargetDirectory;
             _serviceDirectory = processInfo.GetDirectory();
-            _workingDirectory = $@"{_serviceDirectory}\Temp\ServerFileTemp";
+            _workingDirectory = $@"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}\Temp\BMSTemp\ServerFileTemp";
             Directory.CreateDirectory(_workingDirectory);
             _logger = logger;
         }
 
         public void ExtractFilesToDirectory() {
-            using (ZipArchive archive = ZipFile.OpenRead($@"{_serviceDirectory}\Server\MCSFiles\Update_{_packageVersion}.zip")) {
+            using (ZipArchive archive = ZipFile.OpenRead($@"{_serviceDirectory}\BmsConfig\BDSUpdates\Update_{_packageVersion}.zip")) {
                 int fileCount = archive.Entries.Count;
                 for (int i = 0; i < fileCount; i++) {
                     int percentResult = 1;

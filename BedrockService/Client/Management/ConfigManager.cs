@@ -6,7 +6,7 @@ using System.Text;
 
 namespace BedrockService.Client.Management {
     public class ConfigManager {
-        public string ConfigDir = $@"{Directory.GetCurrentDirectory()}\Client\Configs";
+        public string ConfigDir = $@"{Directory.GetCurrentDirectory()}";
         public string ConfigFile;
         public List<IClientSideServiceConfiguration> HostConnectList = new List<IClientSideServiceConfiguration>();
         public string NBTStudioPath;
@@ -15,7 +15,7 @@ namespace BedrockService.Client.Management {
 
         public ConfigManager(IBedrockLogger logger) {
             Logger = logger;
-            ConfigFile = $@"{ConfigDir}\Config.conf";
+            ConfigFile = $@"{ConfigDir}\Client.conf";
         }
 
         public void LoadConfigs() {

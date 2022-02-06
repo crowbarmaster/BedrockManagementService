@@ -18,13 +18,13 @@ namespace BedrockService.Service.Networking {
         }
 
         public void Initialize() {
-            if (!Directory.Exists($@"{_processInfo.GetDirectory()}\Server")) { Directory.CreateDirectory($@"{_processInfo.GetDirectory()}\Server"); }
-            if (!File.Exists($@"{_processInfo.GetDirectory()}\Server\bedrock_ver.ini")) {
+            if (!Directory.Exists($@"{_processInfo.GetDirectory()}\BmsConfig")) { Directory.CreateDirectory($@"{_processInfo.GetDirectory()}\BmsConfig"); }
+            if (!File.Exists($@"{_processInfo.GetDirectory()}\BmsConfig\bedrock_ver.ini")) {
                 _logger.AppendLine("Version ini file missing, creating and fetching build...");
-                File.Create($@"{_processInfo.GetDirectory()}\Server\bedrock_ver.ini").Close();
+                File.Create($@"{_processInfo.GetDirectory()}\BmsConfig\bedrock_ver.ini").Close();
                 return;
             }
-            _version = File.ReadAllText($@"{_processInfo.GetDirectory()}\Server\bedrock_ver.ini");
+            _version = File.ReadAllText($@"{_processInfo.GetDirectory()}\BmsConfig\bedrock_ver.ini");
         }
 
         public async Task CheckUpdates() {
@@ -68,7 +68,7 @@ namespace BedrockService.Service.Networking {
                     return false;
                 }
                 _versionChanged = true;
-                File.WriteAllText($@"{_processInfo.GetDirectory()}\Server\bedrock_ver.ini", fetchedVersion);
+                File.WriteAllText($@"{_processInfo.GetDirectory()}\BmsConfig\bedrock_ver.ini", fetchedVersion);
                 _serviceConfiguration.SetServerVersion(fetchedVersion);
                 return true;
             });
@@ -79,9 +79,9 @@ namespace BedrockService.Service.Networking {
         public void MarkUpToDate() => _versionChanged = false;
 
         private async Task FetchBuild(string path, string version) {
-            string ZipDir = $@"{_processInfo.GetDirectory()}\Server\MCSFiles\Update_{version}.zip";
-            if (!Directory.Exists($@"{_processInfo.GetDirectory()}\Server\MCSFiles")) {
-                Directory.CreateDirectory($@"{_processInfo.GetDirectory()}\Server\MCSFiles");
+            string ZipDir = $@"{_processInfo.GetDirectory()}\BmsConfig\BDSUpdates\Update_{version}.zip";
+            if (!Directory.Exists($@"{_processInfo.GetDirectory()}\BmsConfig\BDSUpdates")) {
+                Directory.CreateDirectory($@"{_processInfo.GetDirectory()}\BmsConfig\BDSUpdates");
             }
             if (File.Exists(ZipDir)) {
                 return;
