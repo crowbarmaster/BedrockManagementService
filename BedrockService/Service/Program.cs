@@ -45,14 +45,13 @@ namespace BedrockService.Service {
                         .AddSingleton(processInfo)
                         .AddTransient<NetworkStrategyLookup>()
                         .AddTransient<FileUtilities>()
+                        .AddSingleton<IBedrockLogger, BedrockLogger>()
                         .AddSingleton<ServiceConfigurator>()
                         .AddSingleton<IServiceConfiguration>(x => x.GetRequiredService<ServiceConfigurator>())
                         .AddSingleton<IBedrockConfiguration>(x => x.GetRequiredService<ServiceConfigurator>())
-                        .AddSingleton<IBedrockLogger, BedrockLogger>()
                         .AddSingleton<IBedrockService, Core.BedrockService>()
                         .AddSingleton<ITCPListener, TCPListener>()
-                        .AddSingleton<IConfigurator, ConfigManager>()
-                        .AddSingleton<IUpdater, Updater>();
+                        .AddSingleton<IConfigurator, ConfigManager>();
                 });
     }
 }
