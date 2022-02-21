@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ namespace BedrockService.Shared.Utilities {
         private static List<KeyValuePair<string, string>> _serviceUpgradeList = new List<KeyValuePair<string, string>> {
             new KeyValuePair<string, string> (@"\Service\Globals.conf", @"\Service.conf"),
             new KeyValuePair<string, string> (@"\Server", @"\BmsConfig"),
-            new KeyValuePair<string, string> (@"\BmsConfig\MCSFiles", @"\BmsConfig\BDSUpdates"),
+            new KeyValuePair<string, string> (@"\BmsConfig\MCSFiles", @"\BmsConfig\BDSBuilds"),
             new KeyValuePair<string, string> (@"\BmsConfig\Configs", @"\BmsConfig\ServerConfigs"),
             new KeyValuePair<string, string> (@"\BmsConfig\ServerConfigs\RegisteredPlayers", @"\BmsConfig\ServerConfigs\PlayerRecords"),
             new KeyValuePair<string, string> (@"\BmsConfig\ServerConfigs\KnownPlayers", @"\BmsConfig\ServerConfigs\PlayerRecords"),
@@ -60,14 +61,27 @@ namespace BedrockService.Shared.Utilities {
                     }
                 }
             }
+            DirectoryInfo buildsDirInfo = new DirectoryInfo($@"{basePath}\BmsConfig\BDSBuilds");
+            IEnumerable<FileInfo> fileInfos = buildsDirInfo.GetFiles();
+            Directory.CreateDirectory($"{buildsDirInfo.FullName}\\BuildArchives");
+            Directory.CreateDirectory($"{buildsDirInfo.FullName}\\CoreFiles");
+            foreach (FileInfo file in fileInfos) {
+                file.MoveTo($"{buildsDirInfo.FullName}\\BuildArchives\\{file.Name}");
+            }
+            File.Delete($"{basePath}\\BMSConfig\\bedrock_ver.ini");
+            File.Delete($"{basePath}\\BMSConfig\\stock_props.conf");
+            File.Delete($"{basePath}\\BMSConfig\\stock_packs.json");
             CorrectFileTimeFormats(basePath);
             RemoveOldDirectories(basePath);
+            UpdateServerConfigurations(basePath);
         }
 
         public static void PerformClientUpgrade(string basePath) {
             if (File.Exists($@"{basePath}\Client\Configs\Config.conf")) {
                 File.Move($@"{basePath}\Client\Configs\Config.conf", $@"{basePath}\Client.conf");
             }
+            CorrectLogTimeFormats(basePath);
+            RemoveOldClientDirectory(basePath);
         }
 
         private static void CorrectFileTimeFormats(string basePath) {
@@ -78,20 +92,27 @@ namespace BedrockService.Shared.Utilities {
                     foreach (DirectoryInfo dir in backupDirList) {
                         IEnumerable<DirectoryInfo> backupList = dir.EnumerateDirectories();
                         if (backupList.Count() > 0) {
-                            DirectoryInfo backupFixTest = backupList.First();
-                            if (long.TryParse(backupFixTest.Name.Substring(6, backupFixTest.Name.Length - 6), out _)) {
-                                foreach (DirectoryInfo backup in backupList) {
-                                    string dateInfo = backup.Name.Substring(6, backup.Name.Length - 6);
+                            foreach (DirectoryInfo backup in backupList) {
+                                string dateInfo = backup.Name.Substring(7, backup.Name.Length - 7);
+                                try {
                                     long dateLongValue = long.Parse(dateInfo);
                                     DateTime newDateObject = new DateTime(dateLongValue);
-                                    string updatedName = $"Backup_{newDateObject:yyyyMMdd_HHmmss}";
-                                    backup.MoveTo($@"{basePath}\ServerBackups\{dir.Name}\{updatedName}");
+                                    string updatedName = $"Backup-{newDateObject:yyyyMMdd_HHmmssff}.zip";
+                                    ZipFile.CreateFromDirectory(backup.FullName, $@"{dir.FullName}\{updatedName}");
+                                    backup.Delete(true);
+                                } catch {
+                                    continue;
                                 }
                             }
+
                         }
                     }
                 }
             }
+            CorrectLogTimeFormats(basePath);
+        }
+
+        private static void CorrectLogTimeFormats(string basePath) {
             if (Directory.Exists($@"{basePath}\Logs")) {
                 DirectoryInfo logDirInfo = new DirectoryInfo($@"{basePath}\Logs");
                 IEnumerable<DirectoryInfo> logDirList = logDirInfo.EnumerateDirectories();
@@ -126,7 +147,7 @@ namespace BedrockService.Shared.Utilities {
                         continue;
                     }
                     string serverNameOverride = isServer ? "Server" : logDir.Name;
-                    string updatedName = $"{serverNameOverride}Log-{newDateObject:yyyyMMdd_HHmmss}.log";
+                    string updatedName = $"{serverNameOverride}Log-{newDateObject:yyyyMMdd_HHmmssff}.log";
                     logFile.MoveTo($@"{logFile.Directory.FullName}\{updatedName}");
                 }
             }
@@ -140,6 +161,55 @@ namespace BedrockService.Shared.Utilities {
             }
             if (Directory.Exists(@$"{basePath}\BmsConfig\ServerConfigs\Backups") && Directory.EnumerateFileSystemEntries(@$"{basePath}\BmsConfig\ServerConfigs\Backups").Count() == 0) {
                 Directory.Delete(@$"{basePath}\BmsConfig\ServerConfigs\Backups");
+            }
+        }
+
+        private static void RemoveOldClientDirectory (string basePath) => Directory.Delete($@"{basePath}\Client", true);
+
+        private static void UpdateServerConfigurations(string basePath) {
+            string serviceConfPath = $@"{basePath}\Service.conf";
+            string configPath = $@"{basePath}\BmsConfig\ServerConfigs";
+            List<string> removeEntries = new List<string>();
+            DirectoryInfo configDirInfo = new DirectoryInfo(configPath);
+            List<FileInfo> serverConfigurations = configDirInfo.GetFiles("*.conf").ToList();
+            List<string> serviceEntries = new List<string>(File.ReadAllLines(serviceConfPath));
+            List<string> entriesToAdd = new List<string>();
+            foreach (string entry in serviceEntries) {
+                string[] splitEntry = entry.Split('=');
+                switch(splitEntry[0]) {
+                    case "BackupEnabled":
+                    case "BackupPath":
+                    case "BackupCron":
+                    case "UpdateCron":
+                    case "MaxBackupCount":
+                    case "IgnoreInactiveBackups":
+                        removeEntries.Add(entry);
+                        entriesToAdd.Add(entry);
+                        break;
+                    case "CheckUpdates":
+                        entriesToAdd.Add(entry);
+                        removeEntries.Add(entry);
+                        if (bool.TryParse(splitEntry[1], out bool result)) {
+                            entriesToAdd.Add($"AutoDeployUpdates={result.ToString().ToLower()}");
+                        }
+                        break;
+                    case "EntireBackups":
+                        removeEntries.Add(entry);
+                        break;
+                }
+            }
+            foreach (string entry in removeEntries) {
+                serviceEntries.Remove(entry);
+            }
+            File.WriteAllLines(serviceConfPath, serviceEntries.ToArray());
+            entriesToAdd.AddRange(new string[] { "ServerAutostartEnabled=true", "AutoBackupsContainPacks=false", "SelectedServerVersion=Latest", "DeployedVersion=None" });
+            entriesToAdd.Insert(0, "#Service");
+            entriesToAdd.Insert(1, "#These entries were added as part of an automated update.");
+            entriesToAdd.Insert(2, "#Pllease note the order may change!");
+            foreach (FileInfo file in serverConfigurations) {
+                List<string> confLines = new List<string>(entriesToAdd);
+                confLines.AddRange(File.ReadAllLines(file.FullName));
+                File.WriteAllLines(file.FullName, confLines.ToArray());
             }
         }
     }
