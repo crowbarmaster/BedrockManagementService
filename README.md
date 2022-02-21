@@ -5,6 +5,8 @@
 Please feel free to post in the discussions if you require assistance or would like to offer your thoughts! I will do my best to answer any questions in a timely fashion.
 ## An application suite for running and controlling multiple bedrock dedicated servers
 
+# Latest beta can be found here: https://github.com/crowbarmaster/BedrockManagementService/releases
+
 ## Project information
 
 BedrockService started as a fork from Ravetroll's BedrockService, using TopShelf for multiple servers and a hidden server instance. This worked okay, but still required manual updates, lacked a way to add server instances while live, and using a WPF Console to merely monitor and send server commands was not enough for my wishes. It still would require you to interact with the server files directly, and if your server is remote, this can become a pain. My main goals for this project are as follows:
