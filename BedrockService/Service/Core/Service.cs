@@ -79,7 +79,7 @@ namespace BedrockService.Service.Core {
         private void OnStopping() {
             if (Environment.UserInteractive) {
                 _bedrockService.Stop(null);
-                while (_bedrockService.GetServiceStatus() != ServiceStatus.Stopped) {
+                while (_bedrockService.GetServiceStatus().ServiceStatus != ServiceStatus.Stopped) {
                     Task.Delay(100).Wait();
                 }
             }

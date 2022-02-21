@@ -1,5 +1,6 @@
 ﻿using BedrockService.Shared.Classes;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BedrockService.Shared.Interfaces {
     public interface IServiceConfiguration : IBedrockConfiguration {
@@ -11,8 +12,11 @@ namespace BedrockService.Shared.Interfaces {
         void AddNewServerInfo(IServerConfiguration serverConfiguration);
         void RemoveServerInfoByIndex(int serverIndex);
         void RemoveServerInfo(IServerConfiguration serverConfiguration);
-        void SetServerVersion(string newVersion);
-        string GetServerVersion();
         List<Property> GetServerDefaultPropList();
+        Task CalculateTotalBackupsAllServers();
+        (int totalBackups, int totalSize) GetServiceBackupInfo();
+        void SetLatestBDSVersion(string version);
+        string GetLatestBDSVersion();
+        bool ValidateLatestVersion();
     }
 }

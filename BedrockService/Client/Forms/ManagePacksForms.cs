@@ -60,7 +60,7 @@ namespace BedrockService.Client.Forms {
                     serverListBox.Items.Remove(item);
                 }
                 JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-                FormManager.TCPClient.SendData(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(temp, Formatting.Indented, settings)), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.RemovePack);
+                FormManager.TCPClient.SendData(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(temp, Formatting.Indented, settings)), ServerIndex, NetworkMessageTypes.RemovePack);
             }
             DialogResult = DialogResult.OK;
         }
@@ -70,7 +70,7 @@ namespace BedrockService.Client.Forms {
             foreach (object item in serverListBox.Items)
                 temp.Add((MinecraftPackContainer)item);
             JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-            FormManager.TCPClient.SendData(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(temp, Formatting.Indented, settings)), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.RemovePack);
+            FormManager.TCPClient.SendData(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(temp, Formatting.Indented, settings)), ServerIndex, NetworkMessageTypes.RemovePack);
             DialogResult = DialogResult.OK;
         }
 
@@ -111,7 +111,7 @@ namespace BedrockService.Client.Forms {
                 container.PackContentLocation = $@"{PackExtractDir.FullName}\ZipTemp\{directoryInfo.Name}";
             }
             ZipFile.CreateFromDirectory($@"{PackExtractDir.FullName}\ZipTemp", $@"{PackExtractDir.FullName}\SendZip.zip");
-            FormManager.TCPClient.SendData(File.ReadAllBytes($@"{PackExtractDir.FullName}\SendZip.zip"), NetworkMessageSource.Client, NetworkMessageDestination.Server, ServerIndex, NetworkMessageTypes.PackFile);
+            FormManager.TCPClient.SendData(File.ReadAllBytes($@"{PackExtractDir.FullName}\SendZip.zip"), ServerIndex, NetworkMessageTypes.PackFile);
             DialogResult = DialogResult.OK;
         }
     }

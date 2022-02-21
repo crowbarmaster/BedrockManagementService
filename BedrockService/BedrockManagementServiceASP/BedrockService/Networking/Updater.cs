@@ -118,7 +118,7 @@ namespace BedrockManagementServiceASP.BedrockService.Networking {
                     } else if (File.Exists($@"{_processInfo.GetDirectory()}\Server\MCSFiles\stock_filelist.ini")) {
                         _fileUtils.DeleteFilelist(File.ReadAllLines($@"{_processInfo.GetDirectory()}\Server\MCSFiles\stock_filelist.ini"), servicePath);
                     } else {
-                        _fileUtils.DeleteFilesRecursively(new DirectoryInfo(servicePath), false);
+                        _fileUtils.DeleteFilesFromDirectory(new DirectoryInfo(servicePath), false);
                         ZipFile.ExtractToDirectory($@"{_processInfo.GetDirectory()}\Server\MCSFiles\Update_{_version}.zip", servicePath);
                         File.Copy(servicePath + "\\bedrock_server.exe", servicePath + "\\" + server.GetProp("ServerExeName"), true);
                     }

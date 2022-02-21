@@ -139,13 +139,13 @@ namespace BedrockManagementServiceASP.BedrockService.Server {
                 _logger.AppendLine($"Backing up files for server {_serverConfiguration.GetServerName()}. Please wait!");
                 if (_serviceConfiguration.GetProp("EntireBackups").ToString() == "false") {
                     string levelDir = @$"\{_serverConfiguration.GetProp("level-name")}";
-                    bool resuilt = _fileUtils.BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, $@"{targetDirectory.FullName}").Result;
+                    bool resuilt = false; // BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, $@"{targetDirectory.FullName}").Result;
                     _fileUtils.CopyFilesMatchingExtension(worldsDir.FullName + levelDir, targetDirectory.FullName + levelDir, ".json");
                     WriteToStandardIn("save resume");
                     return resuilt;
                 }
                 _fileUtils.CopyFolderTree(serverDir, targetDirectory);
-                bool result = _fileUtils.BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, $@"{targetDirectory.FullName}\{_serverConfiguration.GetProp("level-name")}").Result;
+                bool result = false; // BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, $@"{targetDirectory.FullName}\{_serverConfiguration.GetProp("level-name")}").Result;
                 WriteToStandardIn("save resume");
                 return result;
             } catch (Exception e) {
@@ -379,7 +379,7 @@ namespace BedrockManagementServiceASP.BedrockService.Server {
             try {
                 foreach (DirectoryInfo dir in new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{server.GetServerName()}").GetDirectories())
                     if (dir.Name == folderName) {
-                        _fileUtils.DeleteFilesRecursively(new DirectoryInfo($@"{server.GetProp("ServerPath")}\worlds"), false);
+                        _fileUtils.DeleteFilesFromDirectory(new DirectoryInfo($@"{server.GetProp("ServerPath")}\worlds"), false);
                         _logger.AppendLine($"Deleted world folder contents.");
                         foreach (DirectoryInfo worldDir in new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{server.GetServerName()}\{folderName}").GetDirectories()) {
                             _fileUtils.CopyFolderTree(worldDir, new DirectoryInfo($@"{server.GetProp("ServerPath")}\worlds\{worldDir.Name}"));

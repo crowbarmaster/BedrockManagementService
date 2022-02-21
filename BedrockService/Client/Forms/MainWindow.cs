@@ -19,12 +19,14 @@ namespace BedrockService.Client.Forms {
         public IServiceConfiguration connectedHost;
         public IServerConfiguration selectedServer;
         public IClientSideServiceConfiguration clientSideServiceConfiguration;
+        public ServiceStatusModel ServiceStatus;
         public bool ShowsSvcLog = false;
         public bool ServerBusy = false;
         private int _connectTimeout;
         private bool _followTail = false;
         private bool _blockConnect = false;
         private const int _connectTimeoutLimit = 3;
+        private BackupManagerForm _backupManager;
         public IBedrockLogger ClientLogger;
         private readonly IProcessInfo _processInfo;
         private readonly System.Timers.Timer _connectTimer = new System.Timers.Timer(100.0);
@@ -40,7 +42,6 @@ namespace BedrockService.Client.Forms {
             InitForm();
             _connectTimer.Elapsed += ConnectTimer_Elapsed;
             Shown += MainWindow_Shown;
-            
         }
 
         private void MainWindow_Shown(object sender, EventArgs e) {
@@ -55,7 +56,7 @@ namespace BedrockService.Client.Forms {
                 Thread.Sleep(1000);
                 if (connectedHost != null && FormManager.TCPClient.EstablishedLink) {
                     ServerBusy = false;
-                    Invoke((MethodInvoker)delegate { ComponentEnableManager(); });
+                    Invoke((MethodInvoker)delegate { RefreshAllCompenentStates(); });
                     _connectTimer.Enabled = false;
                     _connectTimer.Stop();
                     _connectTimer.Close();
@@ -71,7 +72,7 @@ namespace BedrockService.Client.Forms {
                         RefreshServerContents();
                         HostInfoLabel.Text = $"Failed to connect to host!";
                         Connect.Enabled = true;
-                        ComponentEnableManager();
+                        RefreshAllCompenentStates();
                     });
                     return;
                 }
@@ -152,13 +153,20 @@ namespace BedrockService.Client.Forms {
             });
         }
 
+        public void RecieveExportData(byte[] data) {
+            if (data == null || _backupManager == null) {
+                return;
+            }
+            _backupManager.RecieveExportData(data);
+        }
+
         public override void Refresh() {
             HostInfoLabel.Text = $"Connected to host:";
             ServerSelectBox.Items.Clear();
             if (connectedHost != null) {
                 _logManager.InitLogThread(connectedHost);
                 foreach (ServerConfigurator server in connectedHost.GetServerList()) {
-                    ServerSelectBox.Items.Add(server.ServerName);
+                    ServerSelectBox.Items.Add(server.GetSettingsProp("ServerName").ToString());
                 }
 
                 if (ServerSelectBox.Items.Count > 0) {
@@ -187,12 +195,12 @@ namespace BedrockService.Client.Forms {
         private Task StartClientLogUpdate() => Task.Run(() => {
             while (!IsDisposed && clientLogBox != null) {
                 try {
-                    if (FormManager.ClientLogContainer.GetLog().Count != clientLogBox.TextLength) {
                         Invoke(() => {
+                    if (FormManager.ClientLogContainer.GetLog().Count != clientLogBox.TextLength) {
 
                             UpdateServerLogBox(clientLogBox, string.Join("\r\n", FormManager.ClientLogContainer.GetLog().Select(x => x.Text).ToList()));
-                        });
                     }
+                        });
                 } catch (Exception ex) {
                     ClientLogger.AppendLine($"Error! {ex.Message} {ex.StackTrace}");
                 }
@@ -203,10 +211,14 @@ namespace BedrockService.Client.Forms {
         public void HeartbeatFailDisconnect() {
             Disconn_Click(null, null);
             try {
+                if (selectedServer != null && _backupManager != null && _backupManager.Created) {
+                    _backupManager.Close();
+                    _backupManager.Dispose();
+                }
                 HostInfoLabel.Invoke((MethodInvoker)delegate { HostInfoLabel.Text = "Lost connection to host!"; });
                 ServerInfoBox.Invoke((MethodInvoker)delegate { ServerInfoBox.Text = "Lost connection to host!"; });
                 ServerBusy = false;
-                ComponentEnableManager();
+                RefreshAllCompenentStates();
             } catch (InvalidOperationException) { }
 
             selectedServer = null;
@@ -214,7 +226,6 @@ namespace BedrockService.Client.Forms {
         }
 
         public void UpdateServerLogBox(TextBox targetBox, string contents) {
-            
             int curPos = 0;
             if (contents.Length > 0 && targetBox.TextLength != contents.Length) {
                 curPos = GetScrollPosition(targetBox);
@@ -235,7 +246,7 @@ namespace BedrockService.Client.Forms {
             ClientLogger.AppendLine("Stopping log thread...");
             if (_logManager.StopLogThread()) {
                 ClientLogger.AppendLine("Sending disconnect msg...");
-                FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Disconnect);
+                FormManager.TCPClient.SendData(NetworkMessageTypes.Disconnect);
                 ClientLogger.AppendLine("Closing connection...");
                 FormManager.TCPClient.CloseConnection();
                 selectedServer = null;
@@ -257,54 +268,29 @@ namespace BedrockService.Client.Forms {
                 foreach (ServerConfigurator server in connectedHost.GetServerList()) {
                     if (ServerSelectBox.SelectedItem != null && ServerSelectBox.SelectedItem.ToString() == server.GetServerName()) {
                         selectedServer = server;
-                        FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Server, NetworkMessageTypes.ServerStatusRequest);
-                        ComponentEnableManager();
+                        FormManager.TCPClient.SendData(connectedHost.GetServerIndex(server), NetworkMessageTypes.EnumBackups);
                     }
                 }
+                RefreshAllCompenentStates();
             }
         }
 
         private void SingBackup_Click(object sender, EventArgs e) {
-            FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.Backup);
+            FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.Backup);
             DisableUI();
         }
 
         private void EditCfg_Click(object sender, EventArgs e) {
-            using (PropEditorForm _editDialog = new PropEditorForm()) {
-                DisableUI();
-                _editDialog.PopulateBoxes(selectedServer.GetAllProps());
-                if (_editDialog.ShowDialog() == DialogResult.OK) {
-                    JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-                    byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_editDialog.workingProps, Formatting.Indented, settings));
-                    FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PropUpdate);
-                    selectedServer.SetAllProps(_editDialog.workingProps);
-                }
-            }
-            ServerBusy = false;
+            serverConfigBtnMenu.Show(EditCfg, new System.Drawing.Point { X = 0, Y = EditCfg.Height });
         }
 
         private void RestartSrv_Click(object sender, EventArgs e) {
-            FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.Restart);
+            FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.Restart);
             DisableUI();
         }
 
-        private void EditGlobals_Click(object sender, EventArgs e) {
-            using (PropEditorForm _editDialog = new PropEditorForm()) {
-                _editDialog.PopulateBoxes(connectedHost.GetAllProps());
-                if (_editDialog.ShowDialog() == DialogResult.OK) {
-                    JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-                    byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_editDialog.workingProps, Formatting.Indented, settings));
-                    FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.PropUpdate);
-                    connectedHost.SetAllProps(_editDialog.workingProps);
-                    ServerBusy = true;
-                    DisableUI();
-                }
-            }
-            ServerBusy = false;
-        }
-
         private void GlobBackup_Click(object sender, EventArgs e) {
-            FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.BackupAll);
+            FormManager.TCPClient.SendData(NetworkMessageTypes.BackupAll);
             DisableUI();
         }
 
@@ -316,8 +302,8 @@ namespace BedrockService.Client.Forms {
             using (AddNewServerForm newServerForm = new AddNewServerForm(clientSideServiceConfiguration, connectedHost.GetServerList())) {
                 if (newServerForm.ShowDialog() == DialogResult.OK) {
                     JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-                    byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(newServerForm.DefaultProps, Formatting.Indented, settings));
-                    FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.AddNewServer);
+                    byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(newServerForm.ServerCombinedPropModel, Formatting.Indented, settings));
+                    FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageTypes.AddNewServer);
                     newServerForm.Close();
                     newServerForm.Dispose();
                 }
@@ -328,7 +314,7 @@ namespace BedrockService.Client.Forms {
         private void RemoveSrvBtn_Click(object sender, EventArgs e) {
             using (RemoveServerControl form = new RemoveServerControl()) {
                 if (form.ShowDialog() == DialogResult.OK) {
-                    FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.RemoveServer, form.SelectedFlag);
+                    FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.RemoveServer, form.SelectedFlag);
                     form.Close();
                 }
             }
@@ -337,7 +323,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void PlayerManager_Click(object sender, EventArgs e) {
-            FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PlayersRequest);
+            FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PlayersRequest);
             DisableUI();
             WaitForServerData().Wait();
             FormManager.TCPClient.PlayerInfoArrived = false;
@@ -352,7 +338,7 @@ namespace BedrockService.Client.Forms {
             if (_logManager.StopLogThread()) {
                 try {
                     if (FormManager.TCPClient.Connected) {
-                        FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Disconnect);
+                        FormManager.TCPClient.SendData(NetworkMessageTypes.Disconnect);
                         Thread.Sleep(500);
                         FormManager.TCPClient.CloseConnection();
                     }
@@ -360,7 +346,7 @@ namespace BedrockService.Client.Forms {
                     connectedHost = null;
                     LogBox.Invoke((MethodInvoker)delegate { LogBox.Text = ""; });
                     FormManager.MainWindow.Invoke((MethodInvoker)delegate {
-                        ComponentEnableManager();
+                        RefreshAllCompenentStates();
                         ServerSelectBox.Items.Clear();
                         ServerSelectBox.SelectedIndex = -1;
                         ServerInfoBox.Text = "";
@@ -374,27 +360,16 @@ namespace BedrockService.Client.Forms {
         private void SendCmd_Click(object sender, EventArgs e) {
             if (cmdTextBox.Text.Length > 0) {
                 byte[] msg = Encoding.UTF8.GetBytes(cmdTextBox.Text);
-                FormManager.TCPClient.SendData(msg, NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.Command);
+                FormManager.TCPClient.SendData(msg, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.Command);
             }
             cmdTextBox.Text = "";
         }
 
         private void EditStCmd_Click(object sender, EventArgs e) {
-            PropEditorForm editSrvDialog = new PropEditorForm();
-            editSrvDialog.PopulateStartCmds(selectedServer.GetStartCommands());
-            if (editSrvDialog.ShowDialog() == DialogResult.OK) {
-                JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-                byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(editSrvDialog.startCmds, Formatting.Indented, settings));
-                DisableUI();
-                FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.StartCmdUpdate);
-                selectedServer.SetStartCommands(editSrvDialog.startCmds);
-                editSrvDialog.Close();
-                editSrvDialog.Dispose();
-            }
         }
 
         private void ChkUpdates_Click(object sender, EventArgs e) {
-            FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.CheckUpdates);
+            FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.CheckUpdates);
             DisableUI();
         }
 
@@ -433,7 +408,7 @@ namespace BedrockService.Client.Forms {
             _followTail = true;
         }
 
-        private void ComponentEnableManager() {
+        public void RefreshAllCompenentStates() {
             bool hostConnectedIdle = connectedHost != null && !ServerBusy;
             bool serverConnectedIdle = connectedHost != null && selectedServer != null && !ServerBusy;
             Connect.Enabled = connectedHost == null;
@@ -441,7 +416,6 @@ namespace BedrockService.Client.Forms {
             newSrvBtn.Enabled = hostConnectedIdle;
             ChkUpdates.Enabled = hostConnectedIdle;
             GlobBackup.Enabled = hostConnectedIdle;
-            EditGlobals.Enabled = hostConnectedIdle;
             BackupManagerBtn.Enabled = serverConnectedIdle;
             nbtStudioBtn.Enabled = serverConnectedIdle;
             ManPacks.Enabled = serverConnectedIdle;
@@ -449,12 +423,11 @@ namespace BedrockService.Client.Forms {
             removeSrvBtn.Enabled = serverConnectedIdle;
             EditCfg.Enabled = serverConnectedIdle;
             PlayerManagerBtn.Enabled = serverConnectedIdle;
-            EditStCmd.Enabled = serverConnectedIdle;
             SingBackup.Enabled = serverConnectedIdle;
-            RestartSrv.Enabled = serverConnectedIdle;
             ServerInfoBox.Enabled = serverConnectedIdle;
             SendCmd.Enabled = serverConnectedIdle;
             cmdTextBox.Enabled = serverConnectedIdle;
+            RestartSrv.Enabled = serverConnectedIdle && selectedServer.GetStatus() != null && selectedServer.GetStatus().ServerStatus == ServerStatus.Started;
             startStopBtn.Enabled = serverConnectedIdle;
             startStopBtn.ForeColor = serverConnectedIdle && !IsPrimaryServer() ?
                 System.Drawing.Color.Black :
@@ -465,23 +438,23 @@ namespace BedrockService.Client.Forms {
                 selectedServer.GetStatus() != null && selectedServer.GetStatus().ServerStatus == ServerStatus.Stopped ?
                 "Start" :
                 "Stop";
-            expertOptionsBtn.Enabled = serverConnectedIdle;
+
         }
 
         public Task DisableUI() {
             ServerBusy = true;
             return Task.Run(() => {
-                Invoke((MethodInvoker)delegate { ComponentEnableManager(); });
+                Invoke((MethodInvoker)delegate { RefreshAllCompenentStates(); });
                 while (ServerBusy) {
                     Task.Delay(250).Wait();
                 }
-                Invoke((MethodInvoker)delegate { ComponentEnableManager(); });
+                Invoke((MethodInvoker)delegate { RefreshAllCompenentStates(); });
             });
         }
 
         public Task WaitForServerData() {
             return Task.Run(() => {
-                while (!FormManager.TCPClient.EnumBackupsArrived && !FormManager.TCPClient.PlayerInfoArrived && FormManager.TCPClient.RecievedPacks == null) {
+                while (!FormManager.TCPClient.PlayerInfoArrived && FormManager.TCPClient.RecievedPacks == null) {
                     Task.Delay(250).Wait();
                 }
             });
@@ -516,25 +489,18 @@ namespace BedrockService.Client.Forms {
         }
 
         private void BackupManager_Click(object sender, EventArgs e) {
-            using (PropEditorForm editDialog = new PropEditorForm()) {
-                FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.EnumBackups);
-                DisableUI();
-                WaitForServerData().Wait();
-                FormManager.TCPClient.EnumBackupsArrived = false;
-                editDialog.PopulateBoxes(FormManager.TCPClient.BackupList);
-                editDialog.EnableBackupManager();
-                if (editDialog.ShowDialog() == DialogResult.OK) {
-                    FormManager.TCPClient.SendData(Encoding.UTF8.GetBytes(editDialog.RollbackFolderName), NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.BackupRollback);
-                    ServerBusy = true;
-                } else {
-                    ServerBusy = false;
-                }
-                editDialog.Close();
+            FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.EnumBackups);
+            if (_backupManager == null || _backupManager.IsDisposed) {
+                _backupManager = new BackupManagerForm();
             }
+            _backupManager.ShowDialog();
+
         }
 
+        public void UpdateBackupManagerData() => _backupManager?.UpdateBackupManagerData();
+
         private void ManPacks_Click(object sender, EventArgs e) {
-            FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PackList);
+            FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PackList);
             DisableUI();
             WaitForServerData().Wait();
             using (ManagePacksForms form = new ManagePacksForms(connectedHost.GetServerIndex(selectedServer), ClientLogger, _processInfo)) {
@@ -556,14 +522,14 @@ namespace BedrockService.Client.Forms {
                     } else return;
                 }
             ServerBusy = true;
-            FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.LevelEditRequest);
+            FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.LevelEditRequest);
             DisableUI();
             using (Process nbtStudioProcess = new Process()) {
                 string tempPath = $@"{Path.GetTempPath()}level.dat";
                 nbtStudioProcess.StartInfo = new ProcessStartInfo(_configManager.NBTStudioPath, tempPath);
                 nbtStudioProcess.Start();
                 nbtStudioProcess.WaitForExit();
-                FormManager.TCPClient.SendData(File.ReadAllBytes(tempPath), NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.LevelEditFile);
+                FormManager.TCPClient.SendData(File.ReadAllBytes(tempPath), connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.LevelEditFile);
             }
             ServerBusy = false;
         }
@@ -590,7 +556,7 @@ namespace BedrockService.Client.Forms {
         private void startStopBtn_Click(object sender, EventArgs e) {
             if(!IsPrimaryServer()) {
                 DisableUI();
-                FormManager.TCPClient.SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.StartStop);
+                FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.StartStop);
             } else {
                 startStopBtnToolTip.Active = true;
                 startStopBtnToolTip.Show("Start/Stop feature is disabled to servers using the primary ports 19132 and 19133.", startStopBtn, 2000);
@@ -602,34 +568,69 @@ namespace BedrockService.Client.Forms {
         }
 
         private bool IsPrimaryServer() {
-            return selectedServer.GetProp("server-port").Value == "19132" ||
-            selectedServer.GetProp("server-port").Value == "19133" ||
-            selectedServer.GetProp("server-portv6").Value == "19132" ||
-            selectedServer.GetProp("server-portv6").Value == "19133";
+            return selectedServer.GetProp("server-port").StringValue == "19132" ||
+            selectedServer.GetProp("server-port").StringValue == "19133" ||
+            selectedServer.GetProp("server-portv6").StringValue == "19132" ||
+            selectedServer.GetProp("server-portv6").StringValue == "19133";
         }
 
-        private void expertOptionsBtn_Click(object sender, EventArgs e) {
-            DisableUI();
-            List<Property> properties = new List<Property>();
-
-            if (!IsPrimaryServer()) {
-                properties.Add(selectedServer.GetProp("ServerAutostartEnabled"));
-            }
-            using (ExpertOptionsForm form = new ExpertOptionsForm()) {
-                form.PropertiesToList = properties;
-                form.PopulateOptions();
-                if (form.ShowDialog() == DialogResult.OK) {
-                    foreach (Property property in form.PropertiesToList) {
-                        Property foundProp = properties.Where(x => x.KeyName == property.KeyName).FirstOrDefault();
-                        selectedServer.GetProp(property.KeyName).SetValue(property.Value);
-                    }
+        private void serverPropMenuItem_Click(object sender, EventArgs e) {
+            using (PropEditorForm _editDialog = new PropEditorForm()) {
+                _editDialog.PopulateBoxes(selectedServer.GetAllProps());
+                if (_editDialog.ShowDialog() == DialogResult.OK) {
                     JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-                    byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(form.PropertiesToList, Formatting.Indented, settings));
-                    FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageSource.Client, NetworkMessageDestination.Server, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PropUpdate);
-                } else {
-                    ServerBusy = false;
+                    byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_editDialog.workingProps, Formatting.Indented, settings));
+                    FormManager.TCPClient.SendData(serializeToBytes, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PropUpdate);
+                    selectedServer.SetAllProps(_editDialog.workingProps);
                 }
             }
+            ServerBusy = false;
+        }
+
+        private void startCmdMenuItem_Click(object sender, EventArgs e) {
+            PropEditorForm editSrvDialog = new PropEditorForm();
+            editSrvDialog.PopulateStartCmds(selectedServer.GetStartCommands());
+            if (editSrvDialog.ShowDialog() == DialogResult.OK) {
+                JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
+                byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(editSrvDialog.startCmds, Formatting.Indented, settings));
+                DisableUI();
+                FormManager.TCPClient.SendData(serializeToBytes, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.StartCmdUpdate);
+                selectedServer.SetStartCommands(editSrvDialog.startCmds);
+                editSrvDialog.Close();
+                editSrvDialog.Dispose();
+            }
+        }
+
+        private void servicePropMenuItem_Click(object sender, EventArgs e) {
+            using (PropEditorForm _editDialog = new PropEditorForm()) {
+                List<string> serviceConfigExcludeList = new List<string>() { "ServerName", "ServerExeName", "FileName", "ServerPath", "DeployedVersion" };
+                List<Property> filteredProps = selectedServer.GetSettingsList()
+                            .Where(x => !serviceConfigExcludeList.Contains(x.KeyName))
+                            .ToList();
+                _editDialog.PopulateBoxes(filteredProps);
+                if (_editDialog.ShowDialog() == DialogResult.OK) {
+                    JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
+                    byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_editDialog.workingProps, Formatting.Indented, settings));
+                    FormManager.TCPClient.SendData(serializeToBytes, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PropUpdate);
+                    selectedServer.SetAllSettings(_editDialog.workingProps);
+                }
+            }
+            ServerBusy = false;
+        }
+
+        private void editCoreServicePropertiesToolStripMenuItem_Click(object sender, EventArgs e) {
+            using (PropEditorForm _editDialog = new PropEditorForm()) {
+                _editDialog.PopulateBoxes(connectedHost.GetAllProps());
+                if (_editDialog.ShowDialog() == DialogResult.OK) {
+                    JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
+                    byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_editDialog.workingProps, Formatting.Indented, settings));
+                    FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageTypes.PropUpdate);
+                    connectedHost.SetAllProps(_editDialog.workingProps);
+                    ServerBusy = true;
+                    DisableUI();
+                }
+            }
+            ServerBusy = false;
         }
     }
 }

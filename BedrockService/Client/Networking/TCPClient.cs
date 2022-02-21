@@ -1,4 +1,5 @@
-﻿using BedrockService.Client.Management;
+﻿using BedrockService.Client.Forms;
+using BedrockService.Client.Management;
 using BedrockService.Shared.Classes;
 using BedrockService.Shared.Interfaces;
 using BedrockService.Shared.PackParser;
@@ -22,7 +23,7 @@ namespace BedrockService.Client.Networking {
         public bool EnableRead;
         public bool PlayerInfoArrived;
         public bool EnumBackupsArrived;
-        public List<Property> BackupList;
+        public List<BackupInfoModel> BackupList;
         public List<MinecraftPackContainer> RecievedPacks;
         public Task ClientReciever;
         private CancellationTokenSource? _netCancelSource;
@@ -36,7 +37,7 @@ namespace BedrockService.Client.Networking {
 
         public void ConnectHost(IClientSideServiceConfiguration host) {
             if (EstablishConnection(host.GetAddress(), int.Parse(host.GetPort()))) {
-                SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Connect);
+                SendData(NetworkMessageTypes.Connect);
                 return;
             }
         }
@@ -78,7 +79,7 @@ namespace BedrockService.Client.Networking {
 
         public void ReceiveListener() {
             while (!_netCancelSource.IsCancellationRequested) {
-                SendData(NetworkMessageSource.Client, NetworkMessageDestination.Service, NetworkMessageTypes.Heartbeat);
+                SendData(NetworkMessageTypes.Heartbeat);
                 try {
                     byte[] buffer = new byte[4];
                     while (OpenedTcpClient.Client.Available > 0) {
@@ -115,8 +116,8 @@ namespace BedrockService.Client.Networking {
 
                             case NetworkMessageTypes.EnumBackups:
 
-                                BackupList = JsonConvert.DeserializeObject<List<Property>>(data, settings);
-                                EnumBackupsArrived = true;
+                                BackupList = JsonConvert.DeserializeObject<List<BackupInfoModel>>(data);
+                                FormManager.MainWindow.Invoke(() => FormManager.MainWindow.UpdateBackupManagerData());
 
                                 break;
                             case NetworkMessageTypes.CheckUpdates:
@@ -169,6 +170,7 @@ namespace BedrockService.Client.Networking {
 
                                 List<IPlayer> fetchedPlayers = JsonConvert.DeserializeObject<List<IPlayer>>(data, settings);
                                 FormManager.MainWindow.connectedHost.GetServerInfoByIndex(serverIndex).SetPlayerList(fetchedPlayers);
+                                Task.Delay(500).Wait();
                                 PlayerInfoArrived = true;
 
                                 break;
@@ -183,10 +185,24 @@ namespace BedrockService.Client.Networking {
                                 break;
                             case NetworkMessageTypes.ServerStatusRequest:
 
-                                ServerStatusModel serverStatus = JsonConvert.DeserializeObject<ServerStatusModel>(data, settings);
-                                if(serverStatus != null && serverStatus.ServerIndex != 255) {
-                                    FormManager.MainWindow.connectedHost.GetServerInfoByIndex(serverStatus.ServerIndex).SetStatus(serverStatus);
+                                StatusUpdateModel status = JsonConvert.DeserializeObject<StatusUpdateModel>(data, settings);
+                                if(status != null && status.ServerStatusModel != null && status.ServerStatusModel.ServerIndex != 255) {
+                                    ServerStatusModel formerServerStatus = FormManager.MainWindow.selectedServer.GetStatus();
+                                    if(!status.ServerStatusModel.Equals(formerServerStatus)) {
+                                        FormManager.MainWindow.connectedHost.GetServerInfoByIndex(status.ServerStatusModel.ServerIndex).SetStatus(status.ServerStatusModel);
+                                        FormManager.MainWindow.Invoke(() => FormManager.MainWindow.RefreshAllCompenentStates());
+                                        FormManager.TCPClient.SendData(serverIndex, NetworkMessageTypes.EnumBackups);
+                                        Task.Delay(1000).Wait();
+                                    }
+                                    FormManager.MainWindow.ServiceStatus = status.ServiceStatusModel;
                                 }
+
+                                break;
+                            case NetworkMessageTypes.ExportFile:
+
+                                stripHeaderFromBuffer = new byte[buffer.Length - 5];
+                                Buffer.BlockCopy(buffer, 5, stripHeaderFromBuffer, 0, stripHeaderFromBuffer.Length);
+                                FormManager.MainWindow.RecieveExportData(stripHeaderFromBuffer);
 
                                 break;
                         }
@@ -230,15 +246,15 @@ namespace BedrockService.Client.Networking {
             return false;
         }
 
-        public void SendData(NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type) => SendData(new byte[0], source, destination, 0xFF, type, NetworkMessageFlags.None);
+        public void SendData(NetworkMessageTypes type) => SendData(new byte[0], NetworkMessageSource.Client, NetworkMessageDestination.Service, 0xFF, type, NetworkMessageFlags.None);
 
-        public void SendData(NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type) => SendData(new byte[0], source, destination, serverIndex, type, NetworkMessageFlags.None);
+        public void SendData(byte serverIndex, NetworkMessageTypes type) => SendData(new byte[0], NetworkMessageSource.Client, NetworkMessageDestination.Service, serverIndex, type, NetworkMessageFlags.None);
 
-        public void SendData(NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type, NetworkMessageFlags flag) => SendData(new byte[0], source, destination, serverIndex, type, flag);
+        public void SendData(byte serverIndex, NetworkMessageTypes type, NetworkMessageFlags flag) => SendData(new byte[0], NetworkMessageSource.Client, NetworkMessageDestination.Service, serverIndex, type, flag);
 
-        public void SendData(byte[] bytes, NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type) => SendData(bytes, source, destination, serverIndex, type, NetworkMessageFlags.None);
+        public void SendData(byte[] bytes, byte serverIndex, NetworkMessageTypes type) => SendData(bytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, serverIndex, type, NetworkMessageFlags.None);
 
-        public void SendData(byte[] bytes, NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type) => SendData(bytes, source, destination, 0xFF, type, NetworkMessageFlags.None);
+        public void SendData(byte[] bytes, NetworkMessageTypes type) => SendData(bytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, 0xFF, type, NetworkMessageFlags.None);
 
         public void SendData(NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type, NetworkMessageFlags status) => SendData(new byte[0], source, destination, 0xFF, type, status);
 

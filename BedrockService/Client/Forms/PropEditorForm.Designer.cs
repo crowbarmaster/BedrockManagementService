@@ -34,7 +34,6 @@ namespace BedrockService.Client.Forms
             this.gridView = new System.Windows.Forms.DataGridView();
             this.EntryKey = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.EntryData = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DelBackupBtn = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.gridView)).BeginInit();
             this.SuspendLayout();
             // 
@@ -96,28 +95,12 @@ namespace BedrockService.Client.Forms
             this.EntryData.Name = "EntryData";
             this.EntryData.Width = 300;
             // 
-            // DelBackupBtn
-            // 
-            this.DelBackupBtn.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.DelBackupBtn.Enabled = false;
-            this.DelBackupBtn.Location = new System.Drawing.Point(271, 322);
-            this.DelBackupBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.DelBackupBtn.Name = "DelBackupBtn";
-            this.DelBackupBtn.Size = new System.Drawing.Size(170, 30);
-            this.DelBackupBtn.TabIndex = 50;
-            this.DelBackupBtn.Text = "Delete Backup";
-            this.DelBackupBtn.UseVisualStyleBackColor = true;
-            this.DelBackupBtn.Visible = false;
-            this.DelBackupBtn.Click += new System.EventHandler(this.DelBackupBtn_Click);
-            // 
             // PropEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(714, 361);
-            this.Controls.Add(this.DelBackupBtn);
             this.Controls.Add(this.gridView);
             this.Controls.Add(this.SaveBtn);
             this.Controls.Add(this.CancelBtn);
@@ -135,7 +118,6 @@ namespace BedrockService.Client.Forms
         private System.Windows.Forms.Button CancelBtn;
         private System.Windows.Forms.Button SaveBtn;
         private System.Windows.Forms.DataGridView gridView;
-        private System.Windows.Forms.Button DelBackupBtn;
         private System.Windows.Forms.DataGridViewTextBoxColumn EntryKey;
         private System.Windows.Forms.DataGridViewTextBoxColumn EntryData;
     }

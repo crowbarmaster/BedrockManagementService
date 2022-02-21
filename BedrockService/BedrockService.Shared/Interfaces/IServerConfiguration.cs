@@ -14,7 +14,16 @@ namespace BedrockService.Shared.Interfaces {
         List<IPlayer> GetPlayerList();
         void SetPlayerList(List<IPlayer> newList);
         IServerConfiguration GetServerInfo();
+        void SetServerVersion(string newVersion);
+        string GetServerVersion();
+        string GetSelectedVersion();
         void SetStatus(ServerStatusModel status);
         ServerStatusModel GetStatus();
+        void SetBackupTotals(int totalBackups, int totalSize);
+        Property GetSettingsProp(string name);
+        void SetSettingsProp(string name, string value);
+        List<Property> GetSettingsList();
+        void SetAllSettings(List<Property> settingsList);
+        bool ValidateVersion(string version, bool skipNullCheck = false);
     }
 }

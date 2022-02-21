@@ -2,6 +2,7 @@
 using BedrockService.Client.Networking;
 using BedrockService.Shared.Classes;
 using BedrockService.Shared.Interfaces;
+using BedrockService.Shared.Utilities;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -9,25 +10,27 @@ using System.Windows.Forms;
 
 namespace BedrockService.Client.Management {
     public sealed class FormManager {
-        private static readonly IProcessInfo processInfo = new ServiceProcessInfo("Client", Path.GetDirectoryName(Application.ExecutablePath), Process.GetCurrentProcess().Id, false, true);
+        public static readonly IProcessInfo processInfo = new ServiceProcessInfo("Client", Path.GetDirectoryName(Application.ExecutablePath), Process.GetCurrentProcess().Id, false, true);
         public static readonly IServiceConfiguration ClientLogContainer;
-        private static readonly IBedrockLogger _logger;
+        public static readonly IBedrockLogger Logger;
         private static MainWindow main;
         private static TCPClient client;
 
         static FormManager() {
             ClientLogContainer = new ServiceConfigurator(processInfo);
             ClientLogContainer.InitializeDefaults();
-            ClientLogContainer.SetProp(new Property("LogApplicationOutput", "true") { Value = "true" });
-            _logger = new BedrockLogger(processInfo, ClientLogContainer);
-            _logger.AppendLine($"Bedrock Client version {Application.ProductVersion} has started.");
-            _logger.AppendLine($"Working directory: {processInfo.GetDirectory()}");
+            Logger = new BedrockLogger(processInfo, ClientLogContainer);
+            Logger.AppendLine($"Bedrock Client version {Application.ProductVersion} has started.");
+            Logger.AppendLine($"Working directory: {processInfo.GetDirectory()}");
+            if (UpgradeAssistant_26RC2.IsClientUpgradeRequired(processInfo.GetDirectory())) {
+                UpgradeAssistant_26RC2.PerformClientUpgrade(processInfo.GetDirectory());
+            }
         }
 
         public static MainWindow MainWindow {
             get {
                 if (main == null || main.IsDisposed) {
-                    main = new MainWindow(processInfo, _logger);
+                    main = new MainWindow(processInfo, Logger);
                 }
                 return main;
             }
@@ -36,7 +39,7 @@ namespace BedrockService.Client.Management {
         public static TCPClient TCPClient {
             get {
                 if (client == null) {
-                    client = new TCPClient(_logger);
+                    client = new TCPClient(Logger);
                 }
                 return client;
             }

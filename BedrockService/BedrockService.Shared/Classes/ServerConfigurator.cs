@@ -1,33 +1,76 @@
 ﻿using BedrockService.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BedrockService.Shared.Classes {
     public class ServerConfigurator : ServerInfo, IServerConfiguration {
-        public ServerConfigurator(string coreServersPath, List<Property> defaultPropList) : base (coreServersPath, defaultPropList) {
-            _defaultPropList = defaultPropList;
-            ServersPath = coreServersPath;
+        private string _servicePath;
+        private readonly IProcessInfo _processInfo;
+        private readonly IBedrockLogger _logger;
+        private readonly IServiceConfiguration _serviceConfiguration;
+
+        public ServerConfigurator(IProcessInfo processInfo, IBedrockLogger logger, IServiceConfiguration serviceConfiguration) : base() {
+            _serviceConfiguration = serviceConfiguration;
+            _logger = logger;
+            _processInfo = processInfo;
+            
         }
 
         public bool InitializeDefaults() {
-            ServerName = "Dedicated Server";
-            FileName = "Dedicated Server.conf";
-            ServerPath = new Property("ServerPath", $@"{ServersPath}\{ServerName}");
-            ServerExeName = new Property("ServerExeName", $"BedrockService.{ServerName}.exe");
-            ServerAutostartEnabled = new Property("ServerAutostartEnabled", "true");
-            ServerPropList.Clear();
-            _defaultPropList.ForEach(p => ServerPropList.Add(new Property(p.KeyName, p.DefaultValue)));
+            _servicePath = _processInfo.GetDirectory();
+            _defaultPropList = _serviceConfiguration.GetServerDefaultPropList();
+            ServersPath = new Property("ServersPath", _serviceConfiguration.GetProp("ServersPath").StringValue);
+            ServicePropList.Clear();
+            ServicePropList.Add(new Property("ServerName", "Dedicated Server"));
+            ServicePropList.Add(new Property("FileName", "Dedicated Server.conf"));
+            ServicePropList.Add(new Property("ServerPath", $@"{ServersPath}\Dedicated Server"));
+            ServicePropList.Add(new Property("ServerExeName", $"BedrockService.Dedicated Server.exe"));
+            ServicePropList.Add(new Property("ServerAutostartEnabled", "true"));
+            ServicePropList.Add(new Property("BackupEnabled", "false"));
+            ServicePropList.Add(new Property("BackupPath", $@"{_servicePath}\ServerBackups"));
+            ServicePropList.Add(new Property("BackupCron", "0 1 * * *"));
+            ServicePropList.Add(new Property("MaxBackupCount", "25"));
+            ServicePropList.Add(new Property("AutoBackupsContainPacks", "false"));
+            ServicePropList.Add(new Property("IgnoreInactiveBackups", "true"));
+            ServicePropList.Add(new Property("CheckUpdates", "true"));
+            ServicePropList.Add(new Property("AutoDeployUpdates", "true"));
+            ServicePropList.Add(new Property("UpdateCron", "0 2 * * *"));
+            ServicePropList.Add(new Property("SelectedServerVersion", "Latest"));
+            ServicePropList.Add(new Property("DeployedVersion", "None"));
             return true;
         }
 
         public void SetStartCommands(List<StartCmdEntry> newEntries) => StartCmds = newEntries;
 
+        public void SetServerVersion(string newVersion) => GetSettingsProp("DeployedVersion").SetValue(newVersion);
+
+        public string GetServerVersion() => GetSettingsProp("DeployedVersion").StringValue;
+
+        public string GetSelectedVersion() => GetSettingsProp("SelectedServerVersion").StringValue;
+
         public void ProcessConfiguration(string[] fileEntries) {
             if (fileEntries == null)
                 return;
+            foreach (string entry in fileEntries) {
+                if (entry.StartsWith("SelectedServerVersion")) {
+                    GetSettingsProp("SelectedServerVersion").SetValue(entry.Split('=')[1]);
+                }
+                if (entry.StartsWith("DeployedVersion")) {
+                    GetSettingsProp("DeployedVersion").SetValue(entry.Split('=')[1]);
+                }
+            }
+            if(GetSettingsProp("SelectedServerVersion").StringValue == "Latest") {
+                if(GetSettingsProp("DeployedVersion").StringValue == "None") {
+                    GetSettingsProp("DeployedVersion").StringValue = _serviceConfiguration.GetLatestBDSVersion();
+                }
+                ValidateVersion(GetSettingsProp("DeployedVersion").StringValue);
+            } else {
+                ValidateVersion(GetSettingsProp("SelectedServerVersion").StringValue);
+            }
             foreach (string line in fileEntries) {
                 if (!line.StartsWith("#") && !string.IsNullOrEmpty(line)) {
                     string[] split = line.Split('=');
@@ -38,71 +81,102 @@ namespace BedrockService.Shared.Classes {
                     if (SrvProp != null) {
                         SetProp(split[0], split[1]);
                     }
+                    Property SvcProp = ServicePropList.FirstOrDefault(prop => prop.KeyName == split[0]);
+                    if (SvcProp != null) {
+                        SetSettingsProp(split[0], split[1]);
+                    }
                     switch (split[0]) {
-                        case "ServerAutostartEnabled":
-                            bool result = true;
-                            if(bool.TryParse(split[1], out result)) {
-                                ServerAutostartEnabled.SetValue(result.ToString());
-                            }
-                            break;  
-                            
                         case "server-name":
-                            ServerName = split[1];
-                            ServerPath.SetValue($@"{ServersPath}\{ServerName}");
-                            ServerExeName.SetValue($"BedrockService.{ServerName}.exe");
-                            FileName = $@"{ServerName}.conf";
+                            GetSettingsProp("ServerName").SetValue(split[1]);
+                            GetSettingsProp("ServerPath").SetValue($@"{ServersPath}\{split[1]}");
+                            GetSettingsProp("ServerExeName").SetValue($"BedrockService.{split[1]}.exe");
+                            GetSettingsProp("FileName").SetValue($@"{split[1]}.conf");
                             break;
 
                         case "AddStartCmd":
                             StartCmds.Add(new StartCmdEntry(split[1]));
                             break;
+
+                        case "BackupPath":
+                            if (split[1] == "Default")
+                                GetSettingsProp("BackupPath").SetValue($@"{_servicePath}\ServerBackups");
+                            break;
                     }
                 }
             }
         }
 
-        public bool SetProp(string name, string newValue) {
-            try {
-                Property serverProp = ServerPropList.First(prop => prop.KeyName == name);
-                ServerPropList[ServerPropList.IndexOf(serverProp)].SetValue(newValue);
-                return true;
-            } catch {
-
+        public bool ValidateVersion(string version, bool skipNullCheck = false) {
+            if (_processInfo.DeclaredType() != "Client" || (GetSettingsProp("DeployedVersion").StringValue != "None" && !skipNullCheck)) {
+                if (!File.Exists($@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\CoreFiles\Build_{version}\stock_packs.json") || !File.Exists($@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\CoreFiles\Build_{version}\stock_props.conf")) {
+                    _logger.AppendLine("Core file(s) found missing. Rebuilding!");
+                    MinecraftUpdatePackageProcessor packageProcessor = new(_logger, _processInfo, version, $@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\CoreFiles\Build_{version}");
+                    if(!packageProcessor.ExtractBuildToDirectory()){
+                        return false;
+                    }
+                }
+                ServerPropList.Clear();
+                _defaultPropList.Clear();
+                File.ReadAllLines($@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\CoreFiles\Build_{version}\stock_props.conf").ToList().ForEach(entry => {
+                    string[] splitEntry = entry.Split('=');
+                    ServerPropList.Add(new Property(splitEntry[0], splitEntry[1]));
+                    _defaultPropList.Add(new Property(splitEntry[0], splitEntry[1]));
+                });
             }
-            return false;
+            SetSettingsProp("DeployedVersion", version);
+            return true;
+        }
+
+        public Property GetSettingsProp (string key) {
+            return ServicePropList.First(prop => prop.KeyName == key);
+        }
+
+        public void SetSettingsProp(string key, string value) {
+            if (!string.IsNullOrEmpty(key)) {
+                try {
+                    Property settingsProp = ServicePropList.First(prop => prop.KeyName == key);
+                    ServicePropList[ServicePropList.IndexOf(settingsProp)].SetValue(value);
+                } catch (Exception e) {
+                    throw new FormatException($"Could not find key {key} in settings property list!", e);
+                }
+            }
+        }
+
+        public void SetProp(string key, string newValue) {
+            try {
+                Property serverProp = ServerPropList.First(prop => prop.KeyName == key);
+                ServerPropList[ServerPropList.IndexOf(serverProp)].SetValue(newValue);
+            } catch (Exception e) {
+                throw new FormatException($"Could not find key {key} in server property list!", e);
+            }
         }
 
         public bool SetProp(Property propToSet) {
             try {
                 Property serverProp = ServerPropList.FirstOrDefault(prop => prop.KeyName == propToSet.KeyName);
-                if(serverProp != null) {
-                    ServerPropList[ServerPropList.IndexOf(serverProp)] = propToSet;
-                } else {
-                    if(propToSet.KeyName == "ServerAutostartEnabled") {
-                        ServerAutostartEnabled.Value = propToSet.Value;
-                    }
-                }
+                ServerPropList[ServerPropList.IndexOf(serverProp)].SetValue(propToSet.StringValue);
                 return true;
-            } catch { }
-            return false;
-        }
-
-        public Property GetProp(string name) {
-            Property foundProp = ServerPropList.FirstOrDefault(prop => prop.KeyName == name);
-            if (foundProp == null) {
-                switch (name) {
-                    case "ServerPath":
-                        return ServerPath;
-                    case "ServerExeName":
-                        return ServerExeName;
-                    case "ServerAutostartEnabled":
-                        return ServerAutostartEnabled;
-                }
+            } catch (Exception e) {
+                throw new FormatException($"Could not find key {propToSet.KeyName} in server property list!", e);
             }
-            return foundProp;
         }
 
-        public void SetAllInfos() => throw new System.NotImplementedException();
+        public List<Property> GetSettingsList() => ServicePropList;
+
+        public Property GetProp(string key) {
+            try {
+            Property foundProp = ServerPropList.First(prop => prop.KeyName == key);
+            return foundProp;
+            } catch (Exception e) {
+                throw new FormatException($"Could not find key {key} in server property list!", e);
+            }
+
+        }
+
+        public void SetBackupTotals(int totalBackups, int totalSize) {
+            ServerStatus.TotalBackups = totalBackups;
+            ServerStatus.TotalSizeOfBackups = totalSize; 
+        }
 
         public void AddStartCommand(string command) {
             StartCmds.Add(new StartCmdEntry(command));
@@ -116,28 +190,38 @@ namespace BedrockService.Shared.Classes {
         public List<StartCmdEntry> GetStartCommands() => StartCmds;
 
         public override string ToString() {
-            return ServerName;
+            return GetSettingsProp("ServerName").ToString();
         }
 
         public override int GetHashCode() {
             int hashCode = -298215838;
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ServerName);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(FileName);
-            hashCode = hashCode * -1521134295 + EqualityComparer<Property>.Default.GetHashCode(ServerPath);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(GetSettingsProp("ServerName").StringValue);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(GetSettingsProp("FileName").StringValue);
+            hashCode = hashCode * -1521134295 + EqualityComparer<Property>.Default.GetHashCode(GetSettingsProp("ServerPath"));
             return hashCode;
         }
 
         public override bool Equals(object obj) {
             return obj is ServerInfo info &&
-                   ServerName == info.ServerName &&
-                   EqualityComparer<Property>.Default.Equals(ServerPath, info.ServerPath);
+                   ServicePropList[0].StringValue == info.ServicePropList[0].StringValue &&
+                   EqualityComparer<Property>.Default.Equals(GetSettingsProp("ServerPath"), info.ServicePropList.First(x => x.KeyName == "ServerPath"));
         }
 
-        public string GetServerName() => ServerName;
+        public string GetServerName() => GetSettingsProp("ServerName").StringValue;
 
         public List<Property> GetAllProps() => ServerPropList;
 
-        public void SetAllProps(List<Property> newPropList) => ServerPropList = newPropList;
+        public void SetAllProps(List<Property> newPropList) {
+            newPropList.ForEach(x => {
+                SetProp(x);
+            });
+        }
+
+        public void SetAllSettings(List<Property> settingsList) {
+            settingsList.ForEach(x => {
+                SetSettingsProp(x.KeyName, x.StringValue);
+            });
+        }
 
         public void AddUpdatePlayer(IPlayer player) {
             IPlayer foundPlayer = PlayersList.FirstOrDefault(p => p.GetXUID() == player.GetXUID());
@@ -160,7 +244,7 @@ namespace BedrockService.Shared.Classes {
         }
 
         public string GetFileName() {
-            return FileName;
+            return GetSettingsProp("FileName").StringValue;
         }
 
         public List<LogEntry> GetLog() => ConsoleBuffer = ConsoleBuffer ?? new List<LogEntry>();

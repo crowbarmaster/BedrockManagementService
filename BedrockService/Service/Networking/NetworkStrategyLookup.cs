@@ -7,15 +7,15 @@ namespace BedrockService.Service.Networking {
         private readonly Dictionary<NetworkMessageTypes, IMessageParser> _standardMessageLookup;
         private readonly Dictionary<NetworkMessageTypes, IFlaggedMessageParser> _flaggedMessageLookup;
 
-        public NetworkStrategyLookup(ITCPListener listener, IBedrockService service, IBedrockLogger logger, IConfigurator configurator, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, IUpdater updater, FileUtilities fileUtils) {
+        public NetworkStrategyLookup(ITCPListener listener, IBedrockService service, IBedrockLogger logger, IConfigurator configurator, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, FileUtilities fileUtils) {
             _standardMessageLookup = new Dictionary<NetworkMessageTypes, IMessageParser>()
             {
                 {NetworkMessageTypes.Connect, new Connect(serviceConfiguration) },
-                {NetworkMessageTypes.AddNewServer, new AddNewServer(processInfo, configurator, serviceConfiguration, service) },
+                {NetworkMessageTypes.AddNewServer, new AddNewServer(logger, processInfo, configurator, serviceConfiguration, service) },
                 {NetworkMessageTypes.Command, new ServerCommand(service, logger) },
                 {NetworkMessageTypes.Restart, new ServerRestart(service) },
                 {NetworkMessageTypes.StartStop, new StartStopServer(service) },
-                {NetworkMessageTypes.ServerStatusRequest, new ServerStatusRequest(service) },
+                {NetworkMessageTypes.ServerStatusRequest, new StatusRequest(service, serviceConfiguration) },
                 {NetworkMessageTypes.Backup, new ServerBackup(service) },
                 {NetworkMessageTypes.BackupAll, new ServerBackupAll(service) },
                 {NetworkMessageTypes.EnumBackups, new EnumBackups(configurator) },
@@ -27,11 +27,12 @@ namespace BedrockService.Service.Networking {
                 {NetworkMessageTypes.PackList, new PackList(processInfo, serviceConfiguration, logger) },
                 {NetworkMessageTypes.PackFile, new PackFile(serviceConfiguration, processInfo, logger, fileUtils) },
                 {NetworkMessageTypes.RemovePack, new RemovePack(processInfo, serviceConfiguration, logger) },
-                {NetworkMessageTypes.CheckUpdates, new CheckUpdates(updater) },
+                {NetworkMessageTypes.CheckUpdates, new CheckUpdates(service) },
                 {NetworkMessageTypes.PlayersRequest, new PlayerRequest(serviceConfiguration) },
                 {NetworkMessageTypes.PlayersUpdate, new PlayersUpdate(configurator, serviceConfiguration, service) },
                 {NetworkMessageTypes.LevelEditRequest, new LevelEditRequest(serviceConfiguration) },
-                {NetworkMessageTypes.LevelEditFile, new LevelEditFile(serviceConfiguration, service, logger) }
+                {NetworkMessageTypes.LevelEditFile, new LevelEditFile(serviceConfiguration, service, logger) },
+                {NetworkMessageTypes.ExportFile, new ExportFileRequest(serviceConfiguration) }
             };
             _flaggedMessageLookup = new Dictionary<NetworkMessageTypes, IFlaggedMessageParser>()
             {

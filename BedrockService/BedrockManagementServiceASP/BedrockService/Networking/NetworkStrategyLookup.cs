@@ -428,14 +428,14 @@ namespace BedrockManagementServiceASP.BedrockService.Networking {
                 JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                 List<Property> propList = JsonConvert.DeserializeObject<List<Property>>(stringData, settings);
                 Property serverNameProp = propList.First(p => p.KeyName == "server-name");
-                ServerConfigurator newServer = new ServerConfigurator(null, _serviceConfiguration.GetServerDefaultPropList()) {
+                ServerConfigurator newServer = new ServerConfigurator(null, _serviceConfiguration.GetServerDefaultPropList(), null) {
                     ServerName = serverNameProp.ToString(),
                     ServerPropList = propList,
                     ServerPath = new Property("ServerPath", "") {
-                        Value = $@"{_serviceConfiguration.GetProp("ServersPath")}\{serverNameProp}"
+                        StringValue = $@"{_serviceConfiguration.GetProp("ServersPath")}\{serverNameProp}"
                     },
                     ServerExeName = new Property("ServerExeName", "") {
-                        Value = $"BedrockService.{serverNameProp}.exe"
+                        StringValue = $"BedrockService.{serverNameProp}.exe"
                     },
                     FileName = $@"{serverNameProp}.conf"
                 };

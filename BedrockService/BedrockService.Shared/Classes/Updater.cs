@@ -1,8 +1,13 @@
-﻿using BedrockService.Service.Networking.Interfaces;
+﻿using BedrockService.Shared.Interfaces;
+using BedrockService.Shared.Utilities;
+using System;
+using System.IO;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace BedrockService.Service.Networking {
+namespace BedrockService.Shared.Classes {
     public class Updater : IUpdater {
         private bool _versionChanged = false;
         private readonly IBedrockLogger _logger;
@@ -18,21 +23,21 @@ namespace BedrockService.Service.Networking {
         }
 
         public void Initialize() {
-            if (!Directory.Exists($@"{_processInfo.GetDirectory()}\Server")) { Directory.CreateDirectory($@"{_processInfo.GetDirectory()}\Server"); }
-            if (!File.Exists($@"{_processInfo.GetDirectory()}\Server\bedrock_ver.ini")) {
+            if (!Directory.Exists($@"{_processInfo.GetDirectory()}\BmsConfig")) { 
+                Directory.CreateDirectory($@"{_processInfo.GetDirectory()}\BmsConfig"); 
+            }
+            if (!File.Exists($@"{_processInfo.GetDirectory()}\BmsConfig\latest_bedrock_ver.ini")) {
                 _logger.AppendLine("Version ini file missing, creating and fetching build...");
-                File.Create($@"{_processInfo.GetDirectory()}\Server\bedrock_ver.ini").Close();
+                File.Create($@"{_processInfo.GetDirectory()}\BmsConfig\latest_bedrock_ver.ini").Close();
                 return;
             }
-            _version = File.ReadAllText($@"{_processInfo.GetDirectory()}\Server\bedrock_ver.ini");
+            _version = File.ReadAllText($@"{_processInfo.GetDirectory()}\BmsConfig\latest_bedrock_ver.ini");
+            _serviceConfiguration.SetLatestBDSVersion(_version);
         }
 
-        public async Task CheckUpdates() {
+        public async Task CheckLatestVersion() {
             await Task.Run(async () => {
-                if (_serviceConfiguration.GetServerVersion() != null) {
-                    _version = _serviceConfiguration.GetServerVersion();
-                }
-                _logger.AppendLine("Checking MCS Version and fetching update if needed...");
+                _logger.AppendLine("Checking latest BDS Version...");
                 HttpClient client = new HttpClient();
                 client.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/apng,*/*;q=0.8");
                 client.DefaultRequestHeaders.Add("Accept-Language", "en-GB,en;q=0.9,en-US;q=0.8");
@@ -52,24 +57,19 @@ namespace BedrockService.Service.Networking {
                 Regex regex = new Regex(@"(https://minecraft.azureedge.net/bin-win/bedrock-server-)(.*)(\.zip)", RegexOptions.IgnoreCase);
                 Match m = regex.Match(content);
                 if (!m.Success) {
-                    _logger.AppendLine("Checking for updates failed. Check website functionality!");
+                    _logger.AppendLine("Checking version failed. Check website functionality!");
                     return false;
                 }
                 string downloadPath = m.Groups[0].Value;
                 string fetchedVersion = m.Groups[2].Value;
                 client.Dispose();
-                if (_version == fetchedVersion) {
-                    _logger.AppendLine($"Current version \"{fetchedVersion}\" is up to date!");
-                    return true;
+
+                _logger.AppendLine($"Latest version found: \"{fetchedVersion}\"");
+                if (!File.Exists($@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\BuildArchives\Update_{fetchedVersion}.zip")) {
+                    FetchBuild(_processInfo.GetDirectory(), fetchedVersion).Wait();
                 }
-                _logger.AppendLine($"New version detected! Now fetching from {downloadPath}...");
-                if (!FetchBuild(downloadPath, fetchedVersion).Wait(90000)) {
-                    _logger.AppendLine("Fetching build timed out. If this is a new service instance, please restart service!");
-                    return false;
-                }
-                _versionChanged = true;
-                File.WriteAllText($@"{_processInfo.GetDirectory()}\Server\bedrock_ver.ini", fetchedVersion);
-                _serviceConfiguration.SetServerVersion(fetchedVersion);
+                File.WriteAllText($@"{_processInfo.GetDirectory()}\BmsConfig\latest_bedrock_ver.ini", fetchedVersion);
+                _serviceConfiguration.SetLatestBDSVersion(fetchedVersion);
                 return true;
             });
         }
@@ -78,27 +78,36 @@ namespace BedrockService.Service.Networking {
 
         public void MarkUpToDate() => _versionChanged = false;
 
-        private async Task FetchBuild(string path, string version) {
-            string ZipDir = $@"{_processInfo.GetDirectory()}\Server\MCSFiles\Update_{version}.zip";
-            if (!Directory.Exists($@"{_processInfo.GetDirectory()}\Server\MCSFiles")) {
-                Directory.CreateDirectory($@"{_processInfo.GetDirectory()}\Server\MCSFiles");
+        public static async Task<bool> FetchBuild(string servicePath, string version) {
+            string fetchUrl = $"https://minecraft.azureedge.net/bin-win/bedrock-server-{version}.zip";
+            string zipPath = $@"{servicePath}\BmsConfig\BDSBuilds\BuildArchives\Update_{version}.zip";
+            if (!Directory.Exists($@"{servicePath}\BmsConfig\BDSBuilds")) {
+                Directory.CreateDirectory($@"{servicePath}\BmsConfig\BDSBuilds");
             }
-            if (File.Exists(ZipDir)) {
-                return;
-            }
-            _logger.AppendLine("Now downloading latest build of Minecraft Bedrock Server. Please wait...");
             using (var httpClient = new HttpClient()) {
-                using (var request = new HttpRequestMessage(HttpMethod.Get, path)) {
-                    using (Stream contentStream = await (await httpClient.SendAsync(request)).Content.ReadAsStreamAsync(), stream = new FileStream(ZipDir, FileMode.Create, FileAccess.Write, FileShare.None, 256000, true)) {
+                using (var request = new HttpRequestMessage(HttpMethod.Get, fetchUrl)) {
+                    DirectoryInfo zipDirInfo = new FileInfo(zipPath).Directory;
+                    zipDirInfo.Create();
+                    using (Stream contentStream = await (await httpClient.SendAsync(request)).Content.ReadAsStreamAsync(), stream = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None, 256000, true)) {
                         try {
-                            await contentStream.CopyToAsync(stream);
+                            if (contentStream.Length > 2000) {
+                                await contentStream.CopyToAsync(stream);
+                            } else {
+                                if(stream != null) {
+                                    stream.Close();
+                                    stream.Dispose();
+                                    File.Delete(zipPath);
+                                }
+                                return false;
+
+                            }
                         } catch (Exception e) {
-                            _logger.AppendLine($"Download zip resulted in error: {e.StackTrace}");
+                            return false;
                         }
                         httpClient.Dispose();
                         request.Dispose();
                         contentStream.Dispose();
-                        return;
+                        return true;
                     }
                 }
             }

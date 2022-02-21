@@ -20,7 +20,7 @@ namespace BedrockService.Shared.PackParser {
         public MinecraftPackParser(byte[] fileContents, IProcessInfo processInfo) {
             PackExtractDirectory = $@"{processInfo.GetDirectory()}\Temp";
             _processInfo = processInfo;
-            new FileUtilities(processInfo).ClearTempDir();
+            new FileUtilities(processInfo).ClearTempDir().Wait();
             using (MemoryStream fileStream = new(fileContents, 5, fileContents.Length - 5)) {
                 using ZipArchive zipArchive = new(fileStream, ZipArchiveMode.Read);
                 zipArchive.ExtractToDirectory(PackExtractDirectory);
@@ -31,7 +31,7 @@ namespace BedrockService.Shared.PackParser {
         public MinecraftPackParser(string[] files, string extractDir, IProcessInfo processInfo) {
             PackExtractDirectory = extractDir;
             _processInfo = processInfo;
-            new FileUtilities(_processInfo).ClearTempDir();
+            new FileUtilities(_processInfo).ClearTempDir().Wait();
             if (Directory.Exists($@"{PackExtractDirectory}\ZipTemp")) {
                 Directory.CreateDirectory($@"{PackExtractDirectory}\ZipTemp");
             }

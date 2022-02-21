@@ -29,8 +29,15 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
                 _bedrockService.RestartService();
                 return (Array.Empty<byte>(), 0, 0);
             }
-            foreach (Property property in propList) {
-                _serviceConfiguration.GetServerInfoByIndex(serverIndex).SetProp(property);
+            prop = propList.FirstOrDefault(p => p.KeyName == "server-name");
+            if (prop != null) {
+                foreach (Property property in propList) {
+                    _serviceConfiguration.GetServerInfoByIndex(serverIndex).SetProp(property);
+                }
+            } else {
+                foreach (Property property in propList) {
+                    _serviceConfiguration.GetServerInfoByIndex(serverIndex).SetSettingsProp(property.KeyName, property.StringValue);
+                }
             }
             _configurator.SaveServerConfiguration(_serviceConfiguration.GetServerInfoByIndex(serverIndex));
             _logger.AppendLine("Successfully wrote server configuration to file! Restart server to apply changes!");

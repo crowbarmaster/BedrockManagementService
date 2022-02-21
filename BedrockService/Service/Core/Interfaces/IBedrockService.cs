@@ -6,7 +6,7 @@ namespace BedrockService.Service.Core.Interfaces {
         void RemoveBedrockServerByIndex(int serverIndex);
         void InitializeNewServer(IServerConfiguration serverConfiguration);
         Task RestartService();
-        ServiceStatus GetServiceStatus();
+        ServiceStatusModel GetServiceStatus();
         IBedrockServer GetBedrockServerByIndex(int index);
         IBedrockServer? GetBedrockServerByName(string name);
         List<IBedrockServer> GetAllServers();

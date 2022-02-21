@@ -7,31 +7,42 @@ using System.Windows.Forms;
 
 namespace BedrockService.Client.Forms {
     public partial class AddNewServerForm : Form {
-        public List<Property> DefaultProps = new List<Property>();
+        public ServerCombinedPropModel ServerCombinedPropModel = new();
         private readonly List<IServerConfiguration> serverConfigurations;
         private readonly IClientSideServiceConfiguration serviceConfiguration;
+        private readonly List<string> serviceConfigExcludeList = new List<string>() { "ServerName", "ServerExeName", "FileName", "ServerPath", "DeployedVersion" };
+
         public AddNewServerForm(IClientSideServiceConfiguration serviceConfiguration, List<IServerConfiguration> serverConfigurations) {
             this.serviceConfiguration = serviceConfiguration;
             this.serverConfigurations = serverConfigurations;
             InitializeComponent();
-            IServerConfiguration server = new ServerConfigurator(FormManager.MainWindow.connectedHost.GetProp("ServersPath").ToString(), FormManager.MainWindow.connectedHost.GetServerDefaultPropList());
+            IServerConfiguration server = new ServerConfigurator(FormManager.processInfo, FormManager.Logger, FormManager.MainWindow.connectedHost);
             server.InitializeDefaults();
-            DefaultProps = FormManager.MainWindow.connectedHost.GetServerDefaultPropList();
+            ServerCombinedPropModel.ServerPropList = FormManager.MainWindow.connectedHost.GetServerDefaultPropList();
+            ServerCombinedPropModel.ServicePropList = server.GetSettingsList();
+            versionTextBox.Text = FormManager.MainWindow.connectedHost.GetLatestBDSVersion();
         }
 
         private void editPropsBtn_Click(object sender, System.EventArgs e) {
-            PropEditorForm editSrvDialog = new PropEditorForm();
+            using PropEditorForm editSrvDialog = new PropEditorForm();
             if (srvNameBox.TextLength > 0)
-                DefaultProps.First(prop => prop.KeyName == "server-name").Value = srvNameBox.Text;
+                ServerCombinedPropModel.ServerPropList.First(prop => prop.KeyName == "server-name").StringValue = srvNameBox.Text;
             if (ipV4Box.TextLength > 0)
-                DefaultProps.First(prop => prop.KeyName == "server-port").Value = ipV4Box.Text;
+                ServerCombinedPropModel.ServerPropList.First(prop => prop.KeyName == "server-port").StringValue = ipV4Box.Text;
             if (ipV6Box.TextLength > 0)
-                DefaultProps.First(prop => prop.KeyName == "server-portv6").Value = ipV6Box.Text;
-            editSrvDialog.PopulateBoxes(DefaultProps);
+                ServerCombinedPropModel.ServerPropList.First(prop => prop.KeyName == "server-portv6").StringValue = ipV6Box.Text;
+            editSrvDialog.PopulateBoxes(ServerCombinedPropModel.ServerPropList);
             if (editSrvDialog.ShowDialog() == DialogResult.OK) {
-                DefaultProps = editSrvDialog.workingProps;
-                editSrvDialog.Close();
-                editSrvDialog.Dispose();
+                ServerCombinedPropModel.ServerPropList = editSrvDialog.workingProps;
+            }
+        }
+        
+        private void serverSettingsBtn_Click(object sender, System.EventArgs e) {
+            using PropEditorForm editSrvDialog = new();
+            List<Property> filteredProps = new List<Property> ();
+            editSrvDialog.PopulateBoxes(ServerCombinedPropModel.ServicePropList.Where(x => !serviceConfigExcludeList.Contains(x.KeyName)).ToList());
+            if (editSrvDialog.ShowDialog() == DialogResult.OK) {
+                ServerCombinedPropModel.ServicePropList = editSrvDialog.workingProps;
             }
         }
 
@@ -49,12 +60,23 @@ namespace BedrockService.Client.Forms {
                 }
             }
             if (srvNameBox.TextLength > 0)
-                DefaultProps.First(prop => prop.KeyName == "server-name").Value = srvNameBox.Text;
+                ServerCombinedPropModel.ServerPropList.First(prop => prop.KeyName == "server-name").StringValue = srvNameBox.Text;
             if (ipV4Box.TextLength > 0)
-                DefaultProps.First(prop => prop.KeyName == "server-port").Value = ipV4Box.Text;
+                ServerCombinedPropModel.ServerPropList.First(prop => prop.KeyName == "server-port").StringValue = ipV4Box.Text;
             if (ipV6Box.TextLength > 0)
-                DefaultProps.First(prop => prop.KeyName == "server-portv6").Value = ipV6Box.Text;
+                ServerCombinedPropModel.ServerPropList.First(prop => prop.KeyName == "server-portv6").StringValue = ipV6Box.Text;
+
+            ServerCombinedPropModel.ServicePropList.First(prop => prop.KeyName == "DeployedVersion").StringValue = versionTextBox.Text;
             DialogResult = DialogResult.OK;
+        }
+
+        private void versionTextBox_TextChanged(object sender, System.EventArgs e) {
+            if (versionTextBox.Text != FormManager.MainWindow.connectedHost.GetLatestBDSVersion()) {
+                ServerCombinedPropModel.ServicePropList.First(prop => prop.KeyName == "SelectedServerVersion").StringValue = versionTextBox.Text;
+                editPropsBtn.Enabled = false;
+            } else {
+                editPropsBtn.Enabled = true;
+            }
         }
     }
 }
