@@ -15,5 +15,6 @@
         bool ServerAutostartEnabled();
         ServerStatusModel GetServerStatus();
         bool IsPrimaryServer();
+        void CheckUpdates();
     }
 }
