@@ -28,22 +28,23 @@ namespace BedrockService.Shared.Classes {
 
         public void Initialize() {
             _logPath = $@"{_processInfo.GetDirectory()}\Logs\{_processInfo.DeclaredType()}";
-            _logToFile = bool.Parse(_serviceConfiguration.GetProp("LogApplicationOutput").ToString());
+            _logToFile = _serviceConfiguration.GetProp("LogApplicationOutput").GetBoolValue();
             _logOwner = _processInfo.DeclaredType();
             if (_processInfo.DeclaredType() == "Service") {
-                if (_serverConfiguration != null && bool.Parse(_serviceConfiguration.GetProp("LogServerOutput").ToString())) {
+                if (_serverConfiguration != null && _serviceConfiguration.GetProp("LogServerOutput").GetBoolValue())
+                {
                     _logOwner = _serverConfiguration.GetServerName();
                     string serverLogPath = $@"{_processInfo.GetDirectory()}\Logs\Servers\{_logOwner}";
                     if (!Directory.Exists(serverLogPath))
                         Directory.CreateDirectory(serverLogPath);
-                    _logWriter = new StreamWriter($@"{serverLogPath}\ServerLog-{DateTime.Now:yyyyMMdd_HHmmss}.log", true);
+                    _logWriter = new StreamWriter($@"{serverLogPath}\ServerLog-{DateTime.Now:yyyyMMdd_HHmmssff}.log", true);
                     return;
                 }
             }
             if (_logWriter == null) {
                 if (!Directory.Exists(_logPath))
                     Directory.CreateDirectory(_logPath);
-                _logWriter = new StreamWriter($@"{_logPath}\{_processInfo.DeclaredType()}Log-{DateTime.Now:yyyyMMdd_HHmmss}.log", true);
+                _logWriter = new StreamWriter($@"{_logPath}\{_processInfo.DeclaredType()}Log-{DateTime.Now:yyyyMMdd_HHmmssff}.log", true);
             }
         }
 
