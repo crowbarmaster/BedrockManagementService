@@ -23,7 +23,7 @@ namespace BedrockService.Shared.PackParser {
         }
 
         public void RemovePackFromServer(IServerConfiguration configuration, MinecraftPackContainer pack) {
-            string serverPath = configuration.GetProp("ServerPath").ToString();
+            string serverPath = configuration.GetSettingsProp("ServerPath").ToString();
             string serverFolderName = configuration.GetProp("level-name").ToString();
             string jsonPackPath = null;
             string jsonWorldPackEnablerPath = null;
