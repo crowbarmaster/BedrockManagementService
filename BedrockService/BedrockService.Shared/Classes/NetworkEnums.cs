@@ -24,6 +24,8 @@
         CheckUpdates,
         PackFile,
         PackList,
+        ExportFile,
+        ImportFile,
         LevelEditRequest,
         LevelEditFile,
         RemovePack,
@@ -39,6 +41,14 @@
         Heartbeat,
         Disconnect,
         UICallback
+    }
+
+    public enum FileTypeFlags {
+        Backup,
+        ServerPackage,
+        ServicePackage,
+        ServerConfig,
+        ServiceConfig
     }
 
     public enum NetworkMessageFlags {
