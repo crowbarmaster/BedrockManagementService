@@ -18,14 +18,14 @@ namespace ServiceTests {
 
             public TestFixture() {
                 BedrockService.TestStart();
-                while (BedrockService.GetServiceStatus() != ServiceStatus.Started) {
+                while (BedrockService.GetServiceStatus().ServiceStatus != ServiceStatus.Started) {
                     Task.Delay(100).Wait();
                 }
             }
 
             public void Dispose() {
                 BedrockService.TestStop();
-                while (BedrockService != null && BedrockService.GetServiceStatus() != ServiceStatus.Stopped) {
+                while (BedrockService != null && BedrockService.GetServiceStatus().ServiceStatus != ServiceStatus.Stopped) {
                     Task.Delay(100).Wait();
                 }
             }
@@ -40,13 +40,13 @@ namespace ServiceTests {
 
             [Fact]
             public void Verify_Service_Startup() {
-                Assert.True(_testFixture.BedrockService.GetServiceStatus() == ServiceStatus.Started);
+                Assert.True(_testFixture.BedrockService.GetServiceStatus().ServiceStatus == ServiceStatus.Started);
             }
 
             [Fact]
             public void Verify_Service_Stop() {
                 _testFixture.Dispose();
-                Assert.True(_testFixture.BedrockService.GetServiceStatus() == ServiceStatus.Stopped);
+                Assert.True(_testFixture.BedrockService.GetServiceStatus().ServiceStatus == ServiceStatus.Stopped);
             }
         }
     }
