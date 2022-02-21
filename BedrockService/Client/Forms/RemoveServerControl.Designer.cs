@@ -67,6 +67,11 @@
             this.Controls.Add(this.button1);
             this.Controls.Add(this.checkedListBox1);
             this.Controls.Add(this.label1);
+            this.ShowInTaskbar = false;
+            this.MinimizeBox = false;
+            this.MaximizeBox = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "RemoveServerControl";
             this.Text = "Server removal prompt";
             this.ResumeLayout(false);
