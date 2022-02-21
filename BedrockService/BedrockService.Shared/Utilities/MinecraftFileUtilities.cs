@@ -40,8 +40,8 @@ namespace BedrockService.Shared.Utilities {
         }
 
         public static void WriteServerJsonFiles(IServerConfiguration server) {
-            string permFilePath = $@"{server.GetProp("ServerPath")}\permissions.json";
-            string whitelistFilePath = $@"{server.GetProp("ServerPath")}\whitelist.json";
+            string permFilePath = $@"{server.GetSettingsProp("ServerPath")}\permissions.json";
+            string whitelistFilePath = $@"{server.GetSettingsProp("ServerPath")}\whitelist.json";
             PermissionsFileModel permissionsFile = new() { FilePath = permFilePath };
             WhitelistFileModel whitelistFile = new() { FilePath = whitelistFilePath };
             server.GetPlayerList()
@@ -60,7 +60,7 @@ namespace BedrockService.Shared.Utilities {
 
         public static void WriteServerPropsFile(IServerConfiguration server) {
             int index = 0;
-            string serverPath = server.GetProp("ServerPath").ToString();
+            string serverPath = server.GetSettingsProp("ServerPath").ToString();
             string[] output = new string[2 + server.GetAllProps().Count];
             output[index++] = "#Server";
             server.GetAllProps().ForEach(prop => {
