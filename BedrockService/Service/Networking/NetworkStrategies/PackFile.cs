@@ -22,7 +22,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
             MinecraftPackParser archiveParser = new MinecraftPackParser(data, _serviceProcessInfo);
             foreach (MinecraftPackContainer container in archiveParser.FoundPacks) {
-                string serverPath = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("ServerPath").ToString();
+                string serverPath = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp("ServerPath").ToString();
                 string levelName = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("level-name").ToString();
                 string knownPacksFile = $@"{serverPath}\valid_known_packs.json";
                 string filePath;

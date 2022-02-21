@@ -12,10 +12,8 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
         }
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
-            JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
             string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
-            List<string> backupFileNames = JsonConvert.DeserializeObject<List<string>>(stringData, settings);
-            _configurator.DeleteBackupsForServer(serverIndex, backupFileNames);
+            _configurator.DeleteBackupForServer(serverIndex, stringData);
             return (Array.Empty<byte>(), 0, 0);
         }
     }
