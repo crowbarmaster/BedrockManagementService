@@ -1,7 +1,9 @@
-﻿namespace BedrockService.Service.Networking.Interfaces {
+﻿using System.Threading.Tasks;
+
+namespace BedrockService.Shared.Classes {
     public interface IUpdater {
         void Initialize();
-        Task CheckUpdates();
+        Task CheckLatestVersion();
         bool CheckVersionChanged();
         void MarkUpToDate();
     }
