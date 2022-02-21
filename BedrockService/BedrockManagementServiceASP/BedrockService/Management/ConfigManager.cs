@@ -47,7 +47,7 @@ namespace BedrockManagementServiceASP.BedrockService.Management {
 
                 LoadServerConfigurations();
                 if (_serviceConfiguration.GetServerList().Count == 0) {
-                    serverInfo = new ServerConfigurator(null, _serviceConfiguration.GetServerDefaultPropList());
+                    serverInfo = new ServerConfigurator(null, _serviceConfiguration.GetServerDefaultPropList(), null);
                     serverInfo.InitializeDefaults();
                     SaveServerProps(serverInfo, true);
                     _serviceConfiguration.AddNewServerInfo(serverInfo);
@@ -62,7 +62,7 @@ namespace BedrockManagementServiceASP.BedrockService.Management {
                 ServerConfigurator serverInfo;
                 FileInfo FInfo = new FileInfo(file);
                 string[] fileEntries = File.ReadAllLines(file);
-                serverInfo = new ServerConfigurator($@"{_processInfo.GetDirectory()}\Server", _serviceConfiguration.GetServerDefaultPropList());
+                serverInfo = new ServerConfigurator($@"{_processInfo.GetDirectory()}\Server", _serviceConfiguration.GetServerDefaultPropList(), null);
                 LoadPlayerDatabase(serverInfo);
                 LoadRegisteredPlayers(serverInfo);
                 _serviceConfiguration.AddNewServerInfo(serverInfo);
@@ -295,7 +295,7 @@ namespace BedrockManagementServiceASP.BedrockService.Management {
                 foreach (string deleteDir in list)
                     foreach (DirectoryInfo dir in new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{serverName}").GetDirectories())
                         if (dir.Name == deleteDir) {
-                            _fileUtils.DeleteFilesRecursively(new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{serverName}\{deleteDir}"), true);
+                            _fileUtils.DeleteFilesFromDirectory(new DirectoryInfo($@"{_serviceConfiguration.GetProp("BackupPath")}\{serverName}\{deleteDir}"), true);
                             _logger.AppendLine($"Deleted backup {deleteDir}.");
                         }
             } catch (IOException e) {
@@ -324,7 +324,7 @@ namespace BedrockManagementServiceASP.BedrockService.Management {
 
         private bool DeleteServerFiles(IServerConfiguration serverInfo) {
             try {
-                _fileUtils.DeleteFilesRecursively(new DirectoryInfo(serverInfo.GetProp("ServerPath").ToString()), false);
+                _fileUtils.DeleteFilesFromDirectory(new DirectoryInfo(serverInfo.GetProp("ServerPath").ToString()), false);
                 return true;
             } catch { return false; }
         }
