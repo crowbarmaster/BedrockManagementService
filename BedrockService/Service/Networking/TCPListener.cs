@@ -43,7 +43,7 @@ namespace BedrockService.Service.Networking {
         public Task StartListening() {
             return new Task(() => {
                 _logger.AppendLine("TCP listener task started.");
-                _inListener = new TcpListener(_ipAddress, int.Parse(_serviceConfiguration.GetProp("ClientPort").ToString()));
+                _inListener = new TcpListener(_ipAddress, _serviceConfiguration.GetProp("ClientPort").GetIntValue());
                 try {
 
                     while (_standardMessageLookup == null) { Task.Delay(100).Wait(); }
@@ -55,31 +55,33 @@ namespace BedrockService.Service.Networking {
                 }
                 while (true) {
                     try {
-                        if (_inListener != null && _inListener.Pending() && _canClientConnect && _serviceStarted) {
-                            _canClientConnect = false;
-                            _cancelTokenSource = new CancellationTokenSource();
-                            _client = _inListener.AcceptTcpClient();
-                            _stream = _client.GetStream();
-                            if (_recieverTask != null) {
-                                _recieverTask.Start();
+                        if (_inListener != null && _inListener.Pending() && _serviceStarted) {
+                            if (_canClientConnect) {
+                                _canClientConnect = false;
+                                _cancelTokenSource = new CancellationTokenSource();
+                                _client = _inListener.AcceptTcpClient();
+                                _stream = _client.GetStream();
+                                if (_recieverTask != null) {
+                                    _recieverTask.Start();
+                                }
                             }
-                        }
-                        if (_inListener.Pending() && !_canClientConnect && _serviceStarted) {
-                            _inListener.AcceptTcpClient().Close();
+                            if (!_canClientConnect) {
+                                _inListener.AcceptTcpClient().Close();
+                            }
                         }
                         if (_cancelTokenSource.IsCancellationRequested) {
                             _logger.AppendLine("TCP Listener task canceled!");
-                            if (_inListener != null) {
-                                _inListener.Stop();
-                            }
+                            _inListener?.Stop();
                             _inListener = null;
                             return;
                         }
                         Task.Delay(500).Wait();
-                    } catch (NullReferenceException) { } catch (InvalidOperationException) {
+                    } catch (NullReferenceException) { 
+                    } catch (InvalidOperationException) {
                         _inListener = null;
                         return;
-                    } catch (SocketException) { } catch (Exception e) {
+                    } catch (SocketException) { 
+                    } catch (Exception e) {
                         _logger.AppendLine(e.ToString());
                     }
                 }
