@@ -18,29 +18,66 @@ namespace BedrockService.Shared.Classes {
             globals.Add(new Property("ServersPath", @"C:\MCBedrockService"));
             globals.Add(new Property("AcceptedMojangLic", "false"));
             globals.Add(new Property("ClientPort", "19134"));
-            globals.Add(new Property("BackupEnabled", "false"));
-            globals.Add(new Property("BackupPath", "Default"));
-            globals.Add(new Property("BackupCron", "0 1 * * *"));
-            globals.Add(new Property("MaxBackupCount", "25"));
-            globals.Add(new Property("EntireBackups", "false"));
-            globals.Add(new Property("CheckUpdates", "false"));
-            globals.Add(new Property("UpdateCron", "0 2 * * *"));
             globals.Add(new Property("LogServerOutput", "true"));
             globals.Add(new Property("LogApplicationOutput", "true"));
-            globals.Add(new Property("IgnoreInactiveBackups", "true"));
-            _defaultServerProps.Clear();
-            try {
-                File.ReadAllLines($@"{_processInfo.GetDirectory()}\BmsConfig\stock_props.conf")
-                   .ToList()
-                   .ForEach(x => {
-                       string[] s = x.Split('=');
-                       _defaultServerProps.Add(new Property(s[0], s[1]));
-                   });
-                return true;
-            } catch (Exception) {
-                return false;
-            }
+            return true;
         }
+
+        public Task CalculateTotalBackupsAllServers() {
+            return Task.Run(() => {
+                TotalBackupsServiceWide = 0;
+                TotalBackupSizeServiceWideMegabytes = 0;
+                ServerList.ForEach(x => {
+                    var results = CalculateSingleServerBackupTotals(x).Result;
+                    TotalBackupsServiceWide += results.totalBackups;
+                    TotalBackupSizeServiceWideMegabytes += results.totalSize;
+                });
+            });
+        }
+
+        public bool ValidateLatestVersion() {
+            if (LatestServerVersion != "None" && _processInfo.DeclaredType() != "Client") {
+                if (!File.Exists($@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\CoreFiles\Build_{LatestServerVersion}\stock_packs.json") || !File.Exists($@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\CoreFiles\Build_{LatestServerVersion}\stock_props.conf")) {
+                    MinecraftUpdatePackageProcessor packageProcessor = new(_processInfo, LatestServerVersion, $@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\CoreFiles\Build_{LatestServerVersion}");
+                    if (!packageProcessor.ExtractBuildToDirectory()) {
+                        return false;
+                    }
+                }
+                _defaultServerProps.Clear();
+                File.ReadAllLines($@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\CoreFiles\Build_{LatestServerVersion}\stock_props.conf").ToList().ForEach(entry => {
+                    string[] splitEntry = entry.Split('=');
+                    _defaultServerProps.Add(new Property(splitEntry[0], splitEntry[1]));
+                });
+            }
+            return true;
+        }
+
+        public Task<(int totalBackups, int totalSize)> CalculateSingleServerBackupTotals(IServerConfiguration serverConfiguration) {
+            return Task.Run(() => {
+                int TotalServerBackupCount = 0;
+                int TotalServerBackupSize = 0;
+                string backupPath = serverConfiguration.GetSettingsProp("BackupPath").ToString();
+                string serverName = serverConfiguration.GetSettingsProp("ServerName").ToString();
+                DirectoryInfo serverBackupDirInfo = new($"{backupPath}\\{serverName}");
+                try {
+                    IEnumerable<FileInfo> backupFileList = serverBackupDirInfo.GetFiles();
+                    foreach (FileInfo backupFile in backupFileList) {
+                        TotalServerBackupCount++;
+                        TotalServerBackupSize += (int)(backupFile.Length / 1000);
+                    }
+                } catch (DirectoryNotFoundException) {
+
+                }
+                serverConfiguration.SetBackupTotals(TotalServerBackupCount, TotalServerBackupSize);
+                return (TotalServerBackupCount, TotalServerBackupSize);
+            });
+        }
+
+        public (int totalBackups, int totalSize) GetServiceBackupInfo() => (TotalBackupsServiceWide, TotalBackupSizeServiceWideMegabytes);
+
+        public void SetLatestBDSVersion(string version) => LatestServerVersion = version;
+
+        public string GetLatestBDSVersion() => LatestServerVersion;
 
         public void ProcessConfiguration(string[] fileEntries) {
             foreach (string line in fileEntries) {
@@ -54,10 +91,6 @@ namespace BedrockService.Shared.Classes {
                     }
                     if (split[0] == "LogServersToFile") {
                         split[0] = "LogServerOutput";
-                    }
-                    if (split[0] == "BackupPath") {
-                        if (split[1] == "Default")
-                            split[1] = $@"{_processInfo.GetDirectory()}\ServerBackups";
                     }
                     SetProp(split[0], split[1]);
                 }
@@ -78,7 +111,7 @@ namespace BedrockService.Shared.Classes {
         public bool SetProp(Property propToSet) {
             try {
                 Property GlobalToEdit = globals.First(glob => glob.KeyName == propToSet.KeyName);
-                globals[globals.IndexOf(GlobalToEdit)] = propToSet;
+                globals[globals.IndexOf(GlobalToEdit)].SetValue(propToSet.StringValue);
             } catch {
                 // handle soon.
                 return false;
@@ -92,7 +125,11 @@ namespace BedrockService.Shared.Classes {
 
         public List<Property> GetAllProps() => globals;
 
-        public void SetAllProps(List<Property> props) => globals = props;
+        public void SetAllProps(List<Property> props) {
+            foreach (Property prop in props) {
+                SetProp(prop.KeyName, prop.StringValue);
+            }
+        }
 
         public IServerConfiguration GetServerInfoByName(string serverName) {
             return ServerList.FirstOrDefault(info => info.GetServerName() == serverName);
@@ -117,7 +154,10 @@ namespace BedrockService.Shared.Classes {
         }
 
         public void AddNewServerInfo(IServerConfiguration serverConfiguration) {
-            if (serverConfiguration.GetProp("server-port").Value == "19132" && serverConfiguration.GetProp("server-portv6").Value == "19133") {
+            if(ServerList.Count == 0) {
+
+            }
+            if (serverConfiguration.GetProp("server-port").StringValue == "19132" && serverConfiguration.GetProp("server-portv6").StringValue == "19133") {
                 ServerList.Insert(0, serverConfiguration);
                 return;
             }
@@ -128,15 +168,11 @@ namespace BedrockService.Shared.Classes {
             ServerList.RemoveAt(serverIndex);
         }
 
-        public void SetServerVersion(string newVersion) => serverVersion = newVersion;
-
-        public string GetServerVersion() => serverVersion;
-
         public List<LogEntry> GetLog() => serviceLog ?? new List<LogEntry>();
 
         public void SetLog(List<LogEntry> newLog) => serviceLog = newLog;
 
-        public List<Property> GetServerDefaultPropList() => _defaultServerProps;
+        public List<Property> GetServerDefaultPropList() => new(_defaultServerProps);
 
         public byte GetServerIndex(IServerConfiguration server) => (byte)ServerList.IndexOf(server);
 
