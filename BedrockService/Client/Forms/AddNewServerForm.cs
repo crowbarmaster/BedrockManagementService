@@ -36,13 +36,15 @@ namespace BedrockService.Client.Forms {
                 ServerCombinedPropModel.ServerPropList = editSrvDialog.workingProps;
             }
         }
-        
+
         private void serverSettingsBtn_Click(object sender, System.EventArgs e) {
             using PropEditorForm editSrvDialog = new();
-            List<Property> filteredProps = new List<Property> ();
+            List<Property> filteredProps = new List<Property>();
             editSrvDialog.PopulateBoxes(ServerCombinedPropModel.ServicePropList.Where(x => !serviceConfigExcludeList.Contains(x.KeyName)).ToList());
             if (editSrvDialog.ShowDialog() == DialogResult.OK) {
-                ServerCombinedPropModel.ServicePropList = editSrvDialog.workingProps;
+                editSrvDialog.workingProps.ForEach(x => {
+                    ServerCombinedPropModel.ServicePropList.First(y => y.KeyName == x.KeyName).SetValue(x.StringValue);
+                });
             }
         }
 
@@ -72,11 +74,11 @@ namespace BedrockService.Client.Forms {
 
         private void versionTextBox_TextChanged(object sender, System.EventArgs e) {
             if (versionTextBox.Text != FormManager.MainWindow.connectedHost.GetLatestBDSVersion()) {
-                ServerCombinedPropModel.ServicePropList.First(prop => prop.KeyName == "SelectedServerVersion").StringValue = versionTextBox.Text;
                 editPropsBtn.Enabled = false;
             } else {
                 editPropsBtn.Enabled = true;
             }
+            ServerCombinedPropModel.ServicePropList.First(prop => prop.KeyName == "SelectedServerVersion").StringValue = versionTextBox.Text;
         }
     }
 }
