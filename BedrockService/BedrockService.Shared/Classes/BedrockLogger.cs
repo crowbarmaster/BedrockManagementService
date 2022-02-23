@@ -12,6 +12,7 @@ namespace BedrockService.Shared.Classes {
         [NonSerialized]
         private StreamWriter _logWriter;
         private bool _logToFile = false;
+        private bool _addTimestamps = false;
         private string _logPath;
         private string _logOwner = "Service";
 
@@ -29,6 +30,7 @@ namespace BedrockService.Shared.Classes {
         public void Initialize() {
             _logPath = $@"{_processInfo.GetDirectory()}\Logs\{_processInfo.DeclaredType()}";
             _logToFile = _serviceConfiguration.GetProp("LogApplicationOutput").GetBoolValue();
+            _addTimestamps = _serviceConfiguration.GetProp("TimestampLogEntries").GetBoolValue();
             _logOwner = _processInfo.DeclaredType();
             if (_processInfo.DeclaredType() == "Service") {
                 if (_serverConfiguration != null && _serviceConfiguration.GetProp("LogServerOutput").GetBoolValue())
@@ -46,18 +48,23 @@ namespace BedrockService.Shared.Classes {
                     Directory.CreateDirectory(_logPath);
                 _logWriter = new StreamWriter($@"{_logPath}\{_processInfo.DeclaredType()}Log-{DateTime.Now:yyyyMMdd_HHmmssff}.log", true);
             }
+
         }
 
         public void AppendLine(string text) {
             string newText = $"{_logOwner}: {text}";
+            LogEntry entry = new(newText);
             Console.WriteLine(newText);
             try {
                 if (_serverConfiguration != null) {
-                    _serverConfiguration.GetLog().Add(new LogEntry(newText));
+                    _serverConfiguration.GetLog().Add(entry);
                 } else {
                     if (_serviceConfiguration != null) {
-                        _serviceConfiguration.GetLog().Add(new LogEntry(newText));
+                        _serviceConfiguration.GetLog().Add(entry);
                     }
+                }
+                if (_addTimestamps) {
+                    newText = $"[{entry.TimeStamp.ToString("G")}] {newText}";
                 }
                 if (_logToFile && _logWriter != null) {
                     _logWriter.WriteLine(newText);
