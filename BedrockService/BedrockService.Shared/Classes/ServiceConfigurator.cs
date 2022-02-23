@@ -20,6 +20,7 @@ namespace BedrockService.Shared.Classes {
             globals.Add(new Property("ClientPort", "19134"));
             globals.Add(new Property("LogServerOutput", "true"));
             globals.Add(new Property("LogApplicationOutput", "true"));
+            globals.Add(new Property("TimestampLogEntries", "true"));
             return true;
         }
 
@@ -43,10 +44,10 @@ namespace BedrockService.Shared.Classes {
                         return false;
                     }
                 }
-                _defaultServerProps.Clear();
+                DefaultServerProps.Clear();
                 File.ReadAllLines($@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\CoreFiles\Build_{LatestServerVersion}\stock_props.conf").ToList().ForEach(entry => {
                     string[] splitEntry = entry.Split('=');
-                    _defaultServerProps.Add(new Property(splitEntry[0], splitEntry[1]));
+                    DefaultServerProps.Add(new Property(splitEntry[0], splitEntry[1]));
                 });
             }
             return true;
@@ -172,7 +173,7 @@ namespace BedrockService.Shared.Classes {
 
         public void SetLog(List<LogEntry> newLog) => serviceLog = newLog;
 
-        public List<Property> GetServerDefaultPropList() => new(_defaultServerProps);
+        public List<Property> GetServerDefaultPropList() => new(DefaultServerProps);
 
         public byte GetServerIndex(IServerConfiguration server) => (byte)ServerList.IndexOf(server);
 
