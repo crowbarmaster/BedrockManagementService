@@ -11,6 +11,7 @@ namespace BedrockService.Client.Management {
         public List<IClientSideServiceConfiguration> HostConnectList = new List<IClientSideServiceConfiguration>();
         public string NBTStudioPath;
         public bool DefaultScrollLock = false;
+        public bool DisplayTimestamps = false;
         private readonly IBedrockLogger Logger;
 
         public ConfigManager(IBedrockLogger logger) {
@@ -43,6 +44,9 @@ namespace BedrockService.Client.Management {
                     if (entrySplit[0] == "EnableScrollbarLockDefault") {
                         DefaultScrollLock = entrySplit[1].ToLower().Equals(bool.TrueString.ToLower());
                     }
+                    if(entrySplit[0] == "DisplayTimestamps") {
+                        DisplayTimestamps = entrySplit[1].ToLower().Equals(bool.TrueString.ToLower());
+                    }
                 }
             }
         }
@@ -72,6 +76,7 @@ namespace BedrockService.Client.Management {
             fileContent.Append("\n# Settings\n");
             fileContent.Append($"NBTStudioPath={NBTStudioPath}\n");
             fileContent.Append($"EnableScrollbarLockDefault={DefaultScrollLock}\n");
+            fileContent.Append($"DisplayTimestamps={DisplayTimestamps}\n");
             File.WriteAllText(ConfigFile, fileContent.ToString());
         }
     }

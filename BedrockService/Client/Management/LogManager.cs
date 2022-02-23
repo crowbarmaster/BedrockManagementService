@@ -12,6 +12,7 @@ namespace BedrockService.Client.Management {
     class LogManager {
         public Task LogTask;
         public bool Working = false;
+        public bool DisplayTimestamps = false;
         public List<string> ServiceLogs = new List<string>();
         private CancellationTokenSource _logTaskCancelSource;
         private IServiceConfiguration _connectedHost;
@@ -41,7 +42,14 @@ namespace BedrockService.Client.Management {
                         UpdateLogBoxInvoked(FormManager.MainWindow.LogBox, "");
                     }
                     if (_connectedHost.GetLog().Count != currentServiceLogLength) {
-                        UpdateLogBoxInvoked(FormManager.MainWindow.serviceTextbox, string.Join("\r\n", _connectedHost.GetLog().Select(x => x.Text).ToList()));
+                        string joinString = null;
+                        if (DisplayTimestamps) {
+                            joinString = string.Join("\r\n", _connectedHost.GetLog().Select(x => $"[{x.TimeStamp:G}] {x.Text}").ToList());
+                        } else {
+                            joinString = string.Join("\r\n", _connectedHost.GetLog().Select(x => x.Text).ToList());
+                        }
+
+                        UpdateLogBoxInvoked(FormManager.MainWindow.serviceTextbox, joinString);
                     }
                     if (FormManager.MainWindow.selectedServer != null && FormManager.MainWindow.selectedServer.GetLog() != null && FormManager.MainWindow.selectedServer.GetLog().Count != currentServerLogLength) {
                         UpdateLogBoxInvoked(FormManager.MainWindow.LogBox, string.Join("\r\n", FormManager.MainWindow.selectedServer.GetLog().Select(x => x.Text).ToList()));
@@ -87,6 +95,7 @@ namespace BedrockService.Client.Management {
 
         public bool InitLogThread(IServiceConfiguration host) {
             _connectedHost = host;
+            DisplayTimestamps = FormManager.MainWindow.ConfigManager.DisplayTimestamps;
             _logTaskCancelSource = new CancellationTokenSource();
             return StartLogThread();
         }
