@@ -37,6 +37,7 @@ namespace BedrockService.Client.Forms
             this.nbtButton = new System.Windows.Forms.Button();
             this.saveBtn = new System.Windows.Forms.Button();
             this.scrollLockCheckbox = new System.Windows.Forms.CheckBox();
+            this.displayTimestampCheckbox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.serverGridView)).BeginInit();
             this.SuspendLayout();
             // 
@@ -50,11 +51,12 @@ namespace BedrockService.Client.Forms
             this.HostName,
             this.HostAddress,
             this.Port});
-            this.serverGridView.Location = new System.Drawing.Point(13, 37);
+            this.serverGridView.Location = new System.Drawing.Point(9, 22);
+            this.serverGridView.Margin = new System.Windows.Forms.Padding(2);
             this.serverGridView.Name = "serverGridView";
             this.serverGridView.RowHeadersWidth = 62;
             this.serverGridView.RowTemplate.Height = 28;
-            this.serverGridView.Size = new System.Drawing.Size(1123, 307);
+            this.serverGridView.Size = new System.Drawing.Size(786, 184);
             this.serverGridView.TabIndex = 0;
             // 
             // HostName
@@ -82,18 +84,20 @@ namespace BedrockService.Client.Forms
             // 
             this.nbtPathLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.nbtPathLabel.AutoSize = true;
-            this.nbtPathLabel.Location = new System.Drawing.Point(13, 377);
+            this.nbtPathLabel.Location = new System.Drawing.Point(9, 226);
+            this.nbtPathLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.nbtPathLabel.Name = "nbtPathLabel";
-            this.nbtPathLabel.Size = new System.Drawing.Size(144, 25);
+            this.nbtPathLabel.Size = new System.Drawing.Size(95, 15);
             this.nbtPathLabel.TabIndex = 1;
             this.nbtPathLabel.Text = "NBT Studio path:";
             // 
             // nbtButton
             // 
             this.nbtButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.nbtButton.Location = new System.Drawing.Point(17, 422);
+            this.nbtButton.Location = new System.Drawing.Point(12, 253);
+            this.nbtButton.Margin = new System.Windows.Forms.Padding(2);
             this.nbtButton.Name = "nbtButton";
-            this.nbtButton.Size = new System.Drawing.Size(233, 47);
+            this.nbtButton.Size = new System.Drawing.Size(163, 28);
             this.nbtButton.TabIndex = 2;
             this.nbtButton.Text = "Set NBT Studio path";
             this.nbtButton.UseVisualStyleBackColor = true;
@@ -102,9 +106,10 @@ namespace BedrockService.Client.Forms
             // saveBtn
             // 
             this.saveBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.saveBtn.Location = new System.Drawing.Point(903, 422);
+            this.saveBtn.Location = new System.Drawing.Point(632, 253);
+            this.saveBtn.Margin = new System.Windows.Forms.Padding(2);
             this.saveBtn.Name = "saveBtn";
-            this.saveBtn.Size = new System.Drawing.Size(233, 47);
+            this.saveBtn.Size = new System.Drawing.Size(163, 28);
             this.saveBtn.TabIndex = 3;
             this.saveBtn.Text = "Save settings";
             this.saveBtn.UseVisualStyleBackColor = true;
@@ -113,24 +118,38 @@ namespace BedrockService.Client.Forms
             // scrollLockCheckbox
             // 
             this.scrollLockCheckbox.AutoSize = true;
-            this.scrollLockCheckbox.Location = new System.Drawing.Point(275, 432);
+            this.scrollLockCheckbox.Location = new System.Drawing.Point(192, 253);
+            this.scrollLockCheckbox.Margin = new System.Windows.Forms.Padding(2);
             this.scrollLockCheckbox.Name = "scrollLockCheckbox";
-            this.scrollLockCheckbox.Size = new System.Drawing.Size(325, 29);
+            this.scrollLockCheckbox.Size = new System.Drawing.Size(216, 19);
             this.scrollLockCheckbox.TabIndex = 4;
             this.scrollLockCheckbox.Text = "Set scrollbar lock enabled by default";
             this.scrollLockCheckbox.UseVisualStyleBackColor = true;
             // 
+            // displayTimestampCheckbox
+            // 
+            this.displayTimestampCheckbox.AutoSize = true;
+            this.displayTimestampCheckbox.Location = new System.Drawing.Point(192, 276);
+            this.displayTimestampCheckbox.Margin = new System.Windows.Forms.Padding(2);
+            this.displayTimestampCheckbox.Name = "displayTimestampCheckbox";
+            this.displayTimestampCheckbox.Size = new System.Drawing.Size(167, 19);
+            this.displayTimestampCheckbox.TabIndex = 5;
+            this.displayTimestampCheckbox.Text = "Display timestamps in logs";
+            this.displayTimestampCheckbox.UseVisualStyleBackColor = true;
+            // 
             // ClientConfigForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1149, 510);
+            this.ClientSize = new System.Drawing.Size(804, 306);
+            this.Controls.Add(this.displayTimestampCheckbox);
             this.Controls.Add(this.scrollLockCheckbox);
             this.Controls.Add(this.saveBtn);
             this.Controls.Add(this.nbtButton);
             this.Controls.Add(this.nbtPathLabel);
             this.Controls.Add(this.serverGridView);
-            this.MinimumSize = new System.Drawing.Size(1162, 538);
+            this.Margin = new System.Windows.Forms.Padding(2);
+            this.MinimumSize = new System.Drawing.Size(818, 338);
             this.Name = "ClientConfigForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Client Configuration";
@@ -150,5 +169,6 @@ namespace BedrockService.Client.Forms
         private System.Windows.Forms.Button nbtButton;
         private System.Windows.Forms.Button saveBtn;
         private System.Windows.Forms.CheckBox scrollLockCheckbox;
+        private System.Windows.Forms.CheckBox displayTimestampCheckbox;
     }
 }
