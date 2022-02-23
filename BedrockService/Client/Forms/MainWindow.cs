@@ -20,7 +20,6 @@ namespace BedrockService.Client.Forms {
         public IServerConfiguration selectedServer;
         public IClientSideServiceConfiguration clientSideServiceConfiguration;
         public ServiceStatusModel ServiceStatus;
-        public bool ShowsSvcLog = false;
         public bool ServerBusy = false;
         private int _connectTimeout;
         private bool _followTail = false;
@@ -29,15 +28,15 @@ namespace BedrockService.Client.Forms {
         private BackupManagerForm _backupManager;
         public IBedrockLogger ClientLogger;
         private readonly IProcessInfo _processInfo;
-        private readonly System.Timers.Timer _connectTimer = new System.Timers.Timer(100.0);
+        private readonly System.Timers.Timer _connectTimer = new(100.0);
         private readonly LogManager _logManager;
-        private readonly ConfigManager _configManager;
+        public ConfigManager ConfigManager;
         public MainWindow(IProcessInfo processInfo, IBedrockLogger logger) {
             _processInfo = processInfo;
             ClientLogger = logger;
             ClientLogger.Initialize();
             _logManager = new LogManager(ClientLogger);
-            _configManager = new ConfigManager(ClientLogger);
+            ConfigManager = new ConfigManager(ClientLogger);
             InitializeComponent();
             InitForm();
             _connectTimer.Elapsed += ConnectTimer_Elapsed;
@@ -52,7 +51,7 @@ namespace BedrockService.Client.Forms {
             if (_connectTimer.Enabled && !FormManager.TCPClient.EstablishedLink && !_blockConnect) {
                 _connectTimer.Interval = 2000.0;
                 _blockConnect = true;
-                Invoke((MethodInvoker)delegate { FormManager.TCPClient.ConnectHost(_configManager.HostConnectList.FirstOrDefault(host => host.GetHostName() == (string)HostListBox.SelectedItem)); });
+                Invoke((MethodInvoker)delegate { FormManager.TCPClient.ConnectHost(ConfigManager.HostConnectList.FirstOrDefault(host => host.GetHostName() == (string)HostListBox.SelectedItem)); });
                 Thread.Sleep(1000);
                 if (connectedHost != null && FormManager.TCPClient.EstablishedLink) {
                     ServerBusy = false;
@@ -177,9 +176,9 @@ namespace BedrockService.Client.Forms {
         }
 
         public void InitForm() {
-            _configManager.LoadConfigs();
+            ConfigManager.LoadConfigs();
             HostListBox.Items.Clear();
-            foreach (IClientSideServiceConfiguration host in _configManager.HostConnectList) {
+            foreach (IClientSideServiceConfiguration host in ConfigManager.HostConnectList) {
                 HostListBox.Items.Add(host.GetHostName());
             }
             if (HostListBox.Items.Count > 0) {
@@ -187,19 +186,25 @@ namespace BedrockService.Client.Forms {
             }
             HostListBox.Refresh();
             FormClosing += MainWindow_FormClosing;
-            if (_configManager.DefaultScrollLock) {
+            if (ConfigManager.DefaultScrollLock) {
                 scrollLockChkBox.Checked = true;
             }
         }
 
         private Task StartClientLogUpdate() => Task.Run(() => {
             while (!IsDisposed && clientLogBox != null) {
+                if (_logManager != null) {
+                    _logManager.DisplayTimestamps = ConfigManager.DisplayTimestamps;
+                }
                 try {
                         Invoke(() => {
-                    if (FormManager.ClientLogContainer.GetLog().Count != clientLogBox.TextLength) {
-
-                            UpdateServerLogBox(clientLogBox, string.Join("\r\n", FormManager.ClientLogContainer.GetLog().Select(x => x.Text).ToList()));
-                    }
+                            if (FormManager.ClientLogContainer.GetLog().Count != clientLogBox.TextLength) {
+                                if (ConfigManager.DisplayTimestamps) {
+                                    UpdateServerLogBox(clientLogBox, string.Join("\r\n", FormManager.ClientLogContainer.GetLog().Select(x => $"[{x.TimeStamp:G}] {x.Text}").ToList()));
+                                } else {
+                                    UpdateServerLogBox(clientLogBox, string.Join("\r\n", FormManager.ClientLogContainer.GetLog().Select(x => x.Text).ToList()));
+                                }
+                            }
                         });
                 } catch (Exception ex) {
                     ClientLogger.AppendLine($"Error! {ex.Message} {ex.StackTrace}");
@@ -296,7 +301,7 @@ namespace BedrockService.Client.Forms {
 
         private void newSrvBtn_Click(object sender, EventArgs e) {
             if (clientSideServiceConfiguration == null) {
-                clientSideServiceConfiguration = _configManager.HostConnectList.First(host => host.GetHostName() == HostListBox.Text);
+                clientSideServiceConfiguration = ConfigManager.HostConnectList.First(host => host.GetHostName() == HostListBox.Text);
             }
             DisableUI();
             using (AddNewServerForm newServerForm = new AddNewServerForm(clientSideServiceConfiguration, connectedHost.GetServerList())) {
@@ -511,14 +516,14 @@ namespace BedrockService.Client.Forms {
         }
 
         private void nbtStudioBtn_Click(object sender, EventArgs e) {
-            if (string.IsNullOrEmpty(_configManager.NBTStudioPath))
+            if (string.IsNullOrEmpty(ConfigManager.NBTStudioPath))
                 using (OpenFileDialog openFile = new OpenFileDialog()) {
                     openFile.FileName = "NBTStudio.exe";
                     openFile.Title = "Please locate NBT Studio executable...";
                     openFile.Filter = "NBTStudio.exe|NBTStudio.exe";
                     if (openFile.ShowDialog() == DialogResult.OK) {
-                        _configManager.NBTStudioPath = openFile.FileName;
-                        _configManager.SaveConfigFile();
+                        ConfigManager.NBTStudioPath = openFile.FileName;
+                        ConfigManager.SaveConfigFile();
                     } else return;
                 }
             ServerBusy = true;
@@ -526,7 +531,7 @@ namespace BedrockService.Client.Forms {
             DisableUI();
             using (Process nbtStudioProcess = new Process()) {
                 string tempPath = $@"{Path.GetTempPath()}level.dat";
-                nbtStudioProcess.StartInfo = new ProcessStartInfo(_configManager.NBTStudioPath, tempPath);
+                nbtStudioProcess.StartInfo = new ProcessStartInfo(ConfigManager.NBTStudioPath, tempPath);
                 nbtStudioProcess.Start();
                 nbtStudioProcess.WaitForExit();
                 FormManager.TCPClient.SendData(File.ReadAllBytes(tempPath), connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.LevelEditFile);
@@ -536,7 +541,7 @@ namespace BedrockService.Client.Forms {
 
         private void HostListBox_SelectedIndexChanged(object sender, EventArgs e) {
             if (HostListBox.SelectedIndex != -1) {
-                clientSideServiceConfiguration = _configManager.HostConnectList.FirstOrDefault(host => host.GetHostName() == (string)HostListBox.SelectedItem);
+                clientSideServiceConfiguration = ConfigManager.HostConnectList.FirstOrDefault(host => host.GetHostName() == (string)HostListBox.SelectedItem);
             }
         }
 
@@ -545,7 +550,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void clientConfigBtn_Click(object sender, EventArgs e) {
-            using (ClientConfigForm form = new ClientConfigForm(_configManager)) {
+            using (ClientConfigForm form = new ClientConfigForm(ConfigManager)) {
                 if (form.ShowDialog() == DialogResult.OK) {
                     form.Close();
                     InitForm();

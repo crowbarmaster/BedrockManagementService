@@ -176,7 +176,7 @@
             this.EditCfg.Name = "EditCfg";
             this.EditCfg.Size = new System.Drawing.Size(198, 26);
             this.EditCfg.TabIndex = 75;
-            this.EditCfg.Text = "Edit server configs";
+            this.EditCfg.Text = "Edit BDS/BMS configs";
             this.EditCfg.UseVisualStyleBackColor = true;
             this.EditCfg.Click += new System.EventHandler(this.EditCfg_Click);
             // 

@@ -37,8 +37,8 @@ namespace BedrockService.Service.Management {
                 updater.Initialize();
                 updater.CheckLatestVersion().Wait();
                 _logger.AppendLine("Verifying latest update for baseline properties. Please wait!");
-                _serviceConfiguration.ValidateLatestVersion();
             }
+            _serviceConfiguration.ValidateLatestVersion();
             if (File.Exists(_globalFile)) {
                 _serviceConfiguration.ProcessConfiguration(File.ReadAllLines(_globalFile));
                 _logger.AppendLine("Loaded Service props.");

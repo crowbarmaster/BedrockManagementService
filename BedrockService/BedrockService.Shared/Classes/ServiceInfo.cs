@@ -11,7 +11,7 @@ namespace BedrockService.Shared.Classes {
         public List<LogEntry> serviceLog = new List<LogEntry>();
         public List<IServerConfiguration> ServerList = new List<IServerConfiguration>();
         public List<Property> globals = new List<Property>();
-        public List<Property> _defaultServerProps = new List<Property>();
+        public List<Property> DefaultServerProps = new List<Property>();
         public int TotalBackupsServiceWide { get; set; }
         public int TotalBackupSizeServiceWideMegabytes { get; set; }
     }
