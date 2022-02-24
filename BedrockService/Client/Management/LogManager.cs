@@ -64,10 +64,11 @@ namespace BedrockService.Client.Management {
                             bool autoStartEnabled = serverConfiguration.GetSettingsProp("ServerAutostartEnabled").GetBoolValue();
                             ServerStatusModel status = serverConfiguration.GetStatus();
                             ServiceStatusModel serviceStatus = FormManager.MainWindow.ServiceStatus;
-                            string statusMsg = $"{serverConfiguration.GetServerName()}";
+                            string statusMsg = $"{serverConfiguration.GetServerName()} is {status.ServerStatus}";
 
                             if (FormManager.MainWindow.ServiceStatus != null) {
-                                statusMsg += $" is {status.ServerStatus}\r\n{status.ActivePlayerList.Count} players online";
+                                statusMsg += $"\r\nStarted at: {status.ServerUptime:g}";
+                                statusMsg += $"\r\n{status.ActivePlayerList.Count} players online";
 
                                 if (!autoStartEnabled) {
                                     statusMsg += $"\r\nAutoStart disabled for this server!";
@@ -79,7 +80,8 @@ namespace BedrockService.Client.Management {
                                         statusMsg += $"\r\nUpdate {latestVersion} available";
                                     }
                                 }
-                                statusMsg += $"\r\nTotal service-wide bakups: {FormManager.MainWindow.ServiceStatus.TotalBackups}\r\nTotal backup size: {FormManager.MainWindow.ServiceStatus.TotalBackupSize / 1000} MB";
+                                statusMsg += "\r\n  --------------------------------";
+                                statusMsg += $"\r\nTotal service-wide bakups: {FormManager.MainWindow.ServiceStatus.TotalBackups}\r\nTotal backup size: {FormManager.MainWindow.ServiceStatus.TotalBackupSize / 1000} MB\r\nService started: {FormManager.MainWindow.ServiceStatus.ServiceUptime:g}";
                             }
                             UpdateLogBoxInvoked(FormManager.MainWindow.ServerInfoBox, statusMsg);
                         });
