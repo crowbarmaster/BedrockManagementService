@@ -27,15 +27,16 @@ namespace BedrockService.Shared.Classes {
     }
 
     public class ServiceStatusModel {
+        public DateTime ServiceUptime { get; set; }
         public ServiceStatus ServiceStatus { get; set; }
         public List<IPlayer> ActivePlayerList { get; set; } = new List<IPlayer>();
-        public DateTime ServiceUptime { get; set; }
         public int TotalBackups { get; set; }
         public int TotalBackupSize { get; set; }
         public string LatestVersion { get; set; }
     }
 
     public class ServerStatusModel {
+        public DateTime ServerUptime { get; set; }
         public byte ServerIndex { get; set; }
         public ServerStatus ServerStatus { get; set; }
         public List<IPlayer> ActivePlayerList { get; set; } = new List<IPlayer>();
