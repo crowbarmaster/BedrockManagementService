@@ -30,6 +30,7 @@ namespace BedrockService.Service.Server {
         private IBedrockLogger _serverLogger;
         private IPlayerManager _playerManager;
         private List<IPlayer> _connectedPlayers = new List<IPlayer>();
+        private DateTime _startTime;
         private const string _startupMessage = "INFO] Server started.";
         private bool _AwaitingStopSignal = true;
         private bool _backupRunning = false;
@@ -81,6 +82,7 @@ namespace BedrockService.Service.Server {
                 while (_currentServerStatus != ServerStatus.Started) {
                     Task.Delay(10).Wait();
                 }
+                _startTime = DateTime.Now;
             });
         }
 
@@ -234,6 +236,7 @@ namespace BedrockService.Service.Server {
         }
 
         public ServerStatusModel GetServerStatus() => new ServerStatusModel() {
+            ServerUptime = _startTime,
             ServerStatus = _currentServerStatus,
             ActivePlayerList = _connectedPlayers,
             ServerIndex = _serviceConfiguration.GetServerIndex(_serverConfiguration),
