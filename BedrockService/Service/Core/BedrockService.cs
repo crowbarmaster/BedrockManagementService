@@ -12,7 +12,6 @@ namespace BedrockService.Service.Core {
         private readonly IProcessInfo _processInfo;
         private readonly IConfigurator _configurator;
         private readonly ITCPListener _tCPListener;
-        private readonly IUpdater _updater;
         private readonly FileUtilities _fileUtils;
         private DateTime _upTime;
 
