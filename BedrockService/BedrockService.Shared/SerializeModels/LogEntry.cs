@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BedrockService.Shared.Classes {
+namespace BedrockService.Shared.SerializeModels {
     public class LogEntry {
         public DateTime TimeStamp { get; set; }
         public string Text { get; set; }

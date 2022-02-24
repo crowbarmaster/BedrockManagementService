@@ -20,7 +20,7 @@ public enum ServerStatus {
     Started
 }
 
-namespace BedrockService.Shared.Classes {
+namespace BedrockService.Shared.SerializeModels {
     public class StatusUpdateModel {
         public ServiceStatusModel ServiceStatusModel { get; set; }
         public ServerStatusModel ServerStatusModel { get; set; }
