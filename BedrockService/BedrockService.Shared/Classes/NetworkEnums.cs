@@ -51,6 +51,14 @@
         ServiceConfig
     }
 
+    public enum PackageFlags {
+        ConfigFile,
+        LastBackup,
+        WorldPacks,
+        PlayerDatabase,
+        Full
+    }
+
     public enum NetworkMessageFlags {
         Failed,
         Passed,
