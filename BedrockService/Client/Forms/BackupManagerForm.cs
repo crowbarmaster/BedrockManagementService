@@ -1,6 +1,7 @@
 ﻿using BedrockService.Client.Management;
 using BedrockService.Shared.Classes;
 using BedrockService.Shared.Interfaces;
+using BedrockService.Shared.SerializeModels;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -64,12 +65,16 @@ namespace BedrockService.Client.Forms {
             if (backupSelectBox.SelectedIndex < 0) {
                 return;
             }
+            BackupInfoModel selectedBackup = backupSelectBox.SelectedItem as BackupInfoModel;
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "Zip File|*.zip";
             saveFileDialog.FileName = backupSelectBox.SelectedItem.ToString();
             saveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             if (saveFileDialog.ShowDialog() == DialogResult.OK) {
-                byte[] dataBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(backupSelectBox.SelectedItem));
+                ExportFileModel exportModel = new ExportFileModel();
+                exportModel.Filename = selectedBackup.Filename;
+                exportModel.FileType = FileTypeFlags.Backup;
+                byte[] dataBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(exportModel));
                 _callbackRecieved = false;
                 string[] newText = new string[4];
                 newText[3] = "Downloading your selection now, please wait!";
