@@ -18,9 +18,6 @@ namespace BedrockService.Service.Server {
         private readonly IServerConfiguration _serverConfiguration;
         private readonly FileUtilities _fileUtils;
         private bool _autoBackupsContainPacks = false;
-        private bool _autoBackupsEnabled = false;
-        private int _autoMaxBackupCount = 25;
-        private string _autoBackupCronString = "* 1 * * *";
 
         public enum BackupType {
             Auto,
@@ -67,17 +64,7 @@ namespace BedrockService.Service.Server {
                 _server.WriteToStandardIn("save resume");
                 _server.WriteToStandardIn("say Server backup complete.");
                 if (_autoBackupsContainPacks) {
-                    CreatePackBackupFiles(serverPath, levelName, backupZip);
-                    if (Directory.Exists(levelDirInfo.FullName + "\\resource_packs")) {
-                        _fileUtils.ClearTempDir().Wait();
-                        ZipFile.CreateFromDirectory(levelDirInfo.FullName + "\\resource_packs", $@"{Path.GetTempPath()}\BMSTemp\resource_packs.zip");
-                        backupZip.CreateEntryFromFile($@"{Path.GetTempPath()}\BMSTemp\resource_packs.zip", "resource_packs.zip");
-                    }
-                    if (Directory.Exists(levelDirInfo.FullName + "\\behavior_packs")) {
-                        _fileUtils.ClearTempDir().Wait();
-                        ZipFile.CreateFromDirectory(levelDirInfo.FullName + "\\behavior_packs", $@"{Path.GetTempPath()}\BMSTemp\behavior_packs.zip");
-                        backupZip.CreateEntryFromFile($@"{Path.GetTempPath()}\BMSTemp\behavior_packs.zip", "behavior_packs.zip");
-                    }
+                    _fileUtils.AppendServerPacksToArchive(serverPath, backupZip, levelDirInfo);
                 }
                 _serviceConfiguration.CalculateTotalBackupsAllServers().Wait();
                 return resuilt;
@@ -112,32 +99,6 @@ namespace BedrockService.Service.Server {
             }
         }
 
-        private void CreatePackBackupFiles(string serverPath, string levelName, ZipArchive destinationArchive) {
-            string resouceFolderPath = $@"{serverPath}\resource_packs";
-            string behaviorFolderPath = $@"{serverPath}\behavior_packs";
-            string behaviorFilePath = $@"{serverPath}\worlds\{levelName}\world_behavior_packs.json";
-            string resoruceFilePath = $@"{serverPath}\worlds\{levelName}\world_resource_packs.json";
-            MinecraftPackParser packParser = new(_processInfo);
-            packParser.ParseDirectory(resouceFolderPath);
-            packParser.ParseDirectory(behaviorFolderPath);
-            WorldPackFileModel worldPacks = new(resoruceFilePath);
-            worldPacks.Contents.AddRange(new WorldPackFileModel(behaviorFilePath).Contents);
-            _fileUtils.ClearTempDir().Wait();
-            string packBackupFolderPath = $@"{Path.GetTempPath()}\BMSTemp\InstalledPacks";
-            Directory.CreateDirectory(packBackupFolderPath);
-            if (worldPacks.Contents.Count > 0) {
-                foreach (WorldPackEntryJsonModel model in worldPacks.Contents) {
-                    MinecraftPackContainer container = packParser.FoundPacks.FirstOrDefault(x => x.JsonManifest.header.uuid == model.pack_id);
-                    if (container == null) {
-                        continue;
-                    }
-                    string packLocation = container.PackContentLocation;
-                    ZipFile.CreateFromDirectory(packLocation, $@"{packBackupFolderPath}\{packLocation[packLocation.LastIndexOf('\\')..]}.zip");
-                    destinationArchive.CreateEntryFromFile($@"{packBackupFolderPath}\{packLocation[packLocation.LastIndexOf('\\')..]}.zip", $@"InstalledPacks/{packLocation[packLocation.LastIndexOf('\\')..]}.zip");
-                }
-            }
-        }
-
         private Task<bool> BackupWorldFilesFromQuery(Dictionary<string, int> fileNameSizePairs, string worldPath, ZipArchive destinationArchive) {
             return Task.Run(() => {
                 try {
@@ -145,7 +106,7 @@ namespace BedrockService.Service.Server {
                         string fileName = file.Key.Replace('/', '\\');
                         int fileSize = file.Value;
                         string filePath = $@"{worldPath}\{fileName}";
-                        byte[] fileData = null;
+                        byte[]? fileData = null;
                         using (FileStream fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                         using (MemoryStream ms = new MemoryStream()) {
                             fs.CopyTo(ms);
