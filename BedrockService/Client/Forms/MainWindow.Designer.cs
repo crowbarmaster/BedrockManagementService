@@ -59,6 +59,17 @@
             this.startCmdMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.servicePropMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editCoreServicePropertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.serverConfigFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.serverPackageFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.serviceConfigFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.serverExporterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.asConfigOnlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importableBackupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importableBackupWithPacksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fullServerPackageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.serviceConfigFileToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.clientPage.SuspendLayout();
             this.servicePage.SuspendLayout();
             this.serverPage.SuspendLayout();
@@ -440,9 +451,11 @@
             this.serverPropMenuItem,
             this.startCmdMenuItem,
             this.servicePropMenuItem,
-            this.editCoreServicePropertiesToolStripMenuItem});
+            this.editCoreServicePropertiesToolStripMenuItem,
+            this.importToolStripMenuItem,
+            this.exportToolStripMenuItem});
             this.serverConfigBtnMenu.Name = "serverConfigBtnMenu";
-            this.serverConfigBtnMenu.Size = new System.Drawing.Size(223, 92);
+            this.serverConfigBtnMenu.Size = new System.Drawing.Size(223, 136);
             // 
             // serverPropMenuItem
             // 
@@ -471,6 +484,89 @@
             this.editCoreServicePropertiesToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
             this.editCoreServicePropertiesToolStripMenuItem.Text = "Edit BMS Service properties";
             this.editCoreServicePropertiesToolStripMenuItem.Click += new System.EventHandler(this.editCoreServicePropertiesToolStripMenuItem_Click);
+            // 
+            // importToolStripMenuItem
+            // 
+            this.importToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.serverConfigFileToolStripMenuItem,
+            this.serverPackageFileToolStripMenuItem,
+            this.serviceConfigFileToolStripMenuItem});
+            this.importToolStripMenuItem.Name = "importToolStripMenuItem";
+            this.importToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
+            this.importToolStripMenuItem.Text = "Import...";
+            // 
+            // serverConfigFileToolStripMenuItem
+            // 
+            this.serverConfigFileToolStripMenuItem.Name = "serverConfigFileToolStripMenuItem";
+            this.serverConfigFileToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
+            this.serverConfigFileToolStripMenuItem.Text = "Server config file";
+            // 
+            // serverPackageFileToolStripMenuItem
+            // 
+            this.serverPackageFileToolStripMenuItem.Name = "serverPackageFileToolStripMenuItem";
+            this.serverPackageFileToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
+            this.serverPackageFileToolStripMenuItem.Text = "Server package file";
+            // 
+            // serviceConfigFileToolStripMenuItem
+            // 
+            this.serviceConfigFileToolStripMenuItem.Name = "serviceConfigFileToolStripMenuItem";
+            this.serviceConfigFileToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
+            this.serviceConfigFileToolStripMenuItem.Text = "Service config file";
+            // 
+            // exportToolStripMenuItem
+            // 
+            this.exportToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.serverExporterToolStripMenuItem,
+            this.serviceConfigFileToolStripMenuItem1});
+            this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
+            this.exportToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
+            this.exportToolStripMenuItem.Text = "Export...";
+            // 
+            // serverExporterToolStripMenuItem
+            // 
+            this.serverExporterToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.asConfigOnlyToolStripMenuItem,
+            this.importableBackupToolStripMenuItem,
+            this.importableBackupWithPacksToolStripMenuItem,
+            this.fullServerPackageToolStripMenuItem});
+            this.serverExporterToolStripMenuItem.Name = "serverExporterToolStripMenuItem";
+            this.serverExporterToolStripMenuItem.Size = new System.Drawing.Size(187, 22);
+            this.serverExporterToolStripMenuItem.Text = "Server Exporter Menu";
+            // 
+            // asConfigOnlyToolStripMenuItem
+            // 
+            this.asConfigOnlyToolStripMenuItem.Name = "asConfigOnlyToolStripMenuItem";
+            this.asConfigOnlyToolStripMenuItem.Size = new System.Drawing.Size(233, 22);
+            this.asConfigOnlyToolStripMenuItem.Text = "Configuration file only";
+            this.asConfigOnlyToolStripMenuItem.Click += new System.EventHandler(this.asConfigOnlyToolStripMenuItem_Click);
+            // 
+            // importableBackupToolStripMenuItem
+            // 
+            this.importableBackupToolStripMenuItem.Name = "importableBackupToolStripMenuItem";
+            this.importableBackupToolStripMenuItem.Size = new System.Drawing.Size(233, 22);
+            this.importableBackupToolStripMenuItem.Text = "Importable backup";
+            this.importableBackupToolStripMenuItem.Click += new System.EventHandler(this.importableBackupToolStripMenuItem_Click);
+            // 
+            // importableBackupWithPacksToolStripMenuItem
+            // 
+            this.importableBackupWithPacksToolStripMenuItem.Name = "importableBackupWithPacksToolStripMenuItem";
+            this.importableBackupWithPacksToolStripMenuItem.Size = new System.Drawing.Size(233, 22);
+            this.importableBackupWithPacksToolStripMenuItem.Text = "Importable backup with packs";
+            this.importableBackupWithPacksToolStripMenuItem.Click += new System.EventHandler(this.importableBackupWithPacksToolStripMenuItem_Click);
+            // 
+            // fullServerPackageToolStripMenuItem
+            // 
+            this.fullServerPackageToolStripMenuItem.Name = "fullServerPackageToolStripMenuItem";
+            this.fullServerPackageToolStripMenuItem.Size = new System.Drawing.Size(233, 22);
+            this.fullServerPackageToolStripMenuItem.Text = "Full server package";
+            this.fullServerPackageToolStripMenuItem.Click += new System.EventHandler(this.fullServerPackageToolStripMenuItem_Click);
+            // 
+            // serviceConfigFileToolStripMenuItem1
+            // 
+            this.serviceConfigFileToolStripMenuItem1.Name = "serviceConfigFileToolStripMenuItem1";
+            this.serviceConfigFileToolStripMenuItem1.Size = new System.Drawing.Size(187, 22);
+            this.serviceConfigFileToolStripMenuItem1.Text = "Service config file";
+            this.serviceConfigFileToolStripMenuItem1.Click += new System.EventHandler(this.serviceConfigFileToolStripMenuItem1_Click);
             // 
             // MainWindow
             // 
@@ -556,6 +652,17 @@
         private System.Windows.Forms.ToolStripMenuItem startCmdMenuItem;
         private System.Windows.Forms.ToolStripMenuItem servicePropMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editCoreServicePropertiesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem importToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem serverConfigFileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem serverPackageFileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem serviceConfigFileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exportToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem serviceConfigFileToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem serverExporterToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem asConfigOnlyToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem importableBackupToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem importableBackupWithPacksToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fullServerPackageToolStripMenuItem;
     }
 }
 
