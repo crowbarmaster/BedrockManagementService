@@ -3,6 +3,7 @@ using BedrockService.Client.Management;
 using BedrockService.Shared.Classes;
 using BedrockService.Shared.Interfaces;
 using BedrockService.Shared.PackParser;
+using BedrockService.Shared.SerializeModels;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -200,9 +201,10 @@ namespace BedrockService.Client.Networking {
                                 break;
                             case NetworkMessageTypes.ExportFile:
 
-                                stripHeaderFromBuffer = new byte[buffer.Length - 5];
-                                Buffer.BlockCopy(buffer, 5, stripHeaderFromBuffer, 0, stripHeaderFromBuffer.Length);
-                                FormManager.MainWindow.RecieveExportData(stripHeaderFromBuffer);
+                                ExportFileModel exportModel =  JsonConvert.DeserializeObject<ExportFileModel>(data, settings);
+                                if (exportModel != null) {
+                                    FormManager.MainWindow.Invoke(() => FormManager.MainWindow.RecieveExportData(exportModel));
+                                }
 
                                 break;
                         }

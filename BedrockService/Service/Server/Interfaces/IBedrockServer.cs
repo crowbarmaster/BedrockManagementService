@@ -1,4 +1,6 @@
-﻿namespace BedrockService.Service.Server.Interfaces {
+﻿using BedrockService.Shared.SerializeModels;
+
+namespace BedrockService.Service.Server.Interfaces {
     public interface IBedrockServer {
         void Initialize();
         void StartWatchdog();

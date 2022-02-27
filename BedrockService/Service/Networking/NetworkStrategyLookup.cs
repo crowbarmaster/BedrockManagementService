@@ -32,7 +32,7 @@ namespace BedrockService.Service.Networking {
                 {NetworkMessageTypes.PlayersUpdate, new PlayersUpdate(configurator, serviceConfiguration, service) },
                 {NetworkMessageTypes.LevelEditRequest, new LevelEditRequest(serviceConfiguration) },
                 {NetworkMessageTypes.LevelEditFile, new LevelEditFile(serviceConfiguration, service, logger) },
-                {NetworkMessageTypes.ExportFile, new ExportFileRequest(serviceConfiguration) }
+                {NetworkMessageTypes.ExportFile, new ExportFileRequest(configurator, processInfo, serviceConfiguration) }
             };
             _flaggedMessageLookup = new Dictionary<NetworkMessageTypes, IFlaggedMessageParser>()
             {

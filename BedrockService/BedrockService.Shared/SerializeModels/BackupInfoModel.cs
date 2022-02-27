@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BedrockService.Shared.Classes {
+namespace BedrockService.Shared.SerializeModels {
     public class BackupInfoModel {
         public DateTime Timestamp { get; set; }
         public string Filename { get; set; }

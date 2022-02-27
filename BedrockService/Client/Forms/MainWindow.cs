@@ -1,6 +1,7 @@
 ﻿using BedrockService.Client.Management;
 using BedrockService.Shared.Classes;
 using BedrockService.Shared.Interfaces;
+using BedrockService.Shared.SerializeModels;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -152,11 +153,35 @@ namespace BedrockService.Client.Forms {
             });
         }
 
-        public void RecieveExportData(byte[] data) {
-            if (data == null || _backupManager == null) {
+        public void RecieveExportData(ExportFileModel file) {
+            if (file == null) {
                 return;
             }
-            _backupManager.RecieveExportData(data);
+            if (file.FileType == FileTypeFlags.Backup && _backupManager != null) {
+                _backupManager.RecieveExportData(file.Data);
+            }
+            if (file.FileType == FileTypeFlags.ServerPackage) {
+                SaveFileDialog saveFileDialog = new SaveFileDialog {
+                    Filter = "Zip file|*.zip",
+                    FileName = $"{file.FileType}-{selectedServer.GetServerName()}-{DateTime.Now:yyyyMMdd_hhmmssff}.zip",
+                    RestoreDirectory = true,
+                    Title = "Save exported file..."
+                };
+                if (saveFileDialog.ShowDialog() == DialogResult.OK) {
+                    File.WriteAllBytes(saveFileDialog.FileName, file.Data);
+                }
+            }
+            if (file.FileType == FileTypeFlags.ServicePackage) {
+                SaveFileDialog saveFileDialog = new SaveFileDialog {
+                    Filter = "Zip file|*.zip",
+                    FileName = $"BMS_{file.FileType}-{DateTime.Now:yyyyMMdd_hhmmssff}.zip",
+                    RestoreDirectory = true,
+                    Title = "Save exported file..."
+                };
+                if (saveFileDialog.ShowDialog() == DialogResult.OK) {
+                    File.WriteAllBytes(saveFileDialog.FileName, file.Data);
+                }
+            }
         }
 
         public override void Refresh() {
@@ -197,15 +222,15 @@ namespace BedrockService.Client.Forms {
                     _logManager.DisplayTimestamps = ConfigManager.DisplayTimestamps;
                 }
                 try {
-                        Invoke(() => {
-                            if (FormManager.ClientLogContainer.GetLog().Count != clientLogBox.TextLength) {
-                                if (ConfigManager.DisplayTimestamps) {
-                                    UpdateServerLogBox(clientLogBox, string.Join("\r\n", FormManager.ClientLogContainer.GetLog().Select(x => $"[{x.TimeStamp:G}] {x.Text}").ToList()));
-                                } else {
-                                    UpdateServerLogBox(clientLogBox, string.Join("\r\n", FormManager.ClientLogContainer.GetLog().Select(x => x.Text).ToList()));
-                                }
+                    Invoke(() => {
+                        if (FormManager.ClientLogContainer.GetLog().Count != clientLogBox.TextLength) {
+                            if (ConfigManager.DisplayTimestamps) {
+                                UpdateServerLogBox(clientLogBox, string.Join("\r\n", FormManager.ClientLogContainer.GetLog().Select(x => $"[{x.TimeStamp:G}] {x.Text}").ToList()));
+                            } else {
+                                UpdateServerLogBox(clientLogBox, string.Join("\r\n", FormManager.ClientLogContainer.GetLog().Select(x => x.Text).ToList()));
                             }
-                        });
+                        }
+                    });
                 } catch (Exception ex) {
                     ClientLogger.AppendLine($"Error! {ex.Message} {ex.StackTrace}");
                 }
@@ -378,7 +403,7 @@ namespace BedrockService.Client.Forms {
             DisableUI();
         }
 
-        public int GetScrollPosition (TextBox targetBox) {
+        public int GetScrollPosition(TextBox targetBox) {
             ScrollInfo si = new ScrollInfo();
             si.Size = (uint)Marshal.SizeOf(si);
             si.Mask = (uint)ScrollInfoMask.All;
@@ -386,7 +411,7 @@ namespace BedrockService.Client.Forms {
             return si.Pos;
         }
 
-        public void SetScrollPosition (TextBox targetBox, int pos) {
+        public void SetScrollPosition(TextBox targetBox, int pos) {
             ScrollInfo si = new ScrollInfo();
             si.Size = (uint)Marshal.SizeOf(si);
             si.Mask = (uint)ScrollInfoMask.All;
@@ -406,7 +431,7 @@ namespace BedrockService.Client.Forms {
 
             // Set the scroll position to maximum.
             si.Pos = si.Max - (int)si.Page;
-            if(si.Pos > 0) {
+            if (si.Pos > 0) {
                 SetScrollInfo(targetBox.Handle, (int)ScrollBarDirection.Vertical, ref si, true);
                 SendMessage(targetBox.Handle, VerticalScroll, new IntPtr(Thumbtrack + 0x20000 * si.Pos), new IntPtr(0));
             }
@@ -559,7 +584,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void startStopBtn_Click(object sender, EventArgs e) {
-            if(!IsPrimaryServer()) {
+            if (!IsPrimaryServer()) {
                 DisableUI();
                 FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.StartStop);
             } else {
@@ -636,6 +661,51 @@ namespace BedrockService.Client.Forms {
                 }
             }
             ServerBusy = false;
+        }
+
+        private void asConfigOnlyToolStripMenuItem_Click(object sender, EventArgs e) {
+            ExportFileModel model = new() {
+                FileType = FileTypeFlags.ServerPackage,
+                PackageFlags = PackageFlags.ConfigFile
+            };
+            byte[] serializedBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(model));
+            FormManager.TCPClient.SendData(serializedBytes, FormManager.MainWindow.connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.ExportFile);
+        }
+
+        private void importableBackupToolStripMenuItem_Click(object sender, EventArgs e) {
+            ExportFileModel model = new() {
+                FileType = FileTypeFlags.ServerPackage,
+                PackageFlags = PackageFlags.LastBackup
+            };
+            byte[] serializedBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(model));
+            FormManager.TCPClient.SendData(serializedBytes, FormManager.MainWindow.connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.ExportFile);
+        }
+
+        private void importableBackupWithPacksToolStripMenuItem_Click(object sender, EventArgs e) {
+            ExportFileModel model = new() {
+                FileType = FileTypeFlags.ServerPackage,
+                PackageFlags = PackageFlags.WorldPacks
+            };
+            byte[] serializedBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(model));
+            FormManager.TCPClient.SendData(serializedBytes, FormManager.MainWindow.connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.ExportFile);
+        }
+
+        private void fullServerPackageToolStripMenuItem_Click(object sender, EventArgs e) {
+            ExportFileModel model = new() {
+                FileType = FileTypeFlags.ServerPackage,
+                PackageFlags = PackageFlags.Full
+            };
+            byte[] serializedBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(model));
+            FormManager.TCPClient.SendData(serializedBytes, FormManager.MainWindow.connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.ExportFile);
+        }
+
+        private void serviceConfigFileToolStripMenuItem1_Click(object sender, EventArgs e) {
+            ExportFileModel model = new() {
+                FileType = FileTypeFlags.ServicePackage,
+                PackageFlags = PackageFlags.ConfigFile
+            };
+            byte[] serializedBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(model));
+            FormManager.TCPClient.SendData(serializedBytes, FormManager.MainWindow.connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.ExportFile);
         }
     }
 }

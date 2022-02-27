@@ -1,4 +1,5 @@
 ﻿using BedrockService.Shared.Classes;
+using BedrockService.Shared.SerializeModels;
 using System.Collections.Generic;
 
 namespace BedrockService.Shared.Interfaces {
