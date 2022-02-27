@@ -64,6 +64,48 @@ namespace BedrockService.Shared.Utilities {
             });
         }
 
+
+        public void AppendServerPacksToArchive(string serverPath, ZipArchive backupZip, DirectoryInfo levelDirInfo) {
+            string levelName = levelDirInfo.Name;
+            CreatePackBackupFiles(serverPath, levelName, backupZip);
+            if (Directory.Exists(levelDirInfo.FullName + "\\resource_packs")) {
+                ClearTempDir().Wait();
+                ZipFile.CreateFromDirectory(levelDirInfo.FullName + "\\resource_packs", $@"{Path.GetTempPath()}\BMSTemp\resource_packs.zip");
+                backupZip.CreateEntryFromFile($@"{Path.GetTempPath()}\BMSTemp\resource_packs.zip", "resource_packs.zip");
+            }
+            if (Directory.Exists(levelDirInfo.FullName + "\\behavior_packs")) {
+                ClearTempDir().Wait();
+                ZipFile.CreateFromDirectory(levelDirInfo.FullName + "\\behavior_packs", $@"{Path.GetTempPath()}\BMSTemp\behavior_packs.zip");
+                backupZip.CreateEntryFromFile($@"{Path.GetTempPath()}\BMSTemp\behavior_packs.zip", "behavior_packs.zip");
+            }
+        }
+
+        public void CreatePackBackupFiles(string serverPath, string levelName, ZipArchive destinationArchive) {
+            string resouceFolderPath = $@"{serverPath}\resource_packs";
+            string behaviorFolderPath = $@"{serverPath}\behavior_packs";
+            string behaviorFilePath = $@"{serverPath}\worlds\{levelName}\world_behavior_packs.json";
+            string resoruceFilePath = $@"{serverPath}\worlds\{levelName}\world_resource_packs.json";
+            MinecraftPackParser packParser = new(_processInfo);
+            packParser.ParseDirectory(resouceFolderPath);
+            packParser.ParseDirectory(behaviorFolderPath);
+            WorldPackFileModel worldPacks = new(resoruceFilePath);
+            worldPacks.Contents.AddRange(new WorldPackFileModel(behaviorFilePath).Contents);
+            ClearTempDir().Wait();
+            string packBackupFolderPath = $@"{Path.GetTempPath()}\BMSTemp\InstalledPacks";
+            Directory.CreateDirectory(packBackupFolderPath);
+            if (worldPacks.Contents.Count > 0) {
+                foreach (WorldPackEntryJsonModel model in worldPacks.Contents) {
+                    MinecraftPackContainer container = packParser.FoundPacks.FirstOrDefault(x => x.JsonManifest.header.uuid == model.pack_id);
+                    if (container == null) {
+                        continue;
+                    }
+                    string packLocation = container.PackContentLocation;
+                    ZipFile.CreateFromDirectory(packLocation, $@"{packBackupFolderPath}\{packLocation[packLocation.LastIndexOf('\\')..]}.zip");
+                    destinationArchive.CreateEntryFromFile($@"{packBackupFolderPath}\{packLocation[packLocation.LastIndexOf('\\')..]}.zip", $@"InstalledPacks/{packLocation[packLocation.LastIndexOf('\\')..]}.zip");
+                }
+            }
+        }
+
         public void DeleteFilesFromDirectory(string source, bool removeSourceFolder) => DeleteFilesFromDirectory(new DirectoryInfo(source), removeSourceFolder);
 
         public Task ClearTempDir() {
