@@ -1,5 +1,6 @@
 ﻿using BedrockService.Shared.Classes;
 using BedrockService.Shared.Interfaces;
+using BedrockService.Shared.SerializeModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;

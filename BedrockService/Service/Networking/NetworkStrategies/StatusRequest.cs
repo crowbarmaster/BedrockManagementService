@@ -1,4 +1,5 @@
 ﻿using BedrockService.Service.Networking.Interfaces;
+using BedrockService.Shared.SerializeModels;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

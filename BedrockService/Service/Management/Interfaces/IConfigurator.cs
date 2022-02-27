@@ -1,4 +1,6 @@
-﻿namespace BedrockService.Service.Management.Interfaces {
+﻿using BedrockService.Shared.SerializeModels;
+
+namespace BedrockService.Service.Management.Interfaces {
     public interface IConfigurator {
         Task LoadGlobals();
         Task LoadServerConfigurations();

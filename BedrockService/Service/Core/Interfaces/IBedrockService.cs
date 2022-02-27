@@ -1,4 +1,5 @@
 ﻿using BedrockService.Service.Server.Interfaces;
+using BedrockService.Shared.SerializeModels;
 
 namespace BedrockService.Service.Core.Interfaces {
     public interface IBedrockService : ServiceControl {
