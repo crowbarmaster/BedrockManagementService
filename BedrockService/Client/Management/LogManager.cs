@@ -82,7 +82,7 @@ namespace BedrockService.Client.Management {
                                     }
                                 }
                                 statusMsg += "\r\n  --------------------------------";
-                                statusMsg += $"\r\nTotal service-wide bakups: {FormManager.MainWindow.ServiceStatus.TotalBackups}\r\nTotal backup size: {FormManager.MainWindow.ServiceStatus.TotalBackupSize / 1000} MB\r\nService started: {FormManager.MainWindow.ServiceStatus.ServiceUptime:g}";
+                                statusMsg += $"\r\nTotal service-wide backups: {FormManager.MainWindow.ServiceStatus.TotalBackups}\r\nTotal backup size: {FormManager.MainWindow.ServiceStatus.TotalBackupSize / 1000} MB\r\nService started: {FormManager.MainWindow.ServiceStatus.ServiceUptime:g}";
                             }
                             UpdateLogBoxInvoked(FormManager.MainWindow.ServerInfoBox, statusMsg);
                         });
