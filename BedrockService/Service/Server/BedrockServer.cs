@@ -133,10 +133,14 @@ namespace BedrockService.Service.Server {
         }
 
         private void InitializeBackupTimer() {
-            _backupCron = CrontabSchedule.TryParse(_serverConfiguration.GetSettingsProp("BackupCron").ToString());
+             _backupCron = CrontabSchedule.TryParse(_serverConfiguration.GetSettingsProp("BackupCron").ToString());
             if (_serverConfiguration.GetSettingsProp("BackupEnabled").GetBoolValue() && _backupCron != null) {
                 double interval = (_backupCron.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds;
                 if (interval >= 0) {
+                    if (_backupTimer != null) {
+                        _backupTimer.Stop();
+                        _backupTimer = null;
+                    }                    
                     _backupTimer = new System.Timers.Timer(interval);
                     _logger.AppendLine($"Automatic backups for server {GetServerName()} enabled, next backup at: {_backupCron.GetNextOccurrence(DateTime.Now):G}.");
                     _backupTimer.Elapsed += BackupTimer_Elapsed;
@@ -336,6 +340,12 @@ namespace BedrockService.Service.Server {
                         string deployedVersion = _serverConfiguration.GetSettingsProp("SelectedServerVersion").StringValue == "Latest"
                         ? _serviceConfiguration.GetLatestBDSVersion()
                         : _serverConfiguration.GetSettingsProp("SelectedServerVersion").StringValue;
+                        if (versionString.ToLower().Contains("-beta")) {
+                        int betaTagLoc = versionString.ToLower().IndexOf("-beta");
+                        int betaVer = int.Parse(versionString.Substring(betaTagLoc + 5, versionString.Length - (betaTagLoc + 5)));
+                            versionString = versionString.Substring(0, betaTagLoc) + ".";
+                            versionString = versionString + betaVer;
+                        }
                         if (deployedVersion != versionString) {
                             if (_serverConfiguration.GetSettingsProp("AutoDeployUpdates").GetBoolValue()) {
                                 _logger.AppendLine($"Server {GetServerName()} decected incorrect or out of date version! Replacing build...");
