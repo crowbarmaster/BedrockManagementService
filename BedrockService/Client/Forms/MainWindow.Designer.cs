@@ -60,7 +60,6 @@
             this.servicePropMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editCoreServicePropertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.serverConfigFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.serverPackageFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.serviceConfigFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -455,7 +454,7 @@
             this.importToolStripMenuItem,
             this.exportToolStripMenuItem});
             this.serverConfigBtnMenu.Name = "serverConfigBtnMenu";
-            this.serverConfigBtnMenu.Size = new System.Drawing.Size(223, 136);
+            this.serverConfigBtnMenu.Size = new System.Drawing.Size(223, 158);
             // 
             // serverPropMenuItem
             // 
@@ -488,30 +487,25 @@
             // importToolStripMenuItem
             // 
             this.importToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.serverConfigFileToolStripMenuItem,
             this.serverPackageFileToolStripMenuItem,
             this.serviceConfigFileToolStripMenuItem});
             this.importToolStripMenuItem.Name = "importToolStripMenuItem";
             this.importToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
             this.importToolStripMenuItem.Text = "Import...";
             // 
-            // serverConfigFileToolStripMenuItem
-            // 
-            this.serverConfigFileToolStripMenuItem.Name = "serverConfigFileToolStripMenuItem";
-            this.serverConfigFileToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
-            this.serverConfigFileToolStripMenuItem.Text = "Server config file";
-            // 
             // serverPackageFileToolStripMenuItem
             // 
             this.serverPackageFileToolStripMenuItem.Name = "serverPackageFileToolStripMenuItem";
-            this.serverPackageFileToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
+            this.serverPackageFileToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.serverPackageFileToolStripMenuItem.Text = "Server package file";
+            this.serverPackageFileToolStripMenuItem.Click += new System.EventHandler(this.serverPackageFileToolStripMenuItem_Click);
             // 
             // serviceConfigFileToolStripMenuItem
             // 
             this.serviceConfigFileToolStripMenuItem.Name = "serviceConfigFileToolStripMenuItem";
-            this.serviceConfigFileToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
+            this.serviceConfigFileToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.serviceConfigFileToolStripMenuItem.Text = "Service config file";
+            this.serviceConfigFileToolStripMenuItem.Click += new System.EventHandler(this.serviceConfigFileToolStripMenuItem_Click);
             // 
             // exportToolStripMenuItem
             // 
@@ -653,7 +647,6 @@
         private System.Windows.Forms.ToolStripMenuItem servicePropMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editCoreServicePropertiesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem serverConfigFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem serverPackageFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem serviceConfigFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportToolStripMenuItem;

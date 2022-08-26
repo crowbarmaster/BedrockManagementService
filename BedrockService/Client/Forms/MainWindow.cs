@@ -141,6 +141,7 @@ namespace BedrockService.Client.Forms {
         [STAThread]
         public static void Main() {
             Application.EnableVisualStyles();
+            Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
             Application.SetCompatibleTextRenderingDefault(false);
             Application.ApplicationExit += OnExit;
             Application.Run(FormManager.MainWindow);
@@ -153,7 +154,7 @@ namespace BedrockService.Client.Forms {
             });
         }
 
-        public void RecieveExportData(ExportFileModel file) {
+        public void RecieveExportData(ExportImportFileModel file) {
             if (file == null) {
                 return;
             }
@@ -664,7 +665,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void asConfigOnlyToolStripMenuItem_Click(object sender, EventArgs e) {
-            ExportFileModel model = new() {
+            ExportImportFileModel model = new() {
                 FileType = FileTypeFlags.ServerPackage,
                 PackageFlags = PackageFlags.ConfigFile
             };
@@ -673,7 +674,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void importableBackupToolStripMenuItem_Click(object sender, EventArgs e) {
-            ExportFileModel model = new() {
+            ExportImportFileModel model = new() {
                 FileType = FileTypeFlags.ServerPackage,
                 PackageFlags = PackageFlags.LastBackup
             };
@@ -682,7 +683,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void importableBackupWithPacksToolStripMenuItem_Click(object sender, EventArgs e) {
-            ExportFileModel model = new() {
+            ExportImportFileModel model = new() {
                 FileType = FileTypeFlags.ServerPackage,
                 PackageFlags = PackageFlags.WorldPacks
             };
@@ -691,7 +692,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void fullServerPackageToolStripMenuItem_Click(object sender, EventArgs e) {
-            ExportFileModel model = new() {
+            ExportImportFileModel model = new() {
                 FileType = FileTypeFlags.ServerPackage,
                 PackageFlags = PackageFlags.Full
             };
@@ -700,12 +701,48 @@ namespace BedrockService.Client.Forms {
         }
 
         private void serviceConfigFileToolStripMenuItem1_Click(object sender, EventArgs e) {
-            ExportFileModel model = new() {
+            ExportImportFileModel model = new() {
                 FileType = FileTypeFlags.ServicePackage,
                 PackageFlags = PackageFlags.ConfigFile
             };
             byte[] serializedBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(model));
             FormManager.TCPClient.SendData(serializedBytes, FormManager.MainWindow.connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.ExportFile);
+        }
+
+        private void serverPackageFileToolStripMenuItem_Click(object sender, EventArgs e) {
+            byte[] fileBytes = OpenPackageFile();
+            if (fileBytes != null) {
+                ExportImportFileModel fileModel = new ExportImportFileModel {
+                    Data = fileBytes,
+                    FileType = FileTypeFlags.ServerPackage
+                };
+                byte[] serializedBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(fileModel));
+                FormManager.TCPClient.SendData(serializedBytes, 0xFF, NetworkMessageTypes.ImportFile);
+            }
+        }
+
+        private void serviceConfigFileToolStripMenuItem_Click(object sender, EventArgs e) {
+
+        }
+
+        private byte[] OpenPackageFile () {
+            OpenFileDialog ofd = new OpenFileDialog {
+                Filter = "Zip file|*.zip",
+                Multiselect = false,
+                RestoreDirectory = true,
+                Title = "Open package file..."
+            };
+            byte[] fileBytes = null;
+            if (ofd.ShowDialog() == DialogResult.OK) {
+                if (ofd.FileName == string.Empty) {
+                    return null;
+                }
+                fileBytes = File.ReadAllBytes(ofd.FileName);
+                if(fileBytes.Length < 3 && fileBytes[0] != 0x50 && fileBytes[1] != 0x4B) {
+                    return null;
+                }
+            }
+            return fileBytes;
         }
     }
 }

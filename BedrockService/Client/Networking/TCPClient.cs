@@ -201,7 +201,7 @@ namespace BedrockService.Client.Networking {
                                 break;
                             case NetworkMessageTypes.ExportFile:
 
-                                ExportFileModel exportModel =  JsonConvert.DeserializeObject<ExportFileModel>(data, settings);
+                                ExportImportFileModel exportModel =  JsonConvert.DeserializeObject<ExportImportFileModel>(data, settings);
                                 if (exportModel != null) {
                                     FormManager.MainWindow.Invoke(() => FormManager.MainWindow.RecieveExportData(exportModel));
                                 }
