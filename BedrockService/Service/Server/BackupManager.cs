@@ -81,16 +81,21 @@ namespace BedrockService.Service.Server {
             if (!backupDir.Exists) {
                 backupDir.Create();
             }
-            int dirCount = backupDir.GetDirectories().Length;
+            int fileCount = backupDir.GetFiles().Length;
             try {
-                if (dirCount >= _serverConfiguration.GetSettingsProp("MaxBackupCount").GetIntValue()) {
+                if (fileCount >= _serverConfiguration.GetSettingsProp("MaxBackupCount").GetIntValue()) {
                     List<string> dates = new List<string>();
-                    foreach (DirectoryInfo dir in backupDir.GetDirectories()) {
-                        string[] folderNameSplit = dir.Name.Split('-');
-                        dates.Add(folderNameSplit[1]);
+                    foreach (FileInfo file in backupDir.GetFiles()) {
+                        string[] fileNameSplit = file.Name.Split('-');
+                        dates.Add(fileNameSplit[1]);
                     }
                     dates.Sort();
-                    Directory.Delete($@"{backupDir}\Backup-{dates.First()}", true);
+                    while (fileCount >= _serverConfiguration.GetSettingsProp("MaxBackupCount").GetIntValue()) {
+                        File.Delete($@"{backupDir}\Backup-{dates.First()}");
+                        _logger.AppendLine($"Removed Backup-{dates.First()}");
+                        dates.Remove(dates.First());
+                        fileCount--;
+                    }
                 }
             } catch (Exception e) {
                 if (e.GetType() == typeof(FormatException)) {
@@ -107,6 +112,9 @@ namespace BedrockService.Service.Server {
                         int fileSize = file.Value;
                         string filePath = $@"{worldPath}\{fileName}";
                         byte[]? fileData = null;
+                        if (!File.Exists(filePath)) {
+                            File.Create(filePath).Close();
+                        }
                         using (FileStream fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                         using (MemoryStream ms = new MemoryStream()) {
                             fs.CopyTo(ms);

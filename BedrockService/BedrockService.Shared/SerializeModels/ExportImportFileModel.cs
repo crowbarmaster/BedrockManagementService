@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace BedrockService.Shared.SerializeModels {
-    public class ExportFileModel {
+    public class ExportImportFileModel {
         public FileTypeFlags FileType;
         public string Filename;
         public byte[] Data;

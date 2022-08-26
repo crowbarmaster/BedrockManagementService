@@ -149,6 +149,8 @@ namespace BedrockService.Service.Core {
                     foreach (IBedrockServer brs in _bedrockServers) {
                         brs.AwaitableServerStop(true).Wait();
                     }
+                    GC.Collect();
+                    Task.Delay(1000).Wait();
                     Start(null);
                 } catch (Exception e) {
                     _logger.AppendLine($"Error Stopping BedrockServiceWrapper {e.Message} StackTrace: {e.StackTrace}");

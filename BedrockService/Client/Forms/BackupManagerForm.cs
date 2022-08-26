@@ -71,7 +71,7 @@ namespace BedrockService.Client.Forms {
             saveFileDialog.FileName = backupSelectBox.SelectedItem.ToString();
             saveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             if (saveFileDialog.ShowDialog() == DialogResult.OK) {
-                ExportFileModel exportModel = new ExportFileModel();
+                ExportImportFileModel exportModel = new ExportImportFileModel();
                 exportModel.Filename = selectedBackup.Filename;
                 exportModel.FileType = FileTypeFlags.Backup;
                 byte[] dataBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(exportModel));

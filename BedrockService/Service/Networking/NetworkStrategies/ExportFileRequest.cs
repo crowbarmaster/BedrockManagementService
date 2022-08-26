@@ -22,7 +22,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
             string jsonString = Encoding.UTF8.GetString(data, 5, data.Length - 5);
-            ExportFileModel exportFileInfo = JsonConvert.DeserializeObject<ExportFileModel>(jsonString);
+            ExportImportFileModel exportFileInfo = JsonConvert.DeserializeObject<ExportImportFileModel>(jsonString);
             using MemoryStream ms = new();
             using ZipArchive packageFile = new(ms, ZipArchiveMode.Create);
             byte[]? exportData = null;
@@ -48,7 +48,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
         }
 
 
-        private void PrepareServerFiles(byte serverIndex, ExportFileModel exportFileInfo, IServerConfiguration server, ZipArchive packageFile) {
+        private void PrepareServerFiles(byte serverIndex, ExportImportFileModel exportFileInfo, IServerConfiguration server, ZipArchive packageFile) {
             if (exportFileInfo.PackageFlags >= PackageFlags.ConfigFile) {
                 packageFile.CreateEntryFromFile($"{_processInfo.GetDirectory()}\\BMSConfig\\ServerConfigs\\{server.GetSettingsProp("FileName")}", server.GetSettingsProp("FileName").ToString());
             }
