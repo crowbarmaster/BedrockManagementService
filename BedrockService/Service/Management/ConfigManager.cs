@@ -122,6 +122,7 @@ namespace BedrockService.Service.Management {
                     }
                     _logger.AppendLine($"Extraction of files for {server.GetServerName()} completed.");
                     server.GetSettingsProp("DeployedVersion").SetValue(buildVersion);
+                    SaveServerConfiguration(server);
                 } catch (InvalidDataException e) {
                     throw new FileNotFoundException($"Build file \"Update_{buildVersion}.zip\" found corrupt. Service cannot proceed!!");
                 }
