@@ -119,8 +119,7 @@ namespace BedrockService.Shared.Classes {
             } catch (HttpRequestException) {
                 _logger.AppendLine($"Error! could not fetch current webpage content!");
             } catch (TaskCanceledException) {
-                Thread.Sleep(200);
-                return await FetchHTTPContent(client);
+                return null;
             } catch (Exception e) {
                 _logger.AppendLine($"Updater resulted in error: {e.Message}\n{e.InnerException}\n{e.StackTrace}");
             }
