@@ -79,7 +79,9 @@ namespace BedrockService.Shared.PackParser {
                             File.Exists($@"{file.Directory.FullName}\pack_icon.png") ?
                             File.ReadAllBytes($@"{file.Directory.FullName}\pack_icon.png") :
                             null;
-
+                        if (File.ReadAllText(file.FullName).Contains("-beta")) {
+                            break;
+                        }
                         MinecraftPackContainer container = new() {
                             JsonManifest = new(),
                             PackContentLocation = file.Directory.FullName,
