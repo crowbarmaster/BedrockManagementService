@@ -290,7 +290,7 @@ namespace BedrockService.Service.Server {
                 _serverLogger.AppendLine(dataMsg);
                 if (e.Data != null) {
 
-                    if (dataMsg.Contains(_startupMessage)) {
+                    if (dataMsg.Contains(_startupMessage) || dataMsg.Contains("[Server] Done")) {
                         _currentServerStatus = ServerStatus.Started;
                         Task.Delay(3000).Wait();
 
@@ -346,7 +346,7 @@ namespace BedrockService.Service.Server {
                             versionString = versionString.Substring(0, betaTagLoc) + ".";
                             versionString = versionString + betaVer;
                         }
-                        if (deployedVersion != versionString) {
+                        if (deployedVersion != versionString && !versionString.Contains("LiteLoader")) {
                             if (_serverConfiguration.GetSettingsProp("AutoDeployUpdates").GetBoolValue()) {
                                 _logger.AppendLine($"Server {GetServerName()} decected incorrect or out of date version! Replacing build...");
                                 AwaitableServerStop(false).Wait();
@@ -362,6 +362,9 @@ namespace BedrockService.Service.Server {
                         WriteToStandardIn("save query");
                     }
                     if (dataMsg.Contains($@"{_serverConfiguration.GetProp("level-name")}/db/")) {
+                        if (dataMsg.Contains("[Server]")) {
+                            dataMsg = dataMsg.Substring(dataMsg.IndexOf(']') + 2);
+                        }
                         _logger.AppendLine("Save data string detected! Performing backup now!");
                         if (_backupManager.PerformBackup(dataMsg)) {
                             _logger.AppendLine($"Backup for server {_serverConfiguration.GetServerName()} Completed.");

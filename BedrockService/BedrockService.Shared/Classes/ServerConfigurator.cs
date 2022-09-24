@@ -108,6 +108,9 @@ namespace BedrockService.Shared.Classes {
         }
 
         public bool ValidateVersion(string version, bool skipNullCheck = false) {
+            if (version.Contains("(ProtocolVersion")) {
+                version = version.Substring(0, version.IndexOf('('));
+            }
             if (_processInfo.DeclaredType() != "Client" || (GetSettingsProp("DeployedVersion").StringValue != "None" && !skipNullCheck)) {
                 if (!File.Exists($@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\CoreFiles\Build_{version}\stock_packs.json") || !File.Exists($@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\CoreFiles\Build_{version}\stock_props.conf")) {
                     _logger.AppendLine("Core file(s) found missing. Rebuilding!");
