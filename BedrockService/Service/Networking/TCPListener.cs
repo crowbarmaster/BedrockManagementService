@@ -66,7 +66,11 @@ namespace BedrockService.Service.Networking {
                                 }
                             }
                             if (!_canClientConnect) {
-                                _inListener.AcceptTcpClientAsync(_cancelTokenSource.Token).Result.Close();
+                                try {
+                                    _inListener.AcceptTcpClientAsync(_cancelTokenSource.Token).Result.Close();
+                                } catch (OperationCanceledException) {
+                                    _logger.AppendLine("Client connected before ready - rejected.");
+                                }
                             }
                         }
                         if (_cancelTokenSource.IsCancellationRequested) {
