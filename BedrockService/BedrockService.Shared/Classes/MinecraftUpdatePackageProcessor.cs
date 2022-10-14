@@ -68,7 +68,7 @@ namespace BedrockService.Shared.Classes {
                                 File.Delete(fixedPath);
                             }
                             FileInfo fileInfo = new FileInfo(fixedPath);
-                            if(fileInfo.Extension == ".json" || fileInfo.Extension == ".properties") {
+                            if(fileInfo.Extension == ".properties") {
                                 archive.Entries[i].ExtractToFile(fixedPath);
                             }
                         } else {
@@ -90,27 +90,8 @@ namespace BedrockService.Shared.Classes {
         private void CreateFiles() {
             if (_loggingEnabled) _logger.AppendLine($"Now building necessary files");
             Directory.CreateDirectory(_fileTargetDirectory);
-            string resouceFolder = $@"{_workingDirectory}\resource_packs";
-            string behaviorFolder = $@"{_workingDirectory}\behavior_packs";
             string propFile = $@"{_workingDirectory}\server.properties";
-            MinecraftPackParser packParser = new(_processInfo);
-            packParser.ParseDirectory(resouceFolder);
-            packParser.ParseDirectory(behaviorFolder);
-            KnownPacksFileModel fileModel = new();
-            fileModel.FilePath = $@"{_fileTargetDirectory}\stock_packs.json";
-            foreach (MinecraftPackContainer pack in packParser.FoundPacks) {
-                string fixedPath = pack.PackContentLocation
-                        .Replace(_workingDirectory + '\\', "")
-                        .Replace('\\', '/');
-                KnownPacksJsonModel jsonModel = new() {
-                    file_system = "RawPath",
-                    path = fixedPath,
-                    uuid = pack.JsonManifest.header.uuid,
-                    version = string.Join(".", pack.JsonManifest.header.version)
-                };
-                fileModel.Contents.Add(jsonModel);
-            }
-            fileModel.SaveToFile();
+
             List<string> propFileContents = new(File.ReadAllLines(propFile));
             propFileContents = propFileContents
                 .Where(x => !x.StartsWith('#'))
