@@ -264,5 +264,9 @@ namespace BedrockService.Shared.Classes {
         public void SetStatus (ServerStatusModel status) => ServerStatus = status;
 
         public ServerStatusModel GetStatus() => ServerStatus;
+
+        public void SetLiteLoaderStatus(bool statusToSet) => LiteLoaderEnabled = statusToSet;
+
+        public bool GetLiteLoaderStatus() => LiteLoaderEnabled;
     }
 }

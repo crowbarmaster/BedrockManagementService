@@ -8,6 +8,7 @@ namespace BedrockService.Shared.Classes {
         public Property ServersPath { get; set; }
         public int TotalBackupSizeKilobytes { get; set; }
         public int TotalBackupsStored { get; set; }
+        public bool LiteLoaderEnabled { get; set; }
         public ServerStatusModel ServerStatus { get; set; } = new();
         public List<LogEntry> ConsoleBuffer = new List<LogEntry>();
         public List<IPlayer> PlayersList = new List<IPlayer>();

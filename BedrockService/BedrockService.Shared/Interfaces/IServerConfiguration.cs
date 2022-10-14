@@ -26,5 +26,7 @@ namespace BedrockService.Shared.Interfaces {
         List<Property> GetSettingsList();
         void SetAllSettings(List<Property> settingsList);
         bool ValidateVersion(string version, bool skipNullCheck = false);
+        void SetLiteLoaderStatus(bool statusToSet);
+        bool GetLiteLoaderStatus();
     }
 }

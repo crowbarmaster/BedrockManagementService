@@ -36,7 +36,8 @@ namespace BedrockService.Service.Server {
         private bool _AwaitingStopSignal = true;
         private bool _backupRunning = false;
         private bool _serverModifiedFlag = true;
-
+        private bool _LiteLoaderEnabledServer = false;
+     
         public BedrockServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, FileUtilities fileUtils) {
             _fileUtils = fileUtils;
             _serverConfiguration = serverConfiguration;
@@ -222,12 +223,12 @@ namespace BedrockService.Service.Server {
                     parser.FoundPacks.Clear();
                     parser.ParseDirectory($@"{Path.GetTempPath()}\BMSTemp\PackTemp");
                     if (parser.FoundPacks[0].ManifestType == "data") {
-                        string folderPath = $@"{server.GetSettingsProp("ServerPath")}\behavior_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
+                        string folderPath = $@"{server.GetSettingsProp("ServerPath")}\development_behavior_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
                         Task.Run(() => _fileUtils.DeleteFilesFromDirectory(folderPath, false)).Wait();
                         ZipFile.ExtractToDirectory(file.FullName, folderPath, true);
                     }
                     if (parser.FoundPacks[0].ManifestType == "resources") {
-                        string folderPath = $@"{server.GetSettingsProp("ServerPath")}\resource_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
+                        string folderPath = $@"{server.GetSettingsProp("ServerPath")}\development_resource_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
                         Task.Run(() => _fileUtils.DeleteFilesFromDirectory(folderPath, false)).Wait();
                         ZipFile.ExtractToDirectory(file.FullName, folderPath, true);
                     }
@@ -282,18 +283,19 @@ namespace BedrockService.Service.Server {
         }
 
         private void StdOutToLog(object sender, DataReceivedEventArgs e) {
-            if (e.Data != null && !e.Data.Contains("INFO] Running AutoCompaction...")) {
+            if (e.Data != null && !e.Data.Contains("Running AutoCompaction...")) {
                 string dataMsg = e.Data;
                 string logFileText = "NO LOG FILE! - ";
                 if (dataMsg.StartsWith(logFileText))
                     dataMsg = dataMsg.Substring(logFileText.Length, dataMsg.Length - logFileText.Length);
                 _serverLogger.AppendLine(dataMsg);
                 if (e.Data != null) {
-
+                    if (dataMsg.Contains("[PreLoader]")) {
+                        _serverConfiguration.SetLiteLoaderStatus(true);
+                    }
                     if (dataMsg.Contains(_startupMessage) || dataMsg.Contains("[Server] Done")) {
                         _currentServerStatus = ServerStatus.Started;
                         Task.Delay(3000).Wait();
-
                         if (_serverConfiguration.GetStartCommands().Count > 0) {
                             RunStartupCommands();
                         }
@@ -498,5 +500,7 @@ namespace BedrockService.Service.Server {
                 Thread.Sleep(1000);
             }
         }
+
+        public bool IsServerLLCapable() => _LiteLoaderEnabledServer;
     }
 }

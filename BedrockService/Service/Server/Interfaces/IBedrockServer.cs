@@ -17,6 +17,7 @@ namespace BedrockService.Service.Server.Interfaces {
         bool ServerAutostartEnabled();
         ServerStatusModel GetServerStatus();
         bool IsPrimaryServer();
+        bool IsServerLLCapable();
         void CheckUpdates();
     }
 }
