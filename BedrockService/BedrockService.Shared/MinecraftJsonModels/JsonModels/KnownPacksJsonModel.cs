@@ -17,7 +17,7 @@ namespace BedrockService.Shared.MinecraftJsonModels.JsonModels {
         public KnownPacksJsonModel(MinecraftPackContainer container) {
             file_system = "RawPath";
             from_disk = true;
-            path = $@"{container.GetFixedManifestType()}_packs/{container.FolderName}";
+            path = $@"development_{container.GetFixedManifestType()}_packs/{container.FolderName}";
             uuid = container.JsonManifest.header.uuid;
             version = string.Join(".", container.JsonManifest.header.version);
         }
