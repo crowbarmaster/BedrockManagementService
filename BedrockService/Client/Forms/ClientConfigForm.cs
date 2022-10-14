@@ -15,6 +15,7 @@ namespace BedrockService.Client.Forms {
             _clientConfigs = _configManager.HostConnectList;
             scrollLockCheckbox.Checked = _configManager.DefaultScrollLock;
             displayTimestampCheckbox.Checked = _configManager.DisplayTimestamps;
+            debugNetworkCheckbox.Checked = _configManager.DebugNetworkOutput;
             if (!string.IsNullOrEmpty(_configManager.NBTStudioPath)) {
                 nbtPathLabel.Text = $"NBT Studio path: {_configManager.NBTStudioPath}";
             }
@@ -49,6 +50,7 @@ namespace BedrockService.Client.Forms {
             _configManager.HostConnectList = newConfigs;
             _configManager.DefaultScrollLock = scrollLockCheckbox.Checked;
             _configManager.DisplayTimestamps = displayTimestampCheckbox.Checked;
+            _configManager.DebugNetworkOutput = debugNetworkCheckbox.Checked;
             _configManager.SaveConfigFile();
             DialogResult = DialogResult.OK;
             Close();

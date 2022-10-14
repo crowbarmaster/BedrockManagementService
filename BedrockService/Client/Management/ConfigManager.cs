@@ -12,6 +12,7 @@ namespace BedrockService.Client.Management {
         public string NBTStudioPath;
         public bool DefaultScrollLock = false;
         public bool DisplayTimestamps = false;
+        public bool DebugNetworkOutput = false;
         private readonly IBedrockLogger Logger;
 
         public ConfigManager(IBedrockLogger logger) {

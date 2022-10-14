@@ -38,6 +38,7 @@ namespace BedrockService.Client.Forms
             this.saveBtn = new System.Windows.Forms.Button();
             this.scrollLockCheckbox = new System.Windows.Forms.CheckBox();
             this.displayTimestampCheckbox = new System.Windows.Forms.CheckBox();
+            this.debugNetworkCheckbox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.serverGridView)).BeginInit();
             this.SuspendLayout();
             // 
@@ -137,11 +138,22 @@ namespace BedrockService.Client.Forms
             this.displayTimestampCheckbox.Text = "Display timestamps in logs";
             this.displayTimestampCheckbox.UseVisualStyleBackColor = true;
             // 
+            // debugNetworkCheckbox
+            // 
+            this.debugNetworkCheckbox.AutoSize = true;
+            this.debugNetworkCheckbox.Location = new System.Drawing.Point(444, 253);
+            this.debugNetworkCheckbox.Name = "debugNetworkCheckbox";
+            this.debugNetworkCheckbox.Size = new System.Drawing.Size(147, 19);
+            this.debugNetworkCheckbox.TabIndex = 6;
+            this.debugNetworkCheckbox.Text = "Network debug output";
+            this.debugNetworkCheckbox.UseVisualStyleBackColor = true;
+            // 
             // ClientConfigForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(804, 306);
+            this.Controls.Add(this.debugNetworkCheckbox);
             this.Controls.Add(this.displayTimestampCheckbox);
             this.Controls.Add(this.scrollLockCheckbox);
             this.Controls.Add(this.saveBtn);
@@ -170,5 +182,6 @@ namespace BedrockService.Client.Forms
         private System.Windows.Forms.Button saveBtn;
         private System.Windows.Forms.CheckBox scrollLockCheckbox;
         private System.Windows.Forms.CheckBox displayTimestampCheckbox;
+        private System.Windows.Forms.CheckBox debugNetworkCheckbox;
     }
 }
