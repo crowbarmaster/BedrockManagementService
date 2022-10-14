@@ -11,7 +11,6 @@ using System.Windows.Forms;
 namespace BedrockService.Client.Forms {
     public partial class PlayerManagerForm : Form {
         private readonly IServerConfiguration _server;
-        private readonly string[] RegisteredPlayerColumnArray = new string[8] { "XUID:", "Username:", "Permission:", "Whitelisted:", "Ignores max players:", "First connected on:", "Last connected on:", "Time spent in game:" };
         private List<IPlayer> playersFound = new List<IPlayer>();
         private readonly List<IPlayer> modifiedPlayers = new List<IPlayer>();
         private IPlayer playerToEdit;

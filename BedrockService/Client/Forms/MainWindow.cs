@@ -269,6 +269,15 @@ namespace BedrockService.Client.Forms {
                 ScrollToEnd(targetBox);
         }
 
+        public void RecievePlayerData(byte serverIndex, List<IPlayer> playerList) {
+            connectedHost.GetServerInfoByIndex(serverIndex).SetPlayerList(playerList);
+
+            PlayerManagerForm form = new PlayerManagerForm(selectedServer);
+            if (form.ShowDialog() != DialogResult.OK) {
+                ServerBusy = false;
+            }
+        }
+
         private static void OnExit(object sender, EventArgs e) {
             FormManager.TCPClient.Dispose();
         }
@@ -356,12 +365,6 @@ namespace BedrockService.Client.Forms {
         private void PlayerManager_Click(object sender, EventArgs e) {
             FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PlayersRequest);
             DisableUI();
-            WaitForServerData().Wait();
-            FormManager.TCPClient.PlayerInfoArrived = false;
-            PlayerManagerForm form = new PlayerManagerForm(selectedServer);
-            if (form.ShowDialog() != DialogResult.OK) {
-                ServerBusy = false;
-            }
         }
 
         private void Disconn_Click(object sender, EventArgs e) {
@@ -505,6 +508,16 @@ namespace BedrockService.Client.Forms {
             }
         }
 
+        public void RecievePackData(byte serverIndex, List<Shared.PackParser.MinecraftPackContainer> incomingPacks) {
+            Invoke((MethodInvoker)delegate {
+                using (ManagePacksForms form = new ManagePacksForms(serverIndex, ClientLogger, _processInfo)) {
+                    form.PopulateServerPacks(incomingPacks);
+                    form.ShowDialog();
+                    ServerBusy = false;
+                }
+            });
+        }
+
         private void scrollLockChkBox_CheckedChanged(object sender, EventArgs e) => _followTail = scrollLockChkBox.Checked;
 
         private void cmdTextBox_KeyPress(object sender, KeyPressEventArgs e) {
@@ -533,12 +546,6 @@ namespace BedrockService.Client.Forms {
         private void ManPacks_Click(object sender, EventArgs e) {
             FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PackList);
             DisableUI();
-            WaitForServerData().Wait();
-            using (ManagePacksForms form = new ManagePacksForms(connectedHost.GetServerIndex(selectedServer), ClientLogger, _processInfo)) {
-                form.PopulateServerPacks(FormManager.TCPClient.RecievedPacks);
-                form.ShowDialog();
-                ServerBusy = false;
-            }
         }
 
         private void nbtStudioBtn_Click(object sender, EventArgs e) {

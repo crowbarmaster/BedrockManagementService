@@ -96,6 +96,10 @@ namespace BedrockService.Client.Networking {
                         string data = "";
                         if (msgType != NetworkMessageTypes.PackFile || msgType != NetworkMessageTypes.LevelEditFile)
                             data = GetOffsetString(buffer);
+                        if (FormManager.MainWindow.ConfigManager.DebugNetworkOutput) {
+                            _logger.AppendLine($@"Network msg: {source} * {destination} * {msgType} * {msgStatus} * {serverIndex}");
+                            _logger.AppendLine($@"Data: {data}");
+                        }
                         if (destination != NetworkMessageDestination.Client)
                             continue;
                         int srvCurLen = 0;
@@ -164,15 +168,13 @@ namespace BedrockService.Client.Networking {
                                 JArray jArray = JArray.Parse(data);
                                 foreach (JToken token in jArray)
                                     temp.Add(token.ToObject<MinecraftPackContainer>());
-                                RecievedPacks = temp;
+                                FormManager.MainWindow.RecievePackData(serverIndex, temp);
 
                                 break;
                             case NetworkMessageTypes.PlayersRequest:
 
                                 List<IPlayer> fetchedPlayers = JsonConvert.DeserializeObject<List<IPlayer>>(data, settings);
-                                FormManager.MainWindow.connectedHost.GetServerInfoByIndex(serverIndex).SetPlayerList(fetchedPlayers);
-                                Task.Delay(500).Wait();
-                                PlayerInfoArrived = true;
+                                FormManager.MainWindow.RecievePlayerData(serverIndex, fetchedPlayers);
 
                                 break;
                             case NetworkMessageTypes.LevelEditFile:

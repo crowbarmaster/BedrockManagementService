@@ -19,7 +19,7 @@ namespace BedrockService.Client.Forms {
         private readonly DirectoryInfo PackExtractDir;
         public ManagePacksForms(byte serverIndex, IBedrockLogger logger, IProcessInfo processInfo) {
             Logger = logger;
-            PackExtractDir = new DirectoryInfo($@"{processInfo.GetDirectory()}\Temp");
+            PackExtractDir = new DirectoryInfo($"{Path.GetTempPath()}\\BMSTemp");
             ProcessInfo = processInfo;
             ServerIndex = serverIndex;
             InitializeComponent();
