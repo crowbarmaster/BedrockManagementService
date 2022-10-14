@@ -18,7 +18,7 @@ namespace BedrockService.Shared.PackParser {
         }
 
         public MinecraftPackParser(byte[] fileContents, IProcessInfo processInfo) {
-            PackExtractDirectory = $@"{processInfo.GetDirectory()}\Temp";
+            PackExtractDirectory = $"{Path.GetTempPath()}\\BMSTemp";
             _processInfo = processInfo;
             new FileUtilities(processInfo).ClearTempDir().Wait();
             using (MemoryStream fileStream = new(fileContents, 5, fileContents.Length - 5)) {
