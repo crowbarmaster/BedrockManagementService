@@ -18,7 +18,6 @@ namespace BedrockService.Shared.Classes {
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
             _processInfo = processInfo;
-            
         }
 
         public bool InitializeDefaults() {
@@ -227,26 +226,6 @@ namespace BedrockService.Shared.Classes {
             });
         }
 
-        public void AddUpdatePlayer(IPlayer player) {
-            IPlayer foundPlayer = PlayersList.FirstOrDefault(p => p.GetXUID() == player.GetXUID());
-            if (foundPlayer == null) {
-                PlayersList.Add(player);
-                return;
-            }
-            PlayersList[PlayersList.IndexOf(foundPlayer)] = player;
-        }
-
-        public IPlayer GetOrCreatePlayer(string xuid, string username = null) {
-            IPlayer foundPlayer = PlayersList.FirstOrDefault(p => p.GetXUID() == xuid);
-            if (foundPlayer == null) {
-                Player player = new(GetProp("default-player-permission-level").ToString());
-                player.Initialize(xuid, username);
-                PlayersList.Add(player);
-                return player;
-            }
-            return foundPlayer;
-        }
-
         public string GetFileName() {
             return GetSettingsProp("FileName").StringValue;
         }
@@ -258,6 +237,17 @@ namespace BedrockService.Shared.Classes {
         public List<IPlayer> GetPlayerList() => PlayersList ?? new List<IPlayer>();
 
         public void SetPlayerList(List<IPlayer> newList) => PlayersList = newList;
+
+        public IPlayer GetOrCreatePlayer(string xuid, string username = null) {
+            IPlayer foundPlayer = GetPlayerList().FirstOrDefault(p => p.GetXUID() == xuid);
+            if (foundPlayer == null) {
+                Player player = new(GetProp("default-player-permission-level").ToString());
+                player.Initialize(xuid, username);
+                PlayersList.Add(player);
+                return player;
+            }
+            return foundPlayer;
+        }
 
         public IServerConfiguration GetServerInfo() => this;
 

@@ -10,6 +10,7 @@ namespace BedrockService.Service.Core.Interfaces {
         ServiceStatusModel GetServiceStatus();
         IBedrockServer GetBedrockServerByIndex(int index);
         IBedrockServer? GetBedrockServerByName(string name);
+        IPlayerManager GetPlayerManager();
         List<IBedrockServer> GetAllServers();
         void TestStart();
         void TestStop();

@@ -22,6 +22,7 @@ namespace BedrockService.Service.Server {
         private readonly IBedrockLogger _logger;
         private readonly IProcessInfo _processInfo;
         private readonly IUpdater _updater;
+        private readonly IPlayerManager _playerManager;
         private readonly FileUtilities _fileUtils;
         private readonly BackupManager _backupManager;
         private System.Timers.Timer? _backupTimer { get; set; }
@@ -29,7 +30,6 @@ namespace BedrockService.Service.Server {
         private CrontabSchedule? _updaterCron { get; set; }
         private System.Timers.Timer? _updaterTimer { get; set; }
         private IBedrockLogger _serverLogger;
-        private IPlayerManager _playerManager;
         private List<IPlayer> _connectedPlayers = new List<IPlayer>();
         private DateTime _startTime;
         private const string _startupMessage = "INFO] Server started.";
@@ -38,11 +38,12 @@ namespace BedrockService.Service.Server {
         private bool _serverModifiedFlag = true;
         private bool _LiteLoaderEnabledServer = false;
      
-        public BedrockServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, FileUtilities fileUtils) {
+        public BedrockServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, FileUtilities fileUtils, IPlayerManager servicePlayerManager) {
             _fileUtils = fileUtils;
             _serverConfiguration = serverConfiguration;
             _processInfo = processInfo;
             _serviceConfiguration = serviceConfiguration;
+            _playerManager = serviceConfiguration.GetProp("GlobalizedPlayerDatabase").GetBoolValue() ? servicePlayerManager : new ServerPlayerManager(serverConfiguration);
             _configurator = configurator;
             _logger = logger;
             _backupManager = new BackupManager(_processInfo, _logger, this, serverConfiguration, serviceConfiguration);
@@ -56,7 +57,6 @@ namespace BedrockService.Service.Server {
             if (_serverConfiguration.GetSettingsProp("CheckUpdates").GetBoolValue()) {
                 _updater.CheckLatestVersion().Wait();
             }
-            _playerManager = new PlayerManager(_serverConfiguration);
         }
 
         public void CheckUpdates() {
@@ -265,6 +265,8 @@ namespace BedrockService.Service.Server {
             _serverConfiguration.GetProp("server-portv6").StringValue == "19132" ||
             _serverConfiguration.GetProp("server-portv6").StringValue == "19133";
         }
+
+        public IPlayerManager GetPlayerManager() => _playerManager;
 
         private Task StopWatchdog() {
             return Task.Run(() => {

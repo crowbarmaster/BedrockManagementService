@@ -10,10 +10,9 @@ namespace BedrockService.Shared.Interfaces {
         bool DeleteStartCommand(string command);
         List<StartCmdEntry> GetStartCommands();
         void SetStartCommands(List<StartCmdEntry> newEntries);
-        void AddUpdatePlayer(IPlayer player);
-        IPlayer GetOrCreatePlayer(string xuid, string username = null);
         List<IPlayer> GetPlayerList();
-        void SetPlayerList(List<IPlayer> newList);
+        void SetPlayerList(List<IPlayer> playerList);
+        IPlayer GetOrCreatePlayer(string xuid, string username = null);
         IServerConfiguration GetServerInfo();
         void SetServerVersion(string newVersion);
         string GetServerVersion();

@@ -28,7 +28,7 @@ namespace BedrockService.Service.Networking {
                 {NetworkMessageTypes.PackFile, new PackFile(serviceConfiguration, processInfo, logger, fileUtils) },
                 {NetworkMessageTypes.RemovePack, new RemovePack(processInfo, serviceConfiguration, logger) },
                 {NetworkMessageTypes.CheckUpdates, new CheckUpdates(service) },
-                {NetworkMessageTypes.PlayersRequest, new PlayerRequest(serviceConfiguration) },
+                {NetworkMessageTypes.PlayersRequest, new PlayerRequest(service) },
                 {NetworkMessageTypes.PlayersUpdate, new PlayersUpdate(configurator, serviceConfiguration, service) },
                 {NetworkMessageTypes.LevelEditRequest, new LevelEditRequest(serviceConfiguration) },
                 {NetworkMessageTypes.LevelEditFile, new LevelEditFile(serviceConfiguration, service, logger) },

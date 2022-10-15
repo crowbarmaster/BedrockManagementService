@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace BedrockService.Shared.Classes {
     public class ServerInfo {
+        public ServerPlayerManager PlayerManager { get; set; }
         public Property ServersPath { get; set; }
         public int TotalBackupSizeKilobytes { get; set; }
         public int TotalBackupsStored { get; set; }

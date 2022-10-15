@@ -9,6 +9,7 @@ namespace BedrockService.Service.Management {
     public class ConfigManager : IConfigurator {
         private readonly string _serverConfigDir;
         private readonly string _globalFile;
+        private readonly string _bmsConfigDir;
         private static readonly object _fileLock = new object();
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IProcessInfo _processInfo;
@@ -21,7 +22,8 @@ namespace BedrockService.Service.Management {
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
             _fileUtilities = fileUtilities;
-            _serverConfigDir = $@"{_processInfo.GetDirectory()}\BmsConfig\ServerConfigs";
+            _bmsConfigDir = $@"{_processInfo.GetDirectory()}\BmsConfig";
+            _serverConfigDir = $@"{_bmsConfigDir}\ServerConfigs";
             _globalFile = $@"{_processInfo.GetDirectory()}\Service.conf";
         }
 
@@ -31,6 +33,8 @@ namespace BedrockService.Service.Management {
                 Directory.CreateDirectory(_serverConfigDir);
             if (!Directory.Exists($@"{_serverConfigDir}\PlayerRecords"))
                 Directory.CreateDirectory($@"{_serverConfigDir}\PlayerRecords");
+            if (!Directory.Exists($@"{_serverConfigDir}\GlobalPlayers"))
+                Directory.CreateDirectory($@"{_serverConfigDir}\GlobalPlayers");
             if (File.Exists($@"{_serverConfigDir}\..\latest_bedrock_ver.ini")) {
                 _serviceConfiguration.SetLatestBDSVersion(File.ReadAllText($@"{_serverConfigDir}\..\latest_bedrock_ver.ini"));
             } else {
@@ -143,23 +147,29 @@ namespace BedrockService.Service.Management {
         }
 
         public void SavePlayerDatabase(IServerConfiguration server) {
+            string dbPath = $@"{_serverConfigDir}\PlayerRecords\{server.GetServerName()}.playerdb";
+            string regPath = $@"{_serverConfigDir}\PlayerRecords\{server.GetServerName()}.preg";
+            List<IPlayer> playerList = server.GetPlayerList();
+            if (_serviceConfiguration.GetProp("GlobalizedPlayerDatabase").GetBoolValue()) {
+                dbPath = $@"{_serverConfigDir}\GlobalPlayers\Service.playerdb";
+                regPath = $@"{_serverConfigDir}\GlobalPlayers\Service.preg";
+                playerList = _serviceConfiguration.GetPlayerList();
+            }
             lock (_fileLock) {
-                string filePath = $@"{_serverConfigDir}\PlayerRecords\{server.GetServerName()}.playerdb";
-                TextWriter writer = new StreamWriter(filePath);
-                foreach (Player entry in server.GetPlayerList()) {
+                TextWriter writer = new StreamWriter(dbPath);
+                foreach (Player entry in playerList) {
                     writer.WriteLine(entry.ToString("Known"));
                 }
                 writer.Flush();
                 writer.Close();
             }
             lock (_fileLock) {
-                string filePath = $@"{_serverConfigDir}\PlayerRecords\{server.GetServerName()}.preg";
-                TextWriter writer = new StreamWriter(filePath);
+                TextWriter writer = new StreamWriter(regPath);
                 writer.WriteLine("# Registered player list");
                 writer.WriteLine("# Register player entries: PlayerEntry=xuid,username,permission,isWhitelisted,ignoreMaxPlayers");
                 writer.WriteLine("# Example: 1234111222333444,TestUser,visitor,false,false");
                 writer.WriteLine("");
-                foreach (IPlayer player in server.GetPlayerList()) {
+                foreach (IPlayer player in playerList) {
                     if (!player.IsDefaultRegistration())
                         writer.WriteLine(player.ToString("Registered"));
                 }
@@ -222,18 +232,33 @@ namespace BedrockService.Service.Management {
             string permFilePath = $@"{server.GetSettingsProp("ServerPath")}\permissions.json";
             PermissionsFileModel permissionsFile = new() { FilePath = permFilePath };
             WhitelistFileModel whitelistFile = new() { FilePath = whitelistFilePath };
-            server.GetPlayerList()
-                .Where(x => x.IsPlayerWhitelisted())
-                .Select(x => (xuid: x.GetXUID(), userName: x.GetUsername(), ignoreLimits: x.PlayerIgnoresLimit()))
-                .ToList().ForEach(x => {
-                    whitelistFile.Contents.Add(new WhitelistEntryJsonModel(x.ignoreLimits, x.xuid, x.userName));
-                });
-            server.GetPlayerList()
-                .Where(x => !x.IsDefaultRegistration())
-                .Select(x => (xuid: x.GetXUID(), permLevel: x.GetPermissionLevel()))
-                .ToList().ForEach(x => {
-                    permissionsFile.Contents.Add(new PermissionsEntryJsonModel(x.permLevel, x.xuid));
-                });
+            if (_serviceConfiguration.GetProp("GlobalizedPlayerDatabase").GetBoolValue()) {
+                _serviceConfiguration.GetPlayerList()
+                    .Where(x => x.IsPlayerWhitelisted())
+                    .Select(x => (xuid: x.GetXUID(), userName: x.GetUsername(), ignoreLimits: x.PlayerIgnoresLimit()))
+                    .ToList().ForEach(x => {
+                        whitelistFile.Contents.Add(new WhitelistEntryJsonModel(x.ignoreLimits, x.xuid, x.userName));
+                    });
+                _serviceConfiguration.GetPlayerList()
+                    .Where(x => !x.IsDefaultRegistration())
+                    .Select(x => (xuid: x.GetXUID(), permLevel: x.GetPermissionLevel()))
+                    .ToList().ForEach(x => {
+                        permissionsFile.Contents.Add(new PermissionsEntryJsonModel(x.permLevel, x.xuid));
+                    });
+            } else {
+                server.GetPlayerList()
+                    .Where(x => x.IsPlayerWhitelisted())
+                    .Select(x => (xuid: x.GetXUID(), userName: x.GetUsername(), ignoreLimits: x.PlayerIgnoresLimit()))
+                    .ToList().ForEach(x => {
+                        whitelistFile.Contents.Add(new WhitelistEntryJsonModel(x.ignoreLimits, x.xuid, x.userName));
+                    });
+                server.GetPlayerList()
+                    .Where(x => !x.IsDefaultRegistration())
+                    .Select(x => (xuid: x.GetXUID(), permLevel: x.GetPermissionLevel()))
+                    .ToList().ForEach(x => {
+                        permissionsFile.Contents.Add(new PermissionsEntryJsonModel(x.permLevel, x.xuid));
+                    });
+            }
             permissionsFile.SaveToFile(permissionsFile.Contents);
             whitelistFile.SaveToFile(whitelistFile.Contents);
         }
@@ -252,7 +277,6 @@ namespace BedrockService.Service.Management {
             }
         }
         
-
         public Task<List<BackupInfoModel>> EnumerateBackupsForServer(byte serverIndex) {
             return Task.Run(() => {
                 IServerConfiguration server = _serviceConfiguration.GetServerInfoByIndex(serverIndex);
@@ -338,27 +362,51 @@ namespace BedrockService.Service.Management {
         }
 
         private void LoadPlayerDatabase(IServerConfiguration server) {
-            string serverName = server.GetServerName();
-            string dbPath = $@"{_serverConfigDir}\PlayerRecords\{serverName}.playerdb";
-            string regPath = $@"{_serverConfigDir}\PlayerRecords\{serverName}.preg";
-            _fileUtilities.CreateInexistantFile(regPath);
-            _fileUtilities.CreateInexistantFile(dbPath);
-            List<string[]> playerDbEntries = File.ReadAllLines(dbPath)
-                .Where(x => !x.StartsWith("#"))
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .Select(x => x.Split(','))
-                .ToList();
-            List<string[]> playerRegEntries = File.ReadAllLines(regPath)
-                .Where(x => !x.StartsWith("#"))
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .Select(x => x.Split(','))
-                .ToList();
-            playerDbEntries.ForEach(x => {
-                server.GetOrCreatePlayer(x[0]).UpdatePlayerFromDbStrings(x);
-            });
-            playerRegEntries.ForEach(x => {
-                server.GetOrCreatePlayer(x[0]).UpdatePlayerFromRegStrings(x);
-            });
+            if (_serviceConfiguration.GetProp("GlobalizedPlayerDatabase").GetBoolValue()) {
+                string dbPath = $@"{_serverConfigDir}\GlobalPlayers\Service.playerdb";
+                string regPath = $@"{_serverConfigDir}\GlobalPlayers\Service.preg";
+                _fileUtilities.CreateInexistantFile(regPath);
+                _fileUtilities.CreateInexistantFile(dbPath);
+                List<string[]> playerDbEntries = File.ReadAllLines(dbPath)
+                    .Where(x => !x.StartsWith("#"))
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Select(x => x.Split(','))
+                    .ToList();
+                List<string[]> playerRegEntries = File.ReadAllLines(regPath)
+                    .Where(x => !x.StartsWith("#"))
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Select(x => x.Split(','))
+                    .ToList();
+                playerDbEntries.ForEach(x => {
+                    _serviceConfiguration.GetOrCreatePlayer(x[0]).UpdatePlayerFromDbStrings(x);
+                });
+                playerRegEntries.ForEach(x => {
+                    _serviceConfiguration.GetOrCreatePlayer(x[0]).UpdatePlayerFromRegStrings(x);
+                });
+
+            } else {
+                string serverName = server.GetServerName();
+                string dbPath = $@"{_serverConfigDir}\PlayerRecords\{serverName}.playerdb";
+                string regPath = $@"{_serverConfigDir}\PlayerRecords\{serverName}.preg";
+                _fileUtilities.CreateInexistantFile(regPath);
+                _fileUtilities.CreateInexistantFile(dbPath);
+                List<string[]> playerDbEntries = File.ReadAllLines(dbPath)
+                    .Where(x => !x.StartsWith("#"))
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Select(x => x.Split(','))
+                    .ToList();
+                List<string[]> playerRegEntries = File.ReadAllLines(regPath)
+                    .Where(x => !x.StartsWith("#"))
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Select(x => x.Split(','))
+                    .ToList();
+                playerDbEntries.ForEach(x => {
+                    server.GetOrCreatePlayer(x[0]).UpdatePlayerFromDbStrings(x);
+                });
+                playerRegEntries.ForEach(x => {
+                    server.GetOrCreatePlayer(x[0]).UpdatePlayerFromRegStrings(x);
+                });
+            }
         }
 
         private bool DeleteAllBackups(IServerConfiguration serverInfo) {

@@ -98,9 +98,6 @@ namespace BedrockService.Client.Forms {
         private void saveBtn_Click(object sender, EventArgs e) {
             gridView.ClearSelection();
             if (modifiedPlayers.Count > 0) {
-                foreach (IPlayer player in modifiedPlayers) {
-                    _server.AddUpdatePlayer(player);
-                }
                 JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                 byte[] sendBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(modifiedPlayers, Formatting.Indented, settings));
                 FormManager.TCPClient.SendData(sendBytes, FormManager.MainWindow.connectedHost.GetServerIndex(_server), NetworkMessageTypes.PlayersUpdate);

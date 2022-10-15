@@ -8,6 +8,9 @@ namespace BedrockService.Shared.Interfaces {
         IServerConfiguration GetServerInfoByIndex(int index);
         byte GetServerIndex(IServerConfiguration server);
         List<IServerConfiguration> GetServerList();
+        List<IPlayer> GetPlayerList();
+        void SetPlayerList(List<IPlayer> playerList);
+        IPlayer GetOrCreatePlayer(string xuid, string username = null);
         void SetAllServerInfos(List<IServerConfiguration> newInfos);
         void AddNewServerInfo(IServerConfiguration serverConfiguration);
         void RemoveServerInfoByIndex(int serverIndex);

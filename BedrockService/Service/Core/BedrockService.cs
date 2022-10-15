@@ -14,6 +14,7 @@ namespace BedrockService.Service.Core {
         private readonly IConfigurator _configurator;
         private readonly ITCPListener _tCPListener;
         private readonly FileUtilities _fileUtils;
+        private readonly IPlayerManager _playerManager;
         private DateTime _upTime;
 
         private List<IBedrockServer> _bedrockServers { get; set; } = new();
@@ -26,6 +27,7 @@ namespace BedrockService.Service.Core {
             _logger = logger;
             _serviceConfiguration = serviceConfiguration;
             _processInfo = serviceProcessInfo;
+            _playerManager = new ServicePlayerManager(serviceConfiguration);
             _logger = logger;
         }
 
@@ -82,6 +84,8 @@ namespace BedrockService.Service.Core {
                 LatestVersion = _serviceConfiguration.GetLatestBDSVersion()
             };
         }
+
+        public IPlayerManager GetPlayerManager() => _playerManager;
 
         public bool Start(HostControl? hostControl) {
             if (!Initialize().Result) {
@@ -173,7 +177,7 @@ namespace BedrockService.Service.Core {
         public List<IBedrockServer> GetAllServers() => _bedrockServers;
 
         public void InitializeNewServer(IServerConfiguration server) {
-            IBedrockServer bedrockServer = new BedrockServer(server, _configurator, _logger, _serviceConfiguration, _processInfo, _fileUtils);
+            IBedrockServer bedrockServer = new BedrockServer(server, _configurator, _logger, _serviceConfiguration, _processInfo, _fileUtils, _playerManager);
             bedrockServer.Initialize();
             _bedrockServers.Add(bedrockServer);
             _serviceConfiguration.AddNewServerInfo(server);
@@ -186,7 +190,7 @@ namespace BedrockService.Service.Core {
             try {
                 List<IServerConfiguration> temp = _serviceConfiguration.GetServerList();
                 foreach (IServerConfiguration server in temp) {
-                    IBedrockServer bedrockServer = new BedrockServer(server, _configurator, _logger, _serviceConfiguration, _processInfo, _fileUtils);
+                    IBedrockServer bedrockServer = new BedrockServer(server, _configurator, _logger, _serviceConfiguration, _processInfo, _fileUtils, _playerManager);
                     bedrockServer.Initialize();
                     _bedrockServers.Add(bedrockServer);
                 }

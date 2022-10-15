@@ -22,6 +22,8 @@ namespace BedrockService.Shared.Classes {
             globals.Add(new Property("LogServerOutput", "true"));
             globals.Add(new Property("LogApplicationOutput", "true"));
             globals.Add(new Property("TimestampLogEntries", "true"));
+            globals.Add(new Property("GlobalizedPlayerDatabase", "false"));
+            globals.Add(new Property("DefaultGlobalPermLevel", "member"));
             return true;
         }
 
@@ -178,5 +180,19 @@ namespace BedrockService.Shared.Classes {
 
         public byte GetServerIndex(IServerConfiguration server) => (byte)ServerList.IndexOf(server);
 
+        public IPlayer GetOrCreatePlayer(string xuid, string username = null) {
+            IPlayer foundPlayer = PlayersList.FirstOrDefault(p => p.GetXUID() == xuid);
+            if (foundPlayer == null) {
+                Player player = new(GetProp("DefaultGlobalPermLevel").ToString());
+                player.Initialize(xuid, username);
+                PlayersList.Add(player);
+                return player;
+            }
+            return foundPlayer;
+        }
+
+        public List<IPlayer> GetPlayerList() => PlayersList;
+
+        public void SetPlayerList(List<IPlayer> playerList) => PlayersList = playerList;
     }
 }
