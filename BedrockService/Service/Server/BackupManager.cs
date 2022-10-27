@@ -1,6 +1,6 @@
 ﻿using BedrockService.Service.Server.Interfaces;
-using BedrockService.Shared.MinecraftJsonModels.FileModels;
-using BedrockService.Shared.MinecraftJsonModels.JsonModels;
+using BedrockService.Shared.MinecraftFileModels.FileAccessModels;
+using BedrockService.Shared.MinecraftFileModels.JsonModels;
 using BedrockService.Shared.PackParser;
 using System;
 using System.Collections.Generic;
