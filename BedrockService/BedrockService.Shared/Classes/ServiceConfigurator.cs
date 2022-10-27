@@ -24,6 +24,7 @@ namespace BedrockService.Shared.Classes {
             globals.Add(new Property("TimestampLogEntries", "true"));
             globals.Add(new Property("GlobalizedPlayerDatabase", "false"));
             globals.Add(new Property("DefaultGlobalPermLevel", "member"));
+            globals.Add(new Property("LatestLiteLoaderVersion", "1.19.30.04|2.7.2"));
             return true;
         }
 
@@ -43,7 +44,7 @@ namespace BedrockService.Shared.Classes {
             if (LatestServerVersion != "None" && _processInfo.DeclaredType() != "Client") {
                 if (!File.Exists($@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\CoreFiles\Build_{LatestServerVersion}\stock_packs.json") || !File.Exists($@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\CoreFiles\Build_{LatestServerVersion}\stock_props.conf")) {
                     MinecraftUpdatePackageProcessor packageProcessor = new(_processInfo, LatestServerVersion, $@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\CoreFiles\Build_{LatestServerVersion}");
-                    if (!packageProcessor.ExtractBuildToDirectory()) {
+                    if (!packageProcessor.ExtractCoreFiles()) {
                         return false;
                     }
                 }
