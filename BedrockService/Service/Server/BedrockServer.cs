@@ -1,5 +1,4 @@
-﻿using BedrockService.Service.Management.Interfaces;
-using BedrockService.Service.Networking.Interfaces;
+﻿using BedrockService.Service.Networking.Interfaces;
 using BedrockService.Service.Server.Interfaces;
 using BedrockService.Shared.PackParser;
 using BedrockService.Shared.SerializeModels;
@@ -328,6 +327,7 @@ namespace BedrockService.Service.Server {
                         AwaitableServerStart().Wait();
                     }
                     if (dataMsg.Contains("Version ")) {
+
                         int msgStartIndex = dataMsg.IndexOf(']') + 2;
                         string focusedMsg = dataMsg.Substring(msgStartIndex, dataMsg.Length - msgStartIndex);
                         int versionIndex = focusedMsg.IndexOf(' ') + 1;
@@ -349,6 +349,13 @@ namespace BedrockService.Service.Server {
                         int betaVer = int.Parse(versionString.Substring(betaTagLoc + 5, versionString.Length - (betaTagLoc + 5)));
                             versionString = versionString.Substring(0, betaTagLoc) + ".";
                             versionString = versionString + betaVer;
+                        }
+                        if (!dataMsg.Contains("LiteLoaderBDS")) {
+                            if (_serverConfiguration.GetSettingsProp("LiteLoaderEnabled").GetBoolValue() && !_LiteLoaderEnabledServer) {
+                                AwaitableServerStop(false).Wait();
+                                _configurator.ReplaceServerBuild(_serverConfiguration, deployedVersion).Wait();
+                                AwaitableServerStart();
+                            }
                         }
                         if (deployedVersion != versionString && !versionString.Contains("LiteLoader")) {
                             if (_serverConfiguration.GetSettingsProp("AutoDeployUpdates").GetBoolValue()) {
