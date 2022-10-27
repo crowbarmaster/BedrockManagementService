@@ -12,7 +12,7 @@ namespace ServiceTests {
         public void Can_Create_JsonFiles() {
             IProcessInfo processInfo = new ServiceProcessInfo("TestHost", _directory.FullName, 0, true, true);
             MinecraftUpdatePackageProcessor processor = new(new BedrockLogger(processInfo, new ServiceConfigurator(processInfo)), processInfo, "1.0", @$"{_testFilePath}\Output");
-            processor.ExtractBuildToDirectory();
+            processor.ExtractCoreFiles();
             Assert.True(File.Exists(@$"{_testFilePath}\Output\stock_props.conf"));
             Assert.True(File.Exists(@$"{_testFilePath}\Output\stock_packs.json"));
         }

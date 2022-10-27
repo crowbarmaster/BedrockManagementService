@@ -1,5 +1,5 @@
 ﻿using BedrockService.Service.Networking.Interfaces;
-using BedrockService.Shared.MinecraftJsonModels.JsonModels;
+using BedrockService.Shared.MinecraftFileModels.JsonModels;
 using BedrockService.Shared.PackParser;
 using Newtonsoft.Json;
 using System.Text;

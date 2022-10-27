@@ -1,6 +1,6 @@
 ﻿using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.MinecraftJsonModels.FileModels;
-using BedrockService.Shared.MinecraftJsonModels.JsonModels;
+using BedrockService.Shared.MinecraftFileModels.FileAccessModels;
+using BedrockService.Shared.MinecraftFileModels.JsonModels;
 using BedrockService.Shared.PackParser;
 using BedrockService.Shared.Utilities;
 using System;
@@ -39,7 +39,7 @@ namespace BedrockService.Shared.Classes {
             _loggingEnabled = false;
         }
 
-        public bool ExtractBuildToDirectory() {
+        public bool ExtractCoreFiles() {
             try {
                 FileUtilities fileUtils = new FileUtilities(_processInfo);
                 fileUtils.ClearTempDir().Wait();

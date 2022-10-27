@@ -1,5 +1,5 @@
 using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.MinecraftJsonModels.JsonModels;
+using BedrockService.Shared.MinecraftFileModels.JsonModels;
 using BedrockService.Shared.Utilities;
 using Newtonsoft.Json;
 using System.Collections.Generic;

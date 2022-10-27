@@ -21,7 +21,7 @@ global using System.Reflection;
 global using System.Threading;
 global using System.Threading.Tasks;
 global using Topshelf;
-using BedrockService.Service.Management.Interfaces;
+
 using BedrockService.Service.Networking.Interfaces;
 
 namespace BedrockService.Service {
