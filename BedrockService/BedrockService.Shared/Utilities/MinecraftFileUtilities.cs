@@ -1,7 +1,10 @@
 ﻿using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.MinecraftJsonModels.FileModels;
-using BedrockService.Shared.MinecraftJsonModels.JsonModels;
+using BedrockService.Shared.LiteLoaderFileModels.FileAccessModels;
+using BedrockService.Shared.LiteLoaderFileModels.JsonModels;
+using BedrockService.Shared.MinecraftFileModels.FileAccessModels;
+using BedrockService.Shared.MinecraftFileModels.JsonModels;
 using BedrockService.Shared.PackParser;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -56,6 +59,48 @@ namespace BedrockService.Shared.Utilities {
                 });
             permissionsFile.SaveToFile(permissionsFile.Contents);
             whitelistFile.SaveToFile(whitelistFile.Contents);
+        }
+
+        public static void CreateDefaultLoaderConfigFile(IServerConfiguration server) {
+            string configFilePath = $@"{server.GetSettingsProp("ServerPath")}\plugins\LiteLoader\LiteLoader.json";
+            LiteLoaderFileModel configFile = new() { FilePath = configFilePath };
+            LiteLoaderConfigJsonModel configLayout = new() {
+                ColorLog = false,
+                DebugMode = false,
+                Language = "system",
+                LogLevel = 4,
+                Modules = new() {
+                    AddonsHelper = new() { autoInstallPath = "plugins/AddonsHelper", enabled = true },
+                    AntiGive = new() { command = "kick {player}", enabled = true },
+                    CheckRunningBDS = new() { enabled = true },
+                    ClientChunkPreGeneration = new() { enabled = true },
+                    CrashLogger = new() { enabled = true, path = "plugins\\LiteLoader\\CrashLogger_Daemon.exe" },
+                    EconomyCore = new() { enabled = true },
+                    ErrorStackTraceback = new() { enabled = true, cacheSymbol = false },
+                    FixBDSCrash = new() { enabled = true },
+                    FixDisconnectBug = new() { enabled = true },
+                    FixListenPort = new() { enabled = false },
+                    FixMcBug = new() { enabled = true },
+                    ForceUtf8Input = new() { enabled = false },
+                    OutputFilter = new() { enabled = true, filterRegex = new List<object>(), onlyFilterConsoleOutput = true },
+                    ParticleAPI = new() { enabled = false },
+                    PermissionAPI = new() { enabled = true },
+                    SimpleServerLogger = new() { enabled = true },
+                    TpdimCommand = new() { enabled = true },
+                    UnlockCmd = new() { enabled = true },
+                    UnoccupyPort19132 = new() { enabled = true },
+                    WelcomeText = new() { enabled = true }
+                },
+                ScriptEngine = new() { enabled = true, alwaysLaunch = false },
+                Version = 1
+            };
+            configFile.Contents = configLayout;
+            configFile.SaveToFile();
+        }
+
+        public static void WriteLiteLoaderConfigFile(IServerConfiguration server) {
+            string configFilePath = $@"{server.GetSettingsProp("ServerPath")}\plugins\LiteLoader\LiteLoader.json";
+            LiteLoaderFileModel configFile = new() { FilePath = configFilePath };
         }
 
         public static void WriteServerPropsFile(IServerConfiguration server) {
