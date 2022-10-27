@@ -1,6 +1,6 @@
 ﻿using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.MinecraftJsonModels.FileModels;
-using BedrockService.Shared.MinecraftJsonModels.JsonModels;
+using BedrockService.Shared.MinecraftFileModels.FileAccessModels;
+using BedrockService.Shared.MinecraftFileModels.JsonModels;
 using BedrockService.Shared.PackParser;
 using System;
 using System.Collections.Generic;
@@ -26,7 +26,7 @@ namespace BedrockService.Shared.Utilities {
         }
 
         public void CreateInexistantDirectory(string DirectoryPath) {
-            if (!Directory.Exists(DirectoryPath)) { 
+            if (!Directory.Exists(DirectoryPath)) {
                 Directory.CreateDirectory(DirectoryPath);
             }
         }
@@ -36,7 +36,7 @@ namespace BedrockService.Shared.Utilities {
                 .ToList().ForEach(x => {
                     FileInfo newFile = new(x.FullName.Replace(source.FullName, target.FullName));
                     CreateInexistantDirectory(newFile.DirectoryName);
-                    x.CopyTo(newFile.FullName, true); 
+                    x.CopyTo(newFile.FullName, true);
                 });
         }
 
@@ -133,5 +133,30 @@ namespace BedrockService.Shared.Utilities {
         public void WriteStringToFile(string path, string content) => File.WriteAllText(path, content);
 
         public void WriteStringArrayToFile(string path, string[] content) => File.WriteAllLines(path, content);
+
+        private int RoundOff(int i) {
+            return ((int)Math.Round(i / 10.0)) * 10;
+        }
+
+        public Task ExtractZipToDirectory(string zipPath, string directory, IProgress<double> progress) => Task.Run(() => {
+            FileInfo fileInfo = new FileInfo(zipPath);
+            using ZipArchive archive = ZipFile.OpenRead(zipPath);
+            int fileCount = archive.Entries.Count;
+            for (int i = 0; i < fileCount; i++) {
+                string fixedPath = $@"{directory}\{archive.Entries[i].FullName.Replace('/', '\\')}";
+                if (i % (RoundOff(fileCount) / 6) == 0) {
+                    progress.Report(Math.Round(i / (double)fileCount, 2) * 100);
+                }
+                if (fixedPath.EndsWith("\\")) {
+                    if (!Directory.Exists(fixedPath)) {
+                        Directory.CreateDirectory(fixedPath);
+                    }
+                } else {
+                    Task.Run(() => {
+                        archive.Entries[i].ExtractToFile(fixedPath, true);
+                    }).Wait();
+                }
+            }
+        });
     }
 }
