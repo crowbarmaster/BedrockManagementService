@@ -29,6 +29,7 @@ namespace BedrockService.Shared.Classes {
             ServicePropList.Add(new Property("FileName", "Dedicated Server.conf"));
             ServicePropList.Add(new Property("ServerPath", $@"{ServersPath}\Dedicated Server"));
             ServicePropList.Add(new Property("ServerExeName", $"BedrockService.Dedicated Server.exe"));
+            ServicePropList.Add(new Property("LiteLoaderEnabled", "false"));
             ServicePropList.Add(new Property("ServerAutostartEnabled", "true"));
             ServicePropList.Add(new Property("BackupEnabled", "false"));
             ServicePropList.Add(new Property("BackupPath", $@"{_servicePath}\ServerBackups"));
@@ -111,10 +112,10 @@ namespace BedrockService.Shared.Classes {
                 version = version.Substring(0, version.IndexOf('('));
             }
             if (_processInfo.DeclaredType() != "Client" || (GetSettingsProp("DeployedVersion").StringValue != "None" && !skipNullCheck)) {
-                if (!File.Exists($@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\CoreFiles\Build_{version}\stock_packs.json") || !File.Exists($@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\CoreFiles\Build_{version}\stock_props.conf")) {
+                if (!File.Exists($@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\CoreFiles\Build_{version}\stock_props.conf")) {
                     _logger.AppendLine("Core file(s) found missing. Rebuilding!");
                     MinecraftUpdatePackageProcessor packageProcessor = new(_logger, _processInfo, version, $@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\CoreFiles\Build_{version}");
-                    if(!packageProcessor.ExtractBuildToDirectory()){
+                    if(!packageProcessor.ExtractCoreFiles()){
                         return false;
                     }
                 }
