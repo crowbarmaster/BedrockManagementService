@@ -1,7 +1,7 @@
-﻿using BedrockService.Service.Management.Interfaces;
-using BedrockService.Shared.MinecraftJsonModels.FileModels;
-using BedrockService.Shared.MinecraftJsonModels.JsonModels;
+﻿using BedrockService.Shared.MinecraftFileModels.FileAccessModels;
+using BedrockService.Shared.MinecraftFileModels.JsonModels;
 using BedrockService.Shared.SerializeModels;
+using BedrockService.Shared.Interfaces;
 using System.Globalization;
 using System.IO.Compression;
 
@@ -83,37 +83,41 @@ namespace BedrockService.Service.Management {
         public async Task ReplaceServerBuild(IServerConfiguration server, string buildVersion) {
             await Task.Run(() => {
                 try {
+                    string serverVersion = string.Empty;
+                    string liteVersion = string.Empty;
+                    if (server.GetSettingsProp("LiteLoaderEnabled").GetBoolValue()) {
+                        string[] LLVersion = _serviceConfiguration.GetProp("LatestLiteLoaderVersion").ToString().Split('|');
+                        serverVersion = LLVersion[0];
+                        liteVersion = LLVersion[1];
+                        buildVersion = serverVersion;
+                    }
                     if (!Directory.Exists(server.GetSettingsProp("ServerPath").ToString()))
                         Directory.CreateDirectory(server.GetSettingsProp("ServerPath").ToString());
                     string filePath = $@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\BuildArchives\Update_{buildVersion}.zip";
                     if (!File.Exists(filePath)) {
                         throw new FileNotFoundException($"Service could not locate file \"Update_{buildVersion}.zip\" and version was not found on Mojang servers!");
                     }
-                    using ZipArchive archive = ZipFile.OpenRead($@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\BuildArchives\Update_{buildVersion}.zip");
-                    int fileCount = archive.Entries.Count;
-                    for (int i = 0; i < fileCount; i++) {
-                        if (i % (RoundOff(fileCount) / 6) == 0) {
-                            _logger.AppendLine($"Extracting server files for server {server.GetServerName()}, {Math.Round(i / (double)fileCount, 2) * 100}% completed...");
-                        }
-                        if (!archive.Entries[i].FullName.EndsWith("/")) {
-                            Task.Run(() => {
-                                string fixedPath = $@"{server.GetSettingsProp("ServerPath")}\{archive.Entries[i].FullName.Replace('/', '\\')}";
-                                if (File.Exists(fixedPath)) {
-                                    File.Delete(fixedPath);
-                                }
+                    Progress<double> progress = new(percent =>
+                    {
+                        _logger.AppendLine($"Extracting Bedrock files for server {server.GetServerName()}, {percent}% completed...");
+                    });
+                    _fileUtilities.ExtractZipToDirectory(filePath, server.GetSettingsProp("ServerPath").ToString(), progress).Wait();
 
-                            }).Wait();
-                            Task.Run(() => archive.Entries[i].ExtractToFile($@"{server.GetSettingsProp("ServerPath")}\{archive.Entries[i].FullName.Replace('/', '\\')}")).Wait();
-                        } else {
-                            if (!Directory.Exists($@"{server.GetSettingsProp("ServerPath")}\{archive.Entries[i].FullName.Replace('/', '\\')}")) {
-                                Directory.CreateDirectory($@"{server.GetSettingsProp("ServerPath")}\{archive.Entries[i].FullName.Replace('/', '\\')}");
-                            }
-                        }
-                    }
-                        FileInfo originalExeInfo = new($"{server.GetSettingsProp("ServerPath")}\\bedrock_server.exe");
-                        FileInfo bmsExeInfo = new($"{server.GetSettingsProp("ServerPath")}\\{server.GetSettingsProp("ServerExeName")}");
+                    FileInfo originalExeInfo = new($"{server.GetSettingsProp("ServerPath")}\\bedrock_server.exe");
+                    FileInfo bmsExeInfo = new($"{server.GetSettingsProp("ServerPath")}\\{server.GetSettingsProp("ServerExeName")}");
                     try {
-                        File.Copy(originalExeInfo.FullName, bmsExeInfo.FullName, true);
+                        if (server.GetSettingsProp("LiteLoaderEnabled").GetBoolValue()) {
+                            progress = new(percent =>
+                            {
+                                _logger.AppendLine($"Extracting LiteLoader files for server {server.GetServerName()}, {percent}% completed...");
+                            });
+                            _fileUtilities.ExtractZipToDirectory($@"{_processInfo.GetDirectory()}\BmsConfig\LLBuilds\Update_{liteVersion}.zip", server.GetSettingsProp("ServerPath").ToString(), progress).Wait();
+                            LiteLoaderPECore.BuildLLExe(server, liteVersion);
+                            server.SetSettingsProp("SelectedServerVersion", serverVersion);
+                            MinecraftFileUtilities.CreateDefaultLoaderConfigFile(server);
+                        } else {
+                            File.Copy(originalExeInfo.FullName, bmsExeInfo.FullName, true);
+                        }
                     } catch (IOException e) {
                         if (e.Message.Contains("because it is being used by another process.")) {
                             List<Process> procList = Process.GetProcessesByName(bmsExeInfo.Name.Substring(0, bmsExeInfo.Name.Length - bmsExeInfo.Extension.Length)).ToList();
