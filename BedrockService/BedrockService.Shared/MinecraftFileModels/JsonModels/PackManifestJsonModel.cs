@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace BedrockService.Shared.MinecraftJsonModels.JsonModels {
+namespace BedrockService.Shared.MinecraftFileModels.JsonModels {
     public class PackManifestJsonModel {
         public int format_version { get; set; }
         public Header header { get; set; }

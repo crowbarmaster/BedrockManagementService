@@ -1,8 +1,8 @@
 ﻿using BedrockService.Shared.Classes;
-using BedrockService.Shared.MinecraftJsonModels.JsonModels;
+using BedrockService.Shared.MinecraftFileModels.JsonModels;
 using System.Collections.Generic;
 
-namespace BedrockService.Shared.MinecraftJsonModels.FileModels {
+namespace BedrockService.Shared.MinecraftFileModels.FileAccessModels {
     public class KnownPacksFileModel : BaseJsonFile {
         public List<KnownPacksJsonModel> Contents { get; set; } = new();
 

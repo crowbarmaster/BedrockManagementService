@@ -1,7 +1,7 @@
 ﻿using BedrockService.Shared.Classes;
-using BedrockService.Shared.MinecraftJsonModels.JsonModels;
+using BedrockService.Shared.MinecraftFileModels.JsonModels;
 
-namespace BedrockService.Shared.MinecraftJsonModels.FileModels {
+namespace BedrockService.Shared.MinecraftFileModels.FileAccessModels {
     public class PackManifestFileModel : BaseJsonFile {
         public PackManifestJsonModel Contents { get; set; } = new();
 

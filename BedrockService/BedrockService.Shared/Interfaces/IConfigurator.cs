@@ -1,6 +1,9 @@
-﻿using BedrockService.Shared.SerializeModels;
+﻿using BedrockService.Shared.Classes;
+using BedrockService.Shared.SerializeModels;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace BedrockService.Service.Management.Interfaces {
+namespace BedrockService.Shared.Interfaces {
     public interface IConfigurator {
         Task LoadGlobals();
         Task LoadServerConfigurations();

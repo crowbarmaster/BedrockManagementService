@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BedrockService.Shared.MinecraftJsonModels.JsonModels {
+namespace BedrockService.Shared.MinecraftFileModels.JsonModels {
     public class WhitelistEntryJsonModel {
         public bool ignoresPlayerLimit { get; set; }
         public string name { get; set; }
