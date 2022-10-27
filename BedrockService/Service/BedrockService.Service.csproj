@@ -132,4 +132,7 @@
     <Content Include="appsettings.json" />
     <Content Include="mc_icon.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Management\Interfaces\" />
+  </ItemGroup>
 </Project>
