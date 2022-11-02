@@ -26,7 +26,7 @@ namespace BedrockService.Shared.Classes {
         public IPlayer GetOrCreatePlayer(string xuid, string username = null) {
             IPlayer foundPlayer = _serviceConfiguration.GetPlayerList().FirstOrDefault(p => p.GetXUID() == xuid);
             if (foundPlayer == null) {
-                Player player = new(_serviceConfiguration.GetProp("DefaultGlobalPermLevel").ToString());
+                Player player = new(_serviceConfiguration.GetProp(SharedStringBase.ServicePropertyKeys.DefaultGlobalPermLevel).ToString());
                 player.Initialize(xuid, username);
                 _serviceConfiguration.GetPlayerList().Add(player);
                 return player;

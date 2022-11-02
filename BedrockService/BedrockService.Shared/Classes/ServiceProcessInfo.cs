@@ -13,12 +13,16 @@ namespace BedrockService.Shared.Classes {
             _serviceDirectory = serviceDirectory;
             _processPid = processPid;
             _debugEnabled = debugEnabled;
-            _serverName = serverName;
+        }
+
+        public ServiceProcessInfo(IProcessInfo spi) {
+            _declaredType = spi.DeclaredType();
+            _serviceDirectory = spi.GetDirectory();
+            _processPid = spi.GetProcessPID();
+            _debugEnabled = spi.IsDebugEnabled();
         }
 
         public string DeclaredType() => _declaredType;
-
-        public string GetServerName() => _serverName;
 
         public string GetDirectory() => _serviceDirectory;
 

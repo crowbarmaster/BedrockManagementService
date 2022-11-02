@@ -7,6 +7,7 @@ using BedrockService.Shared.PackParser;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Shared.Utilities {
     public class MinecraftFileUtilities {
@@ -43,8 +44,8 @@ namespace BedrockService.Shared.Utilities {
         }
 
         public static void WriteServerJsonFiles(IServerConfiguration server) {
-            string permFilePath = $@"{server.GetSettingsProp("ServerPath")}\permissions.json";
-            string whitelistFilePath = $@"{server.GetSettingsProp("ServerPath")}\whitelist.json";
+            string permFilePath = $@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\permissions.json";
+            string whitelistFilePath = $@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\whitelist.json";
             PermissionsFileModel permissionsFile = new() { FilePath = permFilePath };
             WhitelistFileModel whitelistFile = new() { FilePath = whitelistFilePath };
             server.GetPlayerList()
@@ -62,7 +63,7 @@ namespace BedrockService.Shared.Utilities {
         }
 
         public static void CreateDefaultLoaderConfigFile(IServerConfiguration server) {
-            string configFilePath = $@"{server.GetSettingsProp("ServerPath")}\plugins\LiteLoader\LiteLoader.json";
+            string configFilePath = $@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\plugins\LiteLoader\LiteLoader.json";
             LiteLoaderFileModel configFile = new() { FilePath = configFilePath };
             LiteLoaderConfigJsonModel configLayout = new() {
                 ColorLog = false,
@@ -99,13 +100,13 @@ namespace BedrockService.Shared.Utilities {
         }
 
         public static void WriteLiteLoaderConfigFile(IServerConfiguration server) {
-            string configFilePath = $@"{server.GetSettingsProp("ServerPath")}\plugins\LiteLoader\LiteLoader.json";
+            string configFilePath = $@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\plugins\LiteLoader\LiteLoader.json";
             LiteLoaderFileModel configFile = new() { FilePath = configFilePath };
         }
 
         public static void WriteServerPropsFile(IServerConfiguration server) {
             int index = 0;
-            string serverPath = server.GetSettingsProp("ServerPath").ToString();
+            string serverPath = server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString();
             string[] output = new string[2 + server.GetAllProps().Count];
             output[index++] = "#Server";
             server.GetAllProps().ForEach(prop => {
@@ -114,7 +115,7 @@ namespace BedrockService.Shared.Utilities {
             if (!Directory.Exists(serverPath)) {
                 Directory.CreateDirectory(serverPath);
             }
-            File.WriteAllLines($@"{serverPath}\server.properties", output);
+            File.WriteAllLines(GetServerFilePath(BdsFileNameKeys.ServerProps, server), output);
         }
     }
 }

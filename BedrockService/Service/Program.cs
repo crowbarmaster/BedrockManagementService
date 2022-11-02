@@ -41,6 +41,7 @@ namespace BedrockService.Service {
             Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hostContext, services) => {
                     IProcessInfo processInfo = new ServiceProcessInfo(_declaredType, Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), Process.GetCurrentProcess().Id, _isDebugEnabled, _shouldStartService);
+                    SharedStringBase.SetWorkingDirectory(processInfo);
                     services.AddHostedService<Core.Service>()
                         .AddSingleton(processInfo)
                         .AddTransient<NetworkStrategyLookup>()

@@ -1,6 +1,7 @@
 ﻿using BedrockService.Shared.Classes;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Shared.Interfaces {
     public interface IServiceConfiguration : IBedrockConfiguration {
@@ -9,6 +10,7 @@ namespace BedrockService.Shared.Interfaces {
         byte GetServerIndex(IServerConfiguration server);
         List<IServerConfiguration> GetServerList();
         List<IPlayer> GetPlayerList();
+        Property GetProp(ServicePropertyKeys keyName);
         void SetPlayerList(List<IPlayer> playerList);
         IPlayer GetOrCreatePlayer(string xuid, string username = null);
         void SetAllServerInfos(List<IServerConfiguration> newInfos);

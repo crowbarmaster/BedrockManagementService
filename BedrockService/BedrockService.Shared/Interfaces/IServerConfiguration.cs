@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace BedrockService.Shared.Interfaces {
     public interface IServerConfiguration : IBedrockConfiguration {
         string GetServerName();
-        string GetFileName();
+        string GetConfigFileName();
         void AddStartCommand(string command);
         bool DeleteStartCommand(string command);
         List<StartCmdEntry> GetStartCommands();
@@ -20,8 +20,9 @@ namespace BedrockService.Shared.Interfaces {
         void SetStatus(ServerStatusModel status);
         ServerStatusModel GetStatus();
         void SetBackupTotals(int totalBackups, int totalSize);
-        Property GetSettingsProp(string name);
-        void SetSettingsProp(string name, string value);
+        Property GetSettingsProp(SharedStringBase.ServerPropertyKeys name);
+        void SetSettingsProp(SharedStringBase.ServerPropertyKeys key, string value);
+        void SetSettingsProp(string key, string value);
         List<Property> GetSettingsList();
         void SetAllSettings(List<Property> settingsList);
         bool ValidateVersion(string version, bool skipNullCheck = false);

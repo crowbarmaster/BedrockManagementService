@@ -5,6 +5,7 @@ using BedrockService.Service.Server.Interfaces;
 using BedrockService.Shared.SerializeModels;
 using NCrontab;
 using System.Timers;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Service.Core {
     public class BedrockService : IBedrockService {
@@ -34,6 +35,11 @@ namespace BedrockService.Service.Core {
         public Task<bool> Initialize() {
             return Task.Run(() => {
                 string? startedVersion = Process.GetCurrentProcess().MainModule?.FileVersionInfo.ProductVersion;
+                foreach (BmsDirectoryKeys key in BmsDirectoryStrings.Keys) {
+                    if (key != BmsDirectoryKeys.WorkingDirectory && !Directory.Exists(GetServiceDirectory(key))) {
+                        Directory.CreateDirectory(GetServiceDirectory(key));
+                    }
+                }
                 if (!File.Exists($@"{_processInfo.GetDirectory()}\ServiceVersion.ini")) {
                     if (UpgradeAssistant_26RC2.IsUpgradeRequired(_processInfo.GetDirectory())) {
                         _logger.AppendLine("Former service of version 2.6RC2 found. Upgrading...");
@@ -47,14 +53,14 @@ namespace BedrockService.Service.Core {
                 _CurrentServiceStatus = ServiceStatus.Starting;
                 _configurator.LoadGlobals().Wait();
                 _logger.Initialize();
-                if (!_serviceConfiguration.GetProp("AcceptedMojangLic").GetBoolValue()) {
+                if (!_serviceConfiguration.GetProp(ServicePropertyKeys.AcceptedMojangLic).GetBoolValue()) {
                     if (Environment.UserInteractive == true) {
                         _logger.AppendLine("You must agree to the terms set by Mojang for use of this software.\n" +
                             "Read terms at: https://minecraft.net/terms \n" +
                             "Type \"Yes\" to affirm you agree to afformentioned terms to continue:");
                         string answer = Console.ReadLine();
                         if (answer != null && answer == "Yes") {
-                            _serviceConfiguration.GetProp("AcceptedMojangLic").SetValue("True");
+                            _serviceConfiguration.GetProp(ServicePropertyKeys.AcceptedMojangLic).SetValue("True");
                             _configurator.SaveGlobalFile();
                         }
                     } else {
@@ -208,7 +214,7 @@ namespace BedrockService.Service.Core {
                     .Select(x => x.GetAllProps()
                         .GroupBy(z => z.StringValue)
                         .SelectMany(z => z
-                            .Where(y => y.KeyName.StartsWith("server-port"))))
+                            .Where(y => y.KeyName.StartsWith(BmsDependServerPropStrings[BmsDependServerPropKeys.PortI4]))))
                     .GroupBy(z => z.Select(x => x.StringValue))
                     .SelectMany(x => x.Key)
                     .GroupBy(x => x)
@@ -226,7 +232,8 @@ namespace BedrockService.Service.Core {
                     throw new Exception($"Duplicate ports used! Check server configurations targeting port(s) {serverPorts}");
                 }
                 foreach (var server in _serviceConfiguration.GetServerList()) {
-                    if (!File.Exists(server.GetSettingsProp("ServerPath") + "\\" + server.GetSettingsProp("ServerExeName"))) {
+                    string serverExePath = string.Format(GetServerFilePath(BdsFileNameKeys.BmsServer_Name, server), server.GetServerName());
+                    if (!File.Exists(serverExePath)) {
                         string deployedVersion = server.GetSelectedVersion() == "Latest"
                                                 ? _serviceConfiguration.GetLatestBDSVersion()
                                                 : server.GetSelectedVersion();
@@ -234,7 +241,7 @@ namespace BedrockService.Service.Core {
                     }
                     if (server.GetServerVersion() != "None" && server.GetSelectedVersion() != "Latest" && server.GetSelectedVersion() != server.GetServerVersion()) {
                         _logger.AppendLine("Manually configured server found with wrong version. Replacing server build...");
-                        if (Updater.FetchBuild(_processInfo.GetDirectory(), server.GetSelectedVersion()).Result) {
+                        if (Updater.FetchBuild(server.GetSelectedVersion()).Result) {
                             _configurator.ReplaceServerBuild(server, server.GetSelectedVersion()).Wait();
                             _configurator.SaveServerConfiguration(server);
                         }

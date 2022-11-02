@@ -8,19 +8,16 @@ using System.IO.Compression;
 
 namespace BedrockService.Shared.PackParser {
     public class MinecraftPackParser {
-        private readonly IProcessInfo _processInfo;
         public string PackExtractDirectory;
         public List<MinecraftPackContainer> FoundPacks = new List<MinecraftPackContainer>();
 
         [JsonConstructor]
-        public MinecraftPackParser(IProcessInfo processInfo) {
-            _processInfo = processInfo;
+        public MinecraftPackParser() {
         }
 
-        public MinecraftPackParser(byte[] fileContents, IProcessInfo processInfo) {
+        public MinecraftPackParser(byte[] fileContents) {
             PackExtractDirectory = $"{Path.GetTempPath()}\\BMSTemp";
-            _processInfo = processInfo;
-            new FileUtilities(processInfo).ClearTempDir().Wait();
+            new FileUtilities().ClearTempDir().Wait();
             using (MemoryStream fileStream = new(fileContents, 5, fileContents.Length - 5)) {
                 using ZipArchive zipArchive = new(fileStream, ZipArchiveMode.Read);
                 zipArchive.ExtractToDirectory(PackExtractDirectory);
@@ -28,10 +25,9 @@ namespace BedrockService.Shared.PackParser {
             ParseDirectory(PackExtractDirectory);
         }
 
-        public MinecraftPackParser(string[] files, string extractDir, IProcessInfo processInfo) {
+        public MinecraftPackParser(string[] files, string extractDir) {
             PackExtractDirectory = extractDir;
-            _processInfo = processInfo;
-            new FileUtilities(_processInfo).ClearTempDir().Wait();
+            new FileUtilities().ClearTempDir().Wait();
             if (Directory.Exists($@"{PackExtractDirectory}\ZipTemp")) {
                 Directory.CreateDirectory($@"{PackExtractDirectory}\ZipTemp");
             }

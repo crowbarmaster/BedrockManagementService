@@ -5,6 +5,7 @@ using BedrockService.Shared.Utilities;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Shared.PackParser {
     public class MinecraftKnownPacksClass {
@@ -37,7 +38,7 @@ namespace BedrockService.Shared.PackParser {
         }
 
         public void RemovePackFromServer(IServerConfiguration configuration, MinecraftPackContainer pack) {
-            string serverPath = configuration.GetSettingsProp("ServerPath").ToString();
+            string serverPath = configuration.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString();
             string serverFolderName = configuration.GetProp("level-name").ToString();
             string jsonPackPath = null;
             string jsonWorldPackEnablerPath = null;

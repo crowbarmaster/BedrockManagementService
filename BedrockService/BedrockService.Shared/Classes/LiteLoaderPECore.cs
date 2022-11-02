@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Shared.Classes {
     public static class LiteLoaderPECore {
@@ -34,8 +35,8 @@ namespace BedrockService.Shared.Classes {
 		static extern int GetFilteredFunctionListCount(string pdbName);
 
 		public static bool FixServerPlugins(IServerConfiguration server) {
-			if(ProcessLibFile($@"{server.GetSettingsProp("ServerPath")}\LiteLoader.dll", $@"{server.GetSettingsProp("ServerPath")}\{server.GetSettingsProp("ServerExeName")}")) {
-				FixPluginsRecusively(new DirectoryInfo($@"{server.GetSettingsProp("ServerPath")}\plugins"), $@"{server.GetSettingsProp("ServerPath")}\{server.GetSettingsProp("ServerExeName")}");
+			if(ProcessLibFile($@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\LiteLoader.dll", $@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\{server.GetSettingsProp(ServerPropertyKeys.ServerExeName)}")) {
+				FixPluginsRecusively(new DirectoryInfo($@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\plugins"), $@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\{server.GetSettingsProp(ServerPropertyKeys.ServerExeName)}");
 				return true;
             }
 			return false;
@@ -49,7 +50,7 @@ namespace BedrockService.Shared.Classes {
         }
 
 		public static bool BuildLLExe(IServerConfiguration server, string liteVersion) {
-			if(CreateModifiedExecutable($@"{server.GetSettingsProp("ServerPath")}\bedrock_server.exe", $@"{server.GetSettingsProp("ServerPath")}\{server.GetSettingsProp("ServerExeName")}", $@"{server.GetSettingsProp("ServerPath")}\bedrock_server.pdb") &&
+			if(CreateModifiedExecutable($@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\bedrock_server.exe", $@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\{server.GetSettingsProp(ServerPropertyKeys.ServerExeName)}", $@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\bedrock_server.pdb") &&
 				FixServerPlugins(server)) {
 				return true;
             }

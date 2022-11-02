@@ -8,6 +8,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Service.Server {
     public class BackupManager {
@@ -30,14 +31,14 @@ namespace BedrockService.Service.Server {
             _server = server;
             _serverConfiguration = serverConfiguration;
             _serviceConfiguration = serviceConfiguration;
-            _fileUtils = new FileUtilities(_processInfo);
-            _autoBackupsContainPacks = _serverConfiguration.GetSettingsProp("AutoBackupsContainPacks").GetBoolValue();
+            _fileUtils = new FileUtilities();
+            _autoBackupsContainPacks = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoBackupsContainPacks).GetBoolValue();
         }
 
         public bool PerformBackup(string queryString) {
             try {
-                string serverPath = _serverConfiguration.GetSettingsProp("ServerPath").ToString();
-                string backupPath = _serverConfiguration.GetSettingsProp("BackupPath").ToString();
+                string serverPath = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString();
+                string backupPath = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupPath).ToString();
                 string levelName = _serverConfiguration.GetProp("level-name").ToString();
                 DirectoryInfo worldsDir = new DirectoryInfo($@"{serverPath}\worlds");
                 DirectoryInfo backupDir = new DirectoryInfo($@"{backupPath}\{_serverConfiguration.GetServerName()}");
@@ -83,14 +84,14 @@ namespace BedrockService.Service.Server {
             }
             int fileCount = backupDir.GetFiles().Length;
             try {
-                if (fileCount >= _serverConfiguration.GetSettingsProp("MaxBackupCount").GetIntValue()) {
+                if (fileCount >= _serverConfiguration.GetSettingsProp(ServerPropertyKeys.MaxBackupCount).GetIntValue()) {
                     List<string> dates = new List<string>();
                     foreach (FileInfo file in backupDir.GetFiles()) {
                         string[] fileNameSplit = file.Name.Split('-');
                         dates.Add(fileNameSplit[1]);
                     }
                     dates.Sort();
-                    while (fileCount >= _serverConfiguration.GetSettingsProp("MaxBackupCount").GetIntValue()) {
+                    while (fileCount >= _serverConfiguration.GetSettingsProp(ServerPropertyKeys.MaxBackupCount).GetIntValue()) {
                         File.Delete($@"{backupDir}\Backup-{dates.First()}");
                         _logger.AppendLine($"Removed Backup-{dates.First()}");
                         dates.Remove(dates.First());

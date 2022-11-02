@@ -2,6 +2,7 @@
 using BedrockService.Shared.SerializeModels;
 using Newtonsoft.Json;
 using System.Text;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Service.Networking.NetworkStrategies {
     public class AddNewServer : IMessageParser {
@@ -24,7 +25,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
             string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
             JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
             ServerCombinedPropModel propModel = JsonConvert.DeserializeObject<ServerCombinedPropModel>(stringData, settings);
-            string serversPath = _serviceConfiguration.GetProp("ServersPath").ToString();
+            string serversPath = _serviceConfiguration.GetProp(ServicePropertyKeys.ServersPath).ToString();
             List<Property>? propList = propModel?.ServerPropList;
             List<Property>? servicePropList = propModel?.ServicePropList;
             Property? serverNameProp = propList?.First(p => p.KeyName == "server-name");
@@ -38,15 +39,15 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
             } else {
                 newServer.SetServerVersion(versionProp?.StringValue);
                 newServer.ValidateVersion(versionProp?.StringValue);
-                newServer.GetSettingsProp("DeployedVersion").SetValue(versionProp?.StringValue);
+                newServer.GetSettingsProp(ServerPropertyKeys.DeployedVersion).SetValue(versionProp?.StringValue);
                 newServer.SetProp("server-name", serverNameProp?.StringValue);
                 newServer.SetProp("server-port", ipV4Prop?.StringValue);
                 newServer.SetProp("server-portv6", ipV6Prop?.StringValue);
             }
-            newServer.GetSettingsProp("ServerName").SetValue(serverNameProp.StringValue);
-            newServer.GetSettingsProp("ServerPath").SetValue($@"{serversPath}\{serverNameProp.StringValue}");
-            newServer.GetSettingsProp("ServerExeName").SetValue($"BedrockService.{serverNameProp.StringValue}.exe");
-            newServer.GetSettingsProp("FileName").SetValue($@"{serverNameProp.StringValue}.conf");
+            newServer.GetSettingsProp(ServerPropertyKeys.ServerName).SetValue(serverNameProp.StringValue);
+            newServer.GetSettingsProp(ServerPropertyKeys.ServerPath).SetValue($@"{serversPath}\{serverNameProp.StringValue}");
+            newServer.GetSettingsProp(ServerPropertyKeys.ServerExeName).SetValue($"BedrockService.{serverNameProp.StringValue}.exe");
+            newServer.GetSettingsProp(ServerPropertyKeys.FileName).SetValue($@"{serverNameProp.StringValue}.conf");
             newServer.SetServerVersion(versionProp?.StringValue);
             _configurator.SaveServerConfiguration(newServer);
             _bedrockService.InitializeNewServer(newServer);

@@ -5,13 +5,20 @@ using BedrockService.Shared.SerializeModels;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Client.Forms {
     public partial class AddNewServerForm : Form {
         public ServerCombinedPropModel ServerCombinedPropModel = new();
         private readonly List<IServerConfiguration> serverConfigurations;
         private readonly IClientSideServiceConfiguration serviceConfiguration;
-        private readonly List<string> serviceConfigExcludeList = new List<string>() { "ServerName", "ServerExeName", "FileName", "ServerPath", "DeployedVersion" };
+        private readonly List<string> serviceConfigExcludeList = new List<string>() 
+        {   ServerPropertyStrings[ServerPropertyKeys.ServerName],
+            ServerPropertyStrings[ServerPropertyKeys.ServerExeName],
+            ServerPropertyStrings[ServerPropertyKeys.FileName],
+            ServerPropertyStrings[ServerPropertyKeys.ServerPath],
+            ServerPropertyStrings[ServerPropertyKeys.DeployedVersion] 
+        };
 
         public AddNewServerForm(IClientSideServiceConfiguration serviceConfiguration, List<IServerConfiguration> serverConfigurations) {
             this.serviceConfiguration = serviceConfiguration;
@@ -27,11 +34,11 @@ namespace BedrockService.Client.Forms {
         private void editPropsBtn_Click(object sender, System.EventArgs e) {
             using PropEditorForm editSrvDialog = new PropEditorForm();
             if (srvNameBox.TextLength > 0)
-                ServerCombinedPropModel.ServerPropList.First(prop => prop.KeyName == "server-name").StringValue = srvNameBox.Text;
+                ServerCombinedPropModel.ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.ServerName]).StringValue = srvNameBox.Text;
             if (ipV4Box.TextLength > 0)
-                ServerCombinedPropModel.ServerPropList.First(prop => prop.KeyName == "server-port").StringValue = ipV4Box.Text;
+                ServerCombinedPropModel.ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.PortI4]).StringValue = ipV4Box.Text;
             if (ipV6Box.TextLength > 0)
-                ServerCombinedPropModel.ServerPropList.First(prop => prop.KeyName == "server-portv6").StringValue = ipV6Box.Text;
+                ServerCombinedPropModel.ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.PortI6]).StringValue = ipV6Box.Text;
             editSrvDialog.PopulateBoxes(ServerCombinedPropModel.ServerPropList);
             if (editSrvDialog.ShowDialog() == DialogResult.OK) {
                 ServerCombinedPropModel.ServerPropList = editSrvDialog.workingProps;
@@ -53,23 +60,23 @@ namespace BedrockService.Client.Forms {
             List<string> usedPorts = new List<string>();
             usedPorts.Add(serviceConfiguration.GetPort());
             foreach (IServerConfiguration serverConfiguration in serverConfigurations) {
-                usedPorts.Add(serverConfiguration.GetProp("server-port").ToString());
-                usedPorts.Add(serverConfiguration.GetProp("server-portv6").ToString());
+                usedPorts.Add(serverConfiguration.GetProp(BmsDependServerPropKeys.PortI4).ToString());
+                usedPorts.Add(serverConfiguration.GetProp(BmsDependServerPropKeys.PortI6).ToString());
             }
             foreach (string port in usedPorts) {
                 if (ipV4Box.Text == port || ipV6Box.Text == port) {
-                    MessageBox.Show($"You have selected port {port} to use, but this port is already used. Please select another port!");
+                    MessageBox.Show($"You have selected port {port}, but this port is already in use. Please select another port!");
                     return;
                 }
             }
             if (srvNameBox.TextLength > 0)
-                ServerCombinedPropModel.ServerPropList.First(prop => prop.KeyName == "server-name").StringValue = srvNameBox.Text;
+                ServerCombinedPropModel.ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.ServerName]).StringValue = srvNameBox.Text;
             if (ipV4Box.TextLength > 0)
-                ServerCombinedPropModel.ServerPropList.First(prop => prop.KeyName == "server-port").StringValue = ipV4Box.Text;
+                ServerCombinedPropModel.ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.PortI4]).StringValue = ipV4Box.Text;
             if (ipV6Box.TextLength > 0)
-                ServerCombinedPropModel.ServerPropList.First(prop => prop.KeyName == "server-portv6").StringValue = ipV6Box.Text;
+                ServerCombinedPropModel.ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.PortI6]).StringValue = ipV6Box.Text;
 
-            ServerCombinedPropModel.ServicePropList.First(prop => prop.KeyName == "DeployedVersion").StringValue = versionTextBox.Text;
+            ServerCombinedPropModel.ServicePropList.First(prop => prop.KeyName == ServerPropertyStrings[ServerPropertyKeys.DeployedVersion]).StringValue = versionTextBox.Text;
             DialogResult = DialogResult.OK;
         }
 
@@ -79,7 +86,7 @@ namespace BedrockService.Client.Forms {
             } else {
                 editPropsBtn.Enabled = true;
             }
-            ServerCombinedPropModel.ServicePropList.First(prop => prop.KeyName == "SelectedServerVersion").StringValue = versionTextBox.Text;
+            ServerCombinedPropModel.ServicePropList.First(prop => prop.KeyName == ServerPropertyStrings[ServerPropertyKeys.SelectedServerVersion]).StringValue = versionTextBox.Text;
         }
     }
 }

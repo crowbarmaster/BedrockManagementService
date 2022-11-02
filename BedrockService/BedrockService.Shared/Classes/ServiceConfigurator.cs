@@ -4,8 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Shared.Classes {
     public class ServiceConfigurator : ServiceInfo, IServiceConfiguration {
@@ -16,15 +16,15 @@ namespace BedrockService.Shared.Classes {
 
         public bool InitializeDefaults() {
             globals.Clear();
-            globals.Add(new Property("ServersPath", @"C:\MCBedrockService"));
-            globals.Add(new Property("AcceptedMojangLic", "false"));
-            globals.Add(new Property("ClientPort", "19134"));
-            globals.Add(new Property("LogServerOutput", "true"));
-            globals.Add(new Property("LogApplicationOutput", "true"));
-            globals.Add(new Property("TimestampLogEntries", "true"));
-            globals.Add(new Property("GlobalizedPlayerDatabase", "false"));
-            globals.Add(new Property("DefaultGlobalPermLevel", "member"));
-            globals.Add(new Property("LatestLiteLoaderVersion", "1.19.30.04|2.7.2"));
+            globals.Add(new Property(ServicePropertyStrings[ServicePropertyKeys.ServersPath], @"C:\MCBedrockService"));
+            globals.Add(new Property(ServicePropertyStrings[ServicePropertyKeys.AcceptedMojangLic], "false"));
+            globals.Add(new Property(ServicePropertyStrings[ServicePropertyKeys.ClientPort], "19134"));
+            globals.Add(new Property(ServicePropertyStrings[ServicePropertyKeys.LogServerOutput], "true"));
+            globals.Add(new Property(ServicePropertyStrings[ServicePropertyKeys.LogApplicationOutput], "true"));
+            globals.Add(new Property(ServicePropertyStrings[ServicePropertyKeys.TimestampLogEntries], "true"));
+            globals.Add(new Property(ServicePropertyStrings[ServicePropertyKeys.GlobalizedPlayerDatabase], "false"));
+            globals.Add(new Property(ServicePropertyStrings[ServicePropertyKeys.DefaultGlobalPermLevel], "member"));
+            globals.Add(new Property(ServicePropertyStrings[ServicePropertyKeys.LatestLiteLoaderVersion], "1.19.30.04|2.7.2"));
             return true;
         }
 
@@ -41,15 +41,17 @@ namespace BedrockService.Shared.Classes {
         }
 
         public bool ValidateLatestVersion() {
+            string propFile = GetServiceFilePath(BmsFileNameKeys.StockProps, LatestServerVersion);
             if (LatestServerVersion != "None" && _processInfo.DeclaredType() != "Client") {
-                if (!File.Exists($@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\CoreFiles\Build_{LatestServerVersion}\stock_packs.json") || !File.Exists($@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\CoreFiles\Build_{LatestServerVersion}\stock_props.conf")) {
-                    MinecraftUpdatePackageProcessor packageProcessor = new(_processInfo, LatestServerVersion, $@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\CoreFiles\Build_{LatestServerVersion}");
+                if (!File.Exists(propFile)) {
+                    FileInfo file = new(propFile);
+                    MinecraftUpdatePackageProcessor packageProcessor = new(LatestServerVersion, file.Directory.FullName);
                     if (!packageProcessor.ExtractCoreFiles()) {
                         return false;
                     }
                 }
                 DefaultServerProps.Clear();
-                File.ReadAllLines($@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\CoreFiles\Build_{LatestServerVersion}\stock_props.conf").ToList().ForEach(entry => {
+                File.ReadAllLines(propFile).ToList().ForEach(entry => {
                     string[] splitEntry = entry.Split('=');
                     DefaultServerProps.Add(new Property(splitEntry[0], splitEntry[1]));
                 });
@@ -61,8 +63,8 @@ namespace BedrockService.Shared.Classes {
             return Task.Run(() => {
                 int TotalServerBackupCount = 0;
                 int TotalServerBackupSize = 0;
-                string backupPath = serverConfiguration.GetSettingsProp("BackupPath").ToString();
-                string serverName = serverConfiguration.GetSettingsProp("ServerName").ToString();
+                string backupPath = serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupPath).ToString();
+                string serverName = serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerName).ToString();
                 DirectoryInfo serverBackupDirInfo = new($"{backupPath}\\{serverName}");
                 try {
                     IEnumerable<FileInfo> backupFileList = serverBackupDirInfo.GetFiles();
@@ -92,10 +94,10 @@ namespace BedrockService.Shared.Classes {
                         split[1] = "";
                     }
                     if (split[0] == "LogServiceToFile") {
-                        split[0] = "LogApplicationOutput";
+                        split[0] = ServicePropertyStrings[ServicePropertyKeys.LogApplicationOutput];
                     }
                     if (split[0] == "LogServersToFile") {
-                        split[0] = "LogServerOutput";
+                        split[0] = ServicePropertyStrings[ServicePropertyKeys.LogServerOutput];
                     }
                     SetProp(split[0], split[1]);
                 }
@@ -184,7 +186,7 @@ namespace BedrockService.Shared.Classes {
         public IPlayer GetOrCreatePlayer(string xuid, string username = null) {
             IPlayer foundPlayer = PlayersList.FirstOrDefault(p => p.GetXUID() == xuid);
             if (foundPlayer == null) {
-                Player player = new(GetProp("DefaultGlobalPermLevel").ToString());
+                Player player = new(GetProp(ServicePropertyStrings[ServicePropertyKeys.DefaultGlobalPermLevel]).ToString());
                 player.Initialize(xuid, username);
                 PlayersList.Add(player);
                 return player;
@@ -195,5 +197,13 @@ namespace BedrockService.Shared.Classes {
         public List<IPlayer> GetPlayerList() => PlayersList;
 
         public void SetPlayerList(List<IPlayer> playerList) => PlayersList = playerList;
+
+        public Property GetProp(ServicePropertyKeys keyName) {
+            return globals.FirstOrDefault(prop => prop.KeyName == ServicePropertyStrings[keyName]);
+        }
+
+        public Property GetProp(BmsDependServerPropKeys key) {
+            throw new NotImplementedException();
+        }
     }
 }

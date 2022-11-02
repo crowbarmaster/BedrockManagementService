@@ -8,15 +8,14 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Shared.Utilities {
     public class FileUtilities {
         readonly string _servicePath;
-        private readonly IProcessInfo _processInfo;
 
-        public FileUtilities(IProcessInfo processInfo) {
-            _processInfo = processInfo;
-            _servicePath = _processInfo.GetDirectory();
+        public FileUtilities() {
+            _servicePath = GetServiceDirectory(BmsDirectoryKeys.WorkingDirectory);
         }
 
         public void CreateInexistantFile(string filePath) {
@@ -68,24 +67,24 @@ namespace BedrockService.Shared.Utilities {
         public void AppendServerPacksToArchive(string serverPath, ZipArchive backupZip, DirectoryInfo levelDirInfo) {
             string levelName = levelDirInfo.Name;
             CreatePackBackupFiles(serverPath, levelName, backupZip);
-            if (Directory.Exists(levelDirInfo.FullName + "\\development_resource_packs")) {
+            if (Directory.Exists(GetServerDirectory(BdsDirectoryKeys.ResourcePacksDir, serverPath))) {
                 ClearTempDir().Wait();
-                ZipFile.CreateFromDirectory(levelDirInfo.FullName + "\\development_resource_packs", $@"{Path.GetTempPath()}\BMSTemp\resource_packs.zip");
+                ZipFile.CreateFromDirectory(string.Format(GetServerDirectory(BdsDirectoryKeys.ResourcePacksDir, serverPath), levelName), $@"{Path.GetTempPath()}\BMSTemp\resource_packs.zip");
                 backupZip.CreateEntryFromFile($@"{Path.GetTempPath()}\BMSTemp\resource_packs.zip", "resource_packs.zip");
             }
-            if (Directory.Exists(levelDirInfo.FullName + "\\development_behavior_packs")) {
+            if (Directory.Exists(GetServerDirectory(BdsDirectoryKeys.BehaviorPacksDir, serverPath))) {
                 ClearTempDir().Wait();
-                ZipFile.CreateFromDirectory(levelDirInfo.FullName + "\\development_behavior_packs", $@"{Path.GetTempPath()}\BMSTemp\behavior_packs.zip");
+                ZipFile.CreateFromDirectory(string.Format(GetServerDirectory(BdsDirectoryKeys.BehaviorPacksDir, serverPath), levelName), $@"{Path.GetTempPath()}\BMSTemp\behavior_packs.zip");
                 backupZip.CreateEntryFromFile($@"{Path.GetTempPath()}\BMSTemp\behavior_packs.zip", "behavior_packs.zip");
             }
         }
 
         public void CreatePackBackupFiles(string serverPath, string levelName, ZipArchive destinationArchive) {
-            string resouceFolderPath = $@"{serverPath}\development_resource_packs";
-            string behaviorFolderPath = $@"{serverPath}\development_behavior_packs";
-            string behaviorFilePath = $@"{serverPath}\worlds\{levelName}\world_behavior_packs.json";
-            string resoruceFilePath = $@"{serverPath}\worlds\{levelName}\world_resource_packs.json";
-            MinecraftPackParser packParser = new(_processInfo);
+            string resouceFolderPath = GetServerDirectory(BdsDirectoryKeys.ResourcePacksDir, serverPath);
+            string behaviorFolderPath = GetServerDirectory(BdsDirectoryKeys.BehaviorPacksDir, serverPath);
+            string behaviorFilePath = GetServerFilePath(BdsFileNameKeys.WorldBehaviorPacks, serverPath);
+            string resoruceFilePath = GetServerFilePath(BdsFileNameKeys.WorldResourcePacks, serverPath);
+            MinecraftPackParser packParser = new();
             packParser.ParseDirectory(resouceFolderPath);
             packParser.ParseDirectory(behaviorFolderPath);
             WorldPackFileModel worldPacks = new(resoruceFilePath);

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Client.Management {
     class LogManager {
@@ -32,7 +33,7 @@ namespace BedrockService.Client.Management {
                     StringBuilder sendString = new StringBuilder();
                     foreach (ServerConfigurator server in _connectedHost.GetServerList()) {
                         server.ConsoleBuffer = server.ConsoleBuffer ?? new List<LogEntry>();
-                        sendString.Append($"{server.GetSettingsProp("ServerName")};{server.ConsoleBuffer.Count}|");
+                        sendString.Append($"{server.GetSettingsProp(ServerPropertyKeys.ServerName)};{server.ConsoleBuffer.Count}|");
                     }
                     sendString.Append($"Service;{_connectedHost.GetLog().Count}");
                     byte[] stringsToBytes = Encoding.UTF8.GetBytes(sendString.ToString());
@@ -62,7 +63,7 @@ namespace BedrockService.Client.Management {
                     if (FormManager.MainWindow.selectedServer != null && FormManager.MainWindow.selectedServer.GetStatus() != null) {
                         Task.Run(() => {
                             IServerConfiguration serverConfiguration = FormManager.MainWindow.selectedServer;
-                            bool autoStartEnabled = serverConfiguration.GetSettingsProp("ServerAutostartEnabled").GetBoolValue();
+                            bool autoStartEnabled = serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerAutostartEnabled).GetBoolValue();
                             ServerStatusModel status = serverConfiguration.GetStatus();
                             ServiceStatusModel serviceStatus = FormManager.MainWindow.ServiceStatus;
                             string statusMsg = $"{serverConfiguration.GetServerName()} is {status.ServerStatus}";
@@ -74,7 +75,7 @@ namespace BedrockService.Client.Management {
                                 if (!autoStartEnabled) {
                                     statusMsg += $"\r\nAutoStart disabled for this server!";
                                 }
-                                if (!serverConfiguration.GetSettingsProp("AutoDeployUpdates").GetBoolValue() && status.DeployedVersion != null && serviceStatus.LatestVersion != null && status.DeployedVersion != "None") {
+                                if (!serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue() && status.DeployedVersion != null && serviceStatus.LatestVersion != null && status.DeployedVersion != "None") {
                                     Version serverVersion = Version.Parse(status.DeployedVersion);
                                     Version latestVersion = Version.Parse(serviceStatus.LatestVersion);
                                     if (serverVersion < latestVersion) {

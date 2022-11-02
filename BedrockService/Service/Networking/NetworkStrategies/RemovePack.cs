@@ -2,6 +2,7 @@
 using BedrockService.Shared.PackParser;
 using Newtonsoft.Json;
 using System.Text;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Service.Networking.NetworkStrategies {
     public class RemovePack : IMessageParser {
@@ -18,8 +19,8 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
             string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
-            string pathToWorldFolder = $@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp("ServerPath")}\worlds\{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("level-name")}";
-            MinecraftKnownPacksClass knownPacks = new MinecraftKnownPacksClass($@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp("ServerPath")}\valid_known_packs.json", pathToWorldFolder);
+            string pathToWorldFolder = $@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp(ServerPropertyKeys.ServerPath)}\worlds\{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("level-name")}";
+            MinecraftKnownPacksClass knownPacks = new MinecraftKnownPacksClass($@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp(ServerPropertyKeys.ServerPath)}\valid_known_packs.json", pathToWorldFolder);
             JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
             List<MinecraftPackContainer>? container = JsonConvert.DeserializeObject<List<MinecraftPackContainer>>(stringData, settings);
             foreach (MinecraftPackContainer content in container) {

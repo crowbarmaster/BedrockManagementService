@@ -2,10 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+#nullable enable
 namespace BedrockService.Shared.Classes {
     public class ServerPlayerManager : IPlayerManager {
-        readonly IServerConfiguration _serverConfiguration;
+        readonly IServerConfiguration? _serverConfiguration;
 
         public ServerPlayerManager(IServerConfiguration? serverConfiguration) {
             _serverConfiguration = serverConfiguration;
@@ -26,7 +26,7 @@ namespace BedrockService.Shared.Classes {
         public IPlayer GetOrCreatePlayer(string xuid, string username = null) {
             IPlayer foundPlayer = _serverConfiguration.GetPlayerList().FirstOrDefault(p => p.GetXUID() == xuid);
             if (foundPlayer == null) {
-                Player player = new(_serverConfiguration.GetProp("default-player-permission-level").ToString());
+                Player player = new(_serverConfiguration.GetProp(SharedStringBase.BmsDependServerPropStrings[SharedStringBase.BmsDependServerPropKeys.PermLevel]).ToString());
                 player.Initialize(xuid, username);
                 _serverConfiguration.GetPlayerList().Add(player);
                 return player;

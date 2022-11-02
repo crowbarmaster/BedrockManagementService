@@ -3,7 +3,7 @@
 namespace BedrockService.Service.Core {
     public class Service : IService {
         private readonly IBedrockService _bedrockService;
-        private Topshelf.Host _host;
+        private Topshelf.Host? _host;
         private readonly IProcessInfo _processInfo;
         private readonly IBedrockLogger _logger;
         private readonly IHostApplicationLifetime _applicationLifetime;
@@ -14,6 +14,7 @@ namespace BedrockService.Service.Core {
             _processInfo = processInfo;
             _bedrockService = bedrockService;
             _applicationLifetime = appLifetime;
+            _ = networkStrategyLookup;
             appLifetime.ApplicationStarted.Register(OnStarted);
             appLifetime.ApplicationStopping.Register(OnStopping);
             appLifetime.ApplicationStopped.Register(OnShutdown);
@@ -22,38 +23,34 @@ namespace BedrockService.Service.Core {
         public async Task InitializeHost() {
             await Task.Run(() => {
                 _host = HostFactory.New(hostConfig => {
-                    hostConfig.SetStartTimeout(TimeSpan.FromSeconds(120));
-                    hostConfig.SetStopTimeout(TimeSpan.FromSeconds(120));
-                    hostConfig.UseAssemblyInfoForServiceInfo();
                     hostConfig.Service(settings => _bedrockService, s => {
-                        s.BeforeStartingService(_ => _logger.AppendLine("Starting service..."));
-                        s.AfterStartingService(_ => {
+                        s.BeforeStartingService(_ => {
                             _logger.AppendLine($"Bedrock Management Service version {Process.GetCurrentProcess().MainModule.FileVersionInfo.ProductVersion} has started.");
                             _logger.AppendLine($"Working directory: {_processInfo.GetDirectory()}");
                         });
+                        s.AfterStartingService(_ => _logger.AppendLine("Service started Successfully."));
                         s.BeforeStoppingService(_ => _logger.AppendLine("Stopping service..."));
                         s.AfterStoppingService(_ => _applicationLifetime.StopApplication());                     
-                    });
-                    hostConfig.RunAsLocalService();
-                    hostConfig.SetDescription("Windows Service Wrapper for Windows Bedrock Server");
-                    hostConfig.SetDisplayName("BedrockService");
-                    hostConfig.SetServiceName("BedrockService");
-                    hostConfig.UnhandledExceptionPolicy = UnhandledExceptionPolicyCode.LogErrorOnly;
-                    hostConfig.AfterInstall(() => {
+                    }).RunAsLocalService().AfterInstall(() => {
                         _logger.AppendLine("Service install completed... Exiting!");
                         Task.Delay(1000).Wait();
                         _applicationLifetime.StopApplication();
-                    });
-                    hostConfig.AfterUninstall(() => {
+                    }).AfterUninstall(() => {
                         _logger.AppendLine("Service uninstall completed... Exiting!");
                         Task.Delay(1000).Wait();
                         _applicationLifetime.StopApplication();
-                    });
-                    hostConfig.EnableServiceRecovery(src => {
+                    }).EnableServiceRecovery(src => {
                         src.RestartService(delayInMinutes: 0);
                         src.RestartService(delayInMinutes: 1);
                         src.SetResetPeriod(days: 1);
                     });
+                    hostConfig.SetStartTimeout(TimeSpan.FromSeconds(120));
+                    hostConfig.SetStopTimeout(TimeSpan.FromSeconds(120));
+                    hostConfig.UseAssemblyInfoForServiceInfo();
+                    hostConfig.SetDescription("Bedrock Management Service for windows 10");
+                    hostConfig.SetDisplayName("BedrockService");
+                    hostConfig.SetServiceName("BedrockService");
+                    hostConfig.UnhandledExceptionPolicy = UnhandledExceptionPolicyCode.LogErrorOnly;
                     hostConfig.OnException((ex) => {
                         _logger.AppendLine("Exception occured Main : " + ex.Message);
                     });
@@ -71,9 +68,11 @@ namespace BedrockService.Service.Core {
         }
 
         private void OnStarted() {
-            Task.Run(() => {
-                _exitCode = _host.Run();
-            });
+            if (_host != null) {
+                Task.Run(() => {
+                    _exitCode = _host.Run();
+                });
+            }
         }
 
         private void OnStopping() {

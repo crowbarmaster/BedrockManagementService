@@ -14,6 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Client.Forms {
     public partial class MainWindow : Form {
@@ -191,7 +192,7 @@ namespace BedrockService.Client.Forms {
             if (connectedHost != null) {
                 _logManager.InitLogThread(connectedHost);
                 foreach (ServerConfigurator server in connectedHost.GetServerList()) {
-                    ServerSelectBox.Items.Add(server.GetSettingsProp("ServerName").ToString());
+                    ServerSelectBox.Items.Add(server.GetSettingsProp(ServerPropertyKeys.ServerName).ToString());
                 }
 
                 if (ServerSelectBox.Items.Count > 0) {

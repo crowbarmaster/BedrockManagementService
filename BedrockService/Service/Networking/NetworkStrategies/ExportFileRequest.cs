@@ -8,6 +8,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Service.Networking.NetworkStrategies {
     public class ExportFileRequest : IMessageParser {
@@ -29,7 +30,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
             if (serverIndex != 255 && exportFileInfo != null) {
                 if (exportFileInfo.FileType == FileTypeFlags.Backup) {
                     IServerConfiguration server = _configuration.GetServerInfoByIndex(serverIndex);
-                    string backupPath = $"{server.GetSettingsProp("BackupPath")}\\{server.GetServerName()}\\{exportFileInfo.Filename}";
+                    string backupPath = $"{server.GetSettingsProp(ServerPropertyKeys.BackupPath)}\\{server.GetServerName()}\\{exportFileInfo.Filename}";
                     exportFileInfo.Data = File.ReadAllBytes(backupPath);
                 }
                 if (exportFileInfo.FileType == FileTypeFlags.ServerPackage) {
@@ -50,17 +51,17 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
 
         private void PrepareServerFiles(byte serverIndex, ExportImportFileModel exportFileInfo, IServerConfiguration server, ZipArchive packageFile) {
             if (exportFileInfo.PackageFlags >= PackageFlags.ConfigFile) {
-                packageFile.CreateEntryFromFile($"{_processInfo.GetDirectory()}\\BMSConfig\\ServerConfigs\\{server.GetSettingsProp("FileName")}", server.GetSettingsProp("FileName").ToString());
+                packageFile.CreateEntryFromFile($"{_processInfo.GetDirectory()}\\BMSConfig\\ServerConfigs\\{server.GetSettingsProp(ServerPropertyKeys.FileName)}", server.GetSettingsProp(ServerPropertyKeys.FileName).ToString());
             }
             if (exportFileInfo.PackageFlags >= PackageFlags.LastBackup) {
                 BackupInfoModel lastBackup = _configurator.EnumerateBackupsForServer(serverIndex).Result.FirstOrDefault();
                 if (lastBackup != null) {
-                    packageFile.CreateEntryFromFile($"{server.GetSettingsProp("BackupPath")}\\{server.GetServerName()}\\{lastBackup.Filename}", lastBackup.Filename);
+                    packageFile.CreateEntryFromFile($"{server.GetSettingsProp(ServerPropertyKeys.BackupPath)}\\{server.GetServerName()}\\{lastBackup.Filename}", lastBackup.Filename);
                 }
             }
             if (exportFileInfo.PackageFlags >= PackageFlags.WorldPacks) {
-                FileUtilities fileUtilities = new FileUtilities(_processInfo);
-                fileUtilities.CreatePackBackupFiles(server.GetSettingsProp("ServerPath").ToString(), server.GetProp("level-name").ToString(), packageFile);
+                FileUtilities fileUtilities = new FileUtilities();
+                fileUtilities.CreatePackBackupFiles(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString(), server.GetProp("level-name").ToString(), packageFile);
             }
             if (exportFileInfo.PackageFlags >= PackageFlags.PlayerDatabase) {
                 if (File.Exists($"{_processInfo.GetDirectory()}\\BMSConfig\\ServerConfigs\\PlayerRecords\\{server.GetServerName()}.playerdb")) {
