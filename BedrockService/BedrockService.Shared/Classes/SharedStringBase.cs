@@ -278,12 +278,24 @@ namespace BedrockService.Shared.Classes {
             if (!BmsFileNameStrings.ContainsKey(key)) {
                 throw new KeyNotFoundException($"Key {key} was not a does not have a file name associated.");
             }
+            if (!BmsFileParentDirectories.ContainsKey(key)) {
+                throw new KeyNotFoundException($"File {key} does not have a parent directory associated.");
+            }
+            if (!BmsDirectoryStrings.ContainsKey(BmsFileParentDirectories[key])) {
+                throw new KeyNotFoundException($"File {BmsFileParentDirectories[key]} does not have a directory associated.");
+            }
             return BmsFileNameStrings[key];
         }
 
         public static string GetServiceFilePath(BmsFileNameKeys key) {
             if (!BmsFileNameStrings.ContainsKey(key)) {
                 throw new KeyNotFoundException($"Key {key} was not a does not have a directory associated.");
+            }
+            if (!BmsFileParentDirectories.ContainsKey(key)) {
+                throw new KeyNotFoundException($"File {key} does not have a parent directory associated.");
+            }
+            if (!BmsDirectoryStrings.ContainsKey(BmsFileParentDirectories[key])) {
+                throw new KeyNotFoundException($"File {BmsFileParentDirectories[key]} does not have a directory associated.");
             }
             return $"{GetServiceDirectory(BmsFileParentDirectories[key])}\\{BmsFileNameStrings[key]}";
         }
@@ -325,6 +337,12 @@ namespace BedrockService.Shared.Classes {
             if (!BdsFileNameStrings.ContainsKey(key)) {
                 throw new KeyNotFoundException($"Key {key} was not a does not have a file name associated.");
             }
+            if (!BdsFileParentDirectories.ContainsKey(key)) {
+                throw new KeyNotFoundException($"File {key} does not have a parent directory associated.");
+            }
+            if(!BdsDirectoryStrings.ContainsKey(BdsFileParentDirectories[key])) {
+                throw new KeyNotFoundException($"File {BdsFileParentDirectories[key]} does not have a directory associated.");
+            }
             return $"{GetServerDirectory(BdsFileParentDirectories[key], server)}\\{BdsFileNameStrings[key]}";
         }
 
@@ -332,12 +350,24 @@ namespace BedrockService.Shared.Classes {
             if (!BdsFileNameStrings.ContainsKey(key)) {
                 throw new KeyNotFoundException($"Key {key} was not a does not have a file name associated.");
             }
+            if (!BdsFileParentDirectories.ContainsKey(key)) {
+                throw new KeyNotFoundException($"File {key} does not have a parent directory associated.");
+            }
+            if (!BdsDirectoryStrings.ContainsKey(BdsFileParentDirectories[key])) {
+                throw new KeyNotFoundException($"File {BdsFileParentDirectories[key]} does not have a directory associated.");
+            }
             return string.Format($@"{GetServerDirectory(BdsFileParentDirectories[key], server)}\{BdsFileNameStrings[key]}", var0);
         }
 
         public static string GetServerFilePath(BdsFileNameKeys key, string serverPath) {
             if (!BdsFileNameStrings.ContainsKey(key)) {
                 throw new KeyNotFoundException($"Key {key} was not a does not have a file name associated.");
+            }
+            if (!BdsFileParentDirectories.ContainsKey(key)) {
+                throw new KeyNotFoundException($"File {key} does not have a parent directory associated.");
+            }
+            if (!BdsDirectoryStrings.ContainsKey(BdsFileParentDirectories[key])) {
+                throw new KeyNotFoundException($"File {BdsFileParentDirectories[key]} does not have a directory associated.");
             }
             return $@"{GetServerDirectory(BdsFileParentDirectories[key], serverPath)}\{BdsFileNameStrings[key]}";
         }
