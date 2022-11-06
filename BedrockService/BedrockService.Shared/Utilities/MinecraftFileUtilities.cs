@@ -4,9 +4,12 @@ using BedrockService.Shared.LiteLoaderFileModels.JsonModels;
 using BedrockService.Shared.MinecraftFileModels.FileAccessModels;
 using BedrockService.Shared.MinecraftFileModels.JsonModels;
 using BedrockService.Shared.PackParser;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Dynamic;
 using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Shared.Utilities {
@@ -102,6 +105,13 @@ namespace BedrockService.Shared.Utilities {
         public static void WriteLiteLoaderConfigFile(IServerConfiguration server) {
             string configFilePath = $@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\plugins\LiteLoader\LiteLoader.json";
             LiteLoaderFileModel configFile = new() { FilePath = configFilePath };
+        }
+
+        public static LiteLoaderConfigNodeModel LoadLiteLoaderConfigFile(IServerConfiguration server) {
+            if (!File.Exists(GetServerFilePath(BdsFileNameKeys.LLConfig, server))) {
+                CreateDefaultLoaderConfigFile(server);
+            }
+            return new("Root", File.ReadAllText(GetServerFilePath(BdsFileNameKeys.LLConfig, server)));
         }
 
         public static void WriteServerPropsFile(IServerConfiguration server) {
