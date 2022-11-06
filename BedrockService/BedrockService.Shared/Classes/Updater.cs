@@ -16,7 +16,7 @@ namespace BedrockService.Shared.Classes {
         private string _version;
         private string _liteLoaderVersion;
 
-        public Updater(IProcessInfo processInfo, IBedrockLogger logger, IServiceConfiguration serviceConfiguration) {
+        public Updater(IBedrockLogger logger, IServiceConfiguration serviceConfiguration) {
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
             _version = "None";
