@@ -27,7 +27,7 @@ namespace BedrockService.Service.Management {
             if (File.Exists(GetServiceFilePath(BmsFileNameKeys.BedrockVersionIni))) {
                 _serviceConfiguration.SetLatestBDSVersion(File.ReadAllText(GetServiceFilePath(BmsFileNameKeys.BedrockVersionIni)));
             } else {
-                Updater updater = new Updater(_processInfo, _logger, _serviceConfiguration);
+                Updater updater = new Updater(_logger, _serviceConfiguration);
                 updater.Initialize();
                 updater.CheckLatestVersion().Wait();
                 _logger.AppendLine("Verifying latest update for baseline properties. Please wait!");
@@ -53,6 +53,9 @@ namespace BedrockService.Service.Management {
                 if (serverInfo.InitializeDefaults()) {
                     serverInfo.ProcessConfiguration(fileEntries);
                     _logger.AppendLine($"Loaded config for server {serverInfo.GetServerName()}.");
+                }
+                if (serverInfo.LiteLoaderEnabled) {
+                    serverInfo.LiteLoaderConfigProps = MinecraftFileUtilities.LoadLiteLoaderConfigFile(serverInfo);
                 }
                 LoadPlayerDatabase(serverInfo);
                 _serviceConfiguration.AddNewServerInfo(serverInfo);
