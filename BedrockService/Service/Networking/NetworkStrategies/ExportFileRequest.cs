@@ -13,11 +13,9 @@ using static BedrockService.Shared.Classes.SharedStringBase;
 namespace BedrockService.Service.Networking.NetworkStrategies {
     public class ExportFileRequest : IMessageParser {
         private readonly IServiceConfiguration _configuration;
-        private readonly IProcessInfo _processInfo;
         private readonly IConfigurator _configurator;
-        public ExportFileRequest(IConfigurator configurator, IProcessInfo processInfo, IServiceConfiguration configuration) {
+        public ExportFileRequest(IConfigurator configurator, IServiceConfiguration configuration) {
             _configuration = configuration;
-            _processInfo = processInfo;
             _configurator = configurator;
         }
 
@@ -43,7 +41,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
                 exportData = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(exportFileInfo));
             }
             if (exportFileInfo.FileType == FileTypeFlags.ServicePackage) {
-                packageFile.CreateEntryFromFile($"{_processInfo.GetDirectory()}\\Service.conf", "Service.conf");
+                packageFile.CreateEntryFromFile(GetServiceFilePath(BmsFileNameKeys.ServiceConfig), GetServiceFilePath(BmsFileNameKeys.ServiceConfig));
             }
             return (exportData, 0, NetworkMessageTypes.ExportFile);
         }
@@ -51,7 +49,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
 
         private void PrepareServerFiles(byte serverIndex, ExportImportFileModel exportFileInfo, IServerConfiguration server, ZipArchive packageFile) {
             if (exportFileInfo.PackageFlags >= PackageFlags.ConfigFile) {
-                packageFile.CreateEntryFromFile($"{_processInfo.GetDirectory()}\\BMSConfig\\ServerConfigs\\{server.GetSettingsProp(ServerPropertyKeys.FileName)}", server.GetSettingsProp(ServerPropertyKeys.FileName).ToString());
+                packageFile.CreateEntryFromFile(GetServiceFilePath(BmsFileNameKeys.ServerConfig_Name, server.GetServerName()), GetServiceFileName(BmsFileNameKeys.ServerConfig_Name, server.GetServerName()));
             }
             if (exportFileInfo.PackageFlags >= PackageFlags.LastBackup) {
                 BackupInfoModel lastBackup = _configurator.EnumerateBackupsForServer(serverIndex).Result.FirstOrDefault();
@@ -61,14 +59,14 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
             }
             if (exportFileInfo.PackageFlags >= PackageFlags.WorldPacks) {
                 FileUtilities fileUtilities = new FileUtilities();
-                fileUtilities.CreatePackBackupFiles(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString(), server.GetProp("level-name").ToString(), packageFile);
+                fileUtilities.CreatePackBackupFiles(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString(), server.GetProp(BmsDependServerPropKeys.LevelName).ToString(), packageFile);
             }
             if (exportFileInfo.PackageFlags >= PackageFlags.PlayerDatabase) {
-                if (File.Exists($"{_processInfo.GetDirectory()}\\BMSConfig\\ServerConfigs\\PlayerRecords\\{server.GetServerName()}.playerdb")) {
-                    packageFile.CreateEntryFromFile($"{_processInfo.GetDirectory()}\\BMSConfig\\ServerConfigs\\PlayerRecords\\{server.GetServerName()}.playerdb", $"{server.GetServerName()}.playerdb");
+                if (File.Exists(GetServiceFilePath(BmsFileNameKeys.ServerPlayerTelem_Name, server.GetServerName()))) {
+                    packageFile.CreateEntryFromFile(GetServiceFilePath(BmsFileNameKeys.ServerPlayerTelem_Name, server.GetServerName()), GetServiceFileName(BmsFileNameKeys.ServerPlayerTelem_Name, server.GetServerName()));
                 }
-                if (File.Exists($"{_processInfo.GetDirectory()}\\BMSConfig\\ServerConfigs\\PlayerRecords\\{server.GetServerName()}.preg")) {
-                    packageFile.CreateEntryFromFile($"{_processInfo.GetDirectory()}\\BMSConfig\\ServerConfigs\\PlayerRecords\\{server.GetServerName()}.preg", $"{server.GetServerName()}.preg");
+                if (File.Exists(GetServiceFilePath(BmsFileNameKeys.ServerPlayerRegistry_Name, server.GetServerName()))) {
+                    packageFile.CreateEntryFromFile(GetServiceFilePath(BmsFileNameKeys.ServerPlayerRegistry_Name, server.GetServerName()), GetServiceFileName(BmsFileNameKeys.ServerPlayerRegistry_Name, server.GetServerName()));
                 }
             }
         }

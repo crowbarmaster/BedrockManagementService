@@ -46,8 +46,8 @@ namespace BedrockService.Service.Server {
             _playerManager = serviceConfiguration.GetProp("GlobalizedPlayerDatabase").GetBoolValue() ? servicePlayerManager : new ServerPlayerManager(serverConfiguration);
             _configurator = configurator;
             _logger = logger;
-            _backupManager = new BackupManager(_processInfo, _logger, this, serverConfiguration, serviceConfiguration);
-            _updater = new Updater(_processInfo, _logger, _serviceConfiguration);
+            _backupManager = new BackupManager(_logger, this, serverConfiguration, serviceConfiguration);
+            _updater = new Updater(_logger, _serviceConfiguration);
         }
 
         public void Initialize() {

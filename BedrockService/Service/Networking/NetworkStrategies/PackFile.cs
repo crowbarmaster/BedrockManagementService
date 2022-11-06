@@ -24,22 +24,22 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
             MinecraftPackParser archiveParser = new MinecraftPackParser(data);
             foreach (MinecraftPackContainer container in archiveParser.FoundPacks) {
                 string serverPath = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp(ServerPropertyKeys.ServerPath).ToString();
-                string levelName = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("level-name").ToString();
-                string knownPacksFile = $@"{serverPath}\valid_known_packs.json";
+                string levelName = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp(BmsDependServerPropKeys.LevelName).ToString();
+                string knownPacksFile = GetServerFilePath(BdsFileNameKeys.ValidKnownPacks, serverPath);
                 string filePath;
                 if (container.ManifestType == "WorldPack") {
-                    _fileUtils.CopyFolderTree(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($@"{serverPath}\worlds\{container.FolderName}"));
+                    _fileUtils.CopyFolderTree(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo(GetServerDirectory(BdsDirectoryKeys.ServerWorldDir_LevelName, serverPath, container.FolderName)));
                 }
                 if (container.ManifestType == "data") {
-                    filePath = $@"{serverPath}\worlds\{levelName}\world_behavior_packs.json";
+                    filePath = GetServerFilePath(BdsFileNameKeys.WorldBehaviorPacks, serverPath);
                     if (MinecraftFileUtilities.UpdateWorldPackFile(filePath, container.JsonManifest) && MinecraftFileUtilities.UpdateKnownPackFile(knownPacksFile, container)) {
-                        _fileUtils.CopyFolderTree(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($@"{serverPath}\development_behavior_packs\{container.FolderName}"));
+                        _fileUtils.CopyFolderTree(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($@"{filePath}\{container.FolderName}"));
                     }
                 }
                 if (container.ManifestType == "resources") {
-                    filePath = $@"{serverPath}\worlds\{levelName}\world_resource_packs.json";
+                    filePath = GetServerFilePath(BdsFileNameKeys.WorldResourcePacks, serverPath);
                     if (MinecraftFileUtilities.UpdateWorldPackFile(filePath, container.JsonManifest) && MinecraftFileUtilities.UpdateKnownPackFile(knownPacksFile, container)) {
-                        _fileUtils.CopyFolderTree(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($@"{serverPath}\development_resource_packs\{container.FolderName}"));
+                        _fileUtils.CopyFolderTree(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($@"{filePath}\{container.FolderName}"));
                     }
                 }
                 _logger.AppendLine($@"{container.GetFixedManifestType()} pack installed to server: {container.JsonManifest.header.name}.");

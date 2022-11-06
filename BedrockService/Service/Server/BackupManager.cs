@@ -12,7 +12,6 @@ using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Service.Server {
     public class BackupManager {
-        private readonly IProcessInfo _processInfo;
         private readonly IBedrockLogger _logger;
         private readonly IBedrockServer _server;
         private readonly IServiceConfiguration _serviceConfiguration;
@@ -25,8 +24,7 @@ namespace BedrockService.Service.Server {
             Manual
         }
 
-        public BackupManager(IProcessInfo processInfo, IBedrockLogger logger, IBedrockServer server, IServerConfiguration serverConfiguration, IServiceConfiguration serviceConfiguration) {
-            _processInfo = processInfo;
+        public BackupManager(IBedrockLogger logger, IBedrockServer server, IServerConfiguration serverConfiguration, IServiceConfiguration serviceConfiguration) {
             _logger = logger;
             _server = server;
             _serverConfiguration = serverConfiguration;
@@ -39,7 +37,7 @@ namespace BedrockService.Service.Server {
             try {
                 string serverPath = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString();
                 string backupPath = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupPath).ToString();
-                string levelName = _serverConfiguration.GetProp("level-name").ToString();
+                string levelName = _serverConfiguration.GetProp(BmsDependServerPropKeys.LevelName).ToString();
                 DirectoryInfo worldsDir = new DirectoryInfo($@"{serverPath}\worlds");
                 DirectoryInfo backupDir = new DirectoryInfo($@"{backupPath}\{_serverConfiguration.GetServerName()}");
                 Dictionary<string, int> backupFileInfoPairs = new Dictionary<string, int>();
@@ -52,7 +50,7 @@ namespace BedrockService.Service.Server {
                 }
                 PruneBackups(backupDir);
                 _logger.AppendLine($"Backing up files for server {_serverConfiguration.GetServerName()}. Please wait!");
-                string levelDir = @$"\{_serverConfiguration.GetProp("level-name")}";
+                string levelDir = @$"\{_serverConfiguration.GetProp(BmsDependServerPropKeys.LevelName)}";
                 using FileStream fs = File.Create($@"{backupDir.FullName}\Backup-{DateTime.Now:yyyyMMdd_HHmmssff}.zip");
                 using ZipArchive backupZip = new ZipArchive(fs, ZipArchiveMode.Create);
                 bool resuilt = BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, backupZip).Result;
