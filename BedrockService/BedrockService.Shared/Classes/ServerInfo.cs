@@ -1,4 +1,5 @@
 ﻿using BedrockService.Shared.Interfaces;
+using BedrockService.Shared.LiteLoaderFileModels.JsonModels;
 using BedrockService.Shared.SerializeModels;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace BedrockService.Shared.Classes {
         public ServerStatusModel ServerStatus { get; set; } = new();
         public List<LogEntry> ConsoleBuffer = new List<LogEntry>();
         public List<IPlayer> PlayersList = new List<IPlayer>();
+        public LiteLoaderConfigNodeModel LiteLoaderConfigProps { get; set; }
         public List<Property> ServicePropList = new List<Property>();
         public List<Property> ServerPropList = new List<Property>();
         public List<Property> _defaultPropList = new List<Property>();
