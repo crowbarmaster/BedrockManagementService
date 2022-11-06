@@ -101,6 +101,10 @@ namespace BedrockService.Shared.Classes {
                             if (split[1] == "Default")
                                 GetSettingsProp(ServerPropertyKeys.BackupPath).SetValue($@"{_servicePath}\ServerBackups");
                             break;
+
+                        case "LiteLoaderEnabled":
+                            LiteLoaderEnabled = bool.Parse(split[1]);
+                            break;
                     }
                 }
             }
