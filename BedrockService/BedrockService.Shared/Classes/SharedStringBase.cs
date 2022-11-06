@@ -101,7 +101,7 @@ namespace BedrockService.Shared.Classes {
 
         public enum BdsDirectoryKeys {
             ServerRoot,
-            ServerWorldDir_Name,
+            ServerWorldDir_LevelName,
             ResourcePacksDir,
             BehaviorPacksDir,
             LLPlugins,
@@ -135,17 +135,17 @@ namespace BedrockService.Shared.Classes {
             { BdsFileNameKeys.VanillaBedrock, BdsDirectoryKeys.ServerRoot },
             { BdsFileNameKeys.ServerProps, BdsDirectoryKeys.ServerRoot },
             { BdsFileNameKeys.ValidKnownPacks, BdsDirectoryKeys.ServerRoot },
-            { BdsFileNameKeys.WorldBehaviorPacks, BdsDirectoryKeys.ServerWorldDir_Name },
-            { BdsFileNameKeys.WorldResourcePacks, BdsDirectoryKeys.ServerWorldDir_Name },
+            { BdsFileNameKeys.WorldBehaviorPacks, BdsDirectoryKeys.ServerWorldDir_LevelName },
+            { BdsFileNameKeys.WorldResourcePacks, BdsDirectoryKeys.ServerWorldDir_LevelName },
             { BdsFileNameKeys.AllowList, BdsDirectoryKeys.ServerRoot },
             { BdsFileNameKeys.WhiteList, BdsDirectoryKeys.ServerRoot },
             { BdsFileNameKeys.PermList, BdsDirectoryKeys.ServerRoot },
-            { BdsFileNameKeys.LevelDat, BdsDirectoryKeys.ServerWorldDir_Name }
+            { BdsFileNameKeys.LevelDat, BdsDirectoryKeys.ServerWorldDir_LevelName }
         };
 
         public static Dictionary<BdsDirectoryKeys, string> BdsDirectoryStrings = new() {
             { BdsDirectoryKeys.ServerRoot, "" },
-            { BdsDirectoryKeys.ServerWorldDir_Name, "worlds\\{0}" },
+            { BdsDirectoryKeys.ServerWorldDir_LevelName, "worlds\\{0}" },
             { BdsDirectoryKeys.ResourcePacksDir, "development_resource_packs" },
             { BdsDirectoryKeys.BehaviorPacksDir, "development_behavior_packs" },
             { BdsDirectoryKeys.LLPlugins, "plugins" },
@@ -287,6 +287,19 @@ namespace BedrockService.Shared.Classes {
             return BmsFileNameStrings[key];
         }
 
+        public static string GetServiceFileName(BmsFileNameKeys key, object var0) {
+            if (!BmsFileNameStrings.ContainsKey(key)) {
+                throw new KeyNotFoundException($"Key {key} was not a does not have a file name associated.");
+            }
+            if (!BmsFileParentDirectories.ContainsKey(key)) {
+                throw new KeyNotFoundException($"File {key} does not have a parent directory associated.");
+            }
+            if (!BmsDirectoryStrings.ContainsKey(BmsFileParentDirectories[key])) {
+                throw new KeyNotFoundException($"File {BmsFileParentDirectories[key]} does not have a directory associated.");
+            }
+            return string.Format(BmsFileNameStrings[key], var0);
+        }
+
         public static string GetServiceFilePath(BmsFileNameKeys key) {
             if (!BmsFileNameStrings.ContainsKey(key)) {
                 throw new KeyNotFoundException($"Key {key} was not a does not have a directory associated.");
@@ -331,6 +344,15 @@ namespace BedrockService.Shared.Classes {
             return BdsDirectoryStrings[key] != string.Empty ?
                 $@"{serverPath}\{BdsDirectoryStrings[key]}" :
                 $@"{serverPath}";
+        }
+
+        public static string GetServerDirectory(BdsDirectoryKeys key, string serverPath, object? var0) {
+            if (!BdsDirectoryStrings.ContainsKey(key)) {
+                throw new KeyNotFoundException($"Key {key} was not a does not have a directory associated.");
+            }
+            return BdsDirectoryStrings[key] != string.Empty ?
+                String.Format($@"{serverPath}\{BdsDirectoryStrings[key]}", var0) :
+                String.Format($@"{serverPath}", var0);
         }
 
         public static string GetServerFilePath(BdsFileNameKeys key, IServerConfiguration server) {
