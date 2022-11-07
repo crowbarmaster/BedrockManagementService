@@ -1,10 +1,10 @@
-﻿using BedrockService.Shared.MinecraftFileModels.FileAccessModels;
-using BedrockService.Shared.MinecraftFileModels.JsonModels;
+﻿using BedrockService.Shared.MinecraftFileModels.JsonModels;
 using BedrockService.Shared.SerializeModels;
 using BedrockService.Shared.Interfaces;
 using System.Globalization;
 using System.IO.Compression;
 using static BedrockService.Shared.Classes.SharedStringBase;
+using BedrockService.Shared.FileModels.MinecraftFileModels;
 
 namespace BedrockService.Service.Management {
     public class ConfigManager : IConfigurator {
@@ -113,7 +113,7 @@ namespace BedrockService.Service.Management {
                         }
                     } catch (IOException e) {
                         if (e.Message.Contains("because it is being used by another process.")) {
-                            List<Process> procList = Process.GetProcessesByName(bmsExeInfo.Name.Substring(0, bmsExeInfo.Name.Length - bmsExeInfo.Extension.Length)).ToList();
+                            List<Process> procList = Process.GetProcessesByName(bmsExeInfo.Name[..^bmsExeInfo.Extension.Length]).ToList();
                             procList.ForEach(p => {
                                 p.Kill();
                                 Task.Delay(1000).Wait();
@@ -124,7 +124,7 @@ namespace BedrockService.Service.Management {
                     _logger.AppendLine($"Extraction of files for {server.GetServerName()} completed.");
                     server.GetSettingsProp(ServerPropertyKeys.DeployedVersion).SetValue(buildVersion);
                     SaveServerConfiguration(server);
-                } catch (InvalidDataException e) {
+                } catch (InvalidDataException) {
                     throw new FileNotFoundException($"Build file \"Update_{buildVersion}.zip\" found corrupt. Service cannot proceed!!");
                 }
             });
@@ -217,7 +217,7 @@ namespace BedrockService.Service.Management {
 
         public void WriteJSONFiles(IServerConfiguration server) {
             Version allowStartVersion = Version.Parse("1.18.11.01");
-            string whitelistFilePath = null;
+            string whitelistFilePath = string.Empty;
             if (server.GetServerVersion() != "None" && Version.Parse(server.GetServerVersion()) >= allowStartVersion) {
                 whitelistFilePath = GetServerFilePath(BdsFileNameKeys.AllowList, server);
                 if (File.Exists(GetServerFilePath(BdsFileNameKeys.WhiteList, server))) {
@@ -261,16 +261,17 @@ namespace BedrockService.Service.Management {
         }
 
         private class BackupComparer : IComparer<BackupInfoModel> {
-            public int Compare(BackupInfoModel x, BackupInfoModel y) {
-                DateTime xTime = DateTime.ParseExact(x.Filename.Substring(7, 17), "yyyyMMdd_HHmmssff", CultureInfo.InvariantCulture);
-                DateTime yTime = DateTime.ParseExact(y.Filename.Substring(7, 17), "yyyyMMdd_HHmmssff", CultureInfo.InvariantCulture);
-                if (xTime > yTime) {
-                    return 1;
-                } else if (yTime > xTime) {
-                    return -1;
-                } else {
-                    return 0;
+            public int Compare(BackupInfoModel? x, BackupInfoModel? y) {
+                if (x != null && y != null) {
+                    DateTime xTime = DateTime.ParseExact(x.Filename.Substring(7, 17), "yyyyMMdd_HHmmssff", CultureInfo.InvariantCulture);
+                    DateTime yTime = DateTime.ParseExact(y.Filename.Substring(7, 17), "yyyyMMdd_HHmmssff", CultureInfo.InvariantCulture);
+                    if (xTime > yTime) {
+                        return 1;
+                    } else if (yTime > xTime) {
+                        return -1;
+                    }
                 }
+                return 0;
             }
         }
         
@@ -417,14 +418,14 @@ namespace BedrockService.Service.Management {
             } catch { return false; }
         }
 
-        private bool DeleteServerFiles(IServerConfiguration serverInfo) {
+        private static bool DeleteServerFiles(IServerConfiguration serverInfo) {
             try {
                 new FileUtilities().DeleteFilesFromDirectory(new DirectoryInfo(serverInfo.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString()), false).Wait();
                 return true;
             } catch { return false; }
         }
 
-        private bool DeletePlayerFiles(IServerConfiguration serverInfo) {
+        private static bool DeletePlayerFiles(IServerConfiguration serverInfo) {
             try {
                 DirectoryInfo configDirInfo = new DirectoryInfo(GetServiceDirectory(BmsDirectoryKeys.ServerConfigs));
                 foreach (DirectoryInfo dir in configDirInfo.GetDirectories()) {

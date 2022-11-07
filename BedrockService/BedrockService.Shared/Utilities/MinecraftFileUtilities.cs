@@ -1,7 +1,4 @@
 ﻿using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.LiteLoaderFileModels.FileAccessModels;
-using BedrockService.Shared.LiteLoaderFileModels.JsonModels;
-using BedrockService.Shared.MinecraftFileModels.FileAccessModels;
 using BedrockService.Shared.MinecraftFileModels.JsonModels;
 using BedrockService.Shared.PackParser;
 using System;
@@ -11,6 +8,10 @@ using System.Linq;
 using System.Text.Json;
 using System.Dynamic;
 using static BedrockService.Shared.Classes.SharedStringBase;
+using BedrockService.Shared.FileModels.LiteLoaderFileModels.FileAccessModels;
+using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
+using BedrockService.Shared.FileModels.MinecraftFileModels;
+using BedrockService.Shared.JsonModels.MinecraftJsonModels;
 
 namespace BedrockService.Shared.Utilities {
     public class MinecraftFileUtilities {

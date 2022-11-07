@@ -1,4 +1,4 @@
-﻿using BedrockService.Shared.MinecraftFileModels.JsonModels;
+﻿using BedrockService.Shared.JsonModels.MinecraftJsonModels;
 
 namespace BedrockService.Shared.PackParser {
     public class MinecraftPackContainer {

@@ -1,4 +1,4 @@
-﻿using BedrockService.Shared.MinecraftFileModels.FileAccessModels;
+﻿using BedrockService.Shared.FileModels.MinecraftFileModels;
 using System.IO;
 using Xunit;
 

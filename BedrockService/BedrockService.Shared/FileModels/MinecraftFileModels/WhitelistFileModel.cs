@@ -1,8 +1,8 @@
 ﻿using BedrockService.Shared.Classes;
-using BedrockService.Shared.MinecraftFileModels.JsonModels;
+using BedrockService.Shared.JsonModels.MinecraftJsonModels;
 using System.Collections.Generic;
 
-namespace BedrockService.Shared.MinecraftFileModels.FileAccessModels {
+namespace BedrockService.Shared.FileModels.MinecraftFileModels {
     public class WhitelistFileModel : BaseJsonFile {
         public List<WhitelistEntryJsonModel> Contents { get; set; } = new();
 

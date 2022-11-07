@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace BedrockService.Shared.MinecraftFileModels.JsonModels {
+namespace BedrockService.Shared.JsonModels.MinecraftJsonModels {
     public class WorldPackEntryJsonModel {
         public string pack_id { get; set; }
         public List<int> version { get; set; }

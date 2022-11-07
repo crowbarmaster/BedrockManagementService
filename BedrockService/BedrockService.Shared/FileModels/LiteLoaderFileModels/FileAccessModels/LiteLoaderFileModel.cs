@@ -1,8 +1,8 @@
 ﻿using BedrockService.Shared.Classes;
-using BedrockService.Shared.LiteLoaderFileModels.JsonModels;
+using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
 using System.Collections.Generic;
 
-namespace BedrockService.Shared.LiteLoaderFileModels.FileAccessModels {
+namespace BedrockService.Shared.FileModels.LiteLoaderFileModels.FileAccessModels {
     public class LiteLoaderFileModel : BaseJsonFile {
         public LiteLoaderConfigJsonModel Contents { get; set; } = new();
 

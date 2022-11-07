@@ -1,5 +1,5 @@
 ﻿using BedrockService.Shared.Classes;
-using BedrockService.Shared.LiteLoaderFileModels.JsonModels;
+using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
 using BedrockService.Shared.SerializeModels;
 using System.Collections.Generic;
 

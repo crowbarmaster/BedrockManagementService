@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace BedrockService.Shared.MinecraftFileModels.JsonModels {
+namespace BedrockService.Shared.JsonModels.MinecraftJsonModels {
     public class KnownPacksJsonModel {
         public int file_version { get; set; }
         public string file_system { get; set; }

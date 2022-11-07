@@ -9,7 +9,7 @@ using System.IO;
 using System.CodeDom.Compiler;
 using System.CodeDom;
 
-namespace BedrockService.Shared.LiteLoaderFileModels.JsonModels {
+namespace BedrockService.Shared.JsonModels.LiteLoaderJsonModels {
     public class LiteLoaderConfigNodeModel {
         public string Name { get; set; }
         public LiteLoaderConfigNodeModel ParentNode { get; set; }

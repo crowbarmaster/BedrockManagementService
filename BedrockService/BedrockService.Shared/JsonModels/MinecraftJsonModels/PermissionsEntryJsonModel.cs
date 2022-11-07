@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BedrockService.Shared.MinecraftFileModels.JsonModels {
+namespace BedrockService.Shared.JsonModels.MinecraftJsonModels {
     public class PermissionsEntryJsonModel {
         public string permission { get; set; }
         public string xuid { get; set; }
