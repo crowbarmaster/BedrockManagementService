@@ -1,4 +1,5 @@
 ﻿using BedrockService.Shared.Interfaces;
+using BedrockService.Shared.LiteLoaderFileModels.JsonModels;
 using BedrockService.Shared.SerializeModels;
 using System;
 using System.Collections.Generic;
@@ -117,7 +118,7 @@ namespace BedrockService.Shared.Classes {
             if (_processInfo.DeclaredType() != "Client" || (GetSettingsProp(ServerPropertyKeys.DeployedVersion).StringValue != "None" && !skipNullCheck)) {
                 if (!File.Exists(GetServiceFilePath(BmsFileNameKeys.StockProps, version))) {
                     _logger.AppendLine("Core file(s) found missing. Rebuilding!");
-                    MinecraftUpdatePackageProcessor packageProcessor = new(_logger, version, GetServiceDirectory(BmsDirectoryKeys.BdsBuilds, version));
+                    MinecraftUpdatePackageProcessor packageProcessor = new(_logger, version, GetServiceDirectory(BmsDirectoryKeys.CoreFileBuild_Ver, version));
                     if(!packageProcessor.ExtractCoreFiles()){
                         return false;
                     }
@@ -289,5 +290,9 @@ namespace BedrockService.Shared.Classes {
         public void SetLiteLoaderStatus(bool statusToSet) => LiteLoaderEnabled = statusToSet;
 
         public bool GetLiteLoaderStatus() => LiteLoaderEnabled;
+
+        public LiteLoaderConfigNodeModel GetLiteLoaderConfig() => LiteLoaderConfigProps;
+
+        public void SetLiteLoaderConfig(LiteLoaderConfigNodeModel config) => LiteLoaderConfigProps = config;
     }
 }
