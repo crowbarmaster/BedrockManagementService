@@ -140,7 +140,8 @@ namespace BedrockService.Shared.Classes {
             { BdsFileNameKeys.AllowList, BdsDirectoryKeys.ServerRoot },
             { BdsFileNameKeys.WhiteList, BdsDirectoryKeys.ServerRoot },
             { BdsFileNameKeys.PermList, BdsDirectoryKeys.ServerRoot },
-            { BdsFileNameKeys.LevelDat, BdsDirectoryKeys.ServerWorldDir_LevelName }
+            { BdsFileNameKeys.LevelDat, BdsDirectoryKeys.ServerWorldDir_LevelName },
+            { BdsFileNameKeys.LLConfig, BdsDirectoryKeys.LLConfigDir }
         };
 
         public static Dictionary<BdsDirectoryKeys, string> BdsDirectoryStrings = new() {
