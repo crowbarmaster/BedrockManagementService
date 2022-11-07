@@ -114,6 +114,18 @@ namespace BedrockService.Shared.Utilities {
             return new("Root", File.ReadAllText(GetServerFilePath(BdsFileNameKeys.LLConfig, server)));
         }
 
+        public static void VerifyLiteLoaderCompatableSettings(IProcessInfo processInfo, IServerConfiguration server) {
+            if (server.GetLiteLoaderConfig() == null) {
+                return;
+            }
+            server.GetLiteLoaderConfig().Properties["ColorLog"] = false;
+            if (processInfo.IsDebugEnabled()) {
+                server.GetLiteLoaderConfig().Properties["DebugMode"] = false;
+                server.GetLiteLoaderConfig().GetChildByName("Modules").GetChildByName("CrashLogger").Properties["enabled"] = false;
+            }
+            server.GetLiteLoaderConfig().SaveToFile(GetServerFilePath(BdsFileNameKeys.LLConfig, server));
+        }
+
         public static void WriteServerPropsFile(IServerConfiguration server) {
             int index = 0;
             string serverPath = server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString();

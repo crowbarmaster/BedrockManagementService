@@ -56,6 +56,7 @@ namespace BedrockService.Service.Management {
                 }
                 if (serverInfo.LiteLoaderEnabled) {
                     serverInfo.LiteLoaderConfigProps = MinecraftFileUtilities.LoadLiteLoaderConfigFile(serverInfo);
+                    MinecraftFileUtilities.VerifyLiteLoaderCompatableSettings(_processInfo, serverInfo);
                 }
                 LoadPlayerDatabase(serverInfo);
                 _serviceConfiguration.AddNewServerInfo(serverInfo);
