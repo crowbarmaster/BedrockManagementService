@@ -1,4 +1,5 @@
 ﻿using BedrockService.Shared.Classes;
+using BedrockService.Shared.LiteLoaderFileModels.JsonModels;
 using BedrockService.Shared.SerializeModels;
 using System.Collections.Generic;
 
@@ -14,6 +15,8 @@ namespace BedrockService.Shared.Interfaces {
         void SetPlayerList(List<IPlayer> playerList);
         IPlayer GetOrCreatePlayer(string xuid, string username = null);
         IServerConfiguration GetServerInfo();
+        LiteLoaderConfigNodeModel GetLiteLoaderConfig();
+        void SetLiteLoaderConfig(LiteLoaderConfigNodeModel config);
         void SetServerVersion(string newVersion);
         string GetServerVersion();
         string GetSelectedVersion();
