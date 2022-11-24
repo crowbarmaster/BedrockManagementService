@@ -12,7 +12,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
             Formatting indented = Formatting.Indented;
-            JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
+            JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All, ReferenceLoopHandling =  ReferenceLoopHandling.Ignore };
             string jsonString = JsonConvert.SerializeObject(_serviceConfiguration, indented, settings);
             byte[] serializeToBytes = Encoding.UTF8.GetBytes(jsonString);
             return (serializeToBytes, 0, NetworkMessageTypes.Connect);
