@@ -24,6 +24,7 @@
         CheckUpdates,
         PackFile,
         PackList,
+        LLPluginFile,
         ExportFile,
         ImportFile,
         LevelEditRequest,
