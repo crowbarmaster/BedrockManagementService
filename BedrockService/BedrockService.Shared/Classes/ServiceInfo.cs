@@ -12,6 +12,7 @@ namespace BedrockService.Shared.Classes {
         public List<IPlayer> PlayersList = new();
         public List<Property> globals = new();
         public List<Property> DefaultServerProps = new();
+        public LLServerPluginRegistry LLServerPluginRegistry = new();
         public int TotalBackupsServiceWide { get; set; }
         public int TotalBackupSizeServiceWideMegabytes { get; set; }
     }
