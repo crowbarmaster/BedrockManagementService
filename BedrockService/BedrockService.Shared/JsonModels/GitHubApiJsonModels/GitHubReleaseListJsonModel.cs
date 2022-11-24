@@ -1,12 +1,30 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace BedrockService.Shared.JsonModels.GitHubApiJsonModels {
-    internal class GitHubReleaseListJsonModel {
+    public class GitHubReleaseListJsonModel {
+        public string url { get; set; }
+        public string assets_url { get; set; }
+        public string upload_url { get; set; }
+        public string html_url { get; set; }
+        public int id { get; set; }
+        public Author author { get; set; }
+        public string node_id { get; set; }
+        public string tag_name { get; set; }
+        public string target_commitish { get; set; }
+        public string name { get; set; }
+        public bool draft { get; set; }
+        public bool prerelease { get; set; }
+        public DateTime created_at { get; set; }
+        public DateTime published_at { get; set; }
+        public List<Asset> assets { get; set; }
+        public string tarball_url { get; set; }
+        public string zipball_url { get; set; }
+        public string body { get; set; }
+        public int mentions_count { get; set; }
+        public Reactions reactions { get; set; }
+
         public class Asset {
             public string url { get; set; }
             public int id { get; set; }
@@ -48,10 +66,10 @@ namespace BedrockService.Shared.JsonModels.GitHubApiJsonModels {
             public string url { get; set; }
             public int total_count { get; set; }
 
-            [JsonProperty("+1")]
+            [JsonPropertyName("+1")]
             public int plus_one { get; set; }
 
-            [JsonProperty("-1")]
+            [JsonPropertyName("-1")]
             public int minus_one { get; set; }
             public int laugh { get; set; }
             public int hooray { get; set; }
@@ -59,29 +77,6 @@ namespace BedrockService.Shared.JsonModels.GitHubApiJsonModels {
             public int heart { get; set; }
             public int rocket { get; set; }
             public int eyes { get; set; }
-        }
-
-        public class ReleaseApiModel {
-            public string url { get; set; }
-            public string assets_url { get; set; }
-            public string upload_url { get; set; }
-            public string html_url { get; set; }
-            public int id { get; set; }
-            public Author author { get; set; }
-            public string node_id { get; set; }
-            public string tag_name { get; set; }
-            public string target_commitish { get; set; }
-            public string name { get; set; }
-            public bool draft { get; set; }
-            public bool prerelease { get; set; }
-            public DateTime created_at { get; set; }
-            public DateTime published_at { get; set; }
-            public List<Asset> assets { get; set; }
-            public string tarball_url { get; set; }
-            public string zipball_url { get; set; }
-            public string body { get; set; }
-            public int mentions_count { get; set; }
-            public Reactions reactions { get; set; }
         }
 
         public class Uploader {
