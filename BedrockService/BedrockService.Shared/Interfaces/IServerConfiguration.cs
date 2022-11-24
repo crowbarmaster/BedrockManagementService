@@ -5,6 +5,8 @@ using System.Collections.Generic;
 
 namespace BedrockService.Shared.Interfaces {
     public interface IServerConfiguration : IBedrockConfiguration {
+        int GetRunningPid();
+        void SetRunningPid(int runningPid);
         string GetServerName();
         string GetConfigFileName();
         void AddStartCommand(string command);

@@ -64,8 +64,8 @@ namespace BedrockService.Shared.Classes {
                     GetSettingsProp(ServerPropertyKeys.DeployedVersion).SetValue(entry.Split('=')[1]);
                 }
             }
-            if(GetSettingsProp(ServerPropertyKeys.SelectedServerVersion).StringValue == "Latest") {
-                if(GetSettingsProp(ServerPropertyKeys.DeployedVersion).StringValue == "None") {
+            if (GetSettingsProp(ServerPropertyKeys.SelectedServerVersion).StringValue == "Latest") {
+                if (GetSettingsProp(ServerPropertyKeys.DeployedVersion).StringValue == "None") {
                     GetSettingsProp(ServerPropertyKeys.DeployedVersion).StringValue = _serviceConfiguration.GetLatestBDSVersion();
                 }
                 ValidateVersion(GetSettingsProp(ServerPropertyKeys.DeployedVersion).StringValue);
@@ -119,7 +119,7 @@ namespace BedrockService.Shared.Classes {
                 if (!File.Exists(GetServiceFilePath(BmsFileNameKeys.StockProps, version))) {
                     _logger.AppendLine("Core file(s) found missing. Rebuilding!");
                     MinecraftUpdatePackageProcessor packageProcessor = new(_logger, version, GetServiceDirectory(BmsDirectoryKeys.CoreFileBuild_Ver, version));
-                    if(!packageProcessor.ExtractCoreFiles()){
+                    if (!packageProcessor.ExtractCoreFiles()) {
                         return false;
                     }
                 }
@@ -135,7 +135,7 @@ namespace BedrockService.Shared.Classes {
             return true;
         }
 
-        public Property GetSettingsProp (ServerPropertyKeys key) {
+        public Property GetSettingsProp(ServerPropertyKeys key) {
             string returnedValue = ServerPropertyStrings[key];
             return ServicePropList.First(prop => prop.KeyName == returnedValue);
         }
@@ -190,8 +190,8 @@ namespace BedrockService.Shared.Classes {
 
         public Property GetProp(string key) {
             try {
-            Property foundProp = ServerPropList.First(prop => prop.KeyName == key);
-            return foundProp;
+                Property foundProp = ServerPropList.First(prop => prop.KeyName == key);
+                return foundProp;
             } catch (Exception e) {
                 throw new FormatException($"Could not find key {key} in server property list!", e);
             }
@@ -200,8 +200,8 @@ namespace BedrockService.Shared.Classes {
 
         public Property GetProp(BmsDependServerPropKeys key) {
             try {
-            Property foundProp = ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[key]);
-            return foundProp;
+                Property foundProp = ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[key]);
+                return foundProp;
             } catch (Exception e) {
                 throw new FormatException($"Could not find key {key} in server property list!", e);
             }
@@ -210,7 +210,7 @@ namespace BedrockService.Shared.Classes {
 
         public void SetBackupTotals(int totalBackups, int totalSize) {
             ServerStatus.TotalBackups = totalBackups;
-            ServerStatus.TotalSizeOfBackups = totalSize; 
+            ServerStatus.TotalSizeOfBackups = totalSize;
         }
 
         public void AddStartCommand(string command) {
@@ -283,7 +283,7 @@ namespace BedrockService.Shared.Classes {
 
         public IServerConfiguration GetServerInfo() => this;
 
-        public void SetStatus (ServerStatusModel status) => ServerStatus = status;
+        public void SetStatus(ServerStatusModel status) => ServerStatus = status;
 
         public ServerStatusModel GetStatus() => ServerStatus;
 
@@ -294,5 +294,9 @@ namespace BedrockService.Shared.Classes {
         public LiteLoaderConfigNodeModel GetLiteLoaderConfig() => LiteLoaderConfigProps;
 
         public void SetLiteLoaderConfig(LiteLoaderConfigNodeModel config) => LiteLoaderConfigProps = config;
+
+        public int GetRunningPid() => ProcessID;
+
+        public void SetRunningPid(int runningPid) => ProcessID = runningPid;
     }
 }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 namespace BedrockService.Shared.Classes {
     public class ServerInfo {
+        public int ProcessID { get; set; }
         public ServerPlayerManager PlayerManager { get; set; }
         public Property ServersPath { get; set; }
         public int TotalBackupSizeKilobytes { get; set; }
