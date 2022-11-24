@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace BedrockService.Shared.JsonModels.LiteLoaderJsonModels {
     public class AddonsHelper {
@@ -34,6 +30,10 @@ namespace BedrockService.Shared.JsonModels.LiteLoaderJsonModels {
 
     public class ErrorStackTraceback {
         public bool cacheSymbol { get; set; }
+        public bool enabled { get; set; }
+    }
+
+    public class FixAbility {
         public bool enabled { get; set; }
     }
 
@@ -98,6 +98,7 @@ namespace BedrockService.Shared.JsonModels.LiteLoaderJsonModels {
         public ClientChunkPreGeneration ClientChunkPreGeneration { get; set; }
         public CrashLogger CrashLogger { get; set; }
         public EconomyCore EconomyCore { get; set; }
+        public FixAbility FixAbility { get; set; }
         public ErrorStackTraceback ErrorStackTraceback { get; set; }
         public FixBDSCrash FixBDSCrash { get; set; }
         public FixDisconnectBug FixDisconnectBug { get; set; }
