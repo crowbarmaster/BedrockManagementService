@@ -3,8 +3,6 @@ using BedrockService.Service.Networking.Interfaces;
 using BedrockService.Service.Server;
 using BedrockService.Service.Server.Interfaces;
 using BedrockService.Shared.SerializeModels;
-using NCrontab;
-using System.Timers;
 using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Service.Core {
@@ -77,7 +75,7 @@ namespace BedrockService.Service.Core {
         }
 
         public ServiceStatusModel GetServiceStatus() {
-            List<IPlayer> serviceActivePlayers = new List<IPlayer>();
+            List<IPlayer> serviceActivePlayers = new();
             _bedrockServers.ForEach(server => {
                 serviceActivePlayers.AddRange(server.GetServerStatus().ActivePlayerList);
             });
@@ -232,7 +230,7 @@ namespace BedrockService.Service.Core {
                     throw new Exception($"Duplicate ports used! Check server configurations targeting port(s) {serverPorts}");
                 }
                 foreach (var server in _serviceConfiguration.GetServerList()) {
-                    string serverExePath = string.Format(GetServerFilePath(BdsFileNameKeys.BmsServer_Name, server), server.GetServerName());
+                    string serverExePath = $@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath).StringValue}\{server.GetSettingsProp(ServerPropertyKeys.ServerExeName).StringValue}";
                     if (!File.Exists(serverExePath)) {
                         string deployedVersion = server.GetSelectedVersion() == "Latest"
                                                 ? _serviceConfiguration.GetLatestBDSVersion()

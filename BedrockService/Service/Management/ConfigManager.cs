@@ -1,19 +1,17 @@
-﻿using BedrockService.Shared.MinecraftFileModels.JsonModels;
+﻿using BedrockService.Shared.FileModels.MinecraftFileModels;
+using BedrockService.Shared.JsonModels.MinecraftJsonModels;
 using BedrockService.Shared.SerializeModels;
-using BedrockService.Shared.Interfaces;
 using System.Globalization;
-using System.IO.Compression;
 using static BedrockService.Shared.Classes.SharedStringBase;
-using BedrockService.Shared.FileModels.MinecraftFileModels;
 
 namespace BedrockService.Service.Management {
     public class ConfigManager : IConfigurator {
-        private static readonly object _fileLock = new object();
+        private static readonly object _fileLock = new();
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IProcessInfo _processInfo;
         private readonly IBedrockLogger _logger;
         private readonly FileUtilities _fileUtilities;
-        private List<string> serviceConfigExcludeList = new List<string>() { "ServerName", "ServerExeName", "FileName", "ServerPath", "DeployedVersion" };
+        private List<string> serviceConfigExcludeList = new() { "ServerName", "ServerExeName", "FileName", "ServerPath", "DeployedVersion" };
 
         public ConfigManager(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, IBedrockLogger logger, FileUtilities fileUtilities) {
             _processInfo = processInfo;
@@ -27,7 +25,7 @@ namespace BedrockService.Service.Management {
             if (File.Exists(GetServiceFilePath(BmsFileNameKeys.BedrockVersionIni))) {
                 _serviceConfiguration.SetLatestBDSVersion(File.ReadAllText(GetServiceFilePath(BmsFileNameKeys.BedrockVersionIni)));
             } else {
-                Updater updater = new Updater(_logger, _serviceConfiguration);
+                Updater updater = new(_logger, _serviceConfiguration);
                 updater.Initialize();
                 updater.CheckLatestVersion().Wait();
                 _logger.AppendLine("Verifying latest update for baseline properties. Please wait!");
@@ -47,7 +45,7 @@ namespace BedrockService.Service.Management {
             _serviceConfiguration.GetServerList().Clear();
             string[] files = Directory.GetFiles(GetServiceDirectory(BmsDirectoryKeys.ServerConfigs), "*.conf");
             foreach (string file in files) {
-                FileInfo FInfo = new FileInfo(file);
+                FileInfo FInfo = new(file);
                 string[] fileEntries = File.ReadAllLines(file);
                 serverInfo = new ServerConfigurator(_processInfo, _logger, _serviceConfiguration);
                 if (serverInfo.InitializeDefaults()) {
@@ -75,33 +73,31 @@ namespace BedrockService.Service.Management {
 
         public async Task ReplaceServerBuild(IServerConfiguration server, string buildVersion) {
             await Task.Run(() => {
-                try {
-                    string serverVersion = string.Empty;
-                    string liteVersion = string.Empty;
-                    if (server.GetSettingsProp(ServerPropertyKeys.LiteLoaderEnabled).GetBoolValue()) {
-                        string[] LLVersion = _serviceConfiguration.GetProp(ServicePropertyKeys.LatestLiteLoaderVersion).ToString().Split('|');
-                        serverVersion = LLVersion[0];
-                        liteVersion = LLVersion[1];
-                        buildVersion = serverVersion;
-                    }
-                    if (!Directory.Exists(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString()))
-                        Directory.CreateDirectory(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString());
-                    string filePath = GetServiceFilePath(BmsFileNameKeys.BdsUpdatePackage_Ver, buildVersion);
-                    if (!File.Exists(filePath)) {
-                        throw new FileNotFoundException($"Service could not locate file \"Update_{buildVersion}.zip\" and version was not found on Mojang servers!");
-                    }
-                    Progress<double> progress = new(percent =>
-                    {
-                        _logger.AppendLine($"Extracting Bedrock files for server {server.GetServerName()}, {percent}% completed...");
-                    });
-                    _fileUtilities.ExtractZipToDirectory(filePath, server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString(), progress).Wait();
+            try {
+                string serverVersion = string.Empty;
+                string liteVersion = string.Empty;
+                if (server.GetSettingsProp(ServerPropertyKeys.LiteLoaderEnabled).GetBoolValue()) {
+                    string[] LLVersion = _serviceConfiguration.GetProp(ServicePropertyKeys.LatestLiteLoaderVersion).ToString().Split('|');
+                    serverVersion = LLVersion[0];
+                    liteVersion = LLVersion[1];
+                    buildVersion = serverVersion;
+                }
+                if (!Directory.Exists(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString()))
+                    Directory.CreateDirectory(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString());
+                string filePath = GetServiceFilePath(BmsFileNameKeys.BdsUpdatePackage_Ver, buildVersion);
+                if (!File.Exists(filePath)) {
+                    throw new FileNotFoundException($"Service could not locate file \"Update_{buildVersion}.zip\" and version was not found on Mojang servers!");
+                }
+                Progress<double> progress = new(percent => {
+                    _logger.AppendLine($"Extracting Bedrock files for server {server.GetServerName()}, {percent}% completed...");
+                });
+                _fileUtilities.ExtractZipToDirectory(filePath, server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString(), progress).Wait();
 
-                    FileInfo originalExeInfo = new(GetServerFilePath(BdsFileNameKeys.VanillaBedrock, server));
-                    FileInfo bmsExeInfo = new(GetServerFilePath(BdsFileNameKeys.BmsServer_Name, server, server.GetServerName()));
+                FileInfo originalExeInfo = new(GetServerFilePath(BdsFileNameKeys.VanillaBedrock, server));
+                FileInfo bmsExeInfo = new(server.GetSettingsProp(ServerPropertyKeys.ServerExeName).StringValue);
                     try {
                         if (server.GetSettingsProp(ServerPropertyKeys.LiteLoaderEnabled).GetBoolValue()) {
-                            progress = new(percent =>
-                            {
+                            progress = new(percent => {
                                 _logger.AppendLine($"Extracting LiteLoader files for server {server.GetServerName()}, {percent}% completed...");
                             });
                             _fileUtilities.ExtractZipToDirectory(GetServiceFilePath(BmsFileNameKeys.LLUpdatePackage_Ver, liteVersion), GetServerDirectory(BdsDirectoryKeys.ServerRoot, server), progress).Wait();
@@ -177,6 +173,9 @@ namespace BedrockService.Service.Management {
 
         public void SaveServerConfiguration(IServerConfiguration server) {
             int index = 0;
+            if (server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString() == null) {
+                server.GetSettingsProp(ServerPropertyKeys.ServerPath).SetValue(server.GetSettingsProp(ServerPropertyKeys.ServerPath).DefaultValue);
+            }
             string serverPath = server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString();
             string[] output = new string[10 + server.GetSettingsList().Count + server.GetAllProps().Count + server.GetStartCommands().Count];
 
@@ -207,12 +206,8 @@ namespace BedrockService.Service.Management {
             output[index++] = $"DeployedVersion={server.GetServerVersion()}";
             output[index++] = string.Empty;
 
-            File.WriteAllLines(GetServiceFilePath(BmsFileNameKeys.ServiceConfig), output);
-            if (server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString() == null)
-                server.GetSettingsProp(ServerPropertyKeys.ServerPath).SetValue(server.GetSettingsProp(ServerPropertyKeys.ServerPath).DefaultValue);
-            if (!Directory.Exists(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString())) {
-                Directory.CreateDirectory(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString());
-            }
+            File.WriteAllLines(GetServiceFilePath(BmsFileNameKeys.ServerConfig_Name, server.GetServerName()), output);
+            Task.Delay(500).Wait();
         }
 
         public void WriteJSONFiles(IServerConfiguration server) {
@@ -274,12 +269,12 @@ namespace BedrockService.Service.Management {
                 return 0;
             }
         }
-        
+
         public Task<List<BackupInfoModel>> EnumerateBackupsForServer(byte serverIndex) {
             return Task.Run(() => {
                 IServerConfiguration server = _serviceConfiguration.GetServerInfoByIndex(serverIndex);
                 _serviceConfiguration.CalculateTotalBackupsAllServers().Wait();
-                List<BackupInfoModel> newList = new List<BackupInfoModel>();
+                List<BackupInfoModel> newList = new();
                 try {
                     foreach (FileInfo dir in new DirectoryInfo($@"{server.GetSettingsProp(ServerPropertyKeys.BackupPath)}\{server.GetServerName()}").GetFiles()) {
                         newList.Add(new BackupInfoModel(dir));
@@ -346,7 +341,7 @@ namespace BedrockService.Service.Management {
 
         public void DeleteBackupForServer(byte serverIndex, string backupName) {
             string serverName = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetServerName();
-            DirectoryInfo serverBackupDir = new DirectoryInfo($@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp(ServerPropertyKeys.BackupPath)}\{serverName}");
+            DirectoryInfo serverBackupDir = new($@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp(ServerPropertyKeys.BackupPath)}\{serverName}");
             try {
                 foreach (FileInfo file in serverBackupDir.GetFiles())
                     if (file.Name == backupName || backupName == "-RemoveAll-") {
@@ -410,7 +405,7 @@ namespace BedrockService.Service.Management {
         private bool DeleteAllBackups(IServerConfiguration serverInfo) {
             try {
                 string configBackupPath = serverInfo.GetSettingsProp(ServerPropertyKeys.BackupPath).ToString();
-                DirectoryInfo backupDirInfo = new DirectoryInfo($@"{configBackupPath}\{serverInfo.GetServerName()}");
+                DirectoryInfo backupDirInfo = new($@"{configBackupPath}\{serverInfo.GetServerName()}");
                 foreach (FileInfo dir in backupDirInfo.EnumerateFiles()) {
                     dir.Delete();
                 }
@@ -427,7 +422,7 @@ namespace BedrockService.Service.Management {
 
         private static bool DeletePlayerFiles(IServerConfiguration serverInfo) {
             try {
-                DirectoryInfo configDirInfo = new DirectoryInfo(GetServiceDirectory(BmsDirectoryKeys.ServerConfigs));
+                DirectoryInfo configDirInfo = new(GetServiceDirectory(BmsDirectoryKeys.ServerConfigs));
                 foreach (DirectoryInfo dir in configDirInfo.GetDirectories()) {
                     if (dir.Name == "KnownPlayers" || dir.Name == "RegisteredPlayers") {
                         foreach (FileInfo file in dir.GetFiles()) {
