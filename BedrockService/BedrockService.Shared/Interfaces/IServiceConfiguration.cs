@@ -1,4 +1,5 @@
 ﻿using BedrockService.Shared.Classes;
+using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using static BedrockService.Shared.Classes.SharedStringBase;
@@ -22,6 +23,11 @@ namespace BedrockService.Shared.Interfaces {
         (int totalBackups, int totalSize) GetServiceBackupInfo();
         void SetLatestBDSVersion(string version);
         string GetLatestBDSVersion();
+        void SetLatestLLVersion(string version);
+        string GetLatestLLVersion();
         bool ValidateLatestVersion();
+        LLServerPluginRegistry GetPluginRegistry();
+        PluginVersionInfo GetServerPluginInfo(int serverIndex, string pluginFilename);
+        void SetServerPluginInfo(int serverIndex, PluginVersionInfo info);
     }
 }
