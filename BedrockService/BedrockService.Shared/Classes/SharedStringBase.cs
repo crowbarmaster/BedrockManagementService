@@ -1,9 +1,6 @@
 ﻿using BedrockService.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 #nullable enable
 
 namespace BedrockService.Shared.Classes {
@@ -42,8 +39,8 @@ namespace BedrockService.Shared.Classes {
         }
 
         public enum MinecraftPackTypes {
-            data,
-            resources,
+            Behavior,
+            Resource,
             WorldPack
         };
 
@@ -110,9 +107,12 @@ namespace BedrockService.Shared.Classes {
 
         public enum BmsUrlKeys {
             BdsDownloadPage,
-            VersionRegx,
+            LLReleasesJson,
+            BdsVersionRegx,
             BdsPackage_Ver,
-            LLPackage_Ver
+            LLPackage_Ver,
+            LLBdsVersionRegx,
+            BdsVersionJson
         }
 
         public static Dictionary<BmsFileNameKeys, BmsDirectoryKeys> BmsFileParentDirectories = new() {
@@ -156,8 +156,11 @@ namespace BedrockService.Shared.Classes {
         public static Dictionary<BmsUrlKeys, string> BmsUrlStrings = new() {
             { BmsUrlKeys.BdsDownloadPage, "https://www.minecraft.net/en-us/download/server/bedrock" },
             { BmsUrlKeys.BdsPackage_Ver, "https://minecraft.azureedge.net/bin-win/bedrock-server-{0}.zip" },
-            { BmsUrlKeys.VersionRegx, @"(https://minecraft.azureedge.net/bin-win/bedrock-server-)(.*)(\.zip)" },
-            { BmsUrlKeys.LLPackage_Ver, "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/{0}/LiteLoader-{0}.zip" }
+            { BmsUrlKeys.BdsVersionRegx, @"(https://minecraft.azureedge.net/bin-win/bedrock-server-)(.*)(\.zip)" },
+            { BmsUrlKeys.LLBdsVersionRegx, @"(Adapted to BDS-)(.*)( \|)" },
+            { BmsUrlKeys.LLPackage_Ver, "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/{0}/LiteLoader-{0}.zip" },
+            { BmsUrlKeys.LLReleasesJson, "https://api.github.com/repos/LiteLDev/LiteLoaderBDS/releases" },
+            { BmsUrlKeys.BdsVersionJson, "http://127.0.0.1/bedrock_version_manifest.json" }
         };
 
         public static Dictionary<BmsDirectoryKeys, string> BmsDirectoryStrings = new() {
@@ -243,8 +246,8 @@ namespace BedrockService.Shared.Classes {
         };
 
         public static Dictionary<MinecraftPackTypes, string> MinecraftPackTypeStrings = new() {
-            { MinecraftPackTypes.data, "data" },
-            { MinecraftPackTypes.resources, "resources" },
+            { MinecraftPackTypes.Behavior, "data" },
+            { MinecraftPackTypes.Resource, "resources" },
             { MinecraftPackTypes.WorldPack, "WorldPack" }
         };
 
@@ -363,7 +366,7 @@ namespace BedrockService.Shared.Classes {
             if (!BdsFileParentDirectories.ContainsKey(key)) {
                 throw new KeyNotFoundException($"File {key} does not have a parent directory associated.");
             }
-            if(!BdsDirectoryStrings.ContainsKey(BdsFileParentDirectories[key])) {
+            if (!BdsDirectoryStrings.ContainsKey(BdsFileParentDirectories[key])) {
                 throw new KeyNotFoundException($"File {BdsFileParentDirectories[key]} does not have a directory associated.");
             }
             return $"{GetServerDirectory(BdsFileParentDirectories[key], server)}\\{BdsFileNameStrings[key]}";
