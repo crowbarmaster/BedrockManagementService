@@ -1,13 +1,11 @@
-﻿using System;
+﻿using System.CodeDom;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Text.Json;
 using System.Dynamic;
 using System.IO;
-using System.CodeDom.Compiler;
-using System.CodeDom;
+using System.Linq;
+using System.Text;
+using System.Text.Json;
 
 namespace BedrockService.Shared.JsonModels.LiteLoaderJsonModels {
     public class LiteLoaderConfigNodeModel {
@@ -16,9 +14,14 @@ namespace BedrockService.Shared.JsonModels.LiteLoaderJsonModels {
         public Dictionary<string, dynamic> Properties { get; set; } = new();
         public List<LiteLoaderConfigNodeModel> ChildNodes { get; set; } = new();
 
+        public LiteLoaderConfigNodeModel() { }
+
         public LiteLoaderConfigNodeModel(string name, string input, LiteLoaderConfigNodeModel parentNode = null) {
             Name = name;
             ParentNode = parentNode;
+            if (input == null) {
+                input = "{}";
+            }
             dynamic json = JsonSerializer.Deserialize<ExpandoObject>(input);
             Dictionary<string, string> children = new();
             foreach (var obj in json) {
@@ -50,7 +53,7 @@ namespace BedrockService.Shared.JsonModels.LiteLoaderJsonModels {
         }
 
         public string ToJsonString(int tabDepth = 1) {
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new();
             List<string> keyCollection = new();
             keyCollection.AddRange(Properties.Keys);
             keyCollection.AddRange(ChildNodes.Select(x => x.Name).ToArray());
