@@ -3,7 +3,7 @@ using System.IO;
 
 namespace BedrockService.Shared.Classes {
     public abstract class BaseJsonFile {
-        private readonly JsonSerializerSettings defaultJsonSettings = new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Ignore };
+        private readonly JsonSerializerSettings defaultJsonSettings = new() { DefaultValueHandling = DefaultValueHandling.Ignore };
         public string FilePath { get; set; }
 
         public BaseJsonFile(string fullPath) => FilePath = fullPath;

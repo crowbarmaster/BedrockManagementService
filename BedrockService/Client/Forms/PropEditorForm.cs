@@ -1,10 +1,6 @@
-﻿using BedrockService.Client.Management;
-using BedrockService.Shared.Classes;
-using Newtonsoft.Json;
+﻿using BedrockService.Shared.Classes;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace BedrockService.Client.Forms {

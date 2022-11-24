@@ -30,7 +30,7 @@ namespace BedrockService.Service.Core {
                         });
                         s.AfterStartingService(_ => _logger.AppendLine("Service started Successfully."));
                         s.BeforeStoppingService(_ => _logger.AppendLine("Stopping service..."));
-                        s.AfterStoppingService(_ => _applicationLifetime.StopApplication());                     
+                        s.AfterStoppingService(_ => _applicationLifetime.StopApplication());
                     }).RunAsLocalService().AfterInstall(() => {
                         _logger.AppendLine("Service install completed... Exiting!");
                         Task.Delay(1000).Wait();

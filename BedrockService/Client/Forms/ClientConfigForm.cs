@@ -29,7 +29,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void nbtButton_Click(object sender, EventArgs e) {
-            using (OpenFileDialog fileDialog = new OpenFileDialog()) {
+            using (OpenFileDialog fileDialog = new()) {
                 fileDialog.Filter = "EXE Files|*.exe";
                 fileDialog.FileName = "NbtStudio.exe";
                 fileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
@@ -41,7 +41,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void saveBtn_Click(object sender, EventArgs e) {
-            List<IClientSideServiceConfiguration> newConfigs = new List<IClientSideServiceConfiguration>();
+            List<IClientSideServiceConfiguration> newConfigs = new();
             foreach (DataGridViewRow row in serverGridView.Rows) {
                 if (!string.IsNullOrEmpty((string)row.Cells[0].Value)) {
                     newConfigs.Add(new ClientSideServiceConfiguration((string)row.Cells[0].Value, (string)row.Cells[1].Value, (string)row.Cells[2].Value));

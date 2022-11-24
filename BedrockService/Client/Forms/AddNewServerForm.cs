@@ -12,12 +12,13 @@ namespace BedrockService.Client.Forms {
         public ServerCombinedPropModel ServerCombinedPropModel = new();
         private readonly List<IServerConfiguration> serverConfigurations;
         private readonly IClientSideServiceConfiguration serviceConfiguration;
-        private readonly List<string> serviceConfigExcludeList = new List<string>() 
-        {   ServerPropertyStrings[ServerPropertyKeys.ServerName],
+        private readonly List<string> serviceConfigExcludeList = new()
+        {
+            ServerPropertyStrings[ServerPropertyKeys.ServerName],
             ServerPropertyStrings[ServerPropertyKeys.ServerExeName],
             ServerPropertyStrings[ServerPropertyKeys.FileName],
             ServerPropertyStrings[ServerPropertyKeys.ServerPath],
-            ServerPropertyStrings[ServerPropertyKeys.DeployedVersion] 
+            ServerPropertyStrings[ServerPropertyKeys.DeployedVersion]
         };
 
         public AddNewServerForm(IClientSideServiceConfiguration serviceConfiguration, List<IServerConfiguration> serverConfigurations) {
@@ -32,7 +33,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void editPropsBtn_Click(object sender, System.EventArgs e) {
-            using PropEditorForm editSrvDialog = new PropEditorForm();
+            using PropEditorForm editSrvDialog = new();
             if (srvNameBox.TextLength > 0)
                 ServerCombinedPropModel.ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.ServerName]).StringValue = srvNameBox.Text;
             if (ipV4Box.TextLength > 0)
@@ -47,7 +48,7 @@ namespace BedrockService.Client.Forms {
 
         private void serverSettingsBtn_Click(object sender, System.EventArgs e) {
             using PropEditorForm editSrvDialog = new();
-            List<Property> filteredProps = new List<Property>();
+            List<Property> filteredProps = new();
             editSrvDialog.PopulateBoxes(ServerCombinedPropModel.ServicePropList.Where(x => !serviceConfigExcludeList.Contains(x.KeyName)).ToList());
             if (editSrvDialog.ShowDialog() == DialogResult.OK) {
                 editSrvDialog.workingProps.ForEach(x => {
@@ -57,7 +58,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void saveBtn_Click(object sender, System.EventArgs e) {
-            List<string> usedPorts = new List<string>();
+            List<string> usedPorts = new();
             usedPorts.Add(serviceConfiguration.GetPort());
             foreach (IServerConfiguration serverConfiguration in serverConfigurations) {
                 usedPorts.Add(serverConfiguration.GetProp(BmsDependServerPropKeys.PortI4).ToString());

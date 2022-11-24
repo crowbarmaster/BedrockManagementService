@@ -32,7 +32,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
             Property? ipV4Prop = propList?.First(p => p.KeyName == "server-port");
             Property? ipV6Prop = propList?.First(p => p.KeyName == "server-portv6");
             Property? versionProp = servicePropList?.First(p => p.KeyName == "DeployedVersion");
-            ServerConfigurator newServer = new ServerConfigurator(_processInfo, _logger, _serviceConfiguration);
+            ServerConfigurator newServer = new(_processInfo, _logger, _serviceConfiguration);
             newServer.ServicePropList = servicePropList;
             if (_serviceConfiguration.GetLatestBDSVersion() == versionProp?.StringValue) {
                 newServer.ServerPropList = propList;

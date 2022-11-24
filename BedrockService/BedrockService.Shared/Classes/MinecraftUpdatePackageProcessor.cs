@@ -23,7 +23,7 @@ namespace BedrockService.Shared.Classes {
             Directory.CreateDirectory(_workingDirectory);
             _logger = logger;
         }
-        
+
         public MinecraftUpdatePackageProcessor(string packageVersion, string fileTargetDirectory) {
             _packageVersion = packageVersion;
             _fileTargetDirectory = fileTargetDirectory;
@@ -33,12 +33,12 @@ namespace BedrockService.Shared.Classes {
 
         public bool ExtractCoreFiles() {
             try {
-                FileUtilities fileUtils = new FileUtilities();
+                FileUtilities fileUtils = new();
                 fileUtils.ClearTempDir().Wait();
                 Directory.CreateDirectory(_workingDirectory);
                 string zipPath = GetServiceFilePath(BmsFileNameKeys.BdsUpdatePackage_Ver, _packageVersion);
                 if (!File.Exists(zipPath)) {
-                    if(_loggingEnabled) _logger.AppendLine("Requested build package was not found. BMS will attempt to fetch it now...");
+                    if (_loggingEnabled) _logger.AppendLine("Requested build package was not found. BMS will attempt to fetch it now...");
                     if (!Updater.FetchBuild(_packageVersion).Result) {
                         if (_loggingEnabled) _logger.AppendLine($"Version {_packageVersion} was not found on mojang servers. Place package manaually, or check configured version for error!");
                         return false;
@@ -59,8 +59,8 @@ namespace BedrockService.Shared.Classes {
                             if (File.Exists(fixedPath)) {
                                 File.Delete(fixedPath);
                             }
-                            FileInfo fileInfo = new FileInfo(fixedPath);
-                            if(fileInfo.Extension == ".properties") {
+                            FileInfo fileInfo = new(fixedPath);
+                            if (fileInfo.Extension == ".properties") {
                                 archive.Entries[i].ExtractToFile(fixedPath);
                             }
                         } else {

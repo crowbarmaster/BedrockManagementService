@@ -2,12 +2,8 @@
 using BedrockService.Service.Networking.Interfaces;
 using BedrockService.Shared.SerializeModels;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.IO.Compression;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Service.Networking.NetworkStrategies {
@@ -58,7 +54,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
                 }
             }
             if (exportFileInfo.PackageFlags >= PackageFlags.WorldPacks) {
-                FileUtilities fileUtilities = new FileUtilities();
+                FileUtilities fileUtilities = new();
                 fileUtilities.CreatePackBackupFiles(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString(), server.GetProp(BmsDependServerPropKeys.LevelName).ToString(), packageFile);
             }
             if (exportFileInfo.PackageFlags >= PackageFlags.PlayerDatabase) {

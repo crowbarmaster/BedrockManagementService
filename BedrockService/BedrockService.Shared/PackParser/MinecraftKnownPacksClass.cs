@@ -1,7 +1,6 @@
 ﻿using BedrockService.Shared.FileModels.MinecraftFileModels;
 using BedrockService.Shared.Interfaces;
 using BedrockService.Shared.JsonModels.MinecraftJsonModels;
-using BedrockService.Shared.Utilities;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -20,13 +19,13 @@ namespace BedrockService.Shared.PackParser {
             if (!File.Exists($@"{worldDirectory}\world_resource_packs.json")) {
                 File.Create($@"{worldDirectory}\world_resource_packs.json").Close();
             }
-            InstalledBehaviorPacks = new WorldPackFileModel($@"{worldDirectory}\world_behavior_packs.json"); 
+            InstalledBehaviorPacks = new WorldPackFileModel($@"{worldDirectory}\world_behavior_packs.json");
             InstalledResourcePacks = new WorldPackFileModel($@"{worldDirectory}\world_resource_packs.json");
             InstalledPacks = new KnownPacksFileModel(validPacksFile);
             if (InstalledPacks.Contents[0].file_version != 0) {
                 InstalledPacks.Contents.RemoveAt(0); // Strip file version entry.
             }
-            List<KnownPacksJsonModel> AddedPacks = new List<KnownPacksJsonModel>();
+            List<KnownPacksJsonModel> AddedPacks = new();
             InstalledBehaviorPacks.Contents.ForEach((x) => {
                 AddedPacks.AddRange(InstalledPacks.Contents.Where(y => y.uuid == x.pack_id).ToList());
             });
@@ -56,7 +55,7 @@ namespace BedrockService.Shared.PackParser {
                 Directory.Delete(jsonPackPath, true);
             }
             if (jsonWorldPackEnablerPath != null) {
-                WorldPackFileModel worldPackFile = new WorldPackFileModel(jsonWorldPackEnablerPath);
+                WorldPackFileModel worldPackFile = new(jsonWorldPackEnablerPath);
                 List<WorldPackEntryJsonModel> worldPacks = worldPackFile.Contents;
                 WorldPackEntryJsonModel foundEntry = worldPacks.FirstOrDefault(x => x.pack_id.Equals(pack.JsonManifest.header.uuid));
                 if (foundEntry != null) {

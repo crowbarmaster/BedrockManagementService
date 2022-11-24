@@ -1,5 +1,4 @@
-﻿using BedrockService.Client.Forms;
-using BedrockService.Client.Management;
+﻿using BedrockService.Client.Management;
 using BedrockService.Shared.Classes;
 using BedrockService.Shared.Interfaces;
 using BedrockService.Shared.PackParser;
@@ -164,7 +163,7 @@ namespace BedrockService.Client.Networking {
                                 break;
                             case NetworkMessageTypes.PackList:
 
-                                List<MinecraftPackContainer> temp = new List<MinecraftPackContainer>();
+                                List<MinecraftPackContainer> temp = new();
                                 JArray jArray = JArray.Parse(data);
                                 foreach (JToken token in jArray)
                                     temp.Add(token.ToObject<MinecraftPackContainer>());
@@ -189,9 +188,9 @@ namespace BedrockService.Client.Networking {
                             case NetworkMessageTypes.ServerStatusRequest:
 
                                 StatusUpdateModel status = JsonConvert.DeserializeObject<StatusUpdateModel>(data, settings);
-                                if(status != null && status.ServerStatusModel != null && status.ServerStatusModel.ServerIndex != 255) {
+                                if (status != null && status.ServerStatusModel != null && status.ServerStatusModel.ServerIndex != 255) {
                                     ServerStatusModel formerServerStatus = FormManager.MainWindow.selectedServer.GetStatus();
-                                    if(!status.ServerStatusModel.Equals(formerServerStatus)) {
+                                    if (!status.ServerStatusModel.Equals(formerServerStatus)) {
                                         FormManager.MainWindow.connectedHost.GetServerInfoByIndex(status.ServerStatusModel.ServerIndex).SetStatus(status.ServerStatusModel);
                                         FormManager.MainWindow.Invoke(() => FormManager.MainWindow.RefreshAllCompenentStates());
                                         FormManager.TCPClient.SendData(serverIndex, NetworkMessageTypes.EnumBackups);
@@ -203,7 +202,7 @@ namespace BedrockService.Client.Networking {
                                 break;
                             case NetworkMessageTypes.ExportFile:
 
-                                ExportImportFileModel exportModel =  JsonConvert.DeserializeObject<ExportImportFileModel>(data, settings);
+                                ExportImportFileModel exportModel = JsonConvert.DeserializeObject<ExportImportFileModel>(data, settings);
                                 if (exportModel != null) {
                                     FormManager.MainWindow.Invoke(() => FormManager.MainWindow.RecieveExportData(exportModel));
                                 }

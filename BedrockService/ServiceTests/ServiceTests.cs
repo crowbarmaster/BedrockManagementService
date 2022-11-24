@@ -1,5 +1,4 @@
 using BedrockService.Service;
-using BedrockService.Service.Core;
 using BedrockService.Service.Core.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

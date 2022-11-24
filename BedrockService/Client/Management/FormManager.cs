@@ -5,7 +5,6 @@ using BedrockService.Shared.Interfaces;
 using BedrockService.Shared.Utilities;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Windows.Forms;
 
 namespace BedrockService.Client.Management {

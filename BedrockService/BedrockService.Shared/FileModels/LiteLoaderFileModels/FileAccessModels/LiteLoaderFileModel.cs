@@ -1,6 +1,5 @@
 ﻿using BedrockService.Shared.Classes;
 using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
-using System.Collections.Generic;
 
 namespace BedrockService.Shared.FileModels.LiteLoaderFileModels.FileAccessModels {
     public class LiteLoaderFileModel : BaseJsonFile {

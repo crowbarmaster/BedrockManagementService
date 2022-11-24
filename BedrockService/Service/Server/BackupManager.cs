@@ -1,13 +1,5 @@
 ﻿using BedrockService.Service.Server.Interfaces;
-using BedrockService.Shared.MinecraftFileModels.FileAccessModels;
-using BedrockService.Shared.MinecraftFileModels.JsonModels;
-using BedrockService.Shared.PackParser;
-using System;
-using System.Collections.Generic;
 using System.IO.Compression;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Service.Server {
@@ -38,9 +30,9 @@ namespace BedrockService.Service.Server {
                 string serverPath = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString();
                 string backupPath = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupPath).ToString();
                 string levelName = _serverConfiguration.GetProp(BmsDependServerPropKeys.LevelName).ToString();
-                DirectoryInfo worldsDir = new DirectoryInfo($@"{serverPath}\worlds");
-                DirectoryInfo backupDir = new DirectoryInfo($@"{backupPath}\{_serverConfiguration.GetServerName()}");
-                Dictionary<string, int> backupFileInfoPairs = new Dictionary<string, int>();
+                DirectoryInfo worldsDir = new($@"{serverPath}\worlds");
+                DirectoryInfo backupDir = new($@"{backupPath}\{_serverConfiguration.GetServerName()}");
+                Dictionary<string, int> backupFileInfoPairs = new();
                 string[] files = queryString.Split(", ");
                 foreach (string file in files) {
                     string[] fileInfoSplit = file.Split(':');
@@ -52,9 +44,9 @@ namespace BedrockService.Service.Server {
                 _logger.AppendLine($"Backing up files for server {_serverConfiguration.GetServerName()}. Please wait!");
                 string levelDir = @$"\{_serverConfiguration.GetProp(BmsDependServerPropKeys.LevelName)}";
                 using FileStream fs = File.Create($@"{backupDir.FullName}\Backup-{DateTime.Now:yyyyMMdd_HHmmssff}.zip");
-                using ZipArchive backupZip = new ZipArchive(fs, ZipArchiveMode.Create);
+                using ZipArchive backupZip = new(fs, ZipArchiveMode.Create);
                 bool resuilt = BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, backupZip).Result;
-                DirectoryInfo levelDirInfo = new DirectoryInfo(worldsDir.FullName + levelDir);
+                DirectoryInfo levelDirInfo = new(worldsDir.FullName + levelDir);
                 List<FileInfo> levelFiles = levelDirInfo.GetFiles("*.json").ToList();
                 levelFiles.AddRange(levelDirInfo.GetFiles("world_icon*"));
                 foreach (FileInfo levelFile in levelFiles) {
@@ -83,7 +75,7 @@ namespace BedrockService.Service.Server {
             int fileCount = backupDir.GetFiles().Length;
             try {
                 if (fileCount >= _serverConfiguration.GetSettingsProp(ServerPropertyKeys.MaxBackupCount).GetIntValue()) {
-                    List<string> dates = new List<string>();
+                    List<string> dates = new();
                     foreach (FileInfo file in backupDir.GetFiles()) {
                         string[] fileNameSplit = file.Name.Split('-');
                         dates.Add(fileNameSplit[1]);
@@ -115,7 +107,7 @@ namespace BedrockService.Service.Server {
                             File.Create(filePath).Close();
                         }
                         using (FileStream fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                        using (MemoryStream ms = new MemoryStream()) {
+                        using (MemoryStream ms = new()) {
                             fs.CopyTo(ms);
                             ms.Position = 0;
                             fileData = ms.ToArray();

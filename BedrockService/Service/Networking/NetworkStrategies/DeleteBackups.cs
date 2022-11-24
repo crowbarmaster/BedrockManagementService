@@ -1,6 +1,5 @@
 ﻿
 using BedrockService.Service.Networking.Interfaces;
-using Newtonsoft.Json;
 using System.Text;
 
 namespace BedrockService.Service.Networking.NetworkStrategies {

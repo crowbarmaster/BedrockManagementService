@@ -1,11 +1,7 @@
 ﻿using BedrockService.Service.Networking.Interfaces;
 using BedrockService.Shared.SerializeModels;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace BedrockService.Service.Networking.NetworkStrategies {
     public class StatusRequest : IMessageParser {
@@ -18,7 +14,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
         }
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
-            StatusUpdateModel model = new StatusUpdateModel();
+            StatusUpdateModel model = new();
             model.ServiceStatusModel = _service.GetServiceStatus();
             JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
             byte[] serializeToBytes = Array.Empty<byte>();

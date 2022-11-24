@@ -15,7 +15,7 @@ namespace BedrockService.Client.Management {
         public Task LogTask;
         public bool Working = false;
         public bool DisplayTimestamps = false;
-        public List<string> ServiceLogs = new List<string>();
+        public List<string> ServiceLogs = new();
         private CancellationTokenSource _logTaskCancelSource;
         private IServiceConfiguration _connectedHost;
         private readonly IBedrockLogger _logger;
@@ -30,7 +30,7 @@ namespace BedrockService.Client.Management {
             while (!_logTaskCancelSource.Token.IsCancellationRequested) {
                 try {
                     Working = true;
-                    StringBuilder sendString = new StringBuilder();
+                    StringBuilder sendString = new();
                     foreach (ServerConfigurator server in _connectedHost.GetServerList()) {
                         server.ConsoleBuffer = server.ConsoleBuffer ?? new List<LogEntry>();
                         sendString.Append($"{server.GetSettingsProp(ServerPropertyKeys.ServerName)};{server.ConsoleBuffer.Count}|");
@@ -88,7 +88,7 @@ namespace BedrockService.Client.Management {
                             UpdateLogBoxInvoked(FormManager.MainWindow.ServerInfoBox, statusMsg);
                         });
                     }
-                    if(FormManager.MainWindow.selectedServer != null) {
+                    if (FormManager.MainWindow.selectedServer != null) {
                         FormManager.TCPClient.SendData(FormManager.MainWindow.connectedHost.GetServerIndex(FormManager.MainWindow.selectedServer), NetworkMessageTypes.ServerStatusRequest);
                     }
                 } catch (Exception e) {

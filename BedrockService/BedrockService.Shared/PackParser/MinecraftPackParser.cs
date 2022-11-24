@@ -1,4 +1,3 @@
-using BedrockService.Shared.Interfaces;
 using BedrockService.Shared.JsonModels.MinecraftJsonModels;
 using BedrockService.Shared.Utilities;
 using Newtonsoft.Json;
@@ -9,7 +8,7 @@ using System.IO.Compression;
 namespace BedrockService.Shared.PackParser {
     public class MinecraftPackParser {
         public string PackExtractDirectory;
-        public List<MinecraftPackContainer> FoundPacks = new List<MinecraftPackContainer>();
+        public List<MinecraftPackContainer> FoundPacks = new();
 
         [JsonConstructor]
         public MinecraftPackParser() {
@@ -32,7 +31,7 @@ namespace BedrockService.Shared.PackParser {
                 Directory.CreateDirectory($@"{PackExtractDirectory}\ZipTemp");
             }
             foreach (string file in files) {
-                FileInfo fInfo = new FileInfo(file);
+                FileInfo fInfo = new(file);
                 string zipFilePath = $@"{PackExtractDirectory}\{fInfo.Name.Replace(fInfo.Extension, "")}";
                 ZipFile.ExtractToDirectory(file, zipFilePath);
                 foreach (FileInfo extractedFile in new DirectoryInfo(zipFilePath).GetFiles()) {
@@ -86,6 +85,7 @@ namespace BedrockService.Shared.PackParser {
                             IconBytes = iconBytes
                         };
                         JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
+                        container.JsonManifest = System.Text.Json.JsonSerializer.Deserialize<PackManifestJsonModel>(File.ReadAllText(file.FullName));
                         container.JsonManifest = JsonConvert.DeserializeObject<PackManifestJsonModel>(File.ReadAllText(file.FullName), settings);
                         container.ManifestType = container.JsonManifest.modules[0].type;
                         FoundPacks.Add(container);

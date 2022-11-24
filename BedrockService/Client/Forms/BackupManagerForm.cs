@@ -5,9 +5,7 @@ using BedrockService.Shared.SerializeModels;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -26,7 +24,7 @@ namespace BedrockService.Client.Forms {
             _serviceConfig = FormManager.MainWindow.connectedHost;
         }
 
-        public void UpdateBackupManagerData () {
+        public void UpdateBackupManagerData() {
             _defaultEntry = new BackupInfoModel(new System.IO.FileInfo("-----.zip"));
             _serviceConfig = FormManager.MainWindow.connectedHost;
             backupSelectBox.Items.Clear();
@@ -66,12 +64,12 @@ namespace BedrockService.Client.Forms {
                 return;
             }
             BackupInfoModel selectedBackup = backupSelectBox.SelectedItem as BackupInfoModel;
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            SaveFileDialog saveFileDialog = new();
             saveFileDialog.Filter = "Zip File|*.zip";
             saveFileDialog.FileName = backupSelectBox.SelectedItem.ToString();
             saveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             if (saveFileDialog.ShowDialog() == DialogResult.OK) {
-                ExportImportFileModel exportModel = new ExportImportFileModel();
+                ExportImportFileModel exportModel = new();
                 exportModel.Filename = selectedBackup.Filename;
                 exportModel.FileType = FileTypeFlags.Backup;
                 byte[] dataBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(exportModel));
@@ -118,8 +116,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void backupSelectBox_SelectedIndexChanged(object sender, EventArgs e) {
-            if(backupSelectBox.SelectedIndex < 1) 
-            {
+            if (backupSelectBox.SelectedIndex < 1) {
                 backupSelectBox.SelectedIndex = 0;
             }
             UpdateInfoBox();

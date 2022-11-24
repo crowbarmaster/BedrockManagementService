@@ -14,7 +14,7 @@ namespace BedrockService.Service.Networking {
         private Dictionary<NetworkMessageTypes, IMessageParser>? _standardMessageLookup;
         private Dictionary<NetworkMessageTypes, IFlaggedMessageParser>? _flaggedMessageLookup;
         private readonly IPAddress _ipAddress = IPAddress.Parse("0.0.0.0");
-        private CancellationTokenSource _cancelTokenSource = new CancellationTokenSource();
+        private CancellationTokenSource _cancelTokenSource = new();
         private Task? _tcpTask;
         private Task? _recieverTask;
         private bool _resettingListener = false;
@@ -80,11 +80,11 @@ namespace BedrockService.Service.Networking {
                             return;
                         }
                         Task.Delay(500).Wait();
-                    } catch (NullReferenceException) { 
+                    } catch (NullReferenceException) {
                     } catch (InvalidOperationException) {
                         _inListener = null;
                         return;
-                    } catch (SocketException) { 
+                    } catch (SocketException) {
                     } catch (Exception e) {
                         _logger.AppendLine(e.ToString());
                     }

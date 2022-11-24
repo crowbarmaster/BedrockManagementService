@@ -40,7 +40,7 @@ namespace BedrockService.Client.Forms {
             if (thisBox.SelectedIndex != -1) {
                 MinecraftPackContainer selectedPack = (MinecraftPackContainer)thisBox.SelectedItem;
                 if (selectedPack.IconBytes != null)
-                    using (MemoryStream ms = new MemoryStream(selectedPack.IconBytes)) {
+                    using (MemoryStream ms = new(selectedPack.IconBytes)) {
                         selectedPackIcon.Image = Image.FromStream(ms);
                     }
                 if (selectedPack.JsonManifest != null)
@@ -52,7 +52,7 @@ namespace BedrockService.Client.Forms {
 
         private void removePackBtn_Click(object sender, EventArgs e) {
             if (serverListBox.SelectedIndex != -1) {
-                List<MinecraftPackContainer> temp = new List<MinecraftPackContainer>();
+                List<MinecraftPackContainer> temp = new();
                 object[] items = new object[serverListBox.SelectedItems.Count];
                 serverListBox.SelectedItems.CopyTo(items, 0);
                 foreach (object item in items) {
@@ -66,7 +66,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void removeAllPacksBtn_Click(object sender, EventArgs e) {
-            List<MinecraftPackContainer> temp = new List<MinecraftPackContainer>();
+            List<MinecraftPackContainer> temp = new();
             foreach (object item in serverListBox.Items)
                 temp.Add((MinecraftPackContainer)item);
             JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
@@ -90,13 +90,13 @@ namespace BedrockService.Client.Forms {
         }
 
         private void openFileBtn_Click(object sender, EventArgs e) {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
+            OpenFileDialog openFileDialog = new();
             openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             openFileDialog.Filter = "MC pack file (.MCWORLD, .MCPACK, .MCADDON, .Zip)|*.mcworld;*.mcpack;*.mcaddon;*.zip";
             openFileDialog.Title = "Select pack file(s)";
             openFileDialog.Multiselect = true;
             if (openFileDialog.ShowDialog() == DialogResult.OK) {
-                MinecraftPackParser parser = new MinecraftPackParser(openFileDialog.FileNames, PackExtractDir.FullName);
+                MinecraftPackParser parser = new(openFileDialog.FileNames, PackExtractDir.FullName);
                 parsedPacksListBox.Items.Clear();
                 foreach (MinecraftPackContainer container in parser.FoundPacks)
                     parsedPacksListBox.Items.Add(container);
@@ -106,7 +106,7 @@ namespace BedrockService.Client.Forms {
         private void SendPacks(object[] packList) {
             foreach (MinecraftPackContainer container in packList) {
                 Directory.CreateDirectory($@"{PackExtractDir.FullName}\ZipTemp");
-                DirectoryInfo directoryInfo = new DirectoryInfo(container.PackContentLocation);
+                DirectoryInfo directoryInfo = new(container.PackContentLocation);
                 directoryInfo.MoveTo($@"{PackExtractDir.FullName}\ZipTemp\{directoryInfo.Name}");
                 container.PackContentLocation = $@"{PackExtractDir.FullName}\ZipTemp\{directoryInfo.Name}";
             }

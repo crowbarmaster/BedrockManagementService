@@ -4,15 +4,14 @@ using BedrockService.Shared.Interfaces;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
 namespace BedrockService.Client.Forms {
     public partial class PlayerManagerForm : Form {
         private readonly IServerConfiguration _server;
-        private List<IPlayer> playersFound = new List<IPlayer>();
-        private readonly List<IPlayer> modifiedPlayers = new List<IPlayer>();
+        private List<IPlayer> playersFound = new();
+        private readonly List<IPlayer> modifiedPlayers = new();
         private IPlayer playerToEdit;
         private bool _loaded = false;
         private const string _searchLegendText =
@@ -80,8 +79,8 @@ namespace BedrockService.Client.Forms {
                 var playerTimes = player.GetTimes();
                 string playerPermission = player.GetPermissionLevel();
                 TimeSpan timeSpent = TimeSpan.FromTicks(playerTimes.Disconn - playerTimes.Conn);
-                DateTime firstConnDateTime = new DateTime(playerTimes.First);
-                DateTime connectDateTime = new DateTime(playerTimes.Conn);
+                DateTime firstConnDateTime = new(playerTimes.First);
+                DateTime connectDateTime = new(playerTimes.Conn);
                 string timeString = timeSpent.TotalSeconds > 59.5 ? $"{timeSpent.TotalMinutes.ToString("N2")} Minutes" : $"{timeSpent.TotalSeconds.ToString("N2")} Seconds";
                 if (playerTimes.Conn == playerTimes.Disconn) {
                     timeString = "N/A";
@@ -109,7 +108,7 @@ namespace BedrockService.Client.Forms {
         private void searchEntryBox_TextChanged(object sender, EventArgs e) {
             playersFound = _server.GetPlayerList();
             string curText = searchEntryBox.Text.ToLower();
-            List<IPlayer> tempList = new List<IPlayer>();
+            List<IPlayer> tempList = new();
             string[] splitCommands = new string[1] { curText };
             string cmd;
             string value;
@@ -125,7 +124,7 @@ namespace BedrockService.Client.Forms {
                             cmd = finalSplit[0].ToLower();
                             value = finalSplit[1].ToLower();
                             tempList = new List<IPlayer>();
-                            foreach (IPlayer player in playersFound) {
+                            foreach (Player player in playersFound) {
                                 string key = player.SearchForProperty(cmd);
                                 if (key != null && key.Contains(value)) {
                                     tempList.Add(player);
@@ -146,7 +145,7 @@ namespace BedrockService.Client.Forms {
 
         private void registerPlayerBtn_Click(object sender, EventArgs e) {
             gridView.ClearSelection();
-            using (NewPlayerRegistrationForm form = new NewPlayerRegistrationForm()) {
+            using (NewPlayerRegistrationForm form = new()) {
                 if (form.ShowDialog() == DialogResult.OK) {
                     _server.GetPlayerList().Add(form.PlayerToAdd);
                     modifiedPlayers.Add(form.PlayerToAdd);

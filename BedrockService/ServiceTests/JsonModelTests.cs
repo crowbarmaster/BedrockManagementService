@@ -1,4 +1,5 @@
 ﻿using BedrockService.Shared.FileModels.MinecraftFileModels;
+using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
 using System.IO;
 using Xunit;
 
@@ -24,6 +25,16 @@ namespace ServiceTests {
                                 "{\"permission\": \"operator\",\"xuid\": \"2098765432112345\"}]";
             File.WriteAllText(".\\sample_permissions_model.json", sampleJson);
             PermissionsFileModel fileModel = new(".\\sample_permissions_model.json");
+        }
+
+        [Fact]
+        public void Can_Create_LiteLoader_Plugin_Json() {
+            LLServerPluginRegistry reg = new();
+            reg.ServerPluginList = new();
+            reg.ServerPluginList.Add(new() { BmsServerName = "TestServer" });
+            reg.ServerPluginList[0].InstalledPlugins = new();
+            reg.ServerPluginList[0].InstalledPlugins.Add(new() { BedrockVersion = "1.19.41.01", LiteLoaderVersion = "2.8.1", PluginFileName = "TestPlugin.dll" });
+            File.WriteAllText("LiteLoaderPluginDatabase.json", System.Text.Json.JsonSerializer.Serialize<LLServerPluginRegistry>(reg, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true }));
         }
     }
 }

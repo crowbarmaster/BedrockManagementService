@@ -1,5 +1,4 @@
 ﻿using BedrockService.Shared.FileModels.MinecraftFileModels;
-using BedrockService.Shared.Interfaces;
 using BedrockService.Shared.JsonModels.MinecraftJsonModels;
 using BedrockService.Shared.PackParser;
 using System;
@@ -138,7 +137,7 @@ namespace BedrockService.Shared.Utilities {
         }
 
         public Task ExtractZipToDirectory(string zipPath, string directory, IProgress<double> progress) => Task.Run(() => {
-            FileInfo fileInfo = new FileInfo(zipPath);
+            FileInfo fileInfo = new(zipPath);
             using ZipArchive archive = ZipFile.OpenRead(zipPath);
             int fileCount = archive.Entries.Count;
             for (int i = 0; i < fileCount; i++) {

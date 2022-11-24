@@ -11,7 +11,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
             IBedrockServer server = _service.GetBedrockServerByIndex(serverIndex);
-            if(server.GetServerStatus().ServerStatus == ServerStatus.Started) {
+            if (server.GetServerStatus().ServerStatus == ServerStatus.Started) {
                 server.AwaitableServerStop(true).Wait();
             } else if (server.GetServerStatus().ServerStatus == ServerStatus.Stopped) {
                 server.AwaitableServerStart().Wait();

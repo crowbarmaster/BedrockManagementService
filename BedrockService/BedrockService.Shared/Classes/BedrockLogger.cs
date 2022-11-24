@@ -34,8 +34,7 @@ namespace BedrockService.Shared.Classes {
             _addTimestamps = _serviceConfiguration.GetProp("TimestampLogEntries").GetBoolValue();
             _logOwner = _processInfo.DeclaredType();
             if (_processInfo.DeclaredType() == "Service") {
-                if (_serverConfiguration != null && _serviceConfiguration.GetProp("LogServerOutput").GetBoolValue())
-                {
+                if (_serverConfiguration != null && _serviceConfiguration.GetProp("LogServerOutput").GetBoolValue()) {
                     _logOwner = _serverConfiguration.GetServerName();
                     string serverLogPath = $@"{_processInfo.GetDirectory()}\Logs\Servers\{_logOwner}";
                     if (!Directory.Exists(serverLogPath))

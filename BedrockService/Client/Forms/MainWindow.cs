@@ -163,7 +163,7 @@ namespace BedrockService.Client.Forms {
                 _backupManager.RecieveExportData(file.Data);
             }
             if (file.FileType == FileTypeFlags.ServerPackage) {
-                SaveFileDialog saveFileDialog = new SaveFileDialog {
+                SaveFileDialog saveFileDialog = new() {
                     Filter = "Zip file|*.zip",
                     FileName = $"{file.FileType}-{selectedServer.GetServerName()}-{DateTime.Now:yyyyMMdd_hhmmssff}.zip",
                     RestoreDirectory = true,
@@ -174,7 +174,7 @@ namespace BedrockService.Client.Forms {
                 }
             }
             if (file.FileType == FileTypeFlags.ServicePackage) {
-                SaveFileDialog saveFileDialog = new SaveFileDialog {
+                SaveFileDialog saveFileDialog = new() {
                     Filter = "Zip file|*.zip",
                     FileName = $"BMS_{file.FileType}-{DateTime.Now:yyyyMMdd_hhmmssff}.zip",
                     RestoreDirectory = true,
@@ -273,7 +273,7 @@ namespace BedrockService.Client.Forms {
         public void RecievePlayerData(byte serverIndex, List<IPlayer> playerList) {
             connectedHost.GetServerInfoByIndex(serverIndex).SetPlayerList(playerList);
 
-            PlayerManagerForm form = new PlayerManagerForm(selectedServer);
+            PlayerManagerForm form = new(selectedServer);
             if (form.ShowDialog() != DialogResult.OK) {
                 ServerBusy = false;
             }
@@ -340,7 +340,7 @@ namespace BedrockService.Client.Forms {
                 clientSideServiceConfiguration = ConfigManager.HostConnectList.First(host => host.GetHostName() == HostListBox.Text);
             }
             DisableUI();
-            using (AddNewServerForm newServerForm = new AddNewServerForm(clientSideServiceConfiguration, connectedHost.GetServerList())) {
+            using (AddNewServerForm newServerForm = new(clientSideServiceConfiguration, connectedHost.GetServerList())) {
                 if (newServerForm.ShowDialog() == DialogResult.OK) {
                     JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                     byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(newServerForm.ServerCombinedPropModel, Formatting.Indented, settings));
@@ -353,7 +353,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void RemoveSrvBtn_Click(object sender, EventArgs e) {
-            using (RemoveServerControl form = new RemoveServerControl()) {
+            using (RemoveServerControl form = new()) {
                 if (form.ShowDialog() == DialogResult.OK) {
                     FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.RemoveServer, form.SelectedFlag);
                     form.Close();
@@ -409,7 +409,7 @@ namespace BedrockService.Client.Forms {
         }
 
         public int GetScrollPosition(TextBox targetBox) {
-            ScrollInfo si = new ScrollInfo();
+            ScrollInfo si = new();
             si.Size = (uint)Marshal.SizeOf(si);
             si.Mask = (uint)ScrollInfoMask.All;
             GetScrollInfo(targetBox.Handle, (int)ScrollBarDirection.Vertical, ref si);
@@ -417,7 +417,7 @@ namespace BedrockService.Client.Forms {
         }
 
         public void SetScrollPosition(TextBox targetBox, int pos) {
-            ScrollInfo si = new ScrollInfo();
+            ScrollInfo si = new();
             si.Size = (uint)Marshal.SizeOf(si);
             si.Mask = (uint)ScrollInfoMask.All;
             GetScrollInfo(targetBox.Handle, (int)ScrollBarDirection.Vertical, ref si);
@@ -429,7 +429,7 @@ namespace BedrockService.Client.Forms {
         public void ScrollToEnd(TextBox targetBox) {
 
             // Get the current scroll info.
-            ScrollInfo si = new ScrollInfo();
+            ScrollInfo si = new();
             si.Size = (uint)Marshal.SizeOf(si);
             si.Mask = (uint)ScrollInfoMask.All;
             GetScrollInfo(targetBox.Handle, (int)ScrollBarDirection.Vertical, ref si);
@@ -511,7 +511,7 @@ namespace BedrockService.Client.Forms {
 
         public void RecievePackData(byte serverIndex, List<Shared.PackParser.MinecraftPackContainer> incomingPacks) {
             Invoke((MethodInvoker)delegate {
-                using (ManagePacksForms form = new ManagePacksForms(serverIndex, ClientLogger, _processInfo)) {
+                using (ManagePacksForms form = new(serverIndex, ClientLogger, _processInfo)) {
                     form.PopulateServerPacks(incomingPacks);
                     form.ShowDialog();
                     ServerBusy = false;
@@ -551,7 +551,7 @@ namespace BedrockService.Client.Forms {
 
         private void nbtStudioBtn_Click(object sender, EventArgs e) {
             if (string.IsNullOrEmpty(ConfigManager.NBTStudioPath))
-                using (OpenFileDialog openFile = new OpenFileDialog()) {
+                using (OpenFileDialog openFile = new()) {
                     openFile.FileName = "NBTStudio.exe";
                     openFile.Title = "Please locate NBT Studio executable...";
                     openFile.Filter = "NBTStudio.exe|NBTStudio.exe";
@@ -563,7 +563,7 @@ namespace BedrockService.Client.Forms {
             ServerBusy = true;
             FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.LevelEditRequest);
             DisableUI();
-            using (Process nbtStudioProcess = new Process()) {
+            using (Process nbtStudioProcess = new()) {
                 string tempPath = $@"{Path.GetTempPath()}level.dat";
                 nbtStudioProcess.StartInfo = new ProcessStartInfo(ConfigManager.NBTStudioPath, tempPath);
                 nbtStudioProcess.Start();
@@ -584,7 +584,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void clientConfigBtn_Click(object sender, EventArgs e) {
-            using (ClientConfigForm form = new ClientConfigForm(ConfigManager)) {
+            using (ClientConfigForm form = new(ConfigManager)) {
                 if (form.ShowDialog() == DialogResult.OK) {
                     form.Close();
                     InitForm();
@@ -614,7 +614,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void serverPropMenuItem_Click(object sender, EventArgs e) {
-            using (PropEditorForm _editDialog = new PropEditorForm()) {
+            using (PropEditorForm _editDialog = new()) {
                 _editDialog.PopulateBoxes(selectedServer.GetAllProps());
                 if (_editDialog.ShowDialog() == DialogResult.OK) {
                     JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
@@ -627,7 +627,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void startCmdMenuItem_Click(object sender, EventArgs e) {
-            PropEditorForm editSrvDialog = new PropEditorForm();
+            PropEditorForm editSrvDialog = new();
             editSrvDialog.PopulateStartCmds(selectedServer.GetStartCommands());
             if (editSrvDialog.ShowDialog() == DialogResult.OK) {
                 JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
@@ -641,8 +641,8 @@ namespace BedrockService.Client.Forms {
         }
 
         private void servicePropMenuItem_Click(object sender, EventArgs e) {
-            using (PropEditorForm _editDialog = new PropEditorForm()) {
-                List<string> serviceConfigExcludeList = new List<string>() { "ServerName", "ServerExeName", "FileName", "ServerPath", "DeployedVersion" };
+            using (PropEditorForm _editDialog = new()) {
+                List<string> serviceConfigExcludeList = new() { "ServerName", "ServerExeName", "FileName", "ServerPath", "DeployedVersion" };
                 List<Property> filteredProps = selectedServer.GetSettingsList()
                             .Where(x => !serviceConfigExcludeList.Contains(x.KeyName))
                             .ToList();
@@ -658,7 +658,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void editCoreServicePropertiesToolStripMenuItem_Click(object sender, EventArgs e) {
-            using (PropEditorForm _editDialog = new PropEditorForm()) {
+            using (PropEditorForm _editDialog = new()) {
                 _editDialog.PopulateBoxes(connectedHost.GetAllProps());
                 if (_editDialog.ShowDialog() == DialogResult.OK) {
                     JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
@@ -720,7 +720,7 @@ namespace BedrockService.Client.Forms {
         private void serverPackageFileToolStripMenuItem_Click(object sender, EventArgs e) {
             byte[] fileBytes = OpenPackageFile();
             if (fileBytes != null) {
-                ExportImportFileModel fileModel = new ExportImportFileModel {
+                ExportImportFileModel fileModel = new() {
                     Data = fileBytes,
                     FileType = FileTypeFlags.ServerPackage
                 };
@@ -733,8 +733,8 @@ namespace BedrockService.Client.Forms {
 
         }
 
-        private byte[] OpenPackageFile () {
-            OpenFileDialog ofd = new OpenFileDialog {
+        private byte[] OpenPackageFile() {
+            OpenFileDialog ofd = new() {
                 Filter = "Zip file|*.zip",
                 Multiselect = false,
                 RestoreDirectory = true,
@@ -746,7 +746,7 @@ namespace BedrockService.Client.Forms {
                     return null;
                 }
                 fileBytes = File.ReadAllBytes(ofd.FileName);
-                if(fileBytes.Length < 3 && fileBytes[0] != 0x50 && fileBytes[1] != 0x4B) {
+                if (fileBytes.Length < 3 && fileBytes[0] != 0x50 && fileBytes[1] != 0x4B) {
                     return null;
                 }
             }

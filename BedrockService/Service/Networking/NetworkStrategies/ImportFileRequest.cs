@@ -2,12 +2,8 @@
 using BedrockService.Service.Networking.Interfaces;
 using BedrockService.Shared.SerializeModels;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.IO.Compression;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace BedrockService.Service.Networking.NetworkStrategies {
     public class ImportFileRequest : IMessageParser {
@@ -24,8 +20,8 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
             ExportImportFileModel fileModel = JsonConvert.DeserializeObject<ExportImportFileModel>(Encoding.UTF8.GetString(data));
             switch (fileModel.FileType) {
                 case FileTypeFlags.ServerPackage:
-                    MemoryStream ms = new MemoryStream(fileModel.Data);
-                    ZipArchive zipArchive = new ZipArchive(ms);
+                    MemoryStream ms = new(fileModel.Data);
+                    ZipArchive zipArchive = new(ms);
                     ZipArchiveEntry serverConfFile = null;
                     ZipArchiveEntry serverBackup = null;
                     ZipArchiveEntry playerDbFile = null;

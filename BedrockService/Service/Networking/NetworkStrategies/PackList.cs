@@ -21,10 +21,10 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
             string knownPackFileLocation = $@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp(ServerPropertyKeys.ServerPath)}\valid_known_packs.json";
             string pathToWorldFolder = $@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp(ServerPropertyKeys.ServerPath)}\worlds\{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp("level-name")}";
-            MinecraftKnownPacksClass knownPacks = new MinecraftKnownPacksClass(knownPackFileLocation, pathToWorldFolder);
-            List<MinecraftPackContainer> list = new List<MinecraftPackContainer>();
+            MinecraftKnownPacksClass knownPacks = new(knownPackFileLocation, pathToWorldFolder);
+            List<MinecraftPackContainer> list = new();
             foreach (KnownPacksJsonModel pack in knownPacks.InstalledPacks.Contents) {
-                MinecraftPackParser currentParser = new MinecraftPackParser();
+                MinecraftPackParser currentParser = new();
                 if (!_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetLiteLoaderStatus()) {
                     pack.path = pack.path.Insert(0, "development_");
                 }

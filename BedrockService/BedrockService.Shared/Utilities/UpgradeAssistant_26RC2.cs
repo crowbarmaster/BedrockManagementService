@@ -4,22 +4,21 @@ using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BedrockService.Shared.Utilities {
     public static class UpgradeAssistant_26RC2 {
-        private static List<KeyValuePair<string, string>> _serviceUpgradeList = new List<KeyValuePair<string, string>> {
-            new KeyValuePair<string, string> (@"\Service\Globals.conf", @"\Service.conf"),
-            new KeyValuePair<string, string> (@"\Server", @"\BmsConfig"),
-            new KeyValuePair<string, string> (@"\BmsConfig\MCSFiles", @"\BmsConfig\BDSBuilds"),
-            new KeyValuePair<string, string> (@"\BmsConfig\Configs", @"\BmsConfig\ServerConfigs"),
-            new KeyValuePair<string, string> (@"\BmsConfig\ServerConfigs\RegisteredPlayers", @"\BmsConfig\ServerConfigs\PlayerRecords"),
-            new KeyValuePair<string, string> (@"\BmsConfig\ServerConfigs\KnownPlayers", @"\BmsConfig\ServerConfigs\PlayerRecords"),
-            new KeyValuePair<string, string> (@"\BmsConfig\Backups", @"\ServerBackups"),
+        private static List<KeyValuePair<string, string>> _serviceUpgradeList = new() {
+            new KeyValuePair<string, string>(@"\Service\Globals.conf", @"\Service.conf"),
+            new KeyValuePair<string, string>(@"\Server", @"\BmsConfig"),
+            new KeyValuePair<string, string>(@"\BmsConfig\MCSFiles", @"\BmsConfig\BDSBuilds"),
+            new KeyValuePair<string, string>(@"\BmsConfig\Configs", @"\BmsConfig\ServerConfigs"),
+            new KeyValuePair<string, string>(@"\BmsConfig\ServerConfigs\RegisteredPlayers", @"\BmsConfig\ServerConfigs\PlayerRecords"),
+            new KeyValuePair<string, string>(@"\BmsConfig\ServerConfigs\KnownPlayers", @"\BmsConfig\ServerConfigs\PlayerRecords"),
+            new KeyValuePair<string, string>(@"\BmsConfig\Backups", @"\ServerBackups"),
         };
 
-        private static List<string> _serviceDirectoryRemovalList = new List<string> {
+        private static List<string> _serviceDirectoryRemovalList = new() {
             @"\BmsConfig\ServerConfigs\PlayerRecords\Backups",
             @"\BmsConfig\ServerConfigs\KnownPlayers",
             @"\Service",
@@ -44,7 +43,7 @@ namespace BedrockService.Shared.Utilities {
             foreach (KeyValuePair<string, string> keyValue in _serviceUpgradeList) {
                 FileAttributes fileAttributes = File.GetAttributes($"{basePath}\\{keyValue.Key}");
                 if (fileAttributes.HasFlag(FileAttributes.Directory)) {
-                    DirectoryInfo keyDir = new DirectoryInfo($"{basePath}\\{keyValue.Key}");
+                    DirectoryInfo keyDir = new($"{basePath}\\{keyValue.Key}");
                     if (keyDir.Exists && !Directory.Exists($"{basePath}\\{keyValue.Value}")) {
                         Task.Run(() => {
                             keyDir.MoveTo($"{basePath}\\{keyValue.Value}");
@@ -52,7 +51,7 @@ namespace BedrockService.Shared.Utilities {
                         }).Wait();
                     }
                 } else {
-                    FileInfo keyFile = new FileInfo($"{basePath}\\{keyValue.Key}");
+                    FileInfo keyFile = new($"{basePath}\\{keyValue.Key}");
                     if (keyFile.Exists && !File.Exists($"{basePath}\\{keyValue.Value}")) {
                         Task.Run(() => {
                             keyFile.MoveTo($"{basePath}\\{keyValue.Value}");
@@ -61,7 +60,7 @@ namespace BedrockService.Shared.Utilities {
                     }
                 }
             }
-            DirectoryInfo buildsDirInfo = new DirectoryInfo($@"{basePath}\BmsConfig\BDSBuilds");
+            DirectoryInfo buildsDirInfo = new($@"{basePath}\BmsConfig\BDSBuilds");
             IEnumerable<FileInfo> fileInfos = buildsDirInfo.GetFiles();
             Directory.CreateDirectory($"{buildsDirInfo.FullName}\\BuildArchives");
             Directory.CreateDirectory($"{buildsDirInfo.FullName}\\CoreFiles");
@@ -86,7 +85,7 @@ namespace BedrockService.Shared.Utilities {
 
         private static void CorrectFileTimeFormats(string basePath) {
             if (Directory.Exists($@"{basePath}\ServerBackups")) {
-                DirectoryInfo dirInfo = new DirectoryInfo($@"{basePath}\ServerBackups");
+                DirectoryInfo dirInfo = new($@"{basePath}\ServerBackups");
                 IEnumerable<DirectoryInfo> backupDirList = dirInfo.EnumerateDirectories();
                 if (backupDirList.Count() > 0) {
                     foreach (DirectoryInfo dir in backupDirList) {
@@ -96,7 +95,7 @@ namespace BedrockService.Shared.Utilities {
                                 string dateInfo = backup.Name.Substring(7, backup.Name.Length - 7);
                                 try {
                                     long dateLongValue = long.Parse(dateInfo);
-                                    DateTime newDateObject = new DateTime(dateLongValue);
+                                    DateTime newDateObject = new(dateLongValue);
                                     string updatedName = $"Backup-{newDateObject:yyyyMMdd_HHmmssff}.zip";
                                     ZipFile.CreateFromDirectory(backup.FullName, $@"{dir.FullName}\{updatedName}");
                                     backup.Delete(true);
@@ -114,11 +113,11 @@ namespace BedrockService.Shared.Utilities {
 
         private static void CorrectLogTimeFormats(string basePath) {
             if (Directory.Exists($@"{basePath}\Logs")) {
-                DirectoryInfo logDirInfo = new DirectoryInfo($@"{basePath}\Logs");
+                DirectoryInfo logDirInfo = new($@"{basePath}\Logs");
                 IEnumerable<DirectoryInfo> logDirList = logDirInfo.EnumerateDirectories();
                 if (logDirList.Count() > 0) {
                     foreach (DirectoryInfo logDir in logDirList) {
-                        DirectoryInfo logSubDirInfo = new DirectoryInfo(logDir.FullName);
+                        DirectoryInfo logSubDirInfo = new(logDir.FullName);
                         IEnumerable<FileInfo> logFileList = logSubDirInfo.EnumerateFiles();
                         if (logDir.Name == "Servers") {
                             IEnumerable<DirectoryInfo> serverLogDirList = logDir.EnumerateDirectories();
@@ -164,19 +163,19 @@ namespace BedrockService.Shared.Utilities {
             }
         }
 
-        private static void RemoveOldClientDirectory (string basePath) => Directory.Delete($@"{basePath}\Client", true);
+        private static void RemoveOldClientDirectory(string basePath) => Directory.Delete($@"{basePath}\Client", true);
 
         private static void UpdateServerConfigurations(string basePath) {
             string serviceConfPath = $@"{basePath}\Service.conf";
             string configPath = $@"{basePath}\BmsConfig\ServerConfigs";
-            List<string> removeEntries = new List<string>();
-            DirectoryInfo configDirInfo = new DirectoryInfo(configPath);
+            List<string> removeEntries = new();
+            DirectoryInfo configDirInfo = new(configPath);
             List<FileInfo> serverConfigurations = configDirInfo.GetFiles("*.conf").ToList();
-            List<string> serviceEntries = new List<string>(File.ReadAllLines(serviceConfPath));
-            List<string> entriesToAdd = new List<string>();
+            List<string> serviceEntries = new(File.ReadAllLines(serviceConfPath));
+            List<string> entriesToAdd = new();
             foreach (string entry in serviceEntries) {
                 string[] splitEntry = entry.Split('=');
-                switch(splitEntry[0]) {
+                switch (splitEntry[0]) {
                     case "BackupEnabled":
                     case "BackupPath":
                     case "BackupCron":
@@ -207,7 +206,7 @@ namespace BedrockService.Shared.Utilities {
             entriesToAdd.Insert(1, "#These entries were added as part of an automated update.");
             entriesToAdd.Insert(2, "#Pllease note the order may change!");
             foreach (FileInfo file in serverConfigurations) {
-                List<string> confLines = new List<string>(entriesToAdd);
+                List<string> confLines = new(entriesToAdd);
                 confLines.AddRange(File.ReadAllLines(file.FullName));
                 File.WriteAllLines(file.FullName, confLines.ToArray());
             }
