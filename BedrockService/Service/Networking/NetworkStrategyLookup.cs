@@ -25,14 +25,15 @@ namespace BedrockService.Service.Networking {
                 {NetworkMessageTypes.StartCmdUpdate, new StartCmdUpdate(configurator, serviceConfiguration) },
                 {NetworkMessageTypes.ConsoleLogUpdate, new ConsoleLogUpdate(logger, serviceConfiguration, service) },
                 {NetworkMessageTypes.PackList, new PackList(processInfo, serviceConfiguration, logger) },
-                {NetworkMessageTypes.PackFile, new PackFile(serviceConfiguration, processInfo, logger, fileUtils) },
-                {NetworkMessageTypes.RemovePack, new RemovePack(processInfo, serviceConfiguration, logger) },
+                {NetworkMessageTypes.PackFile, new PackFile(serviceConfiguration, logger, fileUtils) },
+                {NetworkMessageTypes.RemovePack, new RemovePack(serviceConfiguration, logger) },
                 {NetworkMessageTypes.CheckUpdates, new CheckUpdates(service) },
                 {NetworkMessageTypes.PlayersRequest, new PlayerRequest(service) },
                 {NetworkMessageTypes.PlayersUpdate, new PlayersUpdate(configurator, serviceConfiguration, service) },
                 {NetworkMessageTypes.LevelEditRequest, new LevelEditRequest(serviceConfiguration) },
                 {NetworkMessageTypes.LevelEditFile, new LevelEditFile(serviceConfiguration, service, logger) },
-                {NetworkMessageTypes.ExportFile, new ExportFileRequest(configurator, serviceConfiguration) }
+                {NetworkMessageTypes.ExportFile, new ExportFileRequest(configurator, serviceConfiguration) },
+                {NetworkMessageTypes.LLPluginFile, new LiteLoaderPluginFile(serviceConfiguration) }
             };
             _flaggedMessageLookup = new Dictionary<NetworkMessageTypes, IFlaggedMessageParser>()
             {
