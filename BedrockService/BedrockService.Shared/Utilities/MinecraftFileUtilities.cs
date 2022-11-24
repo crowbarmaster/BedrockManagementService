@@ -1,23 +1,19 @@
-﻿using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.MinecraftFileModels.JsonModels;
+﻿using BedrockService.Shared.FileModels.LiteLoaderFileModels.FileAccessModels;
+using BedrockService.Shared.FileModels.MinecraftFileModels;
+using BedrockService.Shared.Interfaces;
+using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
+using BedrockService.Shared.JsonModels.MinecraftJsonModels;
 using BedrockService.Shared.PackParser;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
-using System.Dynamic;
 using static BedrockService.Shared.Classes.SharedStringBase;
-using BedrockService.Shared.FileModels.LiteLoaderFileModels.FileAccessModels;
-using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
-using BedrockService.Shared.FileModels.MinecraftFileModels;
-using BedrockService.Shared.JsonModels.MinecraftJsonModels;
 
 namespace BedrockService.Shared.Utilities {
     public class MinecraftFileUtilities {
 
         public static bool UpdateWorldPackFile(string filePath, PackManifestJsonModel manifest) {
-            WorldPackFileModel worldPackFile = new WorldPackFileModel(filePath);
+            WorldPackFileModel worldPackFile = new(filePath);
             if (worldPackFile.Contents.Where(x => x.pack_id == manifest.header.uuid).Count() > 0) {
                 return false;
             }
@@ -67,7 +63,11 @@ namespace BedrockService.Shared.Utilities {
         }
 
         public static void CreateDefaultLoaderConfigFile(IServerConfiguration server) {
-            string configFilePath = $@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\plugins\LiteLoader\LiteLoader.json";
+            string configFilePath = GetServerFilePath(BdsFileNameKeys.LLConfig, server);
+            FileInfo fileInfo = new(configFilePath);
+            if (!fileInfo.Directory.Exists) {
+                fileInfo.Directory.Create();
+            }
             LiteLoaderFileModel configFile = new() { FilePath = configFilePath };
             LiteLoaderConfigJsonModel configLayout = new() {
                 ColorLog = false,
@@ -81,8 +81,9 @@ namespace BedrockService.Shared.Utilities {
                     ClientChunkPreGeneration = new() { enabled = true },
                     CrashLogger = new() { enabled = true, path = "plugins\\LiteLoader\\CrashLogger_Daemon.exe" },
                     EconomyCore = new() { enabled = true },
-                    ErrorStackTraceback = new() { enabled = true, cacheSymbol = false },
+                    ErrorStackTraceback = new() { enabled = true, cacheSymbol = true },
                     FixBDSCrash = new() { enabled = true },
+                    FixAbility = new() { enabled = true },
                     FixDisconnectBug = new() { enabled = true },
                     FixListenPort = new() { enabled = false },
                     FixMcBug = new() { enabled = true },
@@ -94,7 +95,7 @@ namespace BedrockService.Shared.Utilities {
                     TpdimCommand = new() { enabled = true },
                     UnlockCmd = new() { enabled = true },
                     UnoccupyPort19132 = new() { enabled = true },
-                    WelcomeText = new() { enabled = true }
+                    WelcomeText = new() { enabled = false }
                 },
                 ScriptEngine = new() { enabled = true, alwaysLaunch = false },
                 Version = 1
