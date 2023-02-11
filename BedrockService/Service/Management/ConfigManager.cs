@@ -94,7 +94,7 @@ namespace BedrockService.Service.Management {
                 _fileUtilities.ExtractZipToDirectory(filePath, server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString(), progress).Wait();
 
                 FileInfo originalExeInfo = new(GetServerFilePath(BdsFileNameKeys.VanillaBedrock, server));
-                FileInfo bmsExeInfo = new(server.GetSettingsProp(ServerPropertyKeys.ServerExeName).StringValue);
+                FileInfo bmsExeInfo = new($@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\{server.GetSettingsProp(ServerPropertyKeys.ServerExeName)}");
                     try {
                         if (server.GetSettingsProp(ServerPropertyKeys.LiteLoaderEnabled).GetBoolValue()) {
                             progress = new(percent => {
