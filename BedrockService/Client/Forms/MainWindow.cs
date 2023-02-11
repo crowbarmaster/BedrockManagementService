@@ -258,12 +258,10 @@ namespace BedrockService.Client.Forms {
         }
 
         public void UpdateServerLogBox(TextBox targetBox, string contents) {
-            int curPos = 0;
+            int curPos;
             if (contents.Length > 0 && targetBox.TextLength != contents.Length) {
                 curPos = GetScrollPosition(targetBox);
-            }
             targetBox.Text = contents;
-            if (contents.Length > 0 && targetBox.TextLength != contents.Length) {
                 SetScrollPosition(targetBox, curPos);
             }
             if (_followTail)
