@@ -112,7 +112,9 @@ namespace BedrockService.Shared.Classes {
             BdsPackage_Ver,
             LLPackage_Ver,
             LLBdsVersionRegx,
-            BdsVersionJson
+            LLBdsVersionRegxNew,
+            BdsVersionJson,
+            PluginRepoJson
         }
 
         public static Dictionary<BmsFileNameKeys, BmsDirectoryKeys> BmsFileParentDirectories = new() {
@@ -158,9 +160,11 @@ namespace BedrockService.Shared.Classes {
             { BmsUrlKeys.BdsPackage_Ver, "https://minecraft.azureedge.net/bin-win/bedrock-server-{0}.zip" },
             { BmsUrlKeys.BdsVersionRegx, @"(https://minecraft.azureedge.net/bin-win/bedrock-server-)(.*)(\.zip)" },
             { BmsUrlKeys.LLBdsVersionRegx, @"(Adapted to BDS-)(.*)( \|)" },
+            { BmsUrlKeys.LLBdsVersionRegxNew, @"(Support BDS )(.*)( \|)" },
             { BmsUrlKeys.LLPackage_Ver, "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/{0}/LiteLoader-{0}.zip" },
             { BmsUrlKeys.LLReleasesJson, "https://api.github.com/repos/LiteLDev/LiteLoaderBDS/releases" },
-            { BmsUrlKeys.BdsVersionJson, "http://127.0.0.1/bedrock_version_manifest.json" }
+            { BmsUrlKeys.BdsVersionJson, "http://127.0.0.1/bms_files/bedrock_version_manifest.json" },
+            { BmsUrlKeys.PluginRepoJson, "http://127.0.0.1/bms_files/plugin_repo.json"}
         };
 
         public static Dictionary<BmsDirectoryKeys, string> BmsDirectoryStrings = new() {
