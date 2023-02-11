@@ -14,5 +14,9 @@ namespace BedrockService.Shared.JsonModels.LiteLoaderJsonModels {
         public string PluginFileName { get; set; }
         public string BedrockVersion { get; set; }
         public string LiteLoaderVersion { get; set; }
+
+        public override string ToString() {
+            return $"{PluginFileName}";
+        }
     }
 }
