@@ -236,7 +236,7 @@ namespace BedrockService.Client.Forms {
                 } catch (Exception ex) {
                     ClientLogger.AppendLine($"Error! {ex.Message} {ex.StackTrace}");
                 }
-                Task.Delay(300);
+                Task.Delay(1500);
             }
         });
 
@@ -261,7 +261,7 @@ namespace BedrockService.Client.Forms {
             int curPos;
             if (contents.Length > 0 && targetBox.TextLength != contents.Length) {
                 curPos = GetScrollPosition(targetBox);
-            targetBox.Text = contents;
+                targetBox.Text = contents;
                 SetScrollPosition(targetBox, curPos);
             }
             if (_followTail)
@@ -426,13 +426,11 @@ namespace BedrockService.Client.Forms {
 
         public void ScrollToEnd(TextBox targetBox) {
 
-            // Get the current scroll info.
             ScrollInfo si = new();
             si.Size = (uint)Marshal.SizeOf(si);
             si.Mask = (uint)ScrollInfoMask.All;
             GetScrollInfo(targetBox.Handle, (int)ScrollBarDirection.Vertical, ref si);
 
-            // Set the scroll position to maximum.
             si.Pos = si.Max - (int)si.Page;
             if (si.Pos > 0) {
                 SetScrollInfo(targetBox.Handle, (int)ScrollBarDirection.Vertical, ref si, true);
@@ -510,7 +508,7 @@ namespace BedrockService.Client.Forms {
         public void RecievePackData(byte serverIndex, List<Shared.PackParser.MinecraftPackContainer> incomingPacks) {
             Invoke((MethodInvoker)delegate {
                 using (ManagePacksForms form = new(serverIndex, ClientLogger, _processInfo)) {
-                    form.PopulateServerPacks(incomingPacks);
+                    form.PopulateServerData(incomingPacks);
                     form.ShowDialog();
                     ServerBusy = false;
                 }
