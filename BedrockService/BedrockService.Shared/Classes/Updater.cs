@@ -88,8 +88,11 @@ namespace BedrockService.Shared.Classes {
                 if (!string.IsNullOrEmpty(llVersion) && !File.Exists(GetServiceFilePath(BmsFileNameKeys.LLUpdatePackage_Ver, llVersion))) {
                     FetchLiteLoaderBuild(llVersion).Wait();
                 }
-
-                List<MinecraftVersionHistoryJson> versions = JsonSerializer.Deserialize<List<MinecraftVersionHistoryJson>>(FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.BdsVersionJson]).Result);
+                string verResult = FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.BdsVersionJson]).Result;
+                if (verResult == null) {
+                    verResult = "[]";
+                }
+                List<MinecraftVersionHistoryJson> versions = JsonSerializer.Deserialize<List<MinecraftVersionHistoryJson>>(verResult);
                 foreach (MinecraftVersionHistoryJson entry in versions) {
                     if (entry.Version.Contains(bdsVersion)) {
                         bdsVersion = entry.Version;
