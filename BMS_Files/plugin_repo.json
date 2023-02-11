@@ -1,0 +1,15 @@
+{
+  "PluginRepo": [
+    {
+      "Name": "CrowbarTools",
+      "Description": "A toolbox of commands for LLBDS",
+      "PluginVersion": "1.0",
+      "ProtoVersion": 557,
+      "ExtendedInfo": "Currently contains comands for inventory manipulation, multiple commands truncated to one, and tele2server control.",
+      "ProtoBlacklist": [
+        0
+      ],
+      "RepoURL": "http://127.0.0.1/bms_files/CrowbarTools.zip"
+    }
+  ]
+}
