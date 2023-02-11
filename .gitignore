@@ -365,3 +365,4 @@ MigrationBackup/
 /BedrockService/ServiceTests/TestFiles/Output/stock_props.conf
 GenerateLog.bat
 /commitlog.exe
+/BedrockService/bin-bak/Published
