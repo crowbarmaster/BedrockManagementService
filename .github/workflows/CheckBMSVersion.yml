@@ -3,7 +3,7 @@ name: CheckBMSVersion
 on:
   schedule:
     # * is a special character in YAML so you have to quote this string
-    - cron:  '0/10 * * * *'
+    - cron:  '* 0/4 * * *'
 
 jobs:
     check-version:
@@ -18,7 +18,7 @@ jobs:
           with:
             # The arguments for the `git add` command (see the paragraph below for more info)
             # Default: '.'
-            add: 'BMS_Files\\bedrock_version_manifest.json'
+            add: '.\BMS_Files\bedrock_version_manifest.json'
             
             # The name of the user that will be displayed as the author of the commit.
             # Default: depends on the default_author input
