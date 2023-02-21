@@ -13,7 +13,6 @@ jobs:
 
         steps:
         - uses: actions/checkout@v3
-        - shell: pwsh
         - run: Set-PSDebug -Trace 1 Set
         - run: class BedrockInfo { [string]$version; [string]$winurl; [string]$linurl;}$reply = Invoke-WebRequest -Uri "https://www.minecraft.net/en-us/download/server/bedrock";$existing = get-content 'BMS_Files\\bedrock_version_manifest.json';if ($reply.Content -match 'https://minecraft.azureedge.net/bin-win/bedrock-server-(?<version>.+)\.zip'){ [version]$version = $Matches.version; if ( $existing ) { $json = $existing | ConvertFrom-Json;	$lastEntry = $json | Select-Object -Last 1; [version]$entryVersion = $lastEntry.version; if($entryVersion -lt $version){ $newEnt = [BedrockInfo]@{ version=$version.ToString(); winurl='https://minecraft.azureedge.net/bin-win/bedrock-server-'+$version.ToString()+'.zip'; linurl='https://minecraft.azureedge.net/bin-linux/bedrock-server-'+$version.ToString()+'.zip' }; $json += $newEnt; $json | ConvertTo-Json -depth 100 | Out-File "BMS_Files\\bedrock_version_manifest.json"; 'File was updated!';}}}
         - uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
