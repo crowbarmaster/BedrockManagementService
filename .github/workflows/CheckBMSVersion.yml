@@ -54,7 +54,7 @@ jobs:
             # Arguments for the git fetch command. If set to false, the action won't fetch the repo.
             # For more info as to why fetching is usually recommended, please see the "Performance on large repos" FAQ. 
             # Default: --tags --force
-            fetch: false
+            fetch: true
             
             # The message for the commit.
             # Default: 'Commit from GitHub Actions (name of the workflow)'
@@ -77,7 +77,7 @@ jobs:
             
             # Whether to push the commit and, if any, its tags to the repo. It can also be used to set the git push arguments (see the paragraph below for more info)
             # Default: true
-            push: false
+            push: true
             
             # The arguments for the `git rm` command (see the paragraph below for more info)
             # Default: ''
