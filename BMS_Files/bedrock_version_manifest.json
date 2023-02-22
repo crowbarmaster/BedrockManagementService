@@ -361,18 +361,18 @@
     },
     {
         "version":  "1.19.52.01",
-        "winurl":  "https://minecraft.azureedge.net/bin-win/bedrock-server-1.19.51.01.zip",
-        "linurl":  "https://minecraft.azureedge.net/bin-linux/bedrock-server-1.19.51.01.zip"
+        "winurl":  "https://minecraft.azureedge.net/bin-win/bedrock-server-1.19.52.01.zip",
+        "linurl":  "https://minecraft.azureedge.net/bin-linux/bedrock-server-1.19.52.01.zip"
     },
     {
         "version":  "1.19.60.04",
-        "winurl":  "https://minecraft.azureedge.net/bin-win/bedrock-server-1.19.51.01.zip",
-        "linurl":  "https://minecraft.azureedge.net/bin-linux/bedrock-server-1.19.51.01.zip"
+        "winurl":  "https://minecraft.azureedge.net/bin-win/bedrock-server-1.19.60.04.zip",
+        "linurl":  "https://minecraft.azureedge.net/bin-linux/bedrock-server-1.19.60.04.zip"
     },
     {
         "version":  "1.19.61.01",
-        "winurl":  "https://minecraft.azureedge.net/bin-win/bedrock-server-1.19.51.01.zip",
-        "linurl":  "https://minecraft.azureedge.net/bin-linux/bedrock-server-1.19.51.01.zip"
+        "winurl":  "https://minecraft.azureedge.net/bin-win/bedrock-server-1.19.61.01.zip",
+        "linurl":  "https://minecraft.azureedge.net/bin-linux/bedrock-server-1.19.61.01.zip"
     },
     {
         "version":  "1.19.62.1",
