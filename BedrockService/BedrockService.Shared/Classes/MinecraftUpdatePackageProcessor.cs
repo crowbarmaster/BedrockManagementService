@@ -62,10 +62,7 @@ namespace BedrockService.Shared.Classes {
                             FileInfo fileInfo = new(fixedPath);
                             if (fileInfo.Extension == ".properties") {
                                 archive.Entries[i].ExtractToFile(fixedPath);
-                            }
-                        } else {
-                            if (!Directory.Exists(fixedPath)) {
-                                Directory.CreateDirectory(fixedPath);
+                                break;
                             }
                         }
                     }
@@ -73,8 +70,8 @@ namespace BedrockService.Shared.Classes {
                     CreateFiles();
                     return true;
                 }
-            } catch (Exception) {
-                if (_loggingEnabled) _logger.AppendLine($"Error extracting core files. Verify build archive \"Update_{_packageVersion}.zip\" exists in BDSBuilds folder!");
+            } catch (Exception e) {
+                if (_loggingEnabled) _logger.AppendLine($"Error extracting core files. {e.Message}");
                 return false;
             }
         }
