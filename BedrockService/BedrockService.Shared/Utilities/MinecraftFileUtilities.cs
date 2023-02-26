@@ -141,5 +141,17 @@ namespace BedrockService.Shared.Utilities {
             }
             File.WriteAllLines(GetServerFilePath(BdsFileNameKeys.ServerProps, server), output);
         }
+
+        public static void CleanBedrockDirectory(IServerConfiguration server) {
+            FileUtilities utilities = new FileUtilities();
+            DirectoryInfo bedrockDir = new DirectoryInfo(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString());
+            utilities.DeleteFilesFromDirectory($@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\resource_packs", true);
+            utilities.DeleteFilesFromDirectory($@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\behavior_packs", true);
+            foreach(FileInfo file in bedrockDir.EnumerateFiles()) {
+                if(file.Extension.Equals(".exe") || file.Extension.Equals(".dll")) {
+                    File.Delete(file.FullName);
+                }
+            }
+        }
     }
 }
