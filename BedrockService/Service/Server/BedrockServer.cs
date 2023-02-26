@@ -53,10 +53,10 @@ namespace BedrockService.Service.Server {
             _serverLogger = new BedrockLogger(_processInfo, _serviceConfiguration, _serverConfiguration);
             _serverLogger.Initialize();
             _updater.Initialize();
-            _updater.CheckLiteLiteLoaderVersion();
             if (_serverConfiguration.GetSettingsProp(ServerPropertyKeys.CheckUpdates).GetBoolValue()) {
                 _updater.CheckLatestVersion().Wait();
             }
+            _updater.CheckLiteLiteLoaderVersion();
         }
 
         public void CheckUpdates() {
