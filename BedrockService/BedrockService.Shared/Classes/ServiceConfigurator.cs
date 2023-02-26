@@ -26,7 +26,7 @@ namespace BedrockService.Shared.Classes {
             globals.Add(new Property(ServicePropertyStrings[ServicePropertyKeys.TimestampLogEntries], "true"));
             globals.Add(new Property(ServicePropertyStrings[ServicePropertyKeys.GlobalizedPlayerDatabase], "false"));
             globals.Add(new Property(ServicePropertyStrings[ServicePropertyKeys.DefaultGlobalPermLevel], "member"));
-            globals.Add(new Property(ServicePropertyStrings[ServicePropertyKeys.LatestLiteLoaderVersion], "1.19.30.04|2.7.2"));
+            globals.Add(new Property(ServicePropertyStrings[ServicePropertyKeys.LatestLiteLoaderVersion], "2.10.1"));
             return true;
         }
 
@@ -202,6 +202,10 @@ namespace BedrockService.Shared.Classes {
 
         public Property GetProp(ServicePropertyKeys keyName) {
             return globals.FirstOrDefault(prop => prop.KeyName == ServicePropertyStrings[keyName]);
+        }
+
+        public void SetProp(ServicePropertyKeys keyName, string value) {
+            globals.FirstOrDefault(prop => prop.KeyName == ServicePropertyStrings[keyName]).SetValue(value);
         }
 
         public Property GetProp(BmsDependServerPropKeys key) {
