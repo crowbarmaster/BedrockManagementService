@@ -366,3 +366,6 @@ MigrationBackup/
 GenerateLog.bat
 /commitlog.exe
 /BedrockService/bin-bak/Published
+/.github/workflows/CheckBMSVersion.yml
+/BMS_Files/bedrock_version_manifest.json
+/BMS_Files/liteloader_version_manifest.json
