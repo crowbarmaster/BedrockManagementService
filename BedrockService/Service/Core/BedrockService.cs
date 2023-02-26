@@ -59,7 +59,6 @@ namespace BedrockService.Service.Core {
                         string answer = Console.ReadLine();
                         if (answer != null && answer == "Yes") {
                             _serviceConfiguration.GetProp(ServicePropertyKeys.AcceptedMojangLic).SetValue("True");
-                            _configurator.SaveGlobalFile();
                         }
                     } else {
                         return false;
@@ -68,6 +67,7 @@ namespace BedrockService.Service.Core {
                 _configurator.LoadServerConfigurations().Wait();
                 _bedrockServers.Clear();
                 InstanciateServers();
+                _configurator.SaveGlobalFile();
                 _serviceConfiguration.CalculateTotalBackupsAllServers();
                 _tCPListener.Initialize();
                 return true;
@@ -236,6 +236,9 @@ namespace BedrockService.Service.Core {
                                                 ? _serviceConfiguration.GetLatestBDSVersion()
                                                 : server.GetSelectedVersion();
                         _configurator.ReplaceServerBuild(server, deployedVersion).Wait();
+                    }
+                    if(File.Exists(GetServerFilePath(BdsFileNameKeys.DeployedBedrockVerIni, server))) {
+                        server.SetServerVersion(File.ReadAllText(GetServerFilePath(BdsFileNameKeys.DeployedBedrockVerIni, server)));
                     }
                     if (server.GetServerVersion() != "None" && server.GetSelectedVersion() != "Latest" && server.GetSelectedVersion() != server.GetServerVersion()) {
                         _logger.AppendLine("Manually configured server found with wrong version. Replacing server build...");
