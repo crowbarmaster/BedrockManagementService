@@ -38,6 +38,7 @@ namespace BedrockService.Shared.Classes {
         }
 
         public static void FixPluginsRecusively(DirectoryInfo directory, string liteModExeName) {
+            ProcessLibDirectory(directory.FullName, liteModExeName);
             foreach (DirectoryInfo dir in directory.GetDirectories()) {
                 ProcessLibDirectory(dir.FullName, liteModExeName);
                 FixPluginsRecusively(dir, liteModExeName);
