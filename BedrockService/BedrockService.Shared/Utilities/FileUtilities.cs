@@ -141,7 +141,11 @@ namespace BedrockService.Shared.Utilities {
             using ZipArchive archive = ZipFile.OpenRead(zipPath);
             int fileCount = archive.Entries.Count;
             for (int i = 0; i < fileCount; i++) {
-                string fixedPath = $@"{directory}\{archive.Entries[i].FullName.Replace('/', '\\')}";
+                string fixedEntry = archive.Entries[i].FullName;
+                if (archive.Entries[i].FullName.StartsWith("LiteLoaderBDS/")) {
+                    fixedEntry = archive.Entries[i].FullName.Substring(14, archive.Entries[i].FullName.Length - 14);
+                }
+                string fixedPath = $@"{directory}\{fixedEntry.Replace('/', '\\')}";
                 if (i % (RoundOff(fileCount) / 6) == 0) {
                     progress.Report(Math.Round(i / (double)fileCount, 2) * 100);
                 }
