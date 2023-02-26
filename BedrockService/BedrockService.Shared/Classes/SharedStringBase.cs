@@ -60,6 +60,7 @@ namespace BedrockService.Shared.Classes {
             BedrockVersionIni,
             BdsUpdatePackage_Ver,
             LLUpdatePackage_Ver,
+            LLModUpdatePackage_Ver,
             StockProps,
             ServerPlayerRegistry_Name,
             ServerPlayerTelem_Name,
@@ -84,6 +85,8 @@ namespace BedrockService.Shared.Classes {
 
         public enum BdsFileNameKeys {
             BmsServer_Name,
+            DeployedBedrockVerIni,
+            DeployedLLBDSIni,
             ValidKnownPacks,
             LevelDat,
             VanillaBedrock,
@@ -111,6 +114,7 @@ namespace BedrockService.Shared.Classes {
             BdsVersionRegx,
             BdsPackage_Ver,
             LLPackage_Ver,
+            LLModPackage_Ver,
             LLBdsVersionRegx,
             LLBdsVersionRegxNew,
             BdsVersionJson,
@@ -125,6 +129,7 @@ namespace BedrockService.Shared.Classes {
             { BmsFileNameKeys.BedrockVersionIni, BmsDirectoryKeys.BmsConfig },
             { BmsFileNameKeys.BdsUpdatePackage_Ver, BmsDirectoryKeys.BuildArchives },
             { BmsFileNameKeys.LLUpdatePackage_Ver, BmsDirectoryKeys.LLBuilds },
+            { BmsFileNameKeys.LLModUpdatePackage_Ver, BmsDirectoryKeys.LLBuilds },
             { BmsFileNameKeys.StockProps, BmsDirectoryKeys.CoreFileBuild_Ver },
             { BmsFileNameKeys.ServerPlayerRegistry_Name, BmsDirectoryKeys.ServerPlayerPath },
             { BmsFileNameKeys.GlobalPlayerRegistry, BmsDirectoryKeys.GlobalPlayerPath },
@@ -136,6 +141,8 @@ namespace BedrockService.Shared.Classes {
             { BdsFileNameKeys.BmsServer_Name, BdsDirectoryKeys.ServerRoot },
             { BdsFileNameKeys.VanillaBedrock, BdsDirectoryKeys.ServerRoot },
             { BdsFileNameKeys.ServerProps, BdsDirectoryKeys.ServerRoot },
+            { BdsFileNameKeys.DeployedBedrockVerIni, BdsDirectoryKeys.ServerRoot },
+            { BdsFileNameKeys.DeployedLLBDSIni, BdsDirectoryKeys.ServerRoot },
             { BdsFileNameKeys.ValidKnownPacks, BdsDirectoryKeys.ServerRoot },
             { BdsFileNameKeys.WorldBehaviorPacks, BdsDirectoryKeys.ServerWorldDir_LevelName },
             { BdsFileNameKeys.WorldResourcePacks, BdsDirectoryKeys.ServerWorldDir_LevelName },
@@ -161,10 +168,11 @@ namespace BedrockService.Shared.Classes {
             { BmsUrlKeys.BdsVersionRegx, @"(https://minecraft.azureedge.net/bin-win/bedrock-server-)(.*)(\.zip)" },
             { BmsUrlKeys.LLBdsVersionRegx, @"(Adapted to BDS-)(.*)( \|)" },
             { BmsUrlKeys.LLBdsVersionRegxNew, @"(Support BDS )(.*)( \|)" },
-            { BmsUrlKeys.LLPackage_Ver, "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/{0}/LiteLoader-{0}.zip" },
-            { BmsUrlKeys.LLReleasesJson, "https://api.github.com/repos/LiteLDev/LiteLoaderBDS/releases" },
-            { BmsUrlKeys.BdsVersionJson, "http://127.0.0.1/bms_files/bedrock_version_manifest.json" },
-            { BmsUrlKeys.PluginRepoJson, "http://127.0.0.1/bms_files/plugin_repo.json"}
+            { BmsUrlKeys.LLPackage_Ver, "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/{0}/LiteLoaderBDS.zip" },
+            { BmsUrlKeys.LLModPackage_Ver, "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/{0}/Modules.zip" },
+            { BmsUrlKeys.LLReleasesJson, "https://github.com/crowbarmaster/BedrockManagementService/raw/master/BMS_Files/liteloader_version_manifest.json" },
+            { BmsUrlKeys.BdsVersionJson, "https://github.com/crowbarmaster/BedrockManagementService/raw/master/BMS_Files/bedrock_version_manifest.json" },
+            { BmsUrlKeys.PluginRepoJson, "https://github.com/crowbarmaster/BedrockManagementService/raw/master/BMS_Files/plugin_repo.json"}
         };
 
         public static Dictionary<BmsDirectoryKeys, string> BmsDirectoryStrings = new() {
@@ -192,13 +200,16 @@ namespace BedrockService.Shared.Classes {
             { BmsFileNameKeys.GlobalPlayerTelem, "Service.playerdb" },
             { BmsFileNameKeys.ServerPlayerTelem_Name, "{0}.playerdb" },
             { BmsFileNameKeys.BdsUpdatePackage_Ver, "Update_{0}.zip" },
-            { BmsFileNameKeys.LLUpdatePackage_Ver, "LLUpdate_{0}.zip" }
+            { BmsFileNameKeys.LLUpdatePackage_Ver, "LLUpdate_{0}.zip" },
+            { BmsFileNameKeys.LLModUpdatePackage_Ver, "LLModUpdate_{0}.zip" }
         };
 
         public static Dictionary<BdsFileNameKeys, string> BdsFileNameStrings = new() {
             { BdsFileNameKeys.BmsServer_Name, "BedrockService.{0}.exe" },
             { BdsFileNameKeys.VanillaBedrock, "bedrock_server.exe" },
             { BdsFileNameKeys.ValidKnownPacks, "valid_known_packs.json" },
+            { BdsFileNameKeys.DeployedBedrockVerIni, "deployed_bedrock_ver.ini" },
+            { BdsFileNameKeys.DeployedLLBDSIni, "deployed_liteloader_ver.ini" },
             { BdsFileNameKeys.LevelDat, "level.dat" },
             { BdsFileNameKeys.ServerProps, "server.properties" },
             { BdsFileNameKeys.WorldResourcePacks, "world_resource_packs.json" },

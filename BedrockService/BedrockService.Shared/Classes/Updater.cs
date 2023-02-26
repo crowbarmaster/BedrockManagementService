@@ -1,12 +1,12 @@
 ﻿using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.JsonModels.GitHubApiJsonModels;
+using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
 using BedrockService.Shared.JsonModels.MinecraftJsonModels;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static BedrockService.Shared.Classes.SharedStringBase;
 
@@ -21,7 +21,7 @@ namespace BedrockService.Shared.Classes {
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
             _version = "None";
-        }
+        } 
 
         public void Initialize() {
             if (!File.Exists(GetServiceFilePath(BmsFileNameKeys.BedrockVersionIni))) {
@@ -31,8 +31,7 @@ namespace BedrockService.Shared.Classes {
             }
             _version = File.ReadAllText(GetServiceFilePath(BmsFileNameKeys.BedrockVersionIni));
             _serviceConfiguration.SetLatestBDSVersion(_version);
-            string[] LLVersion = _serviceConfiguration.GetProp(ServicePropertyKeys.LatestLiteLoaderVersion).ToString().Split('|');
-            _liteLoaderVersion = LLVersion[1];
+            _liteLoaderVersion = _serviceConfiguration.GetProp(ServicePropertyKeys.LatestLiteLoaderVersion).ToString();
         }
 
         public Task CheckLatestVersion() {
@@ -40,22 +39,19 @@ namespace BedrockService.Shared.Classes {
                 _logger.AppendLine("Checking latest LiteLoader Version...");
 
                 _logger.AppendLine("Checking latest BDS Version...");
-                string content = FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.BdsDownloadPage]).Result;
+                string content = FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.BdsVersionJson]).Result;
                 if (content == null)
                     return false;
-                Regex regex = new(BmsUrlStrings[BmsUrlKeys.BdsVersionRegx], RegexOptions.IgnoreCase);
-                Match m = regex.Match(content);
-                if (!m.Success) {
-                    _logger.AppendLine("Checking version failed. Check website functionality!");
-                    return false;
-                }
-                string downloadPath = m.Groups[0].Value;
-                string fetchedVersion = m.Groups[2].Value;
+                List<MinecraftVersionHistoryJson> versionList = JsonSerializer.Deserialize<List<MinecraftVersionHistoryJson>>(content);
+                MinecraftVersionHistoryJson latest = versionList.Last();
+
+                string downloadPath = latest.WindowsBinUrl;
+                string fetchedVersion = latest.Version;
 
                 _logger.AppendLine($"Latest version found: \"{fetchedVersion}\"");
                 if (!File.Exists(GetServiceFilePath(BmsFileNameKeys.BdsUpdatePackage_Ver, fetchedVersion))) {
                     FetchBuild(fetchedVersion).Wait();
-                    MinecraftUpdatePackageProcessor packageProcessor = new(_logger, fetchedVersion, GetServiceFilePath(BmsFileNameKeys.BdsUpdatePackage_Ver, fetchedVersion));
+                    MinecraftUpdatePackageProcessor packageProcessor = new(_logger, fetchedVersion, GetServiceDirectory(BmsDirectoryKeys.CoreFileBuild_Ver, fetchedVersion));
                     if (!packageProcessor.ExtractCoreFiles()) {
                         _logger.AppendLine("Error extracting downloaded zip package. Check file/website!");
                     }
@@ -70,48 +66,57 @@ namespace BedrockService.Shared.Classes {
         }
 
         public Task CheckLiteLiteLoaderVersion() => Task.Run(() => {
-            CheckLatestVersion().Wait();
-            string result = FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.LLReleasesJson], new KeyValuePair<string, string>("Accept", "application/vnd.github+json")).Result;
+            string result = FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.LLReleasesJson]).Result;
             if (result != null) {
-                GitHubReleaseListJsonModel releases = JsonSerializer.Deserialize<List<GitHubReleaseListJsonModel>>(result)[0];
-                Regex regex = new(BmsUrlStrings[BmsUrlKeys.LLBdsVersionRegx], RegexOptions.IgnoreCase);
-                Match match = regex.Match(releases.body);
-                string bdsVersion = string.Empty;
-                if (!match.Success) {
-                    _logger.AppendLine("Regex did not match latest version. Using latest Minecraft version.");
-                    bdsVersion = _serviceConfiguration.GetLatestBDSVersion();
-
-                } else {
-                    bdsVersion = match.Groups[2].Value;
+                List<LiteLoaderVersionManifest> manifestList = JsonSerializer.Deserialize<List<LiteLoaderVersionManifest>>(result);
+                LiteLoaderVersionManifest latestLLVersion = manifestList.Last();
+                if (!string.IsNullOrEmpty(latestLLVersion.Version) && !File.Exists(GetServiceFilePath(BmsFileNameKeys.LLUpdatePackage_Ver, latestLLVersion.Version))) {
+                    FetchLiteLoaderBuild(latestLLVersion.Version).Wait();
                 }
-                string llVersion = releases.tag_name;
-                if (!string.IsNullOrEmpty(llVersion) && !File.Exists(GetServiceFilePath(BmsFileNameKeys.LLUpdatePackage_Ver, llVersion))) {
-                    FetchLiteLoaderBuild(llVersion).Wait();
-                }
+                _serviceConfiguration.SetProp(ServicePropertyKeys.LatestLiteLoaderVersion, latestLLVersion.Version);
                 string verResult = FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.BdsVersionJson]).Result;
                 if (verResult == null) {
                     verResult = "[]";
                 }
                 List<MinecraftVersionHistoryJson> versions = JsonSerializer.Deserialize<List<MinecraftVersionHistoryJson>>(verResult);
                 foreach (MinecraftVersionHistoryJson entry in versions) {
-                    if (entry.Version.Contains(bdsVersion)) {
-                        bdsVersion = entry.Version;
+                    if (entry.Version.Contains(latestLLVersion.BDSVersion)) { // This is a hack to match a partial version string to its full representation.
+                        latestLLVersion.BDSVersion = entry.Version;
                     }
                 }
-                if (!File.Exists(GetServiceFilePath(BmsFileNameKeys.BdsUpdatePackage_Ver, bdsVersion))) {
-                    FetchBuild(bdsVersion).Wait();
+                if (!File.Exists(GetServiceFilePath(BmsFileNameKeys.BdsUpdatePackage_Ver, latestLLVersion.BDSVersion))) {
+                    FetchBuild(latestLLVersion.BDSVersion).Wait();
                 }
             }
         });
 
-        public static async Task<bool> FetchBuild(string version) {
-            string fetchUrl = string.Format(BmsUrlStrings[BmsUrlKeys.BdsPackage_Ver], version);
-            string zipPath = GetServiceFilePath(BmsFileNameKeys.BdsUpdatePackage_Ver, version);
+        public Task<LiteLoaderVersionManifest> GetLiteLoaderVersionManifest(string version) {
+            return Task.Run(() => {
+                string result = FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.LLReleasesJson]).Result;
+                if (result != null) {
+                    List<LiteLoaderVersionManifest> manifestList = JsonSerializer.Deserialize<List<LiteLoaderVersionManifest>>(result);
+                    return manifestList.Where(x => x.Version == version).First();
+                }
+                return null;
+            });
+        }
+
+        public static Task<bool> FetchBuild(string version) {
+            return Task.Run(() => {
+                string fetchUrl = string.Format(BmsUrlStrings[BmsUrlKeys.BdsPackage_Ver], version);
+                string zipPath = GetServiceFilePath(BmsFileNameKeys.BdsUpdatePackage_Ver, version);
+                new FileInfo(zipPath).Directory.Create();
+                if (RetrieveFileFromUrl(fetchUrl, zipPath).Result) {
+                    return true;
+                }
+                return false;
+            });
+        }
+
+        private static async Task<bool> RetrieveFileFromUrl (string url, string outputPath) {
             using HttpClient httpClient = new();
-            using HttpRequestMessage request = new(HttpMethod.Get, fetchUrl);
-            DirectoryInfo zipDirInfo = new FileInfo(zipPath).Directory;
-            zipDirInfo.Create();
-            using Stream contentStream = await (await httpClient.SendAsync(request)).Content.ReadAsStreamAsync(), stream = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None, 256000, true);
+            using HttpRequestMessage request = new(HttpMethod.Get, url);
+            using Stream contentStream = await (await httpClient.SendAsync(request)).Content.ReadAsStreamAsync(), stream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, 256000, true);
             try {
                 if (contentStream.Length > 2000) {
                     await contentStream.CopyToAsync(stream);
@@ -119,7 +124,7 @@ namespace BedrockService.Shared.Classes {
                     if (stream != null) {
                         stream.Close();
                         stream.Dispose();
-                        File.Delete(zipPath);
+                        File.Delete(outputPath);
                     }
                     return false;
 
@@ -133,33 +138,19 @@ namespace BedrockService.Shared.Classes {
             return true;
         }
 
-        public static async Task<bool> FetchLiteLoaderBuild(string version) {
-            string fetchUrl = string.Format(BmsUrlStrings[BmsUrlKeys.LLPackage_Ver], version);
-            string zipPath = GetServiceFilePath(BmsFileNameKeys.LLUpdatePackage_Ver, version);
-            using HttpClient httpClient = new();
-            using HttpRequestMessage request = new(HttpMethod.Get, fetchUrl);
-            DirectoryInfo zipDirInfo = new FileInfo(zipPath).Directory;
-            zipDirInfo.Create();
-            using Stream contentStream = await (await httpClient.SendAsync(request)).Content.ReadAsStreamAsync(), stream = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None, 256000, true);
-            try {
-                if (contentStream.Length > 1000) {
-                    await contentStream.CopyToAsync(stream);
-                } else {
-                    if (stream != null) {
-                        stream.Close();
-                        stream.Dispose();
-                        File.Delete(zipPath);
-                    }
-                    return false;
-
+        public static Task<bool> FetchLiteLoaderBuild(string version) {
+            return Task.Run(() => {
+                string llFetchUrl = string.Format(BmsUrlStrings[BmsUrlKeys.LLPackage_Ver], version);
+                string llModFetchUrl = string.Format(BmsUrlStrings[BmsUrlKeys.LLModPackage_Ver], version);
+                string llZipPath = GetServiceFilePath(BmsFileNameKeys.LLUpdatePackage_Ver, version);
+                string llModZipPath = GetServiceFilePath(BmsFileNameKeys.LLModUpdatePackage_Ver, version);
+                new FileInfo(llZipPath).Directory.Create();
+                new FileInfo(llModZipPath).Directory.Create();
+                if (RetrieveFileFromUrl(llFetchUrl, llZipPath).Result && RetrieveFileFromUrl(llModFetchUrl, llModZipPath).Result) {
+                    return true;
                 }
-            } catch (Exception) {
                 return false;
-            }
-            httpClient.Dispose();
-            request.Dispose();
-            contentStream.Dispose();
-            return true;
+            });
         }
 
         private async Task<string> FetchHTTPContent(string url, KeyValuePair<string, string> optionalHeader = new()) {
