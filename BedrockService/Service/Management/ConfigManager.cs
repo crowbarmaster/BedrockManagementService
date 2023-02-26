@@ -354,22 +354,22 @@ namespace BedrockService.Service.Management {
             }
         }
 
+        private List<string[]> FilterLinesFromFile (string filePath) {
+            return File.ReadAllLines(filePath)
+                    .Where(x => !x.StartsWith("#"))
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Select(x => x.Split(','))
+                    .ToList();
+        }
+
         private void LoadPlayerDatabase(IServerConfiguration server) {
             if (_serviceConfiguration.GetProp(ServicePropertyKeys.GlobalizedPlayerDatabase).GetBoolValue()) {
                 string dbPath = GetServiceFilePath(BmsFileNameKeys.GlobalPlayerTelem);
                 string regPath = GetServiceFilePath(BmsFileNameKeys.GlobalPlayerRegistry);
                 _fileUtilities.CreateInexistantFile(regPath);
                 _fileUtilities.CreateInexistantFile(dbPath);
-                List<string[]> playerDbEntries = File.ReadAllLines(dbPath)
-                    .Where(x => !x.StartsWith("#"))
-                    .Where(x => !string.IsNullOrWhiteSpace(x))
-                    .Select(x => x.Split(','))
-                    .ToList();
-                List<string[]> playerRegEntries = File.ReadAllLines(regPath)
-                    .Where(x => !x.StartsWith("#"))
-                    .Where(x => !string.IsNullOrWhiteSpace(x))
-                    .Select(x => x.Split(','))
-                    .ToList();
+                List<string[]> playerDbEntries = FilterLinesFromFile(dbPath);
+                List<string[]> playerRegEntries = FilterLinesFromFile(regPath);
                 playerDbEntries.ForEach(x => {
                     _serviceConfiguration.GetOrCreatePlayer(x[0]).UpdatePlayerFromDbStrings(x);
                 });
@@ -383,16 +383,8 @@ namespace BedrockService.Service.Management {
                 string regPath = GetServiceFilePath(BmsFileNameKeys.ServerPlayerRegistry_Name, server.GetServerName());
                 _fileUtilities.CreateInexistantFile(regPath);
                 _fileUtilities.CreateInexistantFile(dbPath);
-                List<string[]> playerDbEntries = File.ReadAllLines(dbPath)
-                    .Where(x => !x.StartsWith("#"))
-                    .Where(x => !string.IsNullOrWhiteSpace(x))
-                    .Select(x => x.Split(','))
-                    .ToList();
-                List<string[]> playerRegEntries = File.ReadAllLines(regPath)
-                    .Where(x => !x.StartsWith("#"))
-                    .Where(x => !string.IsNullOrWhiteSpace(x))
-                    .Select(x => x.Split(','))
-                    .ToList();
+                List<string[]> playerDbEntries = FilterLinesFromFile(dbPath);
+                List<string[]> playerRegEntries = FilterLinesFromFile(regPath);
                 playerDbEntries.ForEach(x => {
                     server.GetOrCreatePlayer(x[0]).UpdatePlayerFromDbStrings(x);
                 });
