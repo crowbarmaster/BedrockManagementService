@@ -107,7 +107,13 @@ namespace BedrockService.Shared.Classes {
                 string zipPath = GetServiceFilePath(BmsFileNameKeys.BdsUpdatePackage_Ver, version);
                 new FileInfo(zipPath).Directory.Create();
                 if (RetrieveFileFromUrl(fetchUrl, zipPath).Result) {
+                    if (!File.Exists(GetServiceFilePath(BmsFileNameKeys.StockProps, version))) {
+                        MinecraftUpdatePackageProcessor packageProcessor = new(version, GetServiceDirectory(BmsDirectoryKeys.CoreFileBuild_Ver, version));
+                        if (!packageProcessor.ExtractCoreFiles()) {
+                            return false;
+                        }
                     return true;
+                }
                 }
                 return false;
             });
