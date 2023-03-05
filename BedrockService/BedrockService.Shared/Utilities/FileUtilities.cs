@@ -11,12 +11,6 @@ using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Shared.Utilities {
     public class FileUtilities {
-        readonly string _servicePath;
-
-        public FileUtilities() {
-            _servicePath = GetServiceDirectory(BmsDirectoryKeys.WorkingDirectory);
-        }
-
         public void CreateInexistantFile(string filePath) {
             if (!File.Exists(filePath)) {
                 File.Create(filePath).Close();
