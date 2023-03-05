@@ -11,6 +11,7 @@ namespace BedrockService.Shared.Interfaces {
         byte GetServerIndex(IServerConfiguration server);
         List<IServerConfiguration> GetServerList();
         List<IPlayer> GetPlayerList();
+        void SetProp(ServicePropertyKeys keyName, string value);
         Property GetProp(ServicePropertyKeys keyName);
         void SetPlayerList(List<IPlayer> playerList);
         IPlayer GetOrCreatePlayer(string xuid, string username = null);
