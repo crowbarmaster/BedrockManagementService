@@ -240,6 +240,9 @@ namespace BedrockService.Service.Core {
                     if(File.Exists(GetServerFilePath(BdsFileNameKeys.DeployedBedrockVerIni, server))) {
                         server.SetServerVersion(File.ReadAllText(GetServerFilePath(BdsFileNameKeys.DeployedBedrockVerIni, server)));
                     }
+                    if (File.Exists(GetServerFilePath(BdsFileNameKeys.DeployedLLBDSIni, server))) {
+                        server.GetSettingsProp(ServerPropertyKeys.DeployedLiteLoaderVersion).SetValue(File.ReadAllText(GetServerFilePath(BdsFileNameKeys.DeployedLLBDSIni, server)));
+                    }
                     if (server.GetServerVersion() != "None" && server.GetSelectedVersion() != "Latest" && server.GetSelectedVersion() != server.GetServerVersion()) {
                         _logger.AppendLine("Manually configured server found with wrong version. Replacing server build...");
                         if (Updater.FetchBuild(server.GetSelectedVersion()).Result) {
