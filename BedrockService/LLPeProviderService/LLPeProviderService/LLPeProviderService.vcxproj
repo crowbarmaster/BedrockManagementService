@@ -158,7 +158,7 @@
       <ModuleDefinitionFile>$(SolutionDir)$(ProjectName)\$(ProjectName)\source.def</ModuleDefinitionFile>
     </Link>
     <PostBuildEvent>
-      <Message>copy "$(SolutionDir)$(ProjectName)\$(IntermediateOutputPath)LLPeProviderService.dll" "$(SolutionDir)BedrockService.Shared\LLPeProviderService.dll"</Message>
+      <Message>copy "$(SolutionDir)$(IntermediateOutputPath)LLPeProviderService.dll" "$(SolutionDir)BedrockService.Shared\LLPeProviderService.dll"</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
