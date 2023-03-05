@@ -30,5 +30,13 @@
     "IsBeta": "false",
     "LLUrl": "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/2.11.0/LiteLoaderBDS.zip",
     "ModuleUrl": "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/2.11.0/Modules.zip"
+  },
+  {
+    "Version": "2.11.1",
+    "BDSVersion": "1.19.63.01",
+    "ProtocolVer": "568",
+    "IsBeta": "false",
+    "LLUrl": "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/2.11.1/LiteLoaderBDS.zip",
+    "ModuleUrl": "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/2.11.1/Modules.zip"
   }
 ]
