@@ -82,6 +82,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -158,7 +159,8 @@
       <ModuleDefinitionFile>$(SolutionDir)$(ProjectName)\$(ProjectName)\source.def</ModuleDefinitionFile>
     </Link>
     <PostBuildEvent>
-      <Message>copy "$(SolutionDir)$(IntermediateOutputPath)LLPeProviderService.dll" "$(SolutionDir)BedrockService.Shared\LLPeProviderService.dll"</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

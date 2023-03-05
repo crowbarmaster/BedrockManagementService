@@ -135,4 +135,7 @@
   <ItemGroup>
     <Folder Include="Management\Interfaces\" />
   </ItemGroup>
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="copy &quot;$(SolutionDir)x64\release\LLPeProviderService.dll&quot; &quot;$(SolutionDir)BedrockService.Shared\LLPeProviderService.dll&quot;" />
+  </Target>
 </Project>
