@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 
 
+namespace BedrockService.Shared.SerializeModels {
 public enum ServiceStatus {
     Stopped,
     Starting,
@@ -17,7 +18,6 @@ public enum ServerStatus {
     Started
 }
 
-namespace BedrockService.Shared.SerializeModels {
     public class StatusUpdateModel {
         public ServiceStatusModel ServiceStatusModel { get; set; }
         public ServerStatusModel ServerStatusModel { get; set; }

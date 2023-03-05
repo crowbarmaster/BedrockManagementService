@@ -1,4 +1,5 @@
-﻿using Topshelf.Runtime;
+﻿using BedrockService.Shared.SerializeModels;
+using Topshelf.Runtime;
 
 namespace BedrockService.Service.Core {
     public class Service : IService {
