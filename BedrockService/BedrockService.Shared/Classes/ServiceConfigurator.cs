@@ -44,7 +44,7 @@ namespace BedrockService.Shared.Classes {
         }
 
         public bool ValidateLatestVersion() {
-            string propFile = GetServiceFilePath(BmsFileNameKeys.StockProps);
+            string propFile = GetServiceFilePath(BmsFileNameKeys.StockProps, LatestServerVersion);
             if (LatestServerVersion != "None" && _processInfo.DeclaredType() != "Client") {
                 if (!File.Exists(propFile)) {
                     FileInfo file = new(propFile);

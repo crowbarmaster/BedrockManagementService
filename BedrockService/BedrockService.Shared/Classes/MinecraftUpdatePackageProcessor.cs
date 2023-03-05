@@ -86,7 +86,7 @@ namespace BedrockService.Shared.Classes {
                 .Where(x => !x.StartsWith('#'))
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .ToList();
-            File.WriteAllLines($@"{_fileTargetDirectory}\{GetServiceFileName(BmsFileNameKeys.StockProps)}", propFileContents);
+            File.WriteAllLines($@"{_fileTargetDirectory}\{GetServiceFileName(BmsFileNameKeys.StockProps, _packageVersion)}", propFileContents);
         }
     }
 }
