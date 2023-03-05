@@ -37,7 +37,7 @@ namespace BedrockService.Shared.Classes {
         public Task CheckLatestVersion() {
             return Task.Run(() => {
                 _logger.AppendLine("Checking latest LiteLoader Version...");
-
+                CheckLiteLiteLoaderVersion();
                 _logger.AppendLine("Checking latest BDS Version...");
                 string content = FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.BdsVersionJson]).Result;
                 if (content == null)
@@ -68,9 +68,16 @@ namespace BedrockService.Shared.Classes {
         public Task CheckLiteLiteLoaderVersion() => Task.Run(() => {
             string result = FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.LLReleasesJson]).Result;
             if (result != null) {
+                int distanceFromEnd = 1;
                 List<LiteLoaderVersionManifest> manifestList = JsonSerializer.Deserialize<List<LiteLoaderVersionManifest>>(result);
-                LiteLoaderVersionManifest latestLLVersion = manifestList.Last();
-                if (!string.IsNullOrEmpty(latestLLVersion.Version) && !File.Exists(GetServiceFilePath(BmsFileNameKeys.LLUpdatePackage_Ver, latestLLVersion.Version))) {
+                string llUseBetaFlag = _serviceConfiguration.GetProp(ServicePropertyKeys.UseBetaLiteLoaderVersions).StringValue;
+                LiteLoaderVersionManifest latestLLVersion = manifestList[^distanceFromEnd];
+                while (latestLLVersion.IsBeta == "true" && llUseBetaFlag == "false") {
+                    distanceFromEnd++;
+                    latestLLVersion = manifestList[^distanceFromEnd];
+                }
+                _logger.AppendLine($"Latest LiteLoader version found: \"{latestLLVersion.Version}\"");
+                if (!File.Exists(GetServiceFilePath(BmsFileNameKeys.LLUpdatePackage_Ver, latestLLVersion.Version)) || !File.Exists(GetServiceFilePath(BmsFileNameKeys.LLModUpdatePackage_Ver, latestLLVersion.Version))) {
                     FetchLiteLoaderBuild(latestLLVersion.Version).Wait();
                 }
                 _serviceConfiguration.SetProp(ServicePropertyKeys.LatestLiteLoaderVersion, latestLLVersion.Version);
@@ -112,8 +119,8 @@ namespace BedrockService.Shared.Classes {
                         if (!packageProcessor.ExtractCoreFiles()) {
                             return false;
                         }
-                    return true;
-                }
+                        return true;
+                    }
                 }
                 return false;
             });
