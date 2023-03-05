@@ -1,0 +1,704 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="LibClang">
+      <UniqueIdentifier>{96b93cf4-1a33-4442-ada3-8292049e0f4a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="global.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pdb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="skipFunctions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PeEdit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pdb.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="peEdit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\LibClang\lib\clangAnalysis.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangAPINotes.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangARCMigrate.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangAST.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangASTMatchers.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangBasic.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangCodeGen.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangCrossTU.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangDependencyScanning.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangDirectoryWatcher.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangDriver.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangDynamicASTMatchers.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangEdit.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangFormat.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangFrontend.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangFrontendTool.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangHandleCXX.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangHandleLLVM.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangIndex.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangIndexSerialization.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangInterpreter.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangLex.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangParse.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangRewrite.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangRewriteFrontend.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangSema.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangSerialization.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangStaticAnalyzerCheckers.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangStaticAnalyzerCore.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangStaticAnalyzerFrontend.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangTesting.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangTooling.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangToolingASTDiff.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangToolingCore.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangToolingInclusions.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangToolingRefactoring.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangToolingSyntax.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\clangTransformer.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\libclang.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\lldCOFF.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\lldCommon.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\lldCore.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\lldDriver.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\lldELF.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\lldMachO.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\lldMachO2.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\lldMinGW.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\lldReaderWriter.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\lldWasm.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\lldYAML.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMAArch64AsmParser.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMAArch64CodeGen.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMAArch64Desc.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMAArch64Disassembler.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMAArch64Info.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMAArch64Utils.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMAggressiveInstCombine.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMAMDGPUAsmParser.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMAMDGPUCodeGen.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMAMDGPUDesc.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMAMDGPUDisassembler.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMAMDGPUInfo.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMAMDGPUUtils.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMAnalysis.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMARMAsmParser.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMARMCodeGen.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMARMDesc.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMARMDisassembler.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMARMInfo.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMARMUtils.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMAsmParser.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMAsmPrinter.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMAVRAsmParser.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMAVRCodeGen.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMAVRDesc.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMAVRDisassembler.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMAVRInfo.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMBinaryFormat.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMBitReader.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMBitstreamReader.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMBitWriter.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMBPFAsmParser.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMBPFCodeGen.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMBPFDesc.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMBPFDisassembler.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMBPFInfo.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVM-C.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMCFGuard.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMCFIVerify.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMCodeGen.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMCore.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMCoroutines.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMCoverage.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMDebugInfoCodeView.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMDebugInfoDWARF.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMDebugInfoGSYM.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMDebugInfoMSF.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMDebugInfoPDB.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMDemangle.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMDlltoolDriver.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMDWARFLinker.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMDWP.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMExecutionEngine.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMExegesis.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMExegesisAArch64.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMExegesisMips.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMExegesisPowerPC.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMExegesisX86.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMExtensions.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMFileCheck.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMFrontendOpenACC.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMFrontendOpenMP.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMFuzzMutate.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMGlobalISel.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMHexagonAsmParser.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMHexagonCodeGen.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMHexagonDesc.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMHexagonDisassembler.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMHexagonInfo.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMInstCombine.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMInstrumentation.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMInterfaceStub.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMInterpreter.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMipo.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMIRReader.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMJITLink.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMLanaiAsmParser.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMLanaiCodeGen.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMLanaiDesc.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMLanaiDisassembler.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMLanaiInfo.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMLibDriver.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMLineEditor.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMLinker.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMLTO.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMMC.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMMCA.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMMCACustomBehaviourAMDGPU.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMMCDisassembler.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMMCJIT.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMMCParser.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMMipsAsmParser.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMMipsCodeGen.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMMipsDesc.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMMipsDisassembler.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMMipsInfo.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMMIRParser.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMMSP430AsmParser.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMMSP430CodeGen.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMMSP430Desc.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMMSP430Disassembler.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMMSP430Info.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMNVPTXCodeGen.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMNVPTXDesc.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMNVPTXInfo.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMObjCARCOpts.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMObject.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMObjectYAML.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMOption.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMOrcJIT.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMOrcShared.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMOrcTargetProcess.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMPasses.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMPowerPCAsmParser.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMPowerPCCodeGen.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMPowerPCDesc.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMPowerPCDisassembler.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMPowerPCInfo.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMProfileData.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMRemarks.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMRISCVAsmParser.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMRISCVCodeGen.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMRISCVDesc.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMRISCVDisassembler.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMRISCVInfo.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMRuntimeDyld.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMScalarOpts.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMSelectionDAG.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMSparcAsmParser.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMSparcCodeGen.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMSparcDesc.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMSparcDisassembler.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMSparcInfo.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMSupport.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMSymbolize.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMSystemZAsmParser.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMSystemZCodeGen.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMSystemZDesc.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMSystemZDisassembler.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMSystemZInfo.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMTableGen.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMTableGenGlobalISel.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMTarget.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMTextAPI.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMTransformUtils.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMVectorize.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMWebAssemblyAsmParser.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMWebAssemblyCodeGen.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMWebAssemblyDesc.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMWebAssemblyDisassembler.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMWebAssemblyInfo.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMWebAssemblyUtils.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMWindowsManifest.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMX86AsmParser.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMX86CodeGen.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMX86Desc.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMX86Disassembler.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMX86Info.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMXCoreCodeGen.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMXCoreDesc.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMXCoreDisassembler.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMXCoreInfo.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LLVMXRay.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\LTO.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\LibClang\lib\Remarks.lib">
+      <Filter>LibClang</Filter>
+    </Library>
+    <Library Include="..\x64\Release\Demangler.lib" />
+    <Library Include="..\x64\Release\PortableExecutable.lib" />
+    <Library Include="..\x64\Release\RawPDB.lib" />
+  </ItemGroup>
+</Project>
