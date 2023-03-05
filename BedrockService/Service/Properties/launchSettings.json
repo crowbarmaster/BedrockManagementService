@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "BedrockService.Service": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
