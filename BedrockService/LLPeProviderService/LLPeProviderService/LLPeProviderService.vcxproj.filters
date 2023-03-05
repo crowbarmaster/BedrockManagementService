@@ -697,8 +697,8 @@
     <Library Include="..\LibClang\lib\Remarks.lib">
       <Filter>LibClang</Filter>
     </Library>
-    <Library Include="..\x64\Release\Demangler.lib" />
-    <Library Include="..\x64\Release\PortableExecutable.lib" />
-    <Library Include="..\x64\Release\RawPDB.lib" />
+    <Library Include="..\..\x64\Release\Demangler.lib" />
+    <Library Include="..\..\x64\Release\PortableExecutable.lib" />
+    <Library Include="..\..\x64\Release\RawPDB.lib" />
   </ItemGroup>
 </Project>

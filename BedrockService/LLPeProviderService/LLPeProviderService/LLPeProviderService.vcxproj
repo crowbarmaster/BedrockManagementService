@@ -176,6 +176,9 @@
     <ClCompile Include="peEdit.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Library Include="..\..\x64\Release\Demangler.lib" />
+    <Library Include="..\..\x64\Release\PortableExecutable.lib" />
+    <Library Include="..\..\x64\Release\RawPDB.lib" />
     <Library Include="..\LibClang\lib\clangAnalysis.lib" />
     <Library Include="..\LibClang\lib\clangAPINotes.lib" />
     <Library Include="..\LibClang\lib\clangARCMigrate.lib" />
@@ -391,9 +394,6 @@
     <Library Include="..\LibClang\lib\LLVMXRay.lib" />
     <Library Include="..\LibClang\lib\LTO.lib" />
     <Library Include="..\LibClang\lib\Remarks.lib" />
-    <Library Include="..\x64\Release\Demangler.lib" />
-    <Library Include="..\x64\Release\PortableExecutable.lib" />
-    <Library Include="..\x64\Release\RawPDB.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
