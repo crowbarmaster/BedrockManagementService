@@ -35,7 +35,7 @@ namespace BedrockService.Service.Server {
         private bool _AwaitingStopSignal = true;
         private bool _backupRunning = false;
         private bool _serverModifiedFlag = true;
-        private bool _LiteLoaderEnabledServer = false;
+        private bool _LiteLoadedServer = false;
 
         public BedrockServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, FileUtilities fileUtils, IPlayerManager servicePlayerManager) {
             _fileUtils = fileUtils;
@@ -124,6 +124,8 @@ namespace BedrockService.Service.Server {
                 AwaitableServerStart().Wait();
             });
         }
+
+        public void ForceKillServer () => _serverProcess.Kill();
 
         public string GetServerName() => _serverConfiguration.GetServerName();
 
@@ -251,11 +253,13 @@ namespace BedrockService.Service.Server {
             DeployedVersion = _serverConfiguration.GetServerVersion()
         };
 
+        public List<IPlayer> GetActivePlayerList() => _connectedPlayers;
+
         public IBedrockLogger GetLogger() => _serverLogger;
 
         public bool IsServerModified() => _serverModifiedFlag;
 
-        public void ForceServerModified() => _serverModifiedFlag = true;
+        public void SetServerModified(bool isModified) => _serverModifiedFlag = isModified;
 
         public bool ServerAutostartEnabled() => _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerAutostartEnabled).GetBoolValue();
 
@@ -286,108 +290,28 @@ namespace BedrockService.Service.Server {
 
         private void StdOutToLog(object sender, DataReceivedEventArgs e) {
             if (e.Data != null && !e.Data.Contains("Running AutoCompaction...")) {
-                string dataMsg = e.Data;
+                ConsoleFilterStrategyClass consoleFilter = new ConsoleFilterStrategyClass(_logger, _configurator, _serverConfiguration, this, _serviceConfiguration);
+                string input = e.Data;
                 string logFileText = "NO LOG FILE! - ";
-                if (dataMsg.StartsWith(logFileText))
-                    dataMsg = dataMsg.Substring(logFileText.Length, dataMsg.Length - logFileText.Length);
-                _serverLogger.AppendLine(dataMsg);
+                if (input.StartsWith(logFileText))
+                    input = input.Substring(logFileText.Length, input.Length - logFileText.Length);
+                _serverLogger.AppendLine(input);
                 if (e.Data != null) {
-                    if (dataMsg.Contains("[PreLoader]")) {
-                        _serverConfiguration.SetLiteLoaderStatus(true);
-                    }
-                    if (dataMsg.Contains(_startupMessage) || dataMsg.Contains("[Server] Done")) {
-                        _currentServerStatus = ServerStatus.Started;
-                        Task.Delay(3000).Wait();
-                        if (_serverConfiguration.GetStartCommands().Count > 0) {
-                            RunStartupCommands();
-                        }
-                    }
-                    if (dataMsg.Equals("Quit correctly")) {
+                    if (input.Equals("Quit correctly")) {
                         _logger.AppendLine($"Server {GetServerName()} received quit signal.");
                         _AwaitingStopSignal = false;
                     }
-                    if (dataMsg.Contains("Player connected")) {
-                        var playerInfo = ExtractPlayerInfoFromString(dataMsg);
-                        _logger.AppendLine($"Player {playerInfo.username} connected with XUID: {playerInfo.xuid}");
-                        _serverModifiedFlag = true;
-                        _connectedPlayers.Add(_playerManager.PlayerConnected(playerInfo.username, playerInfo.xuid));
-                        _configurator.SavePlayerDatabase(_serverConfiguration);
+                    if (input.Contains("[PreLoader]")) {
+                        _LiteLoadedServer = true;
                     }
-                    if (dataMsg.Contains("Player disconnected")) {
-                        var playerInfo = ExtractPlayerInfoFromString(dataMsg);
-                        _logger.AppendLine($"Player {playerInfo.username} disconnected with XUID: {playerInfo.xuid}");
-                        _connectedPlayers.Remove(_playerManager.PlayerDisconnected(playerInfo.xuid));
-                        _configurator.SavePlayerDatabase(_serverConfiguration);
-                    }
-                    if (dataMsg.Contains("Failed to load Vanilla")) {
-                        AwaitableServerStop(false).Wait();
-                        string deployedVersion = _serverConfiguration.GetSelectedVersion() == "Latest"
-                                                ? _serviceConfiguration.GetLatestBDSVersion()
-                                                : _serverConfiguration.GetSelectedVersion();
-                        _configurator.ReplaceServerBuild(_serverConfiguration, deployedVersion).Wait();
-                        AwaitableServerStart().Wait();
-                    }
-                    if (dataMsg.Contains("Version ")) {
-
-                        int msgStartIndex = dataMsg.IndexOf(']') + 2;
-                        string focusedMsg = dataMsg.Substring(msgStartIndex, dataMsg.Length - msgStartIndex);
-                        int versionIndex = focusedMsg.IndexOf(' ') + 1;
-                        string versionString = focusedMsg.Substring(versionIndex, focusedMsg.Length - versionIndex);
-                        if (_serverConfiguration.GetSettingsProp(ServerPropertyKeys.DeployedVersion).StringValue == "None") {
-                            _logger.AppendLine("Service detected version, restarting server to apply correct configuration.");
-                            _serverProcess.Kill();
-                            _serverConfiguration.GetSettingsProp(ServerPropertyKeys.DeployedVersion).SetValue(versionString);
-                            _serverConfiguration.ValidateVersion(versionString);
-                            _configurator.LoadServerConfigurations().Wait();
-                            _configurator.SaveServerConfiguration(_serverConfiguration);
-                            AwaitableServerStart().Wait();
-                        }
-                        string deployedVersion = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.SelectedServerVersion).StringValue == "Latest"
-                        ? _serviceConfiguration.GetLatestBDSVersion()
-                        : _serverConfiguration.GetSettingsProp(ServerPropertyKeys.SelectedServerVersion).StringValue;
-                        if (versionString.ToLower().Contains("-beta")) {
-                            int betaTagLoc = versionString.ToLower().IndexOf("-beta");
-                            int betaVer = int.Parse(versionString.Substring(betaTagLoc + 5, versionString.Length - (betaTagLoc + 5)));
-                            versionString = versionString.Substring(0, betaTagLoc) + ".";
-                            versionString = versionString + betaVer;
-                        }
-                        if (!dataMsg.Contains("LiteLoaderBDS")) {
-                            if (_serverConfiguration.GetSettingsProp(ServerPropertyKeys.LiteLoaderEnabled).GetBoolValue() && !_LiteLoaderEnabledServer) {
-                                AwaitableServerStop(false).Wait();
-                                _configurator.ReplaceServerBuild(_serverConfiguration, deployedVersion).Wait();
-                                AwaitableServerStart();
-                            }
-                        }
-                        if (deployedVersion != versionString && !versionString.Contains("LiteLoader")) {
-                            if (_serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()) {
-                                _logger.AppendLine($"Server {GetServerName()} decected incorrect or out of date version! Replacing build...");
-                                AwaitableServerStop(false).Wait();
-                                _configurator.ReplaceServerBuild(_serverConfiguration, deployedVersion).Wait();
-                                AwaitableServerStart();
-                            } else {
-                                _logger.AppendLine($"Server {GetServerName()} is out of date, Enable AutoDeployUpdates option to update to latest!");
-                            }
-                        }
-                    }
-                    if (dataMsg.Contains("A previous save has not been completed.")) {
-                        Task.Delay(1000).Wait();
-                        WriteToStandardIn("save query");
-                    }
-                    if (dataMsg.Contains($@"{_serverConfiguration.GetProp("level-name")}/db/")) {
-                        if (dataMsg.Contains("[Server]")) {
-                            dataMsg = dataMsg.Substring(dataMsg.IndexOf(']') + 2);
-                        }
-                        _logger.AppendLine("Save data string detected! Performing backup now!");
-                        if (_backupManager.PerformBackup(dataMsg)) {
-                            _logger.AppendLine($"Backup for server {_serverConfiguration.GetServerName()} Completed.");
-                            _backupRunning = false;
-                            if (_connectedPlayers.Count == 0) {
-                                _serverModifiedFlag = false;
-                            }
-                            return;
-                        }
+                    if(input.Contains("Changes to the world are resumed")) {
                         _backupRunning = false;
-                        _logger.AppendLine($"Backup for server {_serverConfiguration.GetServerName()} Failed. Check logs!");
+                    }
+                    foreach(KeyValuePair<string, IConsoleFilter> filter in consoleFilter.FilterList) {
+                        if (input.Contains(filter.Key)) {
+                            filter.Value.Filter(input);
+                            break;
+                        }
                     }
                 }
             }
@@ -510,22 +434,17 @@ namespace BedrockService.Service.Server {
             }
         }
 
-        private (string username, string xuid) ExtractPlayerInfoFromString(string dataMsg) {
-            int msgStartIndex = dataMsg.IndexOf(']') + 2;
-            int usernameStart = dataMsg.IndexOf(':', msgStartIndex) + 2;
-            int usernameEnd = dataMsg.IndexOf(',', usernameStart);
-            int usernameLength = usernameEnd - usernameStart;
-            int xuidStart = dataMsg.IndexOf(':', usernameEnd) + 2;
-            return (dataMsg.Substring(usernameStart, usernameLength), dataMsg.Substring(xuidStart, dataMsg.Length - xuidStart));
-        }
-
-        private void RunStartupCommands() {
+        public void RunStartupCommands() {
             foreach (StartCmdEntry cmd in _serverConfiguration.GetStartCommands()) {
                 _stdInStream.WriteLine(cmd.Command.Trim());
                 Thread.Sleep(1000);
             }
         }
 
-        public bool IsServerLLCapable() => _LiteLoaderEnabledServer;
+        public bool LiteLoadedServer() => _LiteLoadedServer;
+
+        public BackupManager GetBackupManager() => _backupManager;
+
+        public void SetStartupStatus(ServerStatus status) => _currentServerStatus = status;
     }
 }
