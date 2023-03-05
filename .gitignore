@@ -369,3 +369,6 @@ GenerateLog.bat
 /.github/workflows/CheckBMSVersion.yml
 /BMS_Files/bedrock_version_manifest.json
 /BMS_Files/liteloader_version_manifest.json
+/BedrockService/BedrockService.Shared/LLPeProviderService.dll
+/BedrockService/BedrockService.Shared/LLPeProviderService.dll
+/BedrockService/BedrockService.Shared/LLPeProviderService.dll
