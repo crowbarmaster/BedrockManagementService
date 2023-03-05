@@ -41,7 +41,9 @@ namespace BedrockService.Shared.Classes {
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.AutoDeployUpdates], "true"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.UpdateCron], "0 2 * **"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.SelectedServerVersion], "Latest"));
+            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.SelectedLiteLoaderVersion], "Latest"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.DeployedVersion], "None"));
+            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.DeployedLiteLoaderVersion], "None"));
             return true;
         }
 
@@ -117,7 +119,7 @@ namespace BedrockService.Shared.Classes {
             }
             if (_processInfo.DeclaredType() != "Client" || (GetSettingsProp(ServerPropertyKeys.DeployedVersion).StringValue != "None" && !skipNullCheck)) {
                 if (!File.Exists(GetServiceFilePath(BmsFileNameKeys.StockProps, version))) {
-                    _logger.AppendLine("Core file(s) found missing. Rebuilding!");
+                    _logger.AppendLine("Core prop file found missing. Please wait a moment!");
                     MinecraftUpdatePackageProcessor packageProcessor = new(_logger, version, GetServiceDirectory(BmsDirectoryKeys.CoreFileBuild_Ver, version));
                     if (!packageProcessor.ExtractCoreFiles()) {
                         return false;

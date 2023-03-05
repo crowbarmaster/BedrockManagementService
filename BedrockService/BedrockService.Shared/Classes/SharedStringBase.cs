@@ -16,6 +16,7 @@ namespace BedrockService.Shared.Classes {
             GlobalizedPlayerDatabase,
             DefaultGlobalPermLevel,
             LatestLiteLoaderVersion,
+            UseBetaLiteLoaderVersions
         };
 
         public enum ServerPropertyKeys {
@@ -35,7 +36,9 @@ namespace BedrockService.Shared.Classes {
             AutoDeployUpdates,
             UpdateCron,
             SelectedServerVersion,
-            DeployedVersion
+            SelectedLiteLoaderVersion,
+            DeployedVersion,
+            DeployedLiteLoaderVersion
         }
 
         public enum MinecraftPackTypes {
@@ -229,6 +232,7 @@ namespace BedrockService.Shared.Classes {
             { ServicePropertyKeys.TimestampLogEntries, "TimestampLogEntries" },
             { ServicePropertyKeys.GlobalizedPlayerDatabase, "GlobalizedPlayerDatabase" },
             { ServicePropertyKeys.DefaultGlobalPermLevel, "DefaultGlobalPermLevel" },
+            { ServicePropertyKeys.UseBetaLiteLoaderVersions, "UseBetaLiteLoaderVersions" },
             { ServicePropertyKeys.LatestLiteLoaderVersion, "LatestLiteLoaderVersion" }
         };
 
@@ -249,7 +253,9 @@ namespace BedrockService.Shared.Classes {
             { ServerPropertyKeys.AutoDeployUpdates, "AutoDeployUpdates" },
             { ServerPropertyKeys.UpdateCron, "UpdateCron" },
             { ServerPropertyKeys.SelectedServerVersion, "SelectedServerVersion" },
+            { ServerPropertyKeys.SelectedLiteLoaderVersion, "SelectedLiteLoaderVersion" },
             { ServerPropertyKeys.DeployedVersion, "DeployedVersion" },
+            { ServerPropertyKeys.DeployedLiteLoaderVersion, "DeployedLiteLoaderVersion" },
         };
 
         public static Dictionary<BmsDependServerPropKeys, string> BmsDependServerPropStrings = new() {

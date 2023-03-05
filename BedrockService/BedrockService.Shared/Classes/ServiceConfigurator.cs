@@ -27,6 +27,7 @@ namespace BedrockService.Shared.Classes {
             globals.Add(new Property(ServicePropertyStrings[ServicePropertyKeys.GlobalizedPlayerDatabase], "false"));
             globals.Add(new Property(ServicePropertyStrings[ServicePropertyKeys.DefaultGlobalPermLevel], "member"));
             globals.Add(new Property(ServicePropertyStrings[ServicePropertyKeys.LatestLiteLoaderVersion], "2.10.1"));
+            globals.Add(new Property(ServicePropertyStrings[ServicePropertyKeys.UseBetaLiteLoaderVersions], "false"));
             return true;
         }
 
