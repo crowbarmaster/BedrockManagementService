@@ -3,8 +3,8 @@
     {
       "Name": "CrowbarTools",
       "Description": "A toolbox of commands for LLBDS",
-      "PluginVersion": "1.0",
-      "ProtoVersion": 557,
+      "PluginVersion": "1.0.0.21",
+      "ProtoVersion": 568,
       "ExtendedInfo": "Currently contains comands for inventory manipulation, multiple commands truncated to one, and tele2server control.",
       "ProtectedFiles": [
         "CrowbarTools.ini"
