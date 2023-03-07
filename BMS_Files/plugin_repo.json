@@ -12,7 +12,7 @@
       "ProtoBlacklist": [
         0
       ],
-      "RepoURL": "http://127.0.0.1/bms_files/CrowbarTools.zip"
+      "RepoURL": "https://github.com/crowbarmaster/CrowbarsLLBDSPlugins/releases/download/Latest/CrowbarTools.zip"
     }
   ]
 }
