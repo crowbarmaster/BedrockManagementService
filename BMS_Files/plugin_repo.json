@@ -6,6 +6,9 @@
       "PluginVersion": "1.0",
       "ProtoVersion": 557,
       "ExtendedInfo": "Currently contains comands for inventory manipulation, multiple commands truncated to one, and tele2server control.",
+      "ProtectedFiles": [
+        "CrowbarTools.ini"
+      ],
       "ProtoBlacklist": [
         0
       ],
