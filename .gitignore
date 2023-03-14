@@ -373,3 +373,4 @@ GenerateLog.bat
 /BedrockService/BedrockService.Shared/LLPeProviderService.dll
 /BedrockService/BedrockService.Shared/LLPeProviderService.dll
 /BedrockService/LLPeProviderService/LibClang
+/BMS_Files/plugin_repo.json
