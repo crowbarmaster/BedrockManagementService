@@ -59,8 +59,8 @@ namespace BedrockService.Service.Server.ConsoleFilters {
             } else {
                 int llVerIndex = input.IndexOf("LiteLoaderBDS ") + 14;
                 string llVer = input.Substring(llVerIndex);
-                if (llVer.EndsWith('+')) {
-                    llVer = llVer.Substring(0, llVer.Length - 1);
+                if (llVer.Contains('+')) {
+                    llVer = llVer.Substring(0, llVer.IndexOf('+'));
                 }
                 if (llVer != userSelectedLLVersion && _serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()) {
                     _bedrockServer.AwaitableServerStop(false).Wait();
