@@ -39,7 +39,7 @@ namespace BedrockService.Shared.Classes {
                 _logger.AppendLine("Checking latest LiteLoader Version...");
                 CheckLiteLiteLoaderVersion();
                 _logger.AppendLine("Checking latest BDS Version...");
-                string content = FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.BdsVersionJson]).Result;
+                string content = HTTPHandler.FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.BdsVersionJson]).Result;
                 if (content == null)
                     return false;
                 List<MinecraftVersionHistoryJson> versionList = JsonSerializer.Deserialize<List<MinecraftVersionHistoryJson>>(content);
@@ -66,7 +66,7 @@ namespace BedrockService.Shared.Classes {
         }
 
         public Task CheckLiteLiteLoaderVersion() => Task.Run(() => {
-            string result = FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.LLReleasesJson]).Result;
+            string result = HTTPHandler.FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.LLReleasesJson]).Result;
             if (result != null) {
                 int distanceFromEnd = 1;
                 List<LiteLoaderVersionManifest> manifestList = JsonSerializer.Deserialize<List<LiteLoaderVersionManifest>>(result);
@@ -81,7 +81,7 @@ namespace BedrockService.Shared.Classes {
                     FetchLiteLoaderBuild(latestLLVersion.Version).Wait();
                 }
                 _serviceConfiguration.SetProp(ServicePropertyKeys.LatestLiteLoaderVersion, latestLLVersion.Version);
-                string verResult = FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.BdsVersionJson]).Result;
+                string verResult = HTTPHandler.FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.BdsVersionJson]).Result;
                 if (verResult == null) {
                     verResult = "[]";
                 }
@@ -99,7 +99,7 @@ namespace BedrockService.Shared.Classes {
 
         public Task<LiteLoaderVersionManifest> GetLiteLoaderVersionManifest(string version) {
             return Task.Run(() => {
-                string result = FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.LLReleasesJson]).Result;
+                string result = HTTPHandler.FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.LLReleasesJson]).Result;
                 if (result != null) {
                     List<LiteLoaderVersionManifest> manifestList = JsonSerializer.Deserialize<List<LiteLoaderVersionManifest>>(result);
                     return manifestList.Where(x => x.Version == version).First();
@@ -164,34 +164,6 @@ namespace BedrockService.Shared.Classes {
                 }
                 return false;
             });
-        }
-
-        private async Task<string> FetchHTTPContent(string url, KeyValuePair<string, string> optionalHeader = new()) {
-            HttpClient client = new();
-            try {
-                client.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/apng,*/*;q=0.8");
-                client.DefaultRequestHeaders.Add("Accept-Language", "en-GB,en;q=0.9,en-US;q=0.8");
-                client.DefaultRequestHeaders.Add("Connection", "keep-alive");
-                client.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
-                client.DefaultRequestHeaders.Add("Pragma", "no-cache");
-                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36");
-                if (!string.IsNullOrEmpty(optionalHeader.Key)) {
-                    if (client.DefaultRequestHeaders.Contains(optionalHeader.Key) && !string.IsNullOrEmpty(optionalHeader.Value))
-                        client.DefaultRequestHeaders.Remove(optionalHeader.Key);
-                    client.DefaultRequestHeaders.Add(optionalHeader.Key, optionalHeader.Value);
-                }
-                client.Timeout = new TimeSpan(0, 0, 3);
-                return await client.GetStringAsync(url);
-            } catch (HttpRequestException) {
-                _logger.AppendLine($"Error! could not fetch current webpage content!");
-            } catch (TaskCanceledException) {
-                return null;
-            } catch (Exception e) {
-                _logger.AppendLine($"Updater resulted in error: {e.Message}\n{e.InnerException}\n{e.StackTrace}");
-            } finally {
-                client.Dispose();
-            }
-            return null;
         }
     }
 }
