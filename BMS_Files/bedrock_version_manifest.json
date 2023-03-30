@@ -398,5 +398,10 @@
     "version": "1.19.72.01",
     "winurl": "https://minecraft.azureedge.net/bin-win/bedrock-server-1.19.72.01.zip",
     "linurl": "https://minecraft.azureedge.net/bin-linux/bedrock-server-1.19.72.01.zip"
+  },
+  {
+    "version": "1.19.73.02",
+    "winurl": "https://minecraft.azureedge.net/bin-win/bedrock-server-1.19.73.02.zip",
+    "linurl": "https://minecraft.azureedge.net/bin-linux/bedrock-server-1.19.73.02.zip"
   }
 ]
