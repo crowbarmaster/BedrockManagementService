@@ -237,7 +237,7 @@ namespace BedrockService.Service.Core {
                                                 : server.GetSelectedVersion();
                         _configurator.ReplaceServerBuild(server, deployedVersion).Wait();
                     }
-                    if(File.Exists(GetServerFilePath(BdsFileNameKeys.DeployedBedrockVerIni, server))) {
+                    if (File.Exists(GetServerFilePath(BdsFileNameKeys.DeployedBedrockVerIni, server))) {
                         server.SetServerVersion(File.ReadAllText(GetServerFilePath(BdsFileNameKeys.DeployedBedrockVerIni, server)));
                     }
                     if (File.Exists(GetServerFilePath(BdsFileNameKeys.DeployedLLBDSIni, server))) {

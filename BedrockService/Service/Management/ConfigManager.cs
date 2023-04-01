@@ -5,6 +5,7 @@ using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
 using BedrockService.Shared.JsonModels.MinecraftJsonModels;
 using BedrockService.Shared.SerializeModels;
 using System.Globalization;
+using System.Xml.Linq;
 using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Service.Management {
@@ -106,8 +107,8 @@ namespace BedrockService.Service.Management {
                     File.WriteAllText(GetServerFilePath(BdsFileNameKeys.DeployedBedrockVerIni, server), buildVersion);
                     try {
                         if (server.GetSettingsProp(ServerPropertyKeys.LiteLoaderEnabled).GetBoolValue()) {
-                            if(!File.Exists(GetServiceFilePath(BmsFileNameKeys.LLUpdatePackage_Ver, liteVersion)) || File.Exists(GetServiceFilePath(BmsFileNameKeys.LLModUpdatePackage_Ver, liteVersion))) {
-                                if(!Updater.FetchLiteLoaderBuild(liteVersion).Result) {
+                            if (!File.Exists(GetServiceFilePath(BmsFileNameKeys.LLUpdatePackage_Ver, liteVersion))) {
+                                if (!Updater.FetchLiteLoaderBuild(liteVersion).Result) {
                                     throw new FileNotFoundException($"Service could not locate file \"Update_{buildVersion}.zip\" and version was not found in LiteLoader manifest!");
                                 }
                             }
@@ -376,7 +377,7 @@ namespace BedrockService.Service.Management {
             }
         }
 
-        private List<string[]> FilterLinesFromFile (string filePath) {
+        private List<string[]> FilterLinesFromFile(string filePath) {
             _fileUtilities.CreateInexistantFile(filePath);
             return File.ReadAllLines(filePath)
                     .Where(x => !x.StartsWith("#"))

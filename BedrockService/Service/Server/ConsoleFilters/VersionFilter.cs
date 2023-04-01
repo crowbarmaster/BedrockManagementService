@@ -30,7 +30,7 @@ namespace BedrockService.Service.Server.ConsoleFilters {
             string versionString = focusedMsg.Substring(versionIndex, focusedMsg.Length - versionIndex);
             if (_serverConfiguration.GetSettingsProp(ServerPropertyKeys.DeployedVersion).StringValue == "None") {
                 _logger.AppendLine("Service detected version, restarting server to apply correct configuration.");
-                
+
                 _bedrockServer.ForceKillServer();
                 _serverConfiguration.GetSettingsProp(ServerPropertyKeys.DeployedVersion).SetValue(versionString);
                 _serverConfiguration.ValidateVersion(versionString);

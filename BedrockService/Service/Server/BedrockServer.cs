@@ -125,7 +125,7 @@ namespace BedrockService.Service.Server {
             });
         }
 
-        public void ForceKillServer () => _serverProcess.Kill();
+        public void ForceKillServer() => _serverProcess.Kill();
 
         public string GetServerName() => _serverConfiguration.GetServerName();
 
@@ -304,10 +304,10 @@ namespace BedrockService.Service.Server {
                     if (input.Contains("[PreLoader]")) {
                         _LiteLoadedServer = true;
                     }
-                    if(input.Contains("Changes to the world are resumed")) {
+                    if (input.Contains("Changes to the world are resumed")) {
                         _backupRunning = false;
                     }
-                    foreach(KeyValuePair<string, IConsoleFilter> filter in consoleFilter.FilterList) {
+                    foreach (KeyValuePair<string, IConsoleFilter> filter in consoleFilter.FilterList) {
                         if (input.Contains(filter.Key)) {
                             filter.Value.Filter(input);
                             break;
