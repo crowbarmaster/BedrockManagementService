@@ -11,6 +11,7 @@ namespace BedrockService.Service.Server {
         private readonly IServerConfiguration _serverConfiguration;
         private readonly FileUtilities _fileUtils;
         private bool _autoBackupsContainPacks = false;
+        private bool _backupRunning = false;
 
         public enum BackupType {
             Auto,
@@ -24,6 +25,20 @@ namespace BedrockService.Service.Server {
             _serviceConfiguration = serviceConfiguration;
             _fileUtils = new FileUtilities();
             _autoBackupsContainPacks = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoBackupsContainPacks).GetBoolValue();
+        }
+
+        public bool BackupRunning() => _backupRunning;
+
+        public bool SetBackupComplete() => _backupRunning = false;
+
+        public void InitializeBackup() {
+            if (!_backupRunning && _server.GetServerStatus().ServerStatus == ServerStatus.Started) {
+                _backupRunning = true;
+                _server.WriteToStandardIn("save hold");
+                Task.Delay(1000).Wait();
+                _server.WriteToStandardIn("say Server backup started.");
+                _server.WriteToStandardIn("save query");
+            }
         }
 
         public bool PerformBackup(string queryString) {

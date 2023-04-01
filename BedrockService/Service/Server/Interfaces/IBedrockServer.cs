@@ -11,7 +11,6 @@ namespace BedrockService.Service.Server.Interfaces {
         string GetServerName();
         void WriteToStandardIn(string command);
         bool RollbackToBackup(byte serverIndex, string folderName);
-        void InitializeBackup();
         IBedrockLogger GetLogger();
         IPlayerManager GetPlayerManager();
         List<IPlayer> GetActivePlayerList();

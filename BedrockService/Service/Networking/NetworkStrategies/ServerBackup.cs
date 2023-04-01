@@ -13,7 +13,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
             IBedrockServer server = _service.GetBedrockServerByIndex(serverIndex);
             server.SetServerModified(true);
-            server.InitializeBackup();
+            server.GetBackupManager().InitializeBackup();
             return (Array.Empty<byte>(), 0, NetworkMessageTypes.UICallback);
         }
     }

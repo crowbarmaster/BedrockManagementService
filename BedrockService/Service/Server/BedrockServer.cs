@@ -33,7 +33,6 @@ namespace BedrockService.Service.Server {
         private DateTime _startTime;
         private const string _startupMessage = "INFO] Server started.";
         private bool _AwaitingStopSignal = true;
-        private bool _backupRunning = false;
         private bool _serverModifiedFlag = true;
         private bool _LiteLoadedServer = false;
 
@@ -101,7 +100,7 @@ namespace BedrockService.Service.Server {
                     _currentServerStatus = ServerStatus.Stopped;
                     return;
                 }
-                while (_backupRunning) {
+                while (_backupManager.BackupRunning()) {
                     Task.Delay(100).Wait();
                 }
                 if (stopWatchdog) {
@@ -164,7 +163,7 @@ namespace BedrockService.Service.Server {
             try {
                 bool shouldBackup = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.IgnoreInactiveBackups).GetBoolValue();
                 if ((shouldBackup && _serverModifiedFlag) || !shouldBackup) {
-                    InitializeBackup();
+                    _backupManager.InitializeBackup();
                 } else {
                     _logger.AppendLine($"Backup for server {GetServerName()} was skipped due to inactivity.");
                 }
@@ -305,7 +304,7 @@ namespace BedrockService.Service.Server {
                         _LiteLoadedServer = true;
                     }
                     if (input.Contains("Changes to the world are resumed")) {
-                        _backupRunning = false;
+                        _backupManager.SetBackupComplete();
                     }
                     foreach (KeyValuePair<string, IConsoleFilter> filter in consoleFilter.FilterList) {
                         if (input.Contains(filter.Key)) {
@@ -314,16 +313,6 @@ namespace BedrockService.Service.Server {
                         }
                     }
                 }
-            }
-        }
-
-        public void InitializeBackup() {
-            if (!_backupRunning && _currentServerStatus == ServerStatus.Started) {
-                _backupRunning = true;
-                WriteToStandardIn("save hold");
-                Task.Delay(1000).Wait();
-                WriteToStandardIn("say Server backup started.");
-                WriteToStandardIn("save query");
             }
         }
 
