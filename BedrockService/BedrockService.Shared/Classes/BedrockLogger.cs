@@ -1,9 +1,12 @@
 ﻿using BedrockService.Shared.Interfaces;
 using BedrockService.Shared.SerializeModels;
 using Newtonsoft.Json;
+using NLog;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace BedrockService.Shared.Classes {
     public class BedrockLogger : IBedrockLogger {
@@ -16,11 +19,13 @@ namespace BedrockService.Shared.Classes {
         private bool _addTimestamps = false;
         private string _logPath;
         private string _logOwner = "Service";
+        private Logger _nLogger;
 
         public BedrockLogger(IProcessInfo processInfo, IBedrockConfiguration serviceConfiguration, IServerConfiguration serverConfiguration = null) {
             _serviceConfiguration = serviceConfiguration;
             _serverConfiguration = serverConfiguration;
             _processInfo = processInfo;
+            _nLogger = NLogManager.Instance.GetLogger("BMSLogger");
         }
 
         [JsonConstructor]
@@ -54,7 +59,11 @@ namespace BedrockService.Shared.Classes {
         public void AppendLine(string text) {
             string newText = $"{_logOwner}: {text}";
             LogEntry entry = new(newText);
-            Console.WriteLine(newText);
+            if (_processInfo.IsDebugEnabled()) {
+                _nLogger.Info(newText);
+            } else {
+                Console.WriteLine(newText);
+            }
             try {
                 if (_serverConfiguration != null) {
                     _serverConfiguration.GetLog().Add(entry);
@@ -99,6 +108,46 @@ namespace BedrockService.Shared.Classes {
                 return string.Join("", _serverConfiguration.GetLog().Select(x => x.Text).ToList());
             }
             return string.Join("", _serviceConfiguration.GetLog().Select(x => x.Text).ToList());
+        }
+
+        public LogFactory GetNLogFactory() => NLogManager.Instance;
+    }
+
+
+    internal class NLogManager {
+        // A Logger dispenser for the current assembly (Remember to call Flush on application exit)
+        public static LogFactory Instance { get { return _instance.Value; } }
+        private static Lazy<LogFactory> _instance = new Lazy<LogFactory>(BuildLogFactory);
+
+        // 
+        // Use a config file located next to our current assembly dll 
+        // eg, if the running assembly is c:\path\to\MyComponent.dll 
+        // the config filepath will be c:\path\to\MyComponent.nlog 
+        // 
+        // WARNING: This will not be appropriate for assemblies in the GAC 
+        // 
+        private static LogFactory BuildLogFactory() {
+            // Use name of current assembly to construct NLog config filename 
+            Assembly thisAssembly = Assembly.GetExecutingAssembly();
+            var config = new NLog.Config.LoggingConfiguration();
+
+            // Targets where to log to: File and Console
+            string logDir = $@"{Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)}\PreServiceLog.log";
+            var logfile = new NLog.Targets.FileTarget("logfile") { FileName = logDir };
+            var logconsole = new NLog.Targets.ConsoleTarget("logconsole");
+
+
+            // Rules for mapping loggers to targets            
+            config.AddRule(LogLevel.Info, LogLevel.Fatal, logconsole);
+            config.AddRule(LogLevel.Info, LogLevel.Fatal, logfile);
+
+            // Apply config           
+            NLog.LogManager.Configuration = config;
+
+            LogFactory logFactory = new() {
+                Configuration = config
+            };
+            return logFactory;
         }
     }
 }

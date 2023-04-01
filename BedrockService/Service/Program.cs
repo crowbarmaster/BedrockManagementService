@@ -32,7 +32,7 @@ namespace BedrockService.Service {
         private static bool _shouldStartService = true;
         public static void Main(string[] args) {
             if (args.Length > 0) {
-                _isDebugEnabled = args[0].ToLower() == "-debug";
+                _isDebugEnabled = args[0].ToLower() == "--debug";
             }
             CreateHostBuilder(args).Build().Run();
         }

@@ -24,6 +24,7 @@ namespace BedrockService.Service.Core {
         public async Task InitializeHost() {
             await Task.Run(() => {
                 _host = HostFactory.New(hostConfig => {
+                    hostConfig.AddCommandLineSwitch("debug", new Action<bool>((x) => { hostConfig.UseNLog(_logger.GetNLogFactory()); }));
                     hostConfig.Service(settings => _bedrockService, s => {
                         s.BeforeStartingService(_ => {
                             _logger.AppendLine($"Bedrock Management Service version {Process.GetCurrentProcess().MainModule.FileVersionInfo.ProductVersion} has started.");
