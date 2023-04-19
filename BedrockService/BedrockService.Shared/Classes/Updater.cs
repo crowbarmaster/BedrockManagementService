@@ -21,7 +21,7 @@ namespace BedrockService.Shared.Classes {
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
             _version = "None";
-        } 
+        }
 
         public void Initialize() {
             if (!File.Exists(GetServiceFilePath(BmsFileNameKeys.BedrockVersionIni))) {
@@ -77,6 +77,7 @@ namespace BedrockService.Shared.Classes {
                     latestLLVersion = manifestList[^distanceFromEnd];
                 }
                 _logger.AppendLine($"Latest LiteLoader version found: \"{latestLLVersion.Version}\"");
+                _serviceConfiguration.SetProp(ServicePropertyKeys.LatestLiteLoaderVersion, latestLLVersion.Version);
                 if (!File.Exists(GetServiceFilePath(BmsFileNameKeys.LLUpdatePackage_Ver, latestLLVersion.Version)) || !File.Exists(GetServiceFilePath(BmsFileNameKeys.LLModUpdatePackage_Ver, latestLLVersion.Version))) {
                     FetchLiteLoaderBuild(latestLLVersion.Version).Wait();
                 }
@@ -126,7 +127,7 @@ namespace BedrockService.Shared.Classes {
             });
         }
 
-        private static async Task<bool> RetrieveFileFromUrl (string url, string outputPath) {
+        private static async Task<bool> RetrieveFileFromUrl(string url, string outputPath) {
             using HttpClient httpClient = new();
             using HttpRequestMessage request = new(HttpMethod.Get, url);
             using Stream contentStream = await (await httpClient.SendAsync(request)).Content.ReadAsStreamAsync(), stream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, 256000, true);
@@ -159,7 +160,8 @@ namespace BedrockService.Shared.Classes {
                 string llModZipPath = GetServiceFilePath(BmsFileNameKeys.LLModUpdatePackage_Ver, version);
                 new FileInfo(llZipPath).Directory.Create();
                 new FileInfo(llModZipPath).Directory.Create();
-                if (RetrieveFileFromUrl(llFetchUrl, llZipPath).Result && RetrieveFileFromUrl(llModFetchUrl, llModZipPath).Result) {
+                if (RetrieveFileFromUrl(llFetchUrl, llZipPath).Result) {
+                    RetrieveFileFromUrl(llModFetchUrl, llModZipPath).Wait(); // If this doesn't exist, it's AIO.
                     return true;
                 }
                 return false;
