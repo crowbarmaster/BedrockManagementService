@@ -120,10 +120,12 @@ namespace BedrockService.Service.Management {
                                 _logger.AppendLine($"Extracting LiteLoader files for server {server.GetServerName()}, {(int)percent}% completed...");
                             });
                             _fileUtilities.ExtractZipToDirectory(GetServiceFilePath(BmsFileNameKeys.LLUpdatePackage_Ver, liteVersion), GetServerDirectory(BdsDirectoryKeys.ServerRoot, server), progress).Wait();
-                            progress = new(percent => {
-                                _logger.AppendLine($"Extracting LiteLoader Module files for server {server.GetServerName()}, {(int)percent}% completed...");
-                            });
-                            _fileUtilities.ExtractZipToDirectory(GetServiceFilePath(BmsFileNameKeys.LLModUpdatePackage_Ver, liteVersion), GetServerDirectory(BdsDirectoryKeys.ServerRoot, server) + "\\plugins", progress).Wait();
+                            if (File.Exists(GetServiceFilePath(BmsFileNameKeys.LLModUpdatePackage_Ver, liteVersion))) {
+                                progress = new(percent => {
+                                    _logger.AppendLine($"Extracting LiteLoader Module files for server {server.GetServerName()}, {(int)percent}% completed...");
+                                });
+                                _fileUtilities.ExtractZipToDirectory(GetServiceFilePath(BmsFileNameKeys.LLModUpdatePackage_Ver, liteVersion), GetServerDirectory(BdsDirectoryKeys.ServerRoot, server) + "\\plugins", progress).Wait();
+                            }
                             LiteLoaderPECore.BuildLLExe(server, liteVersion);
                             server.SetSettingsProp(ServerPropertyKeys.DeployedVersion, buildVersion);
                             MinecraftFileUtilities.CreateDefaultLoaderConfigFile(server);
