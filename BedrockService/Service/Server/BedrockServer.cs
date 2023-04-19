@@ -73,8 +73,8 @@ namespace BedrockService.Service.Server {
             return Task.Run(() => {
                 string exeName = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName).ToString();
                 string appName = exeName.Substring(0, exeName.Length - 4);
-                if (MonitoredAppExists(appName)) {
-                    KillProcessList(Process.GetProcessesByName(appName));
+                if (ProcessUtilities.MonitoredAppExists(appName)) {
+                    ProcessUtilities.KillProcessList(Process.GetProcessesByName(appName));
                     Task.Delay(500).Wait();
                 }
                 StartServerTask();
@@ -345,7 +345,7 @@ namespace BedrockService.Service.Server {
                     if (File.Exists(GetServerFilePath(BdsFileNameKeys.BmsServer_Name, _serverConfiguration, _serverConfiguration.GetServerName()))) {
                         if (ProcessUtilities.MonitoredAppExists(appName)) {
                             ProcessUtilities.KillProcessList(Process.GetProcessesByName(appName));
-                            }
+                        }
                         CreateProcess();
                     } else {
                         _logger.AppendLine($"The Bedrock Server is not accessible at {$@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName)}"}\r\nCheck if the file is at that location and that permissions are correct.");
@@ -374,48 +374,6 @@ namespace BedrockService.Service.Server {
                 _serverProcess.BeginOutputReadLine();
                 _stdInStream = _serverProcess.StandardInput;
                 _serverProcess.EnableRaisingEvents = false;
-            }
-        }
-
-        private void KillProcessList(Process[] processList) {
-            foreach (Process process in processList) {
-                try {
-                    process.Kill();
-                    Thread.Sleep(1000);
-                    _logger.AppendLine($@"App {_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName)} killed!");
-                } catch (Exception e) {
-                    _logger.AppendLine($"Killing proccess resulted in error: {e.StackTrace}");
-                }
-            }
-        }
-
-        private bool MonitoredAppExists(string monitoredAppName) {
-            try {
-                Process[] processList = Process.GetProcessesByName(monitoredAppName);
-                if (processList.Length == 0) {
-                    return false;
-                } else {
-                    return true;
-                }
-            } catch (Exception ex) {
-                _logger.AppendLine("ApplicationWatcher MonitoredAppExists Exception: " + ex.StackTrace);
-                return true;
-            }
-        }
-        
-        private bool MonitoredAppExists(int monitoredAppId) {
-            try {
-                Process process = Process.GetProcessById(monitoredAppId);
-                if (process == null || process.HasExited) {
-                    return false;
-                } else {
-                    return true;
-                }
-            } catch (InvalidOperationException) {
-                return false;
-            } catch (Exception ex) {
-                _logger.AppendLine("ApplicationWatcher MonitoredAppExists Exception: " + ex.StackTrace);
-                return false;
             }
         }
 
