@@ -80,6 +80,10 @@ namespace BedrockService.Service.Management {
             await Task.Run(() => {
                 try {
                     string liteVersion = string.Empty;
+                    string exeName = server.GetSettingsProp(ServerPropertyKeys.ServerExeName).StringValue;
+                    if (ProcessUtilities.MonitoredAppExists(exeName.Substring(0, exeName.Length - 4))) {
+                        ProcessUtilities.KillProcessList(Process.GetProcessesByName(exeName.Substring(0, exeName.Length - 4)));
+                    }
                     MinecraftFileUtilities.CleanBedrockDirectory(server);
                     if (server.GetSettingsProp(ServerPropertyKeys.LiteLoaderEnabled).GetBoolValue()) {
                         string userSelectedLLVersion = server.GetSettingsProp(ServerPropertyKeys.SelectedLiteLoaderVersion).StringValue == "Latest"
@@ -131,11 +135,7 @@ namespace BedrockService.Service.Management {
                         }
                     } catch (IOException e) {
                         if (e.Message.Contains("because it is being used by another process.")) {
-                            List<Process> procList = Process.GetProcessesByName(bmsExeInfo.Name[..^bmsExeInfo.Extension.Length]).ToList();
-                            procList.ForEach(p => {
-                                p.Kill();
-                                Task.Delay(1000).Wait();
-                            });
+                            ProcessUtilities.KillProcessList(Process.GetProcessesByName(bmsExeInfo.Name[..^bmsExeInfo.Extension.Length]));
                             File.Copy(GetServerFilePath(BdsFileNameKeys.VanillaBedrock, server), GetServerFilePath(BdsFileNameKeys.BmsServer_Name, server, server.GetServerName()), true);
                         }
                     }

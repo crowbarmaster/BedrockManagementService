@@ -320,7 +320,7 @@ namespace BedrockService.Service.Server {
             return new Task(() => {
                 while (true) {
                     int procId = _serverConfiguration.GetRunningPid();
-                    bool appExists = MonitoredAppExists(procId);
+                    bool appExists = ProcessUtilities.MonitoredAppExists(procId);
                     if (!appExists && _currentServerStatus == ServerStatus.Started && !_watchdogCanceler.IsCancellationRequested) {
                         _logger.AppendLine($"Started application {_serverConfiguration.GetSettingsProp(ServerPropertyKeys.FileName)} was not found in running processes... Resarting.");
                         _currentServerStatus = ServerStatus.Stopped;
@@ -343,13 +343,9 @@ namespace BedrockService.Service.Server {
 
                 try {
                     if (File.Exists(GetServerFilePath(BdsFileNameKeys.BmsServer_Name, _serverConfiguration, _serverConfiguration.GetServerName()))) {
-                        if (MonitoredAppExists(appName)) {
-                            Process[] processList = Process.GetProcessesByName(appName);
-                            if (processList.Length != 0) {
-                                _logger.AppendLine($@"Application {appName} was found running! Killing to proceed.");
-                                KillProcessList(processList);
+                        if (ProcessUtilities.MonitoredAppExists(appName)) {
+                            ProcessUtilities.KillProcessList(Process.GetProcessesByName(appName));
                             }
-                        }
                         CreateProcess();
                     } else {
                         _logger.AppendLine($"The Bedrock Server is not accessible at {$@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName)}"}\r\nCheck if the file is at that location and that permissions are correct.");
