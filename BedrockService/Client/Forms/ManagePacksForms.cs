@@ -30,9 +30,9 @@ namespace BedrockService.Client.Forms {
             foreach (MinecraftPackContainer container in packList) {
                 serverListBox.Items.Add(container);
             }
-            if(pluginReg != null) {
+            if (pluginReg != null) {
                 BmsServerPluginDatabase db = pluginReg.ServerPluginList[_serverIndex];
-                foreach(PluginVersionInfo info in db.InstalledPlugins) {
+                foreach (PluginVersionInfo info in db.InstalledPlugins) {
 
                 }
             }
@@ -92,8 +92,8 @@ namespace BedrockService.Client.Forms {
         }
 
         private void sendAllBtn_Click(object sender, EventArgs e) {
-            if (parsedPacksListBox.Items.Count < 1) { 
-                return; 
+            if (parsedPacksListBox.Items.Count < 1) {
+                return;
             }
             object[] items = new object[parsedPacksListBox.Items.Count];
             parsedPacksListBox.Items.CopyTo(items, 0);

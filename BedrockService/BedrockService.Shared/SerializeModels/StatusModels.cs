@@ -4,19 +4,19 @@ using System.Collections.Generic;
 
 
 namespace BedrockService.Shared.SerializeModels {
-public enum ServiceStatus {
-    Stopped,
-    Starting,
-    Stopping,
-    Started
-}
+    public enum ServiceStatus {
+        Stopped,
+        Starting,
+        Stopping,
+        Started
+    }
 
-public enum ServerStatus {
-    Stopped,
-    Starting,
-    Stopping,
-    Started
-}
+    public enum ServerStatus {
+        Stopped,
+        Starting,
+        Stopping,
+        Started
+    }
 
     public class StatusUpdateModel {
         public ServiceStatusModel ServiceStatusModel { get; set; }

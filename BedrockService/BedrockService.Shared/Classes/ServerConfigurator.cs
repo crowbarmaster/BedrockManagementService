@@ -27,12 +27,12 @@ namespace BedrockService.Shared.Classes {
             ServicePropList.Clear();
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerName], "Dedicated Server"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.FileName], "Dedicated Server.conf"));
-            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerPath], $@"{ ServersPath }\Dedicated Server"));
+            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerPath], $@"{ServersPath}\Dedicated Server"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerExeName], $"BedrockService.Dedicated Server.exe"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.LiteLoaderEnabled], "false"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerAutostartEnabled], "true"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.BackupEnabled], "false"));
-            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.BackupPath], $@"{ _servicePath }\ServerBackups"));
+            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.BackupPath], $@"{_servicePath}\ServerBackups"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.BackupCron], "0 1 * **"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.MaxBackupCount], "25"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.AutoBackupsContainPacks], "false"));
