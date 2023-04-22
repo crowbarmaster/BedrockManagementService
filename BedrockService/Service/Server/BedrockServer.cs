@@ -136,11 +136,7 @@ namespace BedrockService.Service.Server {
              _backupCron = CrontabSchedule.TryParse(_serverConfiguration.GetSettingsProp("BackupCron").ToString());
             if (_serverConfiguration.GetSettingsProp("BackupEnabled").GetBoolValue() && _backupCron != null) {
                 double interval = (_backupCron.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds;
-                if (interval >= 0) {
-                    if (_backupTimer != null) {
-                        _backupTimer.Stop();
-                        _backupTimer = null;
-                    }                    
+                if (interval >= 0) {                
                     _backupTimer = new System.Timers.Timer(interval);
                     _logger.AppendLine($"Automatic backups for server {GetServerName()} enabled, next backup at: {_backupCron.GetNextOccurrence(DateTime.Now):G}.");
                     _backupTimer.Elapsed += BackupTimer_Elapsed;
@@ -165,9 +161,14 @@ namespace BedrockService.Service.Server {
                 } else {
                     _logger.AppendLine($"Backup for server {GetServerName()} was skipped due to inactivity.");
                 }
+                ((System.Timers.Timer)sender).Stop();
+                ((System.Timers.Timer)sender).Dispose();
                 InitializeBackupTimer();
             } catch (Exception ex) {
+                ((System.Timers.Timer)sender).Stop();
+                ((System.Timers.Timer)sender).Dispose();
                 _logger.AppendLine($"Error in BackupTimer_Elapsed {ex}");
+                InitializeBackupTimer();
             }
         }
 
