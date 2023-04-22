@@ -198,9 +198,14 @@ namespace BedrockService.Service.Server {
                     _logger.AppendLine("Version change detected! Restarting server(s) to apply update...");
                     RestartServer();
                 }
+                ((System.Timers.Timer)sender).Stop();
+                ((System.Timers.Timer)sender).Dispose();
                 InitializeUpdateTimer();
             } catch (Exception ex) {
+                ((System.Timers.Timer)sender).Stop();
+                ((System.Timers.Timer)sender).Dispose();
                 _logger.AppendLine($"Error in UpdateTimer_Elapsed {ex}");
+                InitializeUpdateTimer();
             }
         }
 
