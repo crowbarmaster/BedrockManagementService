@@ -194,7 +194,7 @@ namespace BedrockService.Service.Server {
         private void UpdateTimer_Elapsed(object sender, ElapsedEventArgs e) {
             try {
                 _updater.CheckLatestVersion().Wait();
-                if (_serverConfiguration.GetSettingsProp("AutoDeployUpdates").GetBoolValue()) {
+                if (_serverConfiguration.GetSettingsProp("AutoDeployUpdates").GetBoolValue() && _serverConfiguration.GetSettingsProp("DeployedVersion").StringValue != _serviceConfiguration.GetLatestBDSVersion()) {
                     _logger.AppendLine("Version change detected! Restarting server(s) to apply update...");
                     RestartServer();
                 }
