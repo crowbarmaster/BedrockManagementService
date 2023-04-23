@@ -1,6 +1,10 @@
 ﻿using BedrockService.Shared.Interfaces;
+using BedrockService.Shared.JsonModels.MinecraftJsonModels;
 using BedrockService.Shared.Utilities;
+using System.Text.Json;
+using System.Linq;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -36,7 +40,7 @@ namespace BedrockService.Shared.Classes {
         }
 
         public async Task CheckLatestVersion() {
-            await Task.Run(async () => {
+            await Task.Run(() => {
                 _logger.AppendLine("Checking latest BDS Version...");
                 HttpClient client = new HttpClient();
                 client.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/apng,*/*;q=0.8");
@@ -46,23 +50,14 @@ namespace BedrockService.Shared.Classes {
                 client.DefaultRequestHeaders.Add("Pragma", "no-cache");
                 client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36");
                 client.Timeout = new TimeSpan(0, 0, 3);
-                string content = FetchHTTPContent(client).Result;
-                if (content == null) // This really doesn't fail often. Give it one more try or fail.
-                {
-                    Thread.Sleep(500);
-                    content = await FetchHTTPContent(client);
-                }
+                string content = HTTPHandler.FetchHTTPContent("https://github.com/crowbarmaster/BedrockManagementService/raw/master/BMS_Files/bedrock_version_manifest.json").Result;
                 if (content == null)
                     return false;
-                Regex regex = new Regex(@"(https://minecraft.azureedge.net/bin-win/bedrock-server-)(.*)(\.zip)", RegexOptions.IgnoreCase);
-                Match m = regex.Match(content);
-                if (!m.Success) {
-                    _logger.AppendLine("Checking version failed. Check website functionality!");
-                    return false;
-                }
-                string downloadPath = m.Groups[0].Value;
-                string fetchedVersion = m.Groups[2].Value;
-                client.Dispose();
+                List<MinecraftVersionHistoryJson> versionList = JsonSerializer.Deserialize<List<MinecraftVersionHistoryJson>>(content);
+                MinecraftVersionHistoryJson latest = versionList.Last();
+
+                string downloadPath = latest.WindowsBinUrl;
+                string fetchedVersion = latest.Version;
 
                 _logger.AppendLine($"Latest version found: \"{fetchedVersion}\"");
                 if (!File.Exists($@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\BuildArchives\Update_{fetchedVersion}.zip")) {
@@ -111,19 +106,6 @@ namespace BedrockService.Shared.Classes {
                     }
                 }
             }
-        }
-
-        private async Task<string> FetchHTTPContent(HttpClient client) {
-            try {
-                return await client.GetStringAsync("https://www.minecraft.net/en-us/download/server/bedrock");
-            } catch (HttpRequestException) {
-                _logger.AppendLine($"Error! could not fetch current webpage content!");
-            } catch (TaskCanceledException) {
-                return null;
-            } catch (Exception e) {
-                _logger.AppendLine($"Updater resulted in error: {e.Message}\n{e.InnerException}\n{e.StackTrace}");
-            }
-            return null;
         }
     }
 }

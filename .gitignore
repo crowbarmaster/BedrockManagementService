@@ -365,6 +365,6 @@ MigrationBackup/
 /BedrockService/ServiceTests/TestFiles/Output/stock_props.conf
 GenerateLog.bat
 /commitlog.exe
-/BedrockService/BedrockService.Shared/LLPeProviderService.dll
 /BedrockService/LLPeProviderService/LibClang
+/BedrockService/BedrockService.Shared/LLPeProviderService.dll
 /BedrockService/Service/Properties/launchSettings.json
