@@ -51,7 +51,7 @@ namespace BedrockService.Shared.Classes {
 
         public string GetServerVersion() => GetSettingsProp("DeployedVersion").StringValue;
 
-        public string GetSelectedVersion() => GetSettingsProp("SelectedServerVersion").StringValue;
+        public string GetSelectedVersion() => GetSettingsProp("SelectedServerVersion").StringValue == "Latest" ? _serviceConfiguration.GetLatestBDSVersion() : GetSettingsProp("SelectedServerVersion").StringValue;
 
         public void ProcessConfiguration(string[] fileEntries) {
             if (fileEntries == null)
