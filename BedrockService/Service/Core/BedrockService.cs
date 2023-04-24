@@ -56,6 +56,7 @@ namespace BedrockService.Service.Core {
                             _configurator.SaveGlobalFile();
                         }
                     } else {
+                        _logger.AppendLine("You must agree to the terms set by Mojang for use of this software. Please accept the terms, and set \"AcceptedMojangLic\" to true in the \"Service.conf\" file.");
                         return false;
                     }
                 }
@@ -223,12 +224,9 @@ namespace BedrockService.Service.Core {
                 }
                 foreach (var server in _serviceConfiguration.GetServerList()) {
                     if (!File.Exists(server.GetSettingsProp("ServerPath") + "\\" + server.GetSettingsProp("ServerExeName"))) {
-                        string deployedVersion = server.GetSelectedVersion() == "Latest"
-                                                ? _serviceConfiguration.GetLatestBDSVersion()
-                                                : server.GetSelectedVersion();
-                        _configurator.ReplaceServerBuild(server, deployedVersion).Wait();
+                        _configurator.ReplaceServerBuild(server, server.GetSelectedVersion()).Wait();
                     }
-                    if (server.GetServerVersion() != "None" && server.GetSelectedVersion() != "Latest" && server.GetSelectedVersion() != server.GetServerVersion()) {
+                    if (server.GetServerVersion() != "None" && server.GetSelectedVersion() != server.GetServerVersion()) {
                         _logger.AppendLine("Manually configured server found with wrong version. Replacing server build...");
                         if (Updater.FetchBuild(_processInfo.GetDirectory(), server.GetSelectedVersion()).Result) {
                             _configurator.ReplaceServerBuild(server, server.GetSelectedVersion()).Wait();
