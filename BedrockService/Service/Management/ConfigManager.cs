@@ -86,23 +86,27 @@ namespace BedrockService.Service.Management {
                         throw new FileNotFoundException($"Service could not locate file \"Update_{buildVersion}.zip\" and version was not found on Mojang servers!");
                     }
                     using ZipArchive archive = ZipFile.OpenRead($@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\BuildArchives\Update_{buildVersion}.zip");
+                    string lastFile = string.Empty;
                     int fileCount = archive.Entries.Count;
                     for (int i = 0; i < fileCount; i++) {
                         if (i % (RoundOff(fileCount) / 6) == 0) {
                             _logger.AppendLine($"Extracting server files for server {server.GetServerName()}, {Math.Round(i / (double)fileCount, 2) * 100}% completed...");
                         }
+                        string fixedPath = $@"{server.GetSettingsProp("ServerPath")}\{archive.Entries[i].FullName.Replace('/', '\\')}";
+                        lastFile = fixedPath;
                         if (!archive.Entries[i].FullName.EndsWith("/")) {
                             Task.Run(() => {
-                                string fixedPath = $@"{server.GetSettingsProp("ServerPath")}\{archive.Entries[i].FullName.Replace('/', '\\')}";
                                 if (File.Exists(fixedPath)) {
                                     File.Delete(fixedPath);
                                 }
-
                             }).Wait();
-                            Task.Run(() => archive.Entries[i].ExtractToFile($@"{server.GetSettingsProp("ServerPath")}\{archive.Entries[i].FullName.Replace('/', '\\')}")).Wait();
+                            Task.Run(() => archive.Entries[i].ExtractToFile(fixedPath)).Wait();
                         } else {
-                            if (!Directory.Exists($@"{server.GetSettingsProp("ServerPath")}\{archive.Entries[i].FullName.Replace('/', '\\')}")) {
-                                Directory.CreateDirectory($@"{server.GetSettingsProp("ServerPath")}\{archive.Entries[i].FullName.Replace('/', '\\')}");
+                            if (Directory.Exists(fixedPath)) {
+                                _fileUtilities.DeleteFilesFromDirectory(fixedPath, false).Wait();                                
+                                Directory.CreateDirectory(fixedPath);
+                            } else {
+                                Directory.CreateDirectory(fixedPath);
                             }
                         }
                     }
@@ -117,7 +121,9 @@ namespace BedrockService.Service.Management {
                                 p.Kill();
                                 Task.Delay(1000).Wait();
                             });
-                            File.Copy($"{server.GetSettingsProp("ServerPath")}\\bedrock_server.exe", $"{server.GetSettingsProp("ServerPath")}\\{server.GetSettingsProp("ServerExeName")}", true);
+                            File.Copy(originalExeInfo.FullName, bmsExeInfo.FullName, true);
+                        } else {
+                            _logger.AppendLine($"Error extracting archive. File {lastFile}");
                         }
                     }
                     _logger.AppendLine($"Extraction of files for {server.GetServerName()} completed.");

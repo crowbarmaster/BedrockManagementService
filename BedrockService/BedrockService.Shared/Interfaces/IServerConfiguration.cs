@@ -18,6 +18,7 @@ namespace BedrockService.Shared.Interfaces {
         void SetServerVersion(string newVersion);
         string GetServerVersion();
         string GetSelectedVersion();
+        bool ServerHasSetVersion();
         void SetStatus(ServerStatusModel status);
         ServerStatusModel GetStatus();
         void SetBackupTotals(int totalBackups, int totalSize);

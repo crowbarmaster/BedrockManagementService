@@ -144,7 +144,6 @@ namespace BedrockService.Service.Server {
                 if (interval >= 0) {
                     if (_backupTimer != null) {
                         _backupTimer.Stop();
-                        _backupTimer.Dispose();
                         _backupTimer = null;
                     }
                     _backupTimer = new System.Timers.Timer(interval);
@@ -157,7 +156,6 @@ namespace BedrockService.Service.Server {
             if (!_serverConfiguration.GetSettingsProp("BackupEnabled").GetBoolValue()) {
                 if (_backupTimer != null) {
                     _backupTimer.Stop();
-                    _backupTimer.Dispose();
                     _backupTimer = null;
                 }
             }
@@ -172,11 +170,9 @@ namespace BedrockService.Service.Server {
                     _logger.AppendLine($"Backup for server {GetServerName()} was skipped due to inactivity.");
                 }
                 ((System.Timers.Timer)sender).Stop();
-                ((System.Timers.Timer)sender).Dispose();
                 InitializeBackupTimer();
             } catch (Exception ex) {
                 ((System.Timers.Timer)sender).Stop();
-                ((System.Timers.Timer)sender).Dispose();
                 _logger.AppendLine($"Error in BackupTimer_Elapsed {ex}");
                 InitializeBackupTimer();
             }
@@ -189,7 +185,6 @@ namespace BedrockService.Service.Server {
                 if (interval >= 0) {
                     if(_updaterTimer != null) {
                         _updaterTimer.Stop();
-                        _updaterTimer.Dispose();
                         _updaterTimer = null;
                     }
                     _updaterTimer = new System.Timers.Timer(interval);
@@ -201,7 +196,6 @@ namespace BedrockService.Service.Server {
             if (!_serverConfiguration.GetSettingsProp("CheckUpdates").GetBoolValue()) {
                 if (_updaterTimer != null) {
                     _updaterTimer.Stop();
-                    _updaterTimer.Dispose();
                     _updaterTimer = null;
                 }
             }
@@ -209,17 +203,18 @@ namespace BedrockService.Service.Server {
 
         private void UpdateTimer_Elapsed(object sender, ElapsedEventArgs e) {
             try {
+                if(_currentServerStatus != ServerStatus.Started) {
+                    return;
+                }
                 _updater.CheckLatestVersion().Wait();
-                if (_serverConfiguration.GetSettingsProp("AutoDeployUpdates").GetBoolValue() && _serverConfiguration.GetSettingsProp("DeployedVersion").StringValue != _serviceConfiguration.GetLatestBDSVersion()) {
+                if (_serverConfiguration.GetSettingsProp("AutoDeployUpdates").GetBoolValue() && _serverConfiguration.GetSettingsProp("DeployedVersion").StringValue != _serviceConfiguration.GetLatestBDSVersion() && !_serverConfiguration.ServerHasSetVersion()) {
                     _logger.AppendLine("Version change detected! Restarting server(s) to apply update...");
                     RestartServer().Wait();
                 }
                 ((System.Timers.Timer)sender).Stop();
-                ((System.Timers.Timer)sender).Dispose();
                 InitializeUpdateTimer();
             } catch (Exception ex) {
                 ((System.Timers.Timer)sender).Stop();
-                ((System.Timers.Timer)sender).Dispose();
                 _logger.AppendLine($"Error in UpdateTimer_Elapsed {ex}");
                 InitializeUpdateTimer();
             }
@@ -338,10 +333,7 @@ namespace BedrockService.Service.Server {
                     }
                     if (dataMsg.Contains("Failed to load Vanilla")) {
                         AwaitableServerStop(false).Wait();
-                        string deployedVersion = _serverConfiguration.GetSelectedVersion() == "Latest" 
-                                                ? _serviceConfiguration.GetLatestBDSVersion() 
-                                                : _serverConfiguration.GetSelectedVersion();
-                        _configurator.ReplaceServerBuild(_serverConfiguration, deployedVersion).Wait();
+                        _configurator.ReplaceServerBuild(_serverConfiguration, _serverConfiguration.GetSelectedVersion()).Wait();
                         AwaitableServerStart().Wait();
                     }
                     if (dataMsg.Contains("Version ")) {
@@ -358,20 +350,17 @@ namespace BedrockService.Service.Server {
                             _configurator.SaveServerConfiguration(_serverConfiguration);
                             AwaitableServerStart().Wait();
                         }
-                        string selectedVersion = _serverConfiguration.GetSettingsProp("SelectedServerVersion").StringValue == "Latest"
-                        ? _serviceConfiguration.GetLatestBDSVersion()
-                        : _serverConfiguration.GetSettingsProp("SelectedServerVersion").StringValue;
                         if (versionString.ToLower().Contains("-beta")) {
                         int betaTagLoc = versionString.ToLower().IndexOf("-beta");
                         int betaVer = int.Parse(versionString.Substring(betaTagLoc + 5, versionString.Length - (betaTagLoc + 5)));
                             versionString = versionString.Substring(0, betaTagLoc) + ".";
                             versionString = versionString + betaVer;
                         }
-                        if (selectedVersion != versionString) {
+                        if (_serverConfiguration.GetSelectedVersion() != versionString) {
                             if (_serverConfiguration.GetSettingsProp("AutoDeployUpdates").GetBoolValue()) {
                                 _logger.AppendLine($"Server {GetServerName()} decected incorrect or out of date version! Replacing build...");
                                 AwaitableServerStop(false).Wait();
-                                _configurator.ReplaceServerBuild(_serverConfiguration, selectedVersion).Wait();
+                                _configurator.ReplaceServerBuild(_serverConfiguration, _serverConfiguration.GetSelectedVersion()).Wait();
                                 AwaitableServerStart();
                             } else {
                                 _logger.AppendLine($"Server {GetServerName()} is out of date, Enable AutoDeployUpdates option to update to latest!");
@@ -433,7 +422,7 @@ namespace BedrockService.Service.Server {
                 string exeName = _serverConfiguration.GetSettingsProp("ServerExeName").ToString();
                 string appName = exeName.Substring(0, exeName.Length - 4);
                 if(_serverConfiguration.GetSettingsProp("DeployedVersion").StringValue != _serviceConfiguration.GetLatestBDSVersion()) {
-                    _configurator.ReplaceServerBuild(_serverConfiguration, _serviceConfiguration.GetLatestBDSVersion()).Wait();
+                    _configurator.ReplaceServerBuild(_serverConfiguration, _serverConfiguration.GetSelectedVersion()).Wait();
                 }
                 _configurator.WriteJSONFiles(_serverConfiguration);
                 MinecraftFileUtilities.WriteServerPropsFile(_serverConfiguration);
