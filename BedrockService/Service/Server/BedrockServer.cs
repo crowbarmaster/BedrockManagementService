@@ -89,34 +89,38 @@ namespace BedrockService.Service.Server {
 
         public Task AwaitableServerStop(bool stopWatchdog) {
             return Task.Run(() => {
-                if (_currentServerStatus != ServerStatus.Started) {
-                    if (stopWatchdog) {
-                        StopWatchdog().Wait();
-                    }
-                    if (_serverProcess != null) {
-                        _serverProcess.Kill();
-                        Task.Delay(500).Wait();
-                    }
-                    _currentServerStatus = ServerStatus.Stopped;
-                    return;
-                }
                 while (_backupManager.BackupRunning()) {
                     Task.Delay(100).Wait();
                 }
                 if (stopWatchdog) {
                     StopWatchdog().Wait();
                 }
-                _currentServerStatus = ServerStatus.Stopping;
-                WriteToStandardIn("stop");
-                while (_AwaitingStopSignal) {
-                    Task.Delay(100).Wait();
+                if (_backupTimer != null) {
+                    _backupTimer.Stop();
+                    _backupTimer = null;
                 }
-                _currentServerStatus = ServerStatus.Stopped;
-                _AwaitingStopSignal = true;
-                Task.Delay(500).Wait();
+                if (_updaterTimer != null) {
+                    _updaterTimer.Stop();
+                    _updaterTimer = null;
+                }
+                if (_currentServerStatus != ServerStatus.Started) {
+                    if (_serverProcess != null) {
+                        _serverProcess.Kill();
+                        Task.Delay(500).Wait();
+                    }
+                    _currentServerStatus = ServerStatus.Stopped;
+                } else {
+                    _currentServerStatus = ServerStatus.Stopping;
+                    WriteToStandardIn("stop");
+                    while (_AwaitingStopSignal) {
+                        Task.Delay(100).Wait();
+                    }
+                    _currentServerStatus = ServerStatus.Stopped;
+                    _AwaitingStopSignal = true;
+                    Task.Delay(500).Wait();
+                }
             });
         }
-
         public Task RestartServer() {
             return Task.Run(() => {
                 AwaitableServerStop(false).Wait();
@@ -153,7 +157,6 @@ namespace BedrockService.Service.Server {
             if (!_serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupEnabled).GetBoolValue()) {
                 if (_backupTimer != null) {
                     _backupTimer.Stop();
-                    _backupTimer.Dispose();
                     _backupTimer = null;
                 }
             }
@@ -167,8 +170,10 @@ namespace BedrockService.Service.Server {
                 } else {
                     _logger.AppendLine($"Backup for server {GetServerName()} was skipped due to inactivity.");
                 }
+                ((System.Timers.Timer)sender).Stop();
                 InitializeBackupTimer();
             } catch (Exception ex) {
+                ((System.Timers.Timer)sender).Stop();
                 _logger.AppendLine($"Error in BackupTimer_Elapsed {ex}");
             }
         }
@@ -177,6 +182,10 @@ namespace BedrockService.Service.Server {
             _updaterCron = CrontabSchedule.TryParse(_serverConfiguration.GetSettingsProp(ServerPropertyKeys.UpdateCron).ToString());
             if (_serverConfiguration.GetSettingsProp(ServerPropertyKeys.CheckUpdates).GetBoolValue() && _updaterCron != null) {
                 double interval = (_updaterCron.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds;
+                if (_updaterTimer != null) {
+                    _updaterTimer.Stop();
+                    _updaterTimer = null;
+                }
                 if (interval >= 0) {
                     _updaterTimer = new System.Timers.Timer(interval);
                     _updaterTimer.Elapsed += UpdateTimer_Elapsed;
@@ -187,7 +196,6 @@ namespace BedrockService.Service.Server {
             if (!_serverConfiguration.GetSettingsProp(ServerPropertyKeys.CheckUpdates).GetBoolValue()) {
                 if (_updaterTimer != null) {
                     _updaterTimer.Stop();
-                    _updaterTimer.Dispose();
                     _updaterTimer = null;
                 }
             }
@@ -196,12 +204,14 @@ namespace BedrockService.Service.Server {
         private void UpdateTimer_Elapsed(object sender, ElapsedEventArgs e) {
             try {
                 _updater.CheckLatestVersion().Wait();
-                if (_serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()) {
+                if (_serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue() && _serverConfiguration.GetSettingsProp(ServerPropertyKeys.DeployedVersion).StringValue != _serviceConfiguration.GetLatestBDSVersion() && !_serverConfiguration.ServerHasSetVersion()) {
                     _logger.AppendLine("Version change detected! Restarting server(s) to apply update...");
-                    RestartServer();
+                    RestartServer().Wait();
                 }
+                ((System.Timers.Timer)sender).Stop();
                 InitializeUpdateTimer();
             } catch (Exception ex) {
+                ((System.Timers.Timer)sender).Stop();
                 _logger.AppendLine($"Error in UpdateTimer_Elapsed {ex}");
             }
         }
