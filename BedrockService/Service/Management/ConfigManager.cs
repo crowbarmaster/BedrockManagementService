@@ -126,7 +126,7 @@ namespace BedrockService.Service.Management {
                                 });
                                 _fileUtilities.ExtractZipToDirectory(GetServiceFilePath(BmsFileNameKeys.LLModUpdatePackage_Ver, liteVersion), GetServerDirectory(BdsDirectoryKeys.ServerRoot, server) + "\\plugins", progress).Wait();
                             }
-                            LiteLoaderPECore.BuildLLExe(server, liteVersion);
+                            LiteLoaderPECore.BuildLLExe(server);
                             server.SetSettingsProp(ServerPropertyKeys.DeployedVersion, buildVersion);
                             MinecraftFileUtilities.CreateDefaultLoaderConfigFile(server);
                             server.SetSettingsProp(ServerPropertyKeys.DeployedLiteLoaderVersion, liteVersion);
