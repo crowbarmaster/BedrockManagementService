@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -217,6 +218,7 @@ namespace BedrockService.Client.Forms {
             }
         }
 
+
         private Task StartClientLogUpdate() => Task.Run(() => {
             while (!IsDisposed && clientLogBox != null) {
                 if (_logManager != null) {
@@ -224,7 +226,11 @@ namespace BedrockService.Client.Forms {
                 }
                 try {
                     Invoke(() => {
-                        if (FormManager.ClientLogContainer.GetLog().Count != clientLogBox.TextLength) {
+                        // get the number of line breaks in the logbox and compare the log entry count
+                        string pattern = @"\r\n";
+                        Regex regex = new Regex(pattern, RegexOptions.None);
+                        int logLineBreaks = regex.Matches(clientLogBox.Text).Count();
+                        if (FormManager.ClientLogContainer.GetLog().Count != (logLineBreaks + 1)) {
                             if (ConfigManager.DisplayTimestamps) {
                                 UpdateServerLogBox(clientLogBox, string.Join("\r\n", FormManager.ClientLogContainer.GetLog().Select(x => $"[{x.TimeStamp:G}] {x.Text}").ToList()));
                             } else {
@@ -235,7 +241,8 @@ namespace BedrockService.Client.Forms {
                 } catch (Exception ex) {
                     ClientLogger.AppendLine($"Error! {ex.Message} {ex.StackTrace}");
                 }
-                Task.Delay(300);
+                //Task.Delay(3000);
+                Thread.Sleep(300);
             }
         });
 
@@ -725,7 +732,7 @@ namespace BedrockService.Client.Forms {
 
         }
 
-        private byte[] OpenPackageFile () {
+        private byte[] OpenPackageFile() {
             OpenFileDialog ofd = new OpenFileDialog {
                 Filter = "Zip file|*.zip",
                 Multiselect = false,
@@ -738,7 +745,7 @@ namespace BedrockService.Client.Forms {
                     return null;
                 }
                 fileBytes = File.ReadAllBytes(ofd.FileName);
-                if(fileBytes.Length < 3 && fileBytes[0] != 0x50 && fileBytes[1] != 0x4B) {
+                if (fileBytes.Length < 3 && fileBytes[0] != 0x50 && fileBytes[1] != 0x4B) {
                     return null;
                 }
             }
