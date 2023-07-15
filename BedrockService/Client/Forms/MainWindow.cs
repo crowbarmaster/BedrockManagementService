@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -697,7 +698,7 @@ namespace BedrockService.Client.Forms {
 
         }
 
-        private byte[] OpenPackageFile () {
+        private byte[] OpenPackageFile() {
             OpenFileDialog ofd = new OpenFileDialog {
                 Filter = "Zip file|*.zip",
                 Multiselect = false,
