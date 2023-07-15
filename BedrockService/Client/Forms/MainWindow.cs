@@ -41,11 +41,6 @@ namespace BedrockService.Client.Forms {
             InitializeComponent();
             InitForm();
             _connectTimer.Elapsed += ConnectTimer_Elapsed;
-            Shown += MainWindow_Shown;
-        }
-
-        private void MainWindow_Shown(object sender, EventArgs e) {
-            StartClientLogUpdate();
         }
 
         private void ConnectTimer_Elapsed(object sender, ElapsedEventArgs e) {
@@ -216,28 +211,6 @@ namespace BedrockService.Client.Forms {
                 scrollLockChkBox.Checked = true;
             }
         }
-
-        private Task StartClientLogUpdate() => Task.Run(() => {
-            while (!IsDisposed && clientLogBox != null) {
-                if (_logManager != null) {
-                    _logManager.DisplayTimestamps = ConfigManager.DisplayTimestamps;
-                }
-                try {
-                    Invoke(() => {
-                        if (FormManager.ClientLogContainer.GetLog().Count != clientLogBox.TextLength) {
-                            if (ConfigManager.DisplayTimestamps) {
-                                UpdateServerLogBox(clientLogBox, string.Join("\r\n", FormManager.ClientLogContainer.GetLog().Select(x => $"[{x.TimeStamp:G}] {x.Text}").ToList()));
-                            } else {
-                                UpdateServerLogBox(clientLogBox, string.Join("\r\n", FormManager.ClientLogContainer.GetLog().Select(x => x.Text).ToList()));
-                            }
-                        }
-                    });
-                } catch (Exception ex) {
-                    ClientLogger.AppendLine($"Error! {ex.Message} {ex.StackTrace}");
-                }
-                Task.Delay(300);
-            }
-        });
 
         public void HeartbeatFailDisconnect() {
             Disconn_Click(null, null);
@@ -455,7 +428,6 @@ namespace BedrockService.Client.Forms {
             EditCfg.Enabled = serverConnectedIdle;
             PlayerManagerBtn.Enabled = serverConnectedIdle;
             SingBackup.Enabled = serverConnectedIdle;
-            ServerInfoBox.Enabled = serverConnectedIdle;
             SendCmd.Enabled = serverConnectedIdle;
             cmdTextBox.Enabled = serverConnectedIdle;
             RestartSrv.Enabled = serverConnectedIdle && selectedServer.GetStatus() != null && selectedServer.GetStatus().ServerStatus == ServerStatus.Started;
@@ -738,7 +710,7 @@ namespace BedrockService.Client.Forms {
                     return null;
                 }
                 fileBytes = File.ReadAllBytes(ofd.FileName);
-                if(fileBytes.Length < 3 && fileBytes[0] != 0x50 && fileBytes[1] != 0x4B) {
+                if (fileBytes.Length < 3 && fileBytes[0] != 0x50 && fileBytes[1] != 0x4B) {
                     return null;
                 }
             }
