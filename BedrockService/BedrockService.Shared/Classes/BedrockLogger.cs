@@ -2,6 +2,7 @@
 using BedrockService.Shared.SerializeModels;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -55,6 +56,9 @@ namespace BedrockService.Shared.Classes {
         public void AppendLine(string text) {
             string newText = $"{_logOwner}: {text}";
             LogEntry entry = new(newText);
+            if (_addTimestamps) {
+                newText = $"[{entry.TimeStamp.ToString("G")}] {newText}";
+            }
             Console.WriteLine(newText);
             try {
                 if (_serverConfiguration != null) {
@@ -63,9 +67,6 @@ namespace BedrockService.Shared.Classes {
                     if (_serviceConfiguration != null) {
                         _serviceConfiguration.GetLog().Add(entry);
                     }
-                }
-                if (_addTimestamps) {
-                    newText = $"[{entry.TimeStamp.ToString("G")}] {newText}";
                 }
                 if (_logToFile && _logWriter != null) {
                     _logWriter.WriteLine(newText);
@@ -97,9 +98,16 @@ namespace BedrockService.Shared.Classes {
 
         public override string ToString() {
             if (_serverConfiguration != null) {
-                return string.Join("", _serverConfiguration.GetLog().Select(x => x.Text).ToList());
+                return ProcessText(_serverConfiguration.GetLog());
             }
-            return string.Join("", _serviceConfiguration.GetLog().Select(x => x.Text).ToList());
+            return ProcessText(_serviceConfiguration.GetLog());
+        }
+
+        private string ProcessText (List<LogEntry> targetLog) {
+            if (_serviceConfiguration.GetProp("TimestampLogEntries").GetBoolValue()) {
+                return string.Join("\r\n", targetLog.Select(x => $"[{x.TimeStamp:G}] {x.Text}").ToList());
+            }
+            return string.Join("\r\n", targetLog.Select(x => x.Text).ToList());
         }
     }
 }
