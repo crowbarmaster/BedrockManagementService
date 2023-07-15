@@ -13,7 +13,6 @@ namespace BedrockService.Client.Management {
     class LogManager {
         public Task LogTask;
         public bool Working = false;
-        public bool DisplayTimestamps = false;
         public List<string> ServiceLogs = new List<string>();
         private CancellationTokenSource _logTaskCancelSource;
         private IServiceConfiguration _connectedHost;
@@ -37,28 +36,21 @@ namespace BedrockService.Client.Management {
                     sendString.Append($"Service;{_connectedHost.GetLog().Count}");
                     byte[] stringsToBytes = Encoding.UTF8.GetBytes(sendString.ToString());
                     FormManager.TCPClient.SendData(stringsToBytes, NetworkMessageTypes.ConsoleLogUpdate);
+                    int serverCount = FormManager.MainWindow.selectedServer == null || FormManager.MainWindow.selectedServer.GetLog() == null ? 0 : FormManager.MainWindow.selectedServer.GetLog().Count;
+                    int serviceCount = _connectedHost.GetLog() == null ? 0 : _connectedHost.GetLog().Count;
                     Task.Delay(300).Wait();
 
                     if (FormManager.MainWindow.selectedServer == null) {
                         UpdateLogBoxInvoked(FormManager.MainWindow.LogBox, "");
+                    } else {
+                        FormManager.TCPClient.SendData(FormManager.MainWindow.connectedHost.GetServerIndex(FormManager.MainWindow.selectedServer), NetworkMessageTypes.ServerStatusRequest);
                     }
                     if (_connectedHost.GetLog().Count != currentServiceLogLength) {
-                        string joinString = null;
-                        if (DisplayTimestamps) {
-                            joinString = string.Join("\r\n", _connectedHost.GetLog().Select(x => $"[{x.TimeStamp:G}] {x.Text}").ToList());
-                        } else {
-                            joinString = string.Join("\r\n", _connectedHost.GetLog().Select(x => x.Text).ToList());
-                        }
-
-                        UpdateLogBoxInvoked(FormManager.MainWindow.serviceTextbox, joinString);
+                        UpdateLogBoxInvoked(FormManager.MainWindow.serviceTextbox, ProcessText(_connectedHost.GetLog()));
                     }
                     if (FormManager.MainWindow.selectedServer != null && FormManager.MainWindow.selectedServer.GetLog() != null && FormManager.MainWindow.selectedServer.GetLog().Count != currentServerLogLength) {
-                        UpdateLogBoxInvoked(FormManager.MainWindow.LogBox, string.Join("\r\n", FormManager.MainWindow.selectedServer.GetLog().Select(x => x.Text).ToList()));
+                        UpdateLogBoxInvoked(FormManager.MainWindow.LogBox, ProcessText(FormManager.MainWindow.selectedServer.GetLog()));
                     }
-                    FormManager.MainWindow.LogBox.Invoke((MethodInvoker)delegate {
-                        currentServerLogLength = FormManager.MainWindow.LogBox.TextLength;
-                        currentServiceLogLength = FormManager.MainWindow.serviceTextbox.TextLength;
-                    });
                     if (FormManager.MainWindow.selectedServer != null && FormManager.MainWindow.selectedServer.GetStatus() != null) {
                         Task.Run(() => {
                             IServerConfiguration serverConfiguration = FormManager.MainWindow.selectedServer;
@@ -87,18 +79,23 @@ namespace BedrockService.Client.Management {
                             UpdateLogBoxInvoked(FormManager.MainWindow.ServerInfoBox, statusMsg);
                         });
                     }
-                    if(FormManager.MainWindow.selectedServer != null) {
-                        FormManager.TCPClient.SendData(FormManager.MainWindow.connectedHost.GetServerIndex(FormManager.MainWindow.selectedServer), NetworkMessageTypes.ServerStatusRequest);
-                    }
+                    currentServerLogLength = serverCount;
+                    currentServiceLogLength = serviceCount;
                 } catch (Exception e) {
                     _logger.AppendLine($"LogManager Error! Stacetrace: {e.StackTrace}");
                 }
             }
         }
 
+        private string ProcessText(List<LogEntry> targetLog) {
+            if (FormManager.MainWindow.ConfigManager.DisplayTimestamps) {
+                return string.Join("\r\n", targetLog.Select(x => $"[{x.TimeStamp:G}] {x.Text}").ToList());
+            }
+            return string.Join("\r\n", targetLog.Select(x => x.Text).ToList());
+        }
+
         public bool InitLogThread(IServiceConfiguration host) {
             _connectedHost = host;
-            DisplayTimestamps = FormManager.MainWindow.ConfigManager.DisplayTimestamps;
             _logTaskCancelSource = new CancellationTokenSource();
             return StartLogThread();
         }
@@ -133,7 +130,7 @@ namespace BedrockService.Client.Management {
         }
 
         private static void UpdateLogBoxInvoked(TextBox targetBox, string contents) {
-            FormManager.MainWindow.LogBox.Invoke((MethodInvoker)delegate {
+            FormManager.MainWindow.Invoke((MethodInvoker)delegate {
                 FormManager.MainWindow.UpdateServerLogBox(targetBox, contents);
             });
         }

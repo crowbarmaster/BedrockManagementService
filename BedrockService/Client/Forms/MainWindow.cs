@@ -42,11 +42,6 @@ namespace BedrockService.Client.Forms {
             InitializeComponent();
             InitForm();
             _connectTimer.Elapsed += ConnectTimer_Elapsed;
-            Shown += MainWindow_Shown;
-        }
-
-        private void MainWindow_Shown(object sender, EventArgs e) {
-            StartClientLogUpdate();
         }
 
         private void ConnectTimer_Elapsed(object sender, ElapsedEventArgs e) {
@@ -217,34 +212,6 @@ namespace BedrockService.Client.Forms {
                 scrollLockChkBox.Checked = true;
             }
         }
-
-
-        private Task StartClientLogUpdate() => Task.Run(() => {
-            while (!IsDisposed && clientLogBox != null) {
-                if (_logManager != null) {
-                    _logManager.DisplayTimestamps = ConfigManager.DisplayTimestamps;
-                }
-                try {
-                    Invoke(() => {
-                        // get the number of line breaks in the logbox and compare the log entry count
-                        string pattern = @"\r\n";
-                        Regex regex = new Regex(pattern, RegexOptions.None);
-                        int logLineBreaks = regex.Matches(clientLogBox.Text).Count();
-                        if (FormManager.ClientLogContainer.GetLog().Count != (logLineBreaks + 1)) {
-                            if (ConfigManager.DisplayTimestamps) {
-                                UpdateServerLogBox(clientLogBox, string.Join("\r\n", FormManager.ClientLogContainer.GetLog().Select(x => $"[{x.TimeStamp:G}] {x.Text}").ToList()));
-                            } else {
-                                UpdateServerLogBox(clientLogBox, string.Join("\r\n", FormManager.ClientLogContainer.GetLog().Select(x => x.Text).ToList()));
-                            }
-                        }
-                    });
-                } catch (Exception ex) {
-                    ClientLogger.AppendLine($"Error! {ex.Message} {ex.StackTrace}");
-                }
-                //Task.Delay(3000);
-                Thread.Sleep(300);
-            }
-        });
 
         public void HeartbeatFailDisconnect() {
             Disconn_Click(null, null);
@@ -462,7 +429,6 @@ namespace BedrockService.Client.Forms {
             EditCfg.Enabled = serverConnectedIdle;
             PlayerManagerBtn.Enabled = serverConnectedIdle;
             SingBackup.Enabled = serverConnectedIdle;
-            ServerInfoBox.Enabled = serverConnectedIdle;
             SendCmd.Enabled = serverConnectedIdle;
             cmdTextBox.Enabled = serverConnectedIdle;
             RestartSrv.Enabled = serverConnectedIdle && selectedServer.GetStatus() != null && selectedServer.GetStatus().ServerStatus == ServerStatus.Started;

@@ -303,7 +303,12 @@ namespace BedrockService.Service.Server {
                 string logFileText = "NO LOG FILE! - ";
                 if (dataMsg.StartsWith(logFileText))
                     dataMsg = dataMsg.Substring(logFileText.Length, dataMsg.Length - logFileText.Length);
-                _serverLogger.AppendLine(dataMsg);
+                if (dataMsg.StartsWith('[')) {
+                    int secondBracketLoc = dataMsg.IndexOf(']');
+                    _serverLogger.AppendLine(dataMsg.Substring(secondBracketLoc + 2));
+                } else {
+                    _serverLogger.AppendLine(dataMsg);
+                }
                 if (e.Data != null) {
 
                     if (dataMsg.Contains(_startupMessage)) {
