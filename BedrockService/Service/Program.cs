@@ -42,7 +42,7 @@ namespace BedrockService.Service {
                 .ConfigureServices((hostContext, services) => {
                     IProcessInfo processInfo = new ServiceProcessInfo(_declaredType, Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), Process.GetCurrentProcess().Id, _isDebugEnabled, _shouldStartService);
                     SharedStringBase.SetWorkingDirectory(processInfo);
-                    services.AddHostedService<Core.Service>()
+                    services.AddHostedService<Core.WindowsService>()
                         .AddSingleton(processInfo)
                         .AddTransient<NetworkStrategyLookup>()
                         .AddTransient<FileUtilities>()

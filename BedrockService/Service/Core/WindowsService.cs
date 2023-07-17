@@ -2,7 +2,7 @@
 using Topshelf.Runtime;
 
 namespace BedrockService.Service.Core {
-    public class Service : IService {
+    public class WindowsService : IService {
         private readonly IBedrockService _bedrockService;
         private Topshelf.Host? _host;
         private readonly IProcessInfo _processInfo;
@@ -10,7 +10,7 @@ namespace BedrockService.Service.Core {
         private readonly IHostApplicationLifetime _applicationLifetime;
         TopshelfExitCode _exitCode;
 
-        public Service(IProcessInfo processInfo, IBedrockLogger logger, IBedrockService bedrockService, NetworkStrategyLookup networkStrategyLookup, IHostApplicationLifetime appLifetime) {
+        public WindowsService(IProcessInfo processInfo, IBedrockLogger logger, IBedrockService bedrockService, NetworkStrategyLookup networkStrategyLookup, IHostApplicationLifetime appLifetime) {
             _logger = logger;
             _processInfo = processInfo;
             _bedrockService = bedrockService;
