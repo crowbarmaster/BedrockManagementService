@@ -41,7 +41,7 @@ namespace BedrockService.Service.Server {
             _serverConfiguration = serverConfiguration;
             _processInfo = processInfo;
             _serviceConfiguration = serviceConfiguration;
-            _playerManager = serviceConfiguration.GetProp("GlobalizedPlayerDatabase").GetBoolValue() ? servicePlayerManager : new ServerPlayerManager(serverConfiguration);
+            _playerManager = serviceConfiguration.GetProp(ServicePropertyKeys.GlobalizedPlayerDatabase).GetBoolValue() ? servicePlayerManager : new ServerPlayerManager(serverConfiguration);
             _configurator = configurator;
             _logger = logger;
             _backupManager = new BackupManager(_logger, this, serverConfiguration, serviceConfiguration);
@@ -203,13 +203,23 @@ namespace BedrockService.Service.Server {
 
         private void UpdateTimer_Elapsed(object sender, ElapsedEventArgs e) {
             try {
-                _updater.CheckLatestVersion().Wait();
-                if (_serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue() && _serverConfiguration.GetSettingsProp(ServerPropertyKeys.DeployedVersion).StringValue != _serviceConfiguration.GetLatestBDSVersion() && !_serverConfiguration.ServerHasSetVersion()) {
-                    _logger.AppendLine("Version change detected! Restarting server(s) to apply update...");
-                    RestartServer().Wait();
+                if (_serverConfiguration.GetSettingsProp(ServerPropertyKeys.LiteLoaderEnabled).GetBoolValue()) {
+                    _updater.CheckLiteLiteLoaderVersion().Wait();
+                    if (_serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue() && _serverConfiguration.GetSettingsProp(ServerPropertyKeys.DeployedLiteLoaderVersion).StringValue != _serviceConfiguration.GetLatestLLVersion()) {
+                        _logger.AppendLine("Version change detected! Restarting server(s) to apply update...");
+                        RestartServer().Wait();
+                    }
+                    ((System.Timers.Timer)sender).Stop();
+                    InitializeUpdateTimer();
+                } else {
+                    _updater.CheckLatestVersion().Wait();
+                    if (_serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue() && _serverConfiguration.GetSettingsProp(ServerPropertyKeys.DeployedVersion).StringValue != _serviceConfiguration.GetLatestBDSVersion()) {
+                        _logger.AppendLine("Version change detected! Restarting server(s) to apply update...");
+                        RestartServer().Wait();
+                    }
+                    ((System.Timers.Timer)sender).Stop();
+                    InitializeUpdateTimer();
                 }
-                ((System.Timers.Timer)sender).Stop();
-                InitializeUpdateTimer();
             } catch (Exception ex) {
                 ((System.Timers.Timer)sender).Stop();
                 _logger.AppendLine($"Error in UpdateTimer_Elapsed {ex}");
@@ -273,10 +283,10 @@ namespace BedrockService.Service.Server {
         public bool ServerAutostartEnabled() => _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerAutostartEnabled).GetBoolValue();
 
         public bool IsPrimaryServer() {
-            return _serverConfiguration.GetProp("server-port").StringValue == "19132" ||
-            _serverConfiguration.GetProp("server-port").StringValue == "19133" ||
-            _serverConfiguration.GetProp("server-portv6").StringValue == "19132" ||
-            _serverConfiguration.GetProp("server-portv6").StringValue == "19133";
+            return _serverConfiguration.GetProp(BmsDependServerPropKeys.PortI4).StringValue == "19132" ||
+            _serverConfiguration.GetProp(BmsDependServerPropKeys.PortI4).StringValue == "19133" ||
+            _serverConfiguration.GetProp(BmsDependServerPropKeys.PortI6).StringValue == "19132" ||
+            _serverConfiguration.GetProp(BmsDependServerPropKeys.PortI6).StringValue == "19133";
         }
 
         public IPlayerManager GetPlayerManager() => _playerManager;
@@ -302,9 +312,13 @@ namespace BedrockService.Service.Server {
                 ConsoleFilterStrategyClass consoleFilter = new ConsoleFilterStrategyClass(_logger, _configurator, _serverConfiguration, this, _serviceConfiguration);
                 string input = e.Data;
                 string logFileText = "NO LOG FILE! - ";
+                int trimIndex = 0;
                 if (input.StartsWith(logFileText))
                     input = input.Substring(logFileText.Length, input.Length - logFileText.Length);
-                _serverLogger.AppendLine(input);
+                if (input.StartsWith('[')) {
+                    trimIndex = input.IndexOf(']') + 2;
+                }
+                _serverLogger.AppendLine(input.Substring(trimIndex));
                 if (e.Data != null) {
                     if (input.Equals("Quit correctly")) {
                         _logger.AppendLine($"Server {GetServerName()} received quit signal.");

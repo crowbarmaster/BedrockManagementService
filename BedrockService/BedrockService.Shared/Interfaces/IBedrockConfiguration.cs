@@ -9,6 +9,8 @@ namespace BedrockService.Shared.Interfaces {
         void ProcessConfiguration(string[] configEntries);
         bool SetProp(Property propToSet);
         Property GetProp(string keyName);
+        Property GetProp(ServicePropertyKeys key);
+        Property GetSettingsProp(ServerPropertyKeys key);
         Property GetProp(BmsDependServerPropKeys key);
         List<Property> GetAllProps();
         void SetAllProps(List<Property> newPropList);

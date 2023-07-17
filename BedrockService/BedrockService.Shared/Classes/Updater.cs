@@ -95,6 +95,7 @@ namespace BedrockService.Shared.Classes {
                 if (!File.Exists(GetServiceFilePath(BmsFileNameKeys.BdsUpdatePackage_Ver, latestLLVersion.BDSVersion))) {
                     FetchBuild(latestLLVersion.BDSVersion).Wait();
                 }
+                _serviceConfiguration.SetLatestLLVersion(latestLLVersion.Version);
             }
         });
 
@@ -109,7 +110,7 @@ namespace BedrockService.Shared.Classes {
             });
         }
 
-        public static Task<bool> FetchBuild(string version) {
+            public static Task<bool> FetchBuild(string version) {
             return Task.Run(() => {
                 string fetchUrl = string.Format(BmsUrlStrings[BmsUrlKeys.BdsPackage_Ver], version);
                 string zipPath = GetServiceFilePath(BmsFileNameKeys.BdsUpdatePackage_Ver, version);

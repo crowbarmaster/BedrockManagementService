@@ -38,13 +38,13 @@ namespace BedrockService.Service.Server.ConsoleFilters {
                 _configurator.SaveServerConfiguration(_serverConfiguration);
                 _bedrockServer.AwaitableServerStart().Wait();
             }
-            string userSelectedBdsVersion = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.SelectedServerVersion).StringValue == "Latest"
+            string userSelectedBdsVersion = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()
             ? _serviceConfiguration.GetLatestBDSVersion()
                 : _serverConfiguration.GetSettingsProp(ServerPropertyKeys.SelectedServerVersion).StringValue;
-            string userSelectedLLVersion = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.SelectedLiteLoaderVersion).StringValue == "Latest"
+            string userSelectedLLVersion = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()
             ? _serviceConfiguration.GetLatestLLVersion()
                 : _serverConfiguration.GetSettingsProp(ServerPropertyKeys.SelectedLiteLoaderVersion).StringValue;
-            if (versionString.ToLower().Contains("-beta")) {
+            if (versionString.ToLower().Contains("-beta") && !_serverConfiguration.GetSettingsProp(ServerPropertyKeys.LiteLoaderEnabled).GetBoolValue()) {
                 int betaTagLoc = versionString.ToLower().IndexOf("-beta");
                 int betaVer = int.Parse(versionString.Substring(betaTagLoc + 5, versionString.Length - (betaTagLoc + 5)));
                 versionString = versionString.Substring(0, betaTagLoc) + ".";

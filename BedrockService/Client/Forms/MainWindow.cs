@@ -26,6 +26,7 @@ namespace BedrockService.Client.Forms {
         private int _connectTimeout;
         private bool _followTail = false;
         private bool _blockConnect = false;
+        private bool _enableLogUpdating = false;
         private const int _connectTimeoutLimit = 3;
         private BackupManagerForm _backupManager;
         public IBedrockLogger ClientLogger;
@@ -46,7 +47,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void MainWindow_Shown(object sender, EventArgs e) {
-            StartClientLogUpdate();
+            _enableLogUpdating = true;
         }
 
         private void ConnectTimer_Elapsed(object sender, ElapsedEventArgs e) {
@@ -218,27 +219,16 @@ namespace BedrockService.Client.Forms {
             }
         }
 
-        private Task StartClientLogUpdate() => Task.Run(() => {
-            while (!IsDisposed && clientLogBox != null) {
-                if (_logManager != null) {
-                    _logManager.DisplayTimestamps = ConfigManager.DisplayTimestamps;
-                }
-                try {
-                    Invoke(() => {
-                        if (FormManager.ClientLogContainer.GetLog().Count != clientLogBox.TextLength) {
-                            if (ConfigManager.DisplayTimestamps) {
-                                UpdateServerLogBox(clientLogBox, string.Join("\r\n", FormManager.ClientLogContainer.GetLog().Select(x => $"[{x.TimeStamp:G}] {x.Text}").ToList()));
-                            } else {
-                                UpdateServerLogBox(clientLogBox, string.Join("\r\n", FormManager.ClientLogContainer.GetLog().Select(x => x.Text).ToList()));
-                            }
-                        }
-                    });
-                } catch (Exception ex) {
-                    ClientLogger.AppendLine($"Error! {ex.Message} {ex.StackTrace}");
-                }
-                Task.Delay(1500);
+        public void ClientLogUpdate() {
+            if(!_enableLogUpdating) { return; }
+            try {
+                Invoke(() => {
+                    UpdateServerLogBox(clientLogBox, FormManager.ClientLogContainer.GetLog().ToString());
+                });
+            } catch (Exception ex) {
+                ClientLogger.AppendLine($"Error! {ex.Message} {ex.StackTrace}");
             }
-        });
+        }
 
         public void HeartbeatFailDisconnect() {
             Disconn_Click(null, null);
@@ -603,10 +593,10 @@ namespace BedrockService.Client.Forms {
         }
 
         private bool IsPrimaryServer() {
-            return selectedServer.GetProp("server-port").StringValue == "19132" ||
-            selectedServer.GetProp("server-port").StringValue == "19133" ||
-            selectedServer.GetProp("server-portv6").StringValue == "19132" ||
-            selectedServer.GetProp("server-portv6").StringValue == "19133";
+            return selectedServer.GetProp(BmsDependServerPropKeys.PortI4).StringValue == "19132" ||
+            selectedServer.GetProp(BmsDependServerPropKeys.PortI4).StringValue == "19133" ||
+            selectedServer.GetProp(BmsDependServerPropKeys.PortI6).StringValue == "19132" ||
+            selectedServer.GetProp(BmsDependServerPropKeys.PortI6).StringValue == "19133";
         }
 
         private void serverPropMenuItem_Click(object sender, EventArgs e) {
@@ -639,9 +629,8 @@ namespace BedrockService.Client.Forms {
         private void servicePropMenuItem_Click(object sender, EventArgs e) {
             using (PropEditorForm _editDialog = new()) {
                 List<string> serviceConfigExcludeList = new() { "ServerName", "ServerExeName", "FileName", "ServerPath", "DeployedVersion" };
-                List<Property> filteredProps = selectedServer.GetSettingsList()
-                            .Where(x => !serviceConfigExcludeList.Contains(x.KeyName))
-                            .ToList();
+                List<Property> filteredProps = new List<Property>(selectedServer.GetSettingsList()
+                            .Where(x => !serviceConfigExcludeList.Contains(x.KeyName)));
                 _editDialog.PopulateBoxes(filteredProps);
                 if (_editDialog.ShowDialog() == DialogResult.OK) {
                     JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };

@@ -3,10 +3,12 @@ using BedrockService.Shared.SerializeModels;
 using Newtonsoft.Json;
 using NLog;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Shared.Classes {
     public class BedrockLogger : IBedrockLogger {
@@ -16,7 +18,6 @@ namespace BedrockService.Shared.Classes {
         [NonSerialized]
         private StreamWriter _logWriter;
         private bool _logToFile = false;
-        private bool _addTimestamps = false;
         private string _logPath;
         private string _logOwner = "Service";
         private Logger _nLogger;
@@ -35,11 +36,10 @@ namespace BedrockService.Shared.Classes {
 
         public void Initialize() {
             _logPath = $@"{_processInfo.GetDirectory()}\Logs\{_processInfo.DeclaredType()}";
-            _logToFile = _serviceConfiguration.GetProp("LogApplicationOutput").GetBoolValue();
-            _addTimestamps = _serviceConfiguration.GetProp("TimestampLogEntries").GetBoolValue();
+            _logToFile = _serviceConfiguration.GetProp(ServicePropertyKeys.LogApplicationOutput).GetBoolValue();
             _logOwner = _processInfo.DeclaredType();
             if (_processInfo.DeclaredType() == "Service") {
-                if (_serverConfiguration != null && _serviceConfiguration.GetProp("LogServerOutput").GetBoolValue()) {
+                if (_serverConfiguration != null && _serviceConfiguration.GetProp(ServicePropertyKeys.LogServerOutput).GetBoolValue()) {
                     _logOwner = _serverConfiguration.GetServerName();
                     string serverLogPath = $@"{_processInfo.GetDirectory()}\Logs\Servers\{_logOwner}";
                     if (!Directory.Exists(serverLogPath))
@@ -59,6 +59,9 @@ namespace BedrockService.Shared.Classes {
         public void AppendLine(string text) {
             string newText = $"{_logOwner}: {text}";
             LogEntry entry = new(newText);
+            if (_serviceConfiguration.GetAllProps().Count > 0 && _serviceConfiguration.GetProp(ServicePropertyKeys.TimestampLogEntries).GetBoolValue()) {
+                newText = $"[{entry.TimeStamp:G}] {newText}";
+            }
             if (_processInfo.IsDebugEnabled()) {
                 _nLogger.Info(newText);
             } else {
@@ -71,9 +74,6 @@ namespace BedrockService.Shared.Classes {
                     if (_serviceConfiguration != null) {
                         _serviceConfiguration.GetLog().Add(entry);
                     }
-                }
-                if (_addTimestamps) {
-                    newText = $"[{entry.TimeStamp.ToString("G")}] {newText}";
                 }
                 if (_logToFile && _logWriter != null) {
                     _logWriter.WriteLine(newText);
@@ -90,7 +90,6 @@ namespace BedrockService.Shared.Classes {
             }
         }
 
-
         public int Count() {
             return _serverConfiguration != null ?
             _serverConfiguration.GetLog().Count :
@@ -105,12 +104,19 @@ namespace BedrockService.Shared.Classes {
 
         public override string ToString() {
             if (_serverConfiguration != null) {
-                return string.Join("", _serverConfiguration.GetLog().Select(x => x.Text).ToList());
+                return ProcessText(_serverConfiguration.GetLog());
             }
-            return string.Join("", _serviceConfiguration.GetLog().Select(x => x.Text).ToList());
+            return ProcessText(_serviceConfiguration.GetLog());
         }
 
         public LogFactory GetNLogFactory() => NLogManager.Instance;
+
+        private string ProcessText(List<LogEntry> list) {
+            if (_serviceConfiguration.GetProp(ServicePropertyKeys.TimestampLogEntries).GetBoolValue()) {
+                return string.Join("\r\n", list.Select(x => $"[{x.TimeStamp:G}] {x.Text}").ToList());
+            }
+            return string.Join("\r\n", list.Select(x => x.Text).ToList());
+        }
     }
 
 

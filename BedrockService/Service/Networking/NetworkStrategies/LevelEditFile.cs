@@ -1,4 +1,5 @@
 ﻿using BedrockService.Service.Networking.Interfaces;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Service.Networking.NetworkStrategies {
     public class LevelEditFile : IMessageParser {
@@ -16,7 +17,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
             byte[] stripHeaderFromBuffer = new byte[data.Length - 5];
             Buffer.BlockCopy(data, 5, stripHeaderFromBuffer, 0, stripHeaderFromBuffer.Length);
             IServerConfiguration server = _serviceConfiguration.GetServerInfoByIndex(serverIndex);
-            string pathToLevelDat = $@"{_serviceConfiguration.GetProp("ServersPath")}\{server.GetProp("server-name")}\worlds\{server.GetProp("level-name")}\level.dat";
+            string pathToLevelDat = $@"{_serviceConfiguration.GetProp(ServicePropertyKeys.ServersPath)}\{server.GetProp(BmsDependServerPropKeys.ServerName)}\worlds\{server.GetProp(BmsDependServerPropKeys.LevelName)}\level.dat";
             _bedrockService.GetBedrockServerByIndex(serverIndex).AwaitableServerStop(false).Wait();
             File.WriteAllBytes(pathToLevelDat, stripHeaderFromBuffer);
             _logger.AppendLine($"level.dat writen to server {server.GetServerName()}");

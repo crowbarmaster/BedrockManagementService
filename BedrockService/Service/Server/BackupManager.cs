@@ -66,7 +66,7 @@ namespace BedrockService.Service.Server {
                 List<FileInfo> levelFiles = levelDirInfo.GetFiles("*.json").ToList();
                 levelFiles.AddRange(levelDirInfo.GetFiles("world_icon*"));
                 foreach (FileInfo levelFile in levelFiles) {
-                    backupZip.CreateEntryFromFile(levelFile.FullName, $"{_serverConfiguration.GetProp("level-name")}/{levelFile.Name}");
+                    backupZip.CreateEntryFromFile(levelFile.FullName, $"{_serverConfiguration.GetProp(BmsDependServerPropKeys.LevelName)}/{levelFile.Name}");
                 }
                 _server.WriteToStandardIn("save resume");
                 _server.WriteToStandardIn("say Server backup complete.");

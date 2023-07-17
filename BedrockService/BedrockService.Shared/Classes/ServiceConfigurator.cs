@@ -167,7 +167,7 @@ namespace BedrockService.Shared.Classes {
             if (ServerList.Count == 0) {
 
             }
-            if (serverConfiguration.GetProp("server-port").StringValue == "19132" && serverConfiguration.GetProp("server-portv6").StringValue == "19133") {
+            if (serverConfiguration.GetProp(BmsDependServerPropKeys.PortI4).StringValue == "19132" && serverConfiguration.GetProp(BmsDependServerPropKeys.PortI6).StringValue == "19133") {
                 ServerList.Insert(0, serverConfiguration);
                 return;
             }
@@ -269,6 +269,14 @@ namespace BedrockService.Shared.Classes {
             GetPluginRegistry().ServerPluginList
                 .Where(x => x.BmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).First().InstalledPlugins
                 .Remove(pluginVersionInfo);
+        }
+
+        public Property GetProp(ServerPropertyKeys key) {
+            return null;
+        }
+
+        public Property GetSettingsProp(ServerPropertyKeys key) {
+            return null;
         }
     }
 }

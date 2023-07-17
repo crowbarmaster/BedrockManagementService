@@ -64,7 +64,7 @@ namespace BedrockService.Service.Management {
                 LoadPlayerDatabase(serverInfo);
                 _serviceConfiguration.AddNewServerInfo(serverInfo);
             }
-            if (_serviceConfiguration.GetServerList().Count == 0) {
+            if (_serviceConfiguration .GetServerList().Count == 0) {
                 serverInfo = new ServerConfigurator(_processInfo, _logger, _serviceConfiguration);
                 if (!serverInfo.InitializeDefaults()) {
                     _logger.AppendLine("Error creating default server!");
@@ -78,45 +78,19 @@ namespace BedrockService.Service.Management {
 
         public async Task ReplaceServerBuild(IServerConfiguration server, string buildVersion) {
             await Task.Run(() => {
+                FileInfo originalExeInfo = new(GetServerFilePath(BdsFileNameKeys.VanillaBedrock, server));
+                FileInfo bmsExeInfo = new($@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\{server.GetSettingsProp(ServerPropertyKeys.ServerExeName)}");
+                LiteLoaderVersionManifest selectedVersion = _updater.GetLiteLoaderVersionManifest(buildVersion).Result;
+                string liteVersion = selectedVersion?.Version;
                 try {
-                    string liteVersion = string.Empty;
-                    string exeName = server.GetSettingsProp(ServerPropertyKeys.ServerExeName).StringValue;
-                    if (ProcessUtilities.MonitoredAppExists(exeName.Substring(0, exeName.Length - 4))) {
-                        ProcessUtilities.KillProcessList(Process.GetProcessesByName(exeName.Substring(0, exeName.Length - 4)));
-                    }
-                    MinecraftFileUtilities.CleanBedrockDirectory(server);
                     if (server.GetSettingsProp(ServerPropertyKeys.LiteLoaderEnabled).GetBoolValue()) {
-                        string userSelectedLLVersion = server.GetSettingsProp(ServerPropertyKeys.SelectedLiteLoaderVersion).StringValue == "Latest"
-                            ? _serviceConfiguration.GetLatestLLVersion()
-                            : server.GetSettingsProp(ServerPropertyKeys.SelectedLiteLoaderVersion).StringValue;
-                        LiteLoaderVersionManifest selectedVersion = _updater.GetLiteLoaderVersionManifest(userSelectedLLVersion).Result;
-                        buildVersion = selectedVersion.BDSVersion;
-                        liteVersion = selectedVersion.Version;
-                    }
-                    if (!Directory.Exists(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString()))
-                        Directory.CreateDirectory(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString());
-                    string filePath = GetServiceFilePath(BmsFileNameKeys.BdsUpdatePackage_Ver, buildVersion);
-                    if (!File.Exists(filePath)) {
-                        if (!Updater.FetchBuild(buildVersion).Result) {
-                            throw new FileNotFoundException($"Service could not locate file \"Update_{buildVersion}.zip\" and version was not found in BDS manifest!");
-                        }
-                    }
-                    Progress<double> progress = new(percent => {
-                        _logger.AppendLine($"Extracting Bedrock files for server {server.GetServerName()}, {percent}% completed...");
-                    });
-                    _fileUtilities.ExtractZipToDirectory(filePath, server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString(), progress).Wait();
-
-                    FileInfo originalExeInfo = new(GetServerFilePath(BdsFileNameKeys.VanillaBedrock, server));
-                    FileInfo bmsExeInfo = new($@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\{server.GetSettingsProp(ServerPropertyKeys.ServerExeName)}");
-                    File.WriteAllText(GetServerFilePath(BdsFileNameKeys.DeployedBedrockVerIni, server), buildVersion);
-                    try {
-                        if (server.GetSettingsProp(ServerPropertyKeys.LiteLoaderEnabled).GetBoolValue()) {
+                        try {
                             if (!File.Exists(GetServiceFilePath(BmsFileNameKeys.LLUpdatePackage_Ver, liteVersion))) {
                                 if (!Updater.FetchLiteLoaderBuild(liteVersion).Result) {
                                     throw new FileNotFoundException($"Service could not locate file \"Update_{buildVersion}.zip\" and version was not found in LiteLoader manifest!");
                                 }
                             }
-                            progress = new(percent => {
+                            Progress<double> progress = new(percent => {
                                 _logger.AppendLine($"Extracting LiteLoader files for server {server.GetServerName()}, {(int)percent}% completed...");
                             });
                             _fileUtilities.ExtractZipToDirectory(GetServiceFilePath(BmsFileNameKeys.LLUpdatePackage_Ver, liteVersion), GetServerDirectory(BdsDirectoryKeys.ServerRoot, server), progress).Wait();
@@ -127,23 +101,36 @@ namespace BedrockService.Service.Management {
                                 _fileUtilities.ExtractZipToDirectory(GetServiceFilePath(BmsFileNameKeys.LLModUpdatePackage_Ver, liteVersion), GetServerDirectory(BdsDirectoryKeys.ServerRoot, server) + "\\plugins", progress).Wait();
                             }
                             LiteLoaderPECore.BuildLLExe(server);
-                            server.SetSettingsProp(ServerPropertyKeys.DeployedVersion, buildVersion);
                             MinecraftFileUtilities.CreateDefaultLoaderConfigFile(server);
+                            server.SetSettingsProp(ServerPropertyKeys.DeployedVersion, selectedVersion.BDSVersion);
                             server.SetSettingsProp(ServerPropertyKeys.DeployedLiteLoaderVersion, liteVersion);
                             File.WriteAllText(GetServerFilePath(BdsFileNameKeys.DeployedLLBDSIni, server), liteVersion);
-                            SaveServerConfiguration(server);
-                        } else {
-                            File.Copy(originalExeInfo.FullName, bmsExeInfo.FullName, true);
+                        } catch (IOException e) {
+                            if (e.Message.Contains("because it is being used by another process.")) {
+                                ProcessUtilities.KillProcessList(Process.GetProcessesByName(bmsExeInfo.Name[..^bmsExeInfo.Extension.Length]));
+                                File.Copy(GetServerFilePath(BdsFileNameKeys.VanillaBedrock, server), GetServerFilePath(BdsFileNameKeys.BmsServer_Name, server, server.GetServerName()), true);
+                            }
                         }
-                    } catch (IOException e) {
-                        if (e.Message.Contains("because it is being used by another process.")) {
-                            ProcessUtilities.KillProcessList(Process.GetProcessesByName(bmsExeInfo.Name[..^bmsExeInfo.Extension.Length]));
-                            File.Copy(GetServerFilePath(BdsFileNameKeys.VanillaBedrock, server), GetServerFilePath(BdsFileNameKeys.BmsServer_Name, server, server.GetServerName()), true);
+                        _logger.AppendLine($"Extraction of files for {server.GetServerName()} completed.");
+                        SaveServerConfiguration(server);
+                    } else {
+                        MinecraftFileUtilities.CleanBedrockDirectory(server);
+                        if (!Directory.Exists(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString()))
+                            Directory.CreateDirectory(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString());
+                        string filePath = GetServiceFilePath(BmsFileNameKeys.BdsUpdatePackage_Ver, buildVersion);
+                        if (!File.Exists(filePath)) {
+                            if (!Updater.FetchBuild(buildVersion).Result) {
+                                throw new FileNotFoundException($"Service could not locate file \"Update_{buildVersion}.zip\" and version was not found in BDS manifest!");
+                            }
                         }
+                        Progress<double> progress = new(percent => {
+                            _logger.AppendLine($"Extracting Bedrock files for server {server.GetServerName()}, {percent}% completed...");
+                        });
+                        _fileUtilities.ExtractZipToDirectory(filePath, server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString(), progress).Wait();
+
+                        File.WriteAllText(GetServerFilePath(BdsFileNameKeys.DeployedBedrockVerIni, server), buildVersion);
+                        File.Copy(originalExeInfo.FullName, bmsExeInfo.FullName, true);
                     }
-                    _logger.AppendLine($"Extraction of files for {server.GetServerName()} completed.");
-                    server.GetSettingsProp(ServerPropertyKeys.DeployedVersion).SetValue(buildVersion);
-                    SaveServerConfiguration(server);
                 } catch (InvalidDataException) {
                     throw new FileNotFoundException($"Build file \"Update_{buildVersion}.zip\" found corrupt. Service cannot proceed!!");
                 }
@@ -227,7 +214,7 @@ namespace BedrockService.Service.Management {
             }
             output[index++] = string.Empty;
             output[index++] = "#Persist - Do not modify";
-            output[index++] = $"DeployedVersion={server.GetServerVersion()}";
+            output[index++] = $"DeployedVersion={server.GetSettingsProp(ServerPropertyKeys.DeployedVersion)}";
             output[index++] = $"DeployedLiteLoaderVersion={server.GetSettingsProp(ServerPropertyKeys.DeployedLiteLoaderVersion)}";
             output[index++] = string.Empty;
 
@@ -236,9 +223,13 @@ namespace BedrockService.Service.Management {
         }
 
         public void WriteJSONFiles(IServerConfiguration server) {
+            string serverVer = server.GetServerVersion();
+            if(server.GetSettingsProp(ServerPropertyKeys.LiteLoaderEnabled).GetBoolValue()) { 
+                serverVer = new Updater(_logger, _serviceConfiguration).GetLiteLoaderVersionManifest(server.GetServerVersion()).Result.BDSVersion;
+            }
             Version allowStartVersion = Version.Parse("1.18.11.01");
             string whitelistFilePath = string.Empty;
-            if (server.GetServerVersion() != "None" && Version.Parse(server.GetServerVersion()) >= allowStartVersion) {
+            if (server.GetServerVersion() != "None" && Version.Parse(serverVer) >= allowStartVersion) {
                 whitelistFilePath = GetServerFilePath(BdsFileNameKeys.AllowList, server);
                 if (File.Exists(GetServerFilePath(BdsFileNameKeys.WhiteList, server))) {
                     File.Delete(GetServerFilePath(BdsFileNameKeys.WhiteList, server));

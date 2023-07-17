@@ -23,7 +23,7 @@ namespace BedrockService.Shared.Classes {
         public bool InitializeDefaults() {
             _servicePath = _processInfo.GetDirectory();
             _defaultPropList = _serviceConfiguration.GetServerDefaultPropList();
-            ServersPath = new Property(ServicePropertyStrings[ServicePropertyKeys.ServersPath], _serviceConfiguration.GetProp(ServicePropertyStrings[ServicePropertyKeys.ServersPath]).StringValue);
+            ServersPath = new Property(ServicePropertyStrings[ServicePropertyKeys.ServersPath], _serviceConfiguration.GetProp(ServicePropertyKeys.ServersPath).StringValue);
             ServicePropList.Clear();
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerName], "Dedicated Server"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.FileName], "Dedicated Server.conf"));
@@ -40,8 +40,8 @@ namespace BedrockService.Shared.Classes {
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.CheckUpdates], "true"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.AutoDeployUpdates], "true"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.UpdateCron], "0 2 * **"));
-            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.SelectedServerVersion], "Latest"));
-            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.SelectedLiteLoaderVersion], "Latest"));
+            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.SelectedServerVersion], "None"));
+            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.SelectedLiteLoaderVersion], "None"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.DeployedVersion], "None"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.DeployedLiteLoaderVersion], "None"));
             return true;
@@ -49,44 +49,48 @@ namespace BedrockService.Shared.Classes {
 
         public void SetStartCommands(List<StartCmdEntry> newEntries) => StartCmds = newEntries;
 
-        public void SetServerVersion(string newVersion) => GetSettingsProp(ServerPropertyKeys.DeployedVersion).SetValue(newVersion);
+        public void SetServerVersion(string newVersion) {
+            if (GetSettingsProp(ServerPropertyKeys.LiteLoaderEnabled).GetBoolValue()) {
+                GetSettingsProp(ServerPropertyKeys.DeployedLiteLoaderVersion).SetValue(newVersion);
+            } else {
+                GetSettingsProp(ServerPropertyKeys.DeployedVersion).SetValue(newVersion);
+            }
+        }
 
-        public string GetServerVersion() => GetSettingsProp(ServerPropertyKeys.DeployedVersion).StringValue;
+        public string GetServerVersion() => GetSettingsProp(ServerPropertyKeys.LiteLoaderEnabled).GetBoolValue() ? GetSettingsProp(ServerPropertyKeys.DeployedLiteLoaderVersion).StringValue : GetSettingsProp(ServerPropertyKeys.DeployedVersion).StringValue;
 
-        public string GetSelectedVersion() => GetSettingsProp(ServerPropertyKeys.SelectedServerVersion).StringValue == "Latest" ? _serviceConfiguration.GetLatestBDSVersion() : GetSettingsProp(ServerPropertyKeys.SelectedServerVersion).StringValue;
-
-        public bool ServerHasSetVersion() => GetSettingsProp(ServerPropertyKeys.SelectedServerVersion).StringValue != "Latest";
+        public string GetSelectedVersion() => 
+            GetSettingsProp(ServerPropertyKeys.LiteLoaderEnabled).GetBoolValue() ?
+            GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue() ?
+            _serviceConfiguration.GetLatestLLVersion() : GetSettingsProp(ServerPropertyKeys.SelectedLiteLoaderVersion).StringValue :
+            GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue() ?
+            _serviceConfiguration.GetLatestBDSVersion() : GetSettingsProp(ServerPropertyKeys.SelectedServerVersion).StringValue;
 
         public void ProcessConfiguration(string[] fileEntries) {
             if (fileEntries == null)
                 return;
-            foreach (string entry in fileEntries) {
-                if (entry.StartsWith(ServerPropertyStrings[ServerPropertyKeys.SelectedServerVersion])) {
-                    GetSettingsProp(ServerPropertyKeys.SelectedServerVersion).SetValue(entry.Split('=')[1]);
-                }
-                if (entry.StartsWith(ServerPropertyStrings[ServerPropertyKeys.DeployedVersion])) {
-                    GetSettingsProp(ServerPropertyKeys.DeployedVersion).SetValue(entry.Split('=')[1]);
-                }
+            if (File.Exists(GetServerFilePath(BdsFileNameKeys.DeployedBedrockVerIni, this))) {
+                GetSettingsProp(ServerPropertyKeys.DeployedVersion).SetValue(File.ReadAllText(GetServerFilePath(BdsFileNameKeys.DeployedBedrockVerIni, this)));
             }
-            if (GetSettingsProp(ServerPropertyKeys.SelectedServerVersion).StringValue == "Latest") {
-                if (GetSettingsProp(ServerPropertyKeys.DeployedVersion).StringValue == "None") {
-                    GetSettingsProp(ServerPropertyKeys.DeployedVersion).StringValue = _serviceConfiguration.GetLatestBDSVersion();
-                }
-                ValidateVersion(GetSettingsProp(ServerPropertyKeys.DeployedVersion).StringValue);
-            } else {
-                ValidateVersion(GetSettingsProp(ServerPropertyKeys.SelectedServerVersion).StringValue);
+            if (File.Exists(GetServerFilePath(BdsFileNameKeys.DeployedLLBDSIni, this))) {
+                GetSettingsProp(ServerPropertyKeys.DeployedLiteLoaderVersion).SetValue(File.ReadAllText(GetServerFilePath(BdsFileNameKeys.DeployedLLBDSIni, this)));
             }
+            if (GetSettingsProp(ServerPropertyKeys.DeployedVersion).StringValue == "None" || GetSettingsProp(ServerPropertyKeys.DeployedVersion).StringValue == "Latest") {
+                GetSettingsProp(ServerPropertyKeys.DeployedVersion).StringValue = _serviceConfiguration.GetLatestBDSVersion();
+            }
+            ValidateVersion(GetSettingsProp(ServerPropertyKeys.DeployedVersion).StringValue);
+
             foreach (string line in fileEntries) {
                 if (!line.StartsWith("#") && !string.IsNullOrEmpty(line)) {
                     string[] split = line.Split('=');
                     if (split.Length == 1) {
                         split = new string[] { split[0], "" };
                     }
-                    Property SrvProp = ServerPropList.FirstOrDefault(prop => prop.KeyName == split[0]);
+                    Property SrvProp = ServerPropList.FirstOrDefault(prop => prop != null && prop.KeyName == split[0]);
                     if (SrvProp != null) {
                         SetProp(split[0], split[1]);
                     }
-                    Property SvcProp = ServicePropList.FirstOrDefault(prop => prop.KeyName == split[0]);
+                    Property SvcProp = ServicePropList.FirstOrDefault(prop => prop != null && prop.KeyName == split[0]);
                     if (SvcProp != null) {
                         SetSettingsProp(split[0], split[1]);
                     }
@@ -116,25 +120,61 @@ namespace BedrockService.Shared.Classes {
         }
 
         public bool ValidateVersion(string version, bool skipNullCheck = false) {
-            if (version.Contains("(ProtocolVersion")) {
-                version = version.Substring(0, version.IndexOf('('));
+            bool isLL = GetSettingsProp(ServerPropertyKeys.LiteLoaderEnabled).GetBoolValue();
+            if (version == "Latest" || version == "None") {
+                if (isLL) {
+                    version = _serviceConfiguration.GetLatestLLVersion();
+                } else {
+                    version = _serviceConfiguration.GetLatestBDSVersion();
+                }
             }
-            if (_processInfo.DeclaredType() != "Client" || (GetSettingsProp(ServerPropertyKeys.DeployedVersion).StringValue != "None" && !skipNullCheck)) {
-                if (!File.Exists(GetServiceFilePath(BmsFileNameKeys.StockProps, version))) {
-                    _logger.AppendLine("Core prop file found missing. Please wait a moment!");
-                    MinecraftUpdatePackageProcessor packageProcessor = new(_logger, version, GetServiceDirectory(BmsDirectoryKeys.CoreFileBuild_Ver, version));
-                    if (!packageProcessor.ExtractCoreFiles()) {
+            if (version.Contains("(ProtocolVersion")) {
+                version = version.Substring(version.IndexOf('('));
+            }
+            if (isLL) {
+                if (_processInfo.DeclaredType() != "Client" || (GetSettingsProp(ServerPropertyKeys.DeployedLiteLoaderVersion).StringValue != "None" && !skipNullCheck)) {
+                    LiteLoaderVersionManifest manifest = new Updater(_logger, _serviceConfiguration).GetLiteLoaderVersionManifest(version).Result;
+                    if (!ProcessBedrockValidation(manifest.BDSVersion)) {
+                        _logger.AppendLine("Error with version validation! Check target BDS package!");
+                        return false;
+                    }
+                    if (!File.Exists(GetServiceFilePath(BmsFileNameKeys.LLUpdatePackage_Ver, version))) {
+                        _logger.AppendLine("Error with version validation! Check target LL package!");
+                    }
+                }
+            } else {
+                if (_processInfo.DeclaredType() != "Client" || (GetSettingsProp(ServerPropertyKeys.DeployedVersion).StringValue != "None" && !skipNullCheck)) {
+                    if (!ProcessBedrockValidation(version)) {
+                        _logger.AppendLine("Error with version validation! Check target BDS package!");
                         return false;
                     }
                 }
-                ServerPropList.Clear();
-                _defaultPropList.Clear();
-                File.ReadAllLines(GetServiceFilePath(BmsFileNameKeys.StockProps, version)).ToList().ForEach(entry => {
-                    string[] splitEntry = entry.Split('=');
-                    ServerPropList.Add(new Property(splitEntry[0], splitEntry[1]));
-                    _defaultPropList.Add(new Property(splitEntry[0], splitEntry[1]));
-                });
             }
+            return true;
+        }
+
+        bool ProcessBedrockValidation(string version) {
+            if (!File.Exists(GetServiceFilePath(BmsFileNameKeys.StockProps, version))) {
+                _logger.AppendLine("Core prop file found missing. Please wait a moment!");
+                MinecraftUpdatePackageProcessor packageProcessor = new(_logger, version, GetServiceDirectory(BmsDirectoryKeys.CoreFileBuild_Ver, version));
+                if (!packageProcessor.ExtractCoreFiles()) {
+                    return false;
+                }
+            }
+            _defaultPropList.Clear();
+            File.ReadAllLines(GetServiceFilePath(BmsFileNameKeys.StockProps, version)).ToList().ForEach(entry => {
+                string[] splitEntry = entry.Split('=');
+                Property propToSet = new Property(splitEntry[0], splitEntry[1]);
+                Property existingProp = ServerPropList.FirstOrDefault(x => x.KeyName == propToSet.KeyName);
+                if (existingProp != null) {
+                    Property newProp = new Property(splitEntry[0], splitEntry[1]);
+                    newProp.SetValue(existingProp.StringValue);
+                    existingProp = newProp;
+                    } else { 
+                    ServerPropList.Add(propToSet);
+                }
+                   _defaultPropList.Add(propToSet);
+            });
             SetSettingsProp(ServerPropertyKeys.DeployedVersion, version);
             return true;
         }
@@ -182,7 +222,7 @@ namespace BedrockService.Shared.Classes {
 
         public bool SetProp(Property propToSet) {
             try {
-                Property serverProp = ServerPropList.FirstOrDefault(prop => prop.KeyName == propToSet.KeyName);
+                Property serverProp = ServerPropList.First(prop => prop.KeyName == propToSet.KeyName);
                 ServerPropList[ServerPropList.IndexOf(serverProp)].SetValue(propToSet.StringValue);
                 return true;
             } catch (Exception e) {
@@ -302,5 +342,10 @@ namespace BedrockService.Shared.Classes {
         public int GetRunningPid() => ProcessID;
 
         public void SetRunningPid(int runningPid) => ProcessID = runningPid;
+
+        public Property GetProp(ServicePropertyKeys key) {
+            _logger.AppendLine("GetProp destined for service called on server!");
+            return null;
+        }
     }
 }

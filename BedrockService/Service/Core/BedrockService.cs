@@ -233,22 +233,23 @@ namespace BedrockService.Service.Core {
                 foreach (var server in _serviceConfiguration.GetServerList()) {
                     string serverExePath = $@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath).StringValue}\{server.GetSettingsProp(ServerPropertyKeys.ServerExeName).StringValue}";
                     if (!File.Exists(serverExePath)) {
-                        string deployedVersion = server.GetSelectedVersion() == "Latest"
+                        string deployedVersion = server.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()
                                                 ? _serviceConfiguration.GetLatestBDSVersion()
                                                 : server.GetSelectedVersion();
                         _configurator.ReplaceServerBuild(server, deployedVersion).Wait();
                     }
-                    if (File.Exists(GetServerFilePath(BdsFileNameKeys.DeployedBedrockVerIni, server))) {
-                        server.SetServerVersion(File.ReadAllText(GetServerFilePath(BdsFileNameKeys.DeployedBedrockVerIni, server)));
-                    }
-                    if (File.Exists(GetServerFilePath(BdsFileNameKeys.DeployedLLBDSIni, server))) {
-                        server.GetSettingsProp(ServerPropertyKeys.DeployedLiteLoaderVersion).SetValue(File.ReadAllText(GetServerFilePath(BdsFileNameKeys.DeployedLLBDSIni, server)));
-                    }
-                    if (server.GetServerVersion() != "None" && server.GetSelectedVersion() != "Latest" && server.GetSelectedVersion() != server.GetServerVersion()) {
+                    if (!server.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue() && server.GetSelectedVersion() != server.GetServerVersion()) {
                         _logger.AppendLine("Manually configured server found with wrong version. Replacing server build...");
-                        if (Updater.FetchBuild(server.GetSelectedVersion()).Result) {
-                            _configurator.ReplaceServerBuild(server, server.GetSelectedVersion()).Wait();
-                            _configurator.SaveServerConfiguration(server);
+                        if (server.GetSettingsProp(ServerPropertyKeys.LiteLoaderEnabled).GetBoolValue()) {
+                            if (Updater.FetchLiteLoaderBuild(server.GetSelectedVersion()).Result) {
+                                _configurator.ReplaceServerBuild(server, server.GetSelectedVersion()).Wait();
+                                _configurator.SaveServerConfiguration(server);
+                            }
+                        } else {
+                            if (Updater.FetchBuild(server.GetSelectedVersion()).Result) {
+                                _configurator.ReplaceServerBuild(server, server.GetSelectedVersion()).Wait();
+                                _configurator.SaveServerConfiguration(server);
+                            }
                         }
                     }
                 }

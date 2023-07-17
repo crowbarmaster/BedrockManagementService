@@ -1,6 +1,7 @@
 ﻿using BedrockService.Service.Networking.Interfaces;
 using System.Net;
 using System.Net.Sockets;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Service.Networking {
     public class TCPListener : ITCPListener {
@@ -43,7 +44,7 @@ namespace BedrockService.Service.Networking {
         public Task StartListening() {
             return new Task(() => {
                 _logger.AppendLine("TCP listener task started.");
-                _inListener = new TcpListener(_ipAddress, _serviceConfiguration.GetProp("ClientPort").GetIntValue());
+                _inListener = new TcpListener(_ipAddress, _serviceConfiguration.GetProp(ServicePropertyKeys.ClientPort).GetIntValue());
                 try {
 
                     while (_standardMessageLookup == null) { Task.Delay(100).Wait(); }

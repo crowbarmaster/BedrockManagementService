@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static BedrockService.Shared.Classes.SharedStringBase;
 #nullable enable
 namespace BedrockService.Shared.Classes {
     public class ServerPlayerManager : IPlayerManager {
@@ -26,7 +27,7 @@ namespace BedrockService.Shared.Classes {
         public IPlayer GetOrCreatePlayer(string xuid, string username = null) {
             IPlayer foundPlayer = _serverConfiguration.GetPlayerList().FirstOrDefault(p => p.GetXUID() == xuid);
             if (foundPlayer == null) {
-                Player player = new(_serverConfiguration.GetProp(SharedStringBase.BmsDependServerPropStrings[SharedStringBase.BmsDependServerPropKeys.PermLevel]).ToString());
+                Player player = new(_serverConfiguration.GetProp(BmsDependServerPropKeys.PermLevel).ToString());
                 player.Initialize(xuid, username);
                 _serverConfiguration.GetPlayerList().Add(player);
                 return player;

@@ -20,8 +20,8 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
             zipArchive.ExtractToDirectory(GetServerDirectory(BdsDirectoryKeys.LLPlugins, _serviceConfiguration.GetServerInfoByIndex(serverIndex)), true);
 
             PluginVersionInfo versionInfo = new() {
-                BedrockVersion = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetServerVersion(),
-                LiteLoaderVersion = _serviceConfiguration.GetLatestLLVersion(),
+                BedrockVersion = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp(ServerPropertyKeys.DeployedVersion).StringValue,
+                LiteLoaderVersion = _serviceConfiguration.GetSettingsProp(ServerPropertyKeys.DeployedLiteLoaderVersion).StringValue,
                 PluginFileName = zipArchive.Entries[0].Name
             };
             _serviceConfiguration.SetServerPluginInfo(serverIndex, versionInfo);

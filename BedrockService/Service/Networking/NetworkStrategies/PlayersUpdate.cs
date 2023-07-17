@@ -2,6 +2,7 @@
 using BedrockService.Service.Networking.Interfaces;
 using Newtonsoft.Json;
 using System.Text;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Service.Networking.NetworkStrategies {
     public class PlayersUpdate : IMessageParser {
@@ -26,7 +27,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
                 } catch (Exception) {
                 }
             }
-            if (_serviceConfiguration.GetProp("GlobalizedPlayerDatabase").GetBoolValue()) {
+            if (_serviceConfiguration.GetProp(ServicePropertyKeys.GlobalizedPlayerDatabase).GetBoolValue()) {
                 foreach (IServerConfiguration server in _serviceConfiguration.GetServerList()) {
                     _configurator.SavePlayerDatabase(server);
                     _configurator.WriteJSONFiles(server);

@@ -96,7 +96,7 @@ namespace BedrockService.Client.Forms {
 
         private void editServerBackupSettingsToolStripMenuItem_Click(object sender, EventArgs e) {
             using PropEditorForm editor = new();
-            List<Property> filteredList = FormManager.MainWindow.selectedServer.GetSettingsList().Where(x => x.KeyName.Contains("Backup")).ToList();
+            List<Property> filteredList = new List<Property>(FormManager.MainWindow.selectedServer.GetSettingsList().Where(x => x.KeyName.Contains("Backup")).ToList());
             editor.PopulateBoxes(filteredList);
             if (editor.ShowDialog() == DialogResult.OK) {
                 byte[] serializedBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(editor.workingProps));

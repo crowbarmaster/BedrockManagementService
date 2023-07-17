@@ -147,11 +147,13 @@ namespace BedrockService.Client.Networking {
                                         int curCount = bedrockServer.GetLog().Count;
                                         if (curCount == srvCurLen) {
                                             bedrockServer.GetLog().Add(new LogEntry(srvText));
+                                            FormManager.MainWindow.ClientLogUpdate();
                                         }
                                     } else {
                                         int curCount = FormManager.MainWindow.connectedHost.GetLog().Count;
                                         if (curCount == srvCurLen) {
                                             FormManager.MainWindow.connectedHost.GetLog().Add(new LogEntry(srvText));
+                                            FormManager.MainWindow.ClientLogUpdate();
                                         }
                                     }
                                 }
