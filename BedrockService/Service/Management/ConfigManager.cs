@@ -46,13 +46,13 @@ namespace BedrockService.Service.Management {
         });
 
         public Task LoadServerConfigurations() => Task.Run(() => {
-            ServerConfigurator serverInfo;
+            BedrockConfiguration serverInfo;
             _serviceConfiguration.GetServerList().Clear();
             string[] files = Directory.GetFiles(GetServiceDirectory(BmsDirectoryKeys.ServerConfigs), "*.conf");
             foreach (string file in files) {
                 FileInfo FInfo = new(file);
                 string[] fileEntries = File.ReadAllLines(file);
-                serverInfo = new ServerConfigurator(_processInfo, _logger, _serviceConfiguration);
+                serverInfo = new BedrockConfiguration(_processInfo, _logger, _serviceConfiguration);
                 if (serverInfo.InitializeDefaults()) {
                     serverInfo.ProcessConfiguration(fileEntries);
                     _logger.AppendLine($"Loaded config for server {serverInfo.GetServerName()}.");
@@ -65,7 +65,7 @@ namespace BedrockService.Service.Management {
                 _serviceConfiguration.AddNewServerInfo(serverInfo);
             }
             if (_serviceConfiguration .GetServerList().Count == 0) {
-                serverInfo = new ServerConfigurator(_processInfo, _logger, _serviceConfiguration);
+                serverInfo = new BedrockConfiguration(_processInfo, _logger, _serviceConfiguration);
                 if (!serverInfo.InitializeDefaults()) {
                     _logger.AppendLine("Error creating default server!");
                 }

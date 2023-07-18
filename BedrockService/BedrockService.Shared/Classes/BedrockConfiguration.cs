@@ -8,13 +8,13 @@ using System.Linq;
 using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Shared.Classes {
-    public class ServerConfigurator : ServerInfo, IServerConfiguration {
+    public class BedrockConfiguration : ServerInfo, IServerConfiguration {
         private string _servicePath;
         private readonly IProcessInfo _processInfo;
         private readonly IBedrockLogger _logger;
         private readonly IServiceConfiguration _serviceConfiguration;
 
-        public ServerConfigurator(IProcessInfo processInfo, IBedrockLogger logger, IServiceConfiguration serviceConfiguration) : base() {
+        public BedrockConfiguration(IProcessInfo processInfo, IBedrockLogger logger, IServiceConfiguration serviceConfiguration) : base() {
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
             _processInfo = processInfo;

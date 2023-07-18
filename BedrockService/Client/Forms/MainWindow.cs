@@ -192,7 +192,7 @@ namespace BedrockService.Client.Forms {
             ServerSelectBox.Items.Clear();
             if (connectedHost != null) {
                 _logManager.InitLogThread(connectedHost);
-                foreach (ServerConfigurator server in connectedHost.GetServerList()) {
+                foreach (BedrockConfiguration server in connectedHost.GetServerList()) {
                     ServerSelectBox.Items.Add(server.GetSettingsProp(ServerPropertyKeys.ServerName).ToString());
                 }
 
@@ -294,7 +294,7 @@ namespace BedrockService.Client.Forms {
 
         private void ServerSelectBox_SelectedIndexChanged(object sender, EventArgs e) {
             if (connectedHost != null) {
-                foreach (ServerConfigurator server in connectedHost.GetServerList()) {
+                foreach (BedrockConfiguration server in connectedHost.GetServerList()) {
                     if (ServerSelectBox.SelectedItem != null && ServerSelectBox.SelectedItem.ToString() == server.GetServerName()) {
                         selectedServer = server;
                         FormManager.TCPClient.SendData(connectedHost.GetServerIndex(server), NetworkMessageTypes.EnumBackups);

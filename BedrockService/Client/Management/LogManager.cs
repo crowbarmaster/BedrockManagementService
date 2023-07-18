@@ -31,7 +31,7 @@ namespace BedrockService.Client.Management {
                 try {
                     Working = true;
                     StringBuilder sendString = new();
-                    foreach (ServerConfigurator server in _connectedHost.GetServerList()) {
+                    foreach (BedrockConfiguration server in _connectedHost.GetServerList()) {
                         server.ConsoleBuffer = server.ConsoleBuffer ?? new List<LogEntry>();
                         sendString.Append($"{server.GetSettingsProp(ServerPropertyKeys.ServerName)};{server.ConsoleBuffer.Count}|");
                     }
