@@ -6,7 +6,7 @@ using BedrockService.Shared.SerializeModels;
 using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Service.Core {
-    public class BedrockService : IBedrockService {
+    public class BmsService : IBedrockService {
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IBedrockLogger _logger;
         private readonly IProcessInfo _processInfo;
@@ -19,7 +19,7 @@ namespace BedrockService.Service.Core {
         private List<IBedrockServer> _bedrockServers { get; set; } = new();
         private ServiceStatus _CurrentServiceStatus { get; set; }
 
-        public BedrockService(IConfigurator configurator, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ITCPListener tCPListener, FileUtilities fileUtils) {
+        public BmsService(IConfigurator configurator, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ITCPListener tCPListener, FileUtilities fileUtils) {
             _fileUtils = fileUtils;
             _tCPListener = tCPListener;
             _configurator = configurator;

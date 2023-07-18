@@ -50,7 +50,7 @@ namespace BedrockService.Service {
                         .AddSingleton<ServiceConfigurator>()
                         .AddSingleton<IServiceConfiguration>(x => x.GetRequiredService<ServiceConfigurator>())
                         .AddSingleton<IBedrockConfiguration>(x => x.GetRequiredService<ServiceConfigurator>())
-                        .AddSingleton<IBedrockService, Core.BedrockService>()
+                        .AddSingleton<IBedrockService, Core.BmsService>()
                         .AddSingleton<ITCPListener, TCPListener>()
                         .AddSingleton<IConfigurator, ConfigManager>();
                 });
