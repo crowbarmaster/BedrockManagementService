@@ -136,5 +136,11 @@ namespace BedrockService.Shared.Utilities {
         public void WriteStringToFile(string path, string content) => File.WriteAllText(path, content);
 
         public void WriteStringArrayToFile(string path, string[] content) => File.WriteAllLines(path, content);
+
+        public List<string> ReadLines(string path)
+        {
+            CreateInexistantFile(path);
+            return File.ReadLines(path).ToList();
+        }
     }
 }

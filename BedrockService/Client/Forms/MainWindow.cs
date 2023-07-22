@@ -2,15 +2,16 @@
 using BedrockService.Shared.Classes;
 using BedrockService.Shared.Interfaces;
 using BedrockService.Shared.SerializeModels;
+using BedrockService.Shared.Utilities;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -23,6 +24,8 @@ namespace BedrockService.Client.Forms {
         public IClientSideServiceConfiguration clientSideServiceConfiguration;
         public ServiceStatusModel ServiceStatus;
         public bool ServerBusy = false;
+        private int _commandHistoryIndex = 0;
+        private string _commandHistoryPath = "";
         private int _connectTimeout;
         private bool _followTail = false;
         private bool _blockConnect = false;
@@ -33,15 +36,19 @@ namespace BedrockService.Client.Forms {
         private readonly System.Timers.Timer _connectTimer = new(100.0);
         private readonly LogManager _logManager;
         public ConfigManager ConfigManager;
+        public event PropertyChangedEventHandler PropertyChanged;
+        private readonly FileUtilities _fileUtils;
         public MainWindow(IProcessInfo processInfo, IBedrockLogger logger) {
             _processInfo = processInfo;
             ClientLogger = logger;
             ClientLogger.Initialize();
             _logManager = new LogManager(ClientLogger);
             ConfigManager = new ConfigManager(ClientLogger);
+            _fileUtils = new FileUtilities(_processInfo);
             InitializeComponent();
             InitForm();
             _connectTimer.Elapsed += ConnectTimer_Elapsed;
+            _commandHistoryPath = $@"{_processInfo.GetDirectory()}\commandHistory.txt";
         }
 
         private void ConnectTimer_Elapsed(object sender, ElapsedEventArgs e) {
@@ -362,11 +369,28 @@ namespace BedrockService.Client.Forms {
             }
         }
 
+
         private void SendCmd_Click(object sender, EventArgs e) {
-            if (cmdTextBox.Text.Length > 0) {
+            // store the last command in the consoleHistory.txt file
+            List<string> lines = _fileUtils.ReadLines(_commandHistoryPath);
+            if (lines.Count == 0 || (lines.Last() != cmdTextBox.Text && !string.IsNullOrEmpty(cmdTextBox.Text))) {
+                lines.Add(cmdTextBox.Text);
+            }
+            if (lines.Count > 500) {
+                // remove all lines that are not the last 500
+                int linesToRemove = lines.Count - 500;
+                lines.RemoveRange(0, linesToRemove);
+            }
+            _fileUtils.WriteStringArrayToFile(_commandHistoryPath, lines.ToArray());
+
+            // send the command to the server
+            if (cmdTextBox.Text.Length > 0 && connectedHost != null) {
                 byte[] msg = Encoding.UTF8.GetBytes(cmdTextBox.Text);
                 FormManager.TCPClient.SendData(msg, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.Command);
             }
+            _commandHistoryIndex = 0;
+            logPageControl.SelectedTab = logPageControl.TabPages[0];
+
             cmdTextBox.Text = "";
         }
 
@@ -486,6 +510,39 @@ namespace BedrockService.Client.Forms {
             }
         }
 
+        private void cmdTextBox_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e) {
+            if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down) {
+                List<string> lines = _fileUtils.ReadLines(_commandHistoryPath);
+
+                if (lines.Count > 0) {
+                    _commandHistoryIndex = _commandHistoryIndex < 0 ? 0 : _commandHistoryIndex;
+                    if (e.KeyCode == Keys.Up) {
+                        if (lines.Count > _commandHistoryIndex) {
+                            _commandHistoryIndex++;
+                        }
+                    } else {
+                        _commandHistoryIndex--;
+                    }
+                    if (_commandHistoryIndex <= 0) {
+                        cmdTextBox.Text = "";
+                    } else {
+                        // get the line at the index
+                        string line = lines.Skip(lines.Count - _commandHistoryIndex).Take(1).First();
+                        // check that line is not null then set as the text value
+                        if (line != null) {
+                            cmdTextBox.Text = line;
+                        }
+                    }
+                }
+            }
+        }
+
+
+        private void cmdTextBox_TextUpdate(object sender, KeyPressEventArgs e) {
+            // offer suggestions here
+        }
+
+
         private void HostListBox_KeyPress(object sender, KeyPressEventArgs e) {
             if (e.KeyChar == (char)Keys.Enter) {
                 Connect_Click(null, null);
@@ -545,7 +602,6 @@ namespace BedrockService.Client.Forms {
         }
 
         private void MainWindow_Load(object sender, EventArgs e) {
-
         }
 
         private void clientConfigBtn_Click(object sender, EventArgs e) {

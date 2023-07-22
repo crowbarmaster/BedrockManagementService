@@ -69,7 +69,8 @@ namespace BedrockService.Client.Networking {
                 stream = null;
                 Connected = false;
                 EstablishedLink = false;
-                _netCancelSource.Cancel();
+                if (_netCancelSource != null)
+                    _netCancelSource.Cancel();
             } catch (NullReferenceException) {
                 Connected = false;
                 EstablishedLink = false;
@@ -187,9 +188,9 @@ namespace BedrockService.Client.Networking {
                             case NetworkMessageTypes.ServerStatusRequest:
 
                                 StatusUpdateModel status = JsonConvert.DeserializeObject<StatusUpdateModel>(data, settings);
-                                if(status != null && status.ServerStatusModel != null && status.ServerStatusModel.ServerIndex != 255) {
+                                if (status != null && status.ServerStatusModel != null && status.ServerStatusModel.ServerIndex != 255) {
                                     ServerStatusModel formerServerStatus = FormManager.MainWindow.selectedServer.GetStatus();
-                                    if(!status.ServerStatusModel.Equals(formerServerStatus)) {
+                                    if (!status.ServerStatusModel.Equals(formerServerStatus)) {
                                         FormManager.MainWindow.connectedHost.GetServerInfoByIndex(status.ServerStatusModel.ServerIndex).SetStatus(status.ServerStatusModel);
                                         FormManager.MainWindow.Invoke(() => FormManager.MainWindow.RefreshAllCompenentStates());
                                         FormManager.TCPClient.SendData(serverIndex, NetworkMessageTypes.EnumBackups);
@@ -201,7 +202,7 @@ namespace BedrockService.Client.Networking {
                                 break;
                             case NetworkMessageTypes.ExportFile:
 
-                                ExportImportFileModel exportModel =  JsonConvert.DeserializeObject<ExportImportFileModel>(data, settings);
+                                ExportImportFileModel exportModel = JsonConvert.DeserializeObject<ExportImportFileModel>(data, settings);
                                 if (exportModel != null) {
                                     FormManager.MainWindow.Invoke(() => FormManager.MainWindow.RecieveExportData(exportModel));
                                 }
