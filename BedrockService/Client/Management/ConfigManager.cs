@@ -13,9 +13,9 @@ namespace BedrockService.Client.Management {
         public bool DefaultScrollLock = false;
         public bool DisplayTimestamps = false;
         public bool DebugNetworkOutput = false;
-        private readonly IBedrockLogger Logger;
+        private readonly IServerLogger Logger;
 
-        public ConfigManager(IBedrockLogger logger) {
+        public ConfigManager(IServerLogger logger) {
             Logger = logger;
             ConfigFile = $@"{ConfigDir}\Client.conf";
         }

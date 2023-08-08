@@ -9,9 +9,9 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
     public class RemovePack : IMessageParser {
 
         private readonly IServiceConfiguration _serviceConfiguration;
-        private readonly IBedrockLogger _logger;
+        private readonly IServerLogger _logger;
 
-        public RemovePack(IServiceConfiguration serviceConfiguration, IBedrockLogger logger) {
+        public RemovePack(IServiceConfiguration serviceConfiguration, IServerLogger logger) {
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
         }

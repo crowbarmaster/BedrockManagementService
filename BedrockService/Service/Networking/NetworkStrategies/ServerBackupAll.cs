@@ -12,7 +12,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
         }
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
-            foreach (IBedrockServer server in _service.GetAllServers()) {
+            foreach (IServerController server in _service.GetAllServers()) {
                 server.SetServerModified(true);
                 server.GetBackupManager().InitializeBackup();
             }

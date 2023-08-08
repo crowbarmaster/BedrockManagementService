@@ -5,11 +5,11 @@ using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Service.Server {
     public class BackupManager {
-        private readonly IBedrockLogger _logger;
-        private readonly IBedrockServer _server;
+        private readonly IServerLogger _logger;
+        private readonly IServerController _server;
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IServerConfiguration _serverConfiguration;
-        private readonly FileUtilities _fileUtils;
+        private readonly FileUtilities FileUtilities;
         private bool _autoBackupsContainPacks = false;
         private bool _backupRunning = false;
 
@@ -18,12 +18,11 @@ namespace BedrockService.Service.Server {
             Manual
         }
 
-        public BackupManager(IBedrockLogger logger, IBedrockServer server, IServerConfiguration serverConfiguration, IServiceConfiguration serviceConfiguration) {
+        public BackupManager(IServerLogger logger, IServerController server, IServerConfiguration serverConfiguration, IServiceConfiguration serviceConfiguration) {
             _logger = logger;
             _server = server;
             _serverConfiguration = serverConfiguration;
             _serviceConfiguration = serviceConfiguration;
-            _fileUtils = new FileUtilities();
             _autoBackupsContainPacks = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoBackupsContainPacks).GetBoolValue();
         }
 
@@ -71,7 +70,7 @@ namespace BedrockService.Service.Server {
                 _server.WriteToStandardIn("save resume");
                 _server.WriteToStandardIn("say Server backup complete.");
                 if (_autoBackupsContainPacks) {
-                    _fileUtils.AppendServerPacksToArchive(serverPath, backupZip, levelDirInfo);
+                    FileUtilities.AppendServerPacksToArchive(serverPath, backupZip, levelDirInfo);
                 }
                 _serviceConfiguration.CalculateTotalBackupsAllServers().Wait();
                 return resuilt;

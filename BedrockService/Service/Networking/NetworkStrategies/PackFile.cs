@@ -6,11 +6,9 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
     public class PackFile : IMessageParser {
 
         private readonly IServiceConfiguration _serviceConfiguration;
-        private readonly IBedrockLogger _logger;
-        private readonly FileUtilities _fileUtils;
+        private readonly IServerLogger _logger;
 
-        public PackFile(IServiceConfiguration serviceConfiguration, IBedrockLogger logger, FileUtilities fileUtils) {
-            _fileUtils = fileUtils;
+        public PackFile(IServiceConfiguration serviceConfiguration, IServerLogger logger) {
             _logger = logger;
             _serviceConfiguration = serviceConfiguration;
         }
@@ -23,18 +21,18 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
                 string knownPacksFile = GetServerFilePath(BdsFileNameKeys.ValidKnownPacks, serverPath);
                 string filePath;
                 if (container.ManifestType == MinecraftPackTypeStrings[MinecraftPackTypes.WorldPack]) {
-                    _fileUtils.CopyFolderTree(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo(GetServerDirectory(BdsDirectoryKeys.ServerWorldDir_LevelName, serverPath, container.FolderName)));
+                    FileUtilities.CopyFolderTree(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo(GetServerDirectory(BdsDirectoryKeys.ServerWorldDir_LevelName, serverPath, container.FolderName)));
                 }
                 if (container.ManifestType == MinecraftPackTypeStrings[MinecraftPackTypes.Behavior]) {
                     filePath = GetServerFilePath(BdsFileNameKeys.WorldBehaviorPacks, serverPath);
                     if (MinecraftFileUtilities.UpdateWorldPackFile(filePath, container.JsonManifest) && MinecraftFileUtilities.UpdateKnownPackFile(knownPacksFile, container)) {
-                        _fileUtils.CopyFolderTree(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($@"{filePath}\{container.FolderName}"));
+                        FileUtilities.CopyFolderTree(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($@"{filePath}\{container.FolderName}"));
                     }
                 }
                 if (container.ManifestType == MinecraftPackTypeStrings[MinecraftPackTypes.Resource]) {
                     filePath = GetServerFilePath(BdsFileNameKeys.WorldResourcePacks, serverPath);
                     if (MinecraftFileUtilities.UpdateWorldPackFile(filePath, container.JsonManifest) && MinecraftFileUtilities.UpdateKnownPackFile(knownPacksFile, container)) {
-                        _fileUtils.CopyFolderTree(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($@"{filePath}\{container.FolderName}"));
+                        FileUtilities.CopyFolderTree(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($@"{filePath}\{container.FolderName}"));
                     }
                 }
                 _logger.AppendLine($@"{container.GetFixedManifestType()} pack installed to server: {container.JsonManifest.header.name}.");

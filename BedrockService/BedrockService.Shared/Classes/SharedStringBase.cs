@@ -6,6 +6,12 @@ using System.Collections.Generic;
 namespace BedrockService.Shared.Classes {
     public static class SharedStringBase {
 
+        public enum MinecraftServerArch {
+            Bedrock,
+            LiteLoader,
+            Java
+        }
+
         public enum ServicePropertyKeys {
             ServersPath,
             AcceptedMojangLic,
@@ -15,16 +21,15 @@ namespace BedrockService.Shared.Classes {
             TimestampLogEntries,
             GlobalizedPlayerDatabase,
             DefaultGlobalPermLevel,
-            LatestLiteLoaderVersion,
             UseBetaLiteLoaderVersions
         };
 
         public enum ServerPropertyKeys {
+            MinecraftType,
             ServerName,
             FileName,
             ServerPath,
             ServerExeName,
-            LiteLoaderEnabled,
             ServerAutostartEnabled,
             BackupEnabled,
             BackupPath,
@@ -35,10 +40,9 @@ namespace BedrockService.Shared.Classes {
             CheckUpdates,
             AutoDeployUpdates,
             UpdateCron,
-            SelectedServerVersion,
-            SelectedLiteLoaderVersion,
-            DeployedVersion,
-            DeployedLiteLoaderVersion
+            ServerVersion,
+            UseBetaVersions,
+            JavaArgs
         }
 
         public enum MinecraftPackTypes {
@@ -60,15 +64,19 @@ namespace BedrockService.Shared.Classes {
             ClientConfig,
             ServerConfig_Name,
             BmsVersionIni,
-            BedrockVersionIni,
+            LatestVerIni_Name,
             BdsUpdatePackage_Ver,
+            JdsUpdatePackage_Ver,
             LLUpdatePackage_Ver,
             LLModUpdatePackage_Ver,
-            StockProps,
+            BedrockStockProps_Ver,
+            JavaStockProps_Ver,
             ServerPlayerRegistry_Name,
             ServerPlayerTelem_Name,
             GlobalPlayerRegistry,
-            GlobalPlayerTelem
+            GlobalPlayerTelem,
+            Jdk17JavaVanillaExe,
+            Jdk17JavaMmsExe
         }
 
         public enum BmsDirectoryKeys {
@@ -80,26 +88,32 @@ namespace BedrockService.Shared.Classes {
             ServerPlayerPath,
             GlobalPlayerPath,
             BdsBuilds,
+            JavaBuilds,
             LLBuilds,
             BuildArchives,
             CoreFiles,
-            CoreFileBuild_Ver,
+            BedrockCoreFiles_Ver,
+            JavaCoreFiles_Ver,
+            Jdk20Path,
+            Jdk17BinPath
         }
 
         public enum BdsFileNameKeys {
             BmsServer_Name,
-            DeployedBedrockVerIni,
-            DeployedLLBDSIni,
+            JavaServer_Name,
+            DeployedINI,
             ValidKnownPacks,
             LevelDat,
             VanillaBedrock,
+            VanillaJava,
             ServerProps,
             WorldResourcePacks,
             WorldBehaviorPacks,
             AllowList,
             WhiteList,
             PermList,
-            LLConfig
+            LLConfig,
+            JavaEula
         }
 
         public enum BdsDirectoryKeys {
@@ -116,12 +130,15 @@ namespace BedrockService.Shared.Classes {
             LLReleasesJson,
             BdsVersionRegx,
             BdsPackage_Ver,
+            LLPackageOld_Ver,
             LLPackage_Ver,
             LLModPackage_Ver,
             LLBdsVersionRegx,
             LLBdsVersionRegxNew,
             BdsVersionJson,
-            PluginRepoJson
+            JdsVersionJson,
+            PluginRepoJson,
+            Jdk17DownloadLink
         }
 
         public static Dictionary<BmsFileNameKeys, BmsDirectoryKeys> BmsFileParentDirectories = new() {
@@ -129,23 +146,28 @@ namespace BedrockService.Shared.Classes {
             { BmsFileNameKeys.ClientConfig, BmsDirectoryKeys.Root },
             { BmsFileNameKeys.ServerConfig_Name, BmsDirectoryKeys.ServerConfigs },
             { BmsFileNameKeys.BmsVersionIni, BmsDirectoryKeys.Root },
-            { BmsFileNameKeys.BedrockVersionIni, BmsDirectoryKeys.BmsConfig },
+            { BmsFileNameKeys.LatestVerIni_Name, BmsDirectoryKeys.BmsConfig },
             { BmsFileNameKeys.BdsUpdatePackage_Ver, BmsDirectoryKeys.BuildArchives },
+            { BmsFileNameKeys.JdsUpdatePackage_Ver, BmsDirectoryKeys.JavaCoreFiles_Ver },
             { BmsFileNameKeys.LLUpdatePackage_Ver, BmsDirectoryKeys.LLBuilds },
             { BmsFileNameKeys.LLModUpdatePackage_Ver, BmsDirectoryKeys.LLBuilds },
-            { BmsFileNameKeys.StockProps, BmsDirectoryKeys.CoreFileBuild_Ver },
+            { BmsFileNameKeys.BedrockStockProps_Ver, BmsDirectoryKeys.BedrockCoreFiles_Ver },
+            { BmsFileNameKeys.JavaStockProps_Ver, BmsDirectoryKeys.JavaCoreFiles_Ver },
             { BmsFileNameKeys.ServerPlayerRegistry_Name, BmsDirectoryKeys.ServerPlayerPath },
             { BmsFileNameKeys.GlobalPlayerRegistry, BmsDirectoryKeys.GlobalPlayerPath },
             { BmsFileNameKeys.ServerPlayerTelem_Name, BmsDirectoryKeys.ServerPlayerPath },
-            { BmsFileNameKeys.GlobalPlayerTelem, BmsDirectoryKeys.GlobalPlayerPath }
+            { BmsFileNameKeys.GlobalPlayerTelem, BmsDirectoryKeys.GlobalPlayerPath },
+            { BmsFileNameKeys.Jdk17JavaVanillaExe, BmsDirectoryKeys.Jdk17BinPath },
+            { BmsFileNameKeys.Jdk17JavaMmsExe, BmsDirectoryKeys.Jdk17BinPath }
         };
 
         public static Dictionary<BdsFileNameKeys, BdsDirectoryKeys> BdsFileParentDirectories = new() {
             { BdsFileNameKeys.BmsServer_Name, BdsDirectoryKeys.ServerRoot },
+            { BdsFileNameKeys.JavaServer_Name, BdsDirectoryKeys.ServerRoot },
             { BdsFileNameKeys.VanillaBedrock, BdsDirectoryKeys.ServerRoot },
+            { BdsFileNameKeys.VanillaJava, BdsDirectoryKeys.ServerRoot },
             { BdsFileNameKeys.ServerProps, BdsDirectoryKeys.ServerRoot },
-            { BdsFileNameKeys.DeployedBedrockVerIni, BdsDirectoryKeys.ServerRoot },
-            { BdsFileNameKeys.DeployedLLBDSIni, BdsDirectoryKeys.ServerRoot },
+            { BdsFileNameKeys.DeployedINI, BdsDirectoryKeys.ServerRoot },
             { BdsFileNameKeys.ValidKnownPacks, BdsDirectoryKeys.ServerRoot },
             { BdsFileNameKeys.WorldBehaviorPacks, BdsDirectoryKeys.ServerWorldDir_LevelName },
             { BdsFileNameKeys.WorldResourcePacks, BdsDirectoryKeys.ServerWorldDir_LevelName },
@@ -153,7 +175,15 @@ namespace BedrockService.Shared.Classes {
             { BdsFileNameKeys.WhiteList, BdsDirectoryKeys.ServerRoot },
             { BdsFileNameKeys.PermList, BdsDirectoryKeys.ServerRoot },
             { BdsFileNameKeys.LevelDat, BdsDirectoryKeys.ServerWorldDir_LevelName },
-            { BdsFileNameKeys.LLConfig, BdsDirectoryKeys.LLConfigDir }
+            { BdsFileNameKeys.LLConfig, BdsDirectoryKeys.LLConfigDir },
+            { BdsFileNameKeys.JavaEula, BdsDirectoryKeys.ServerRoot }
+        };
+
+
+        public static Dictionary<MinecraftServerArch, string> MinecraftArchStrings = new() {
+            { MinecraftServerArch.Bedrock, "Bedrock" },
+            { MinecraftServerArch.LiteLoader, "LiteLoader" },
+            { MinecraftServerArch.Java, "Java" }
         };
 
         public static Dictionary<BdsDirectoryKeys, string> BdsDirectoryStrings = new() {
@@ -169,13 +199,14 @@ namespace BedrockService.Shared.Classes {
             { BmsUrlKeys.BdsDownloadPage, "https://www.minecraft.net/en-us/download/server/bedrock" },
             { BmsUrlKeys.BdsPackage_Ver, "https://minecraft.azureedge.net/bin-win/bedrock-server-{0}.zip" },
             { BmsUrlKeys.BdsVersionRegx, @"(https://minecraft.azureedge.net/bin-win/bedrock-server-)(.*)(\.zip)" },
-            { BmsUrlKeys.LLBdsVersionRegx, @"(Adapted to BDS-)(.*)( \|)" },
-            { BmsUrlKeys.LLBdsVersionRegxNew, @"(Support BDS )(.*)( \|)" },
+            { BmsUrlKeys.LLPackageOld_Ver, "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/{0}/LiteLoader-{0}.zip" },
             { BmsUrlKeys.LLPackage_Ver, "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/{0}/LiteLoaderBDS.zip" },
             { BmsUrlKeys.LLModPackage_Ver, "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/{0}/Modules.zip" },
             { BmsUrlKeys.LLReleasesJson, "https://github.com/crowbarmaster/BedrockManagementService/raw/master/BMS_Files/liteloader_version_manifest.json" },
             { BmsUrlKeys.BdsVersionJson, "https://github.com/crowbarmaster/BedrockManagementService/raw/master/BMS_Files/bedrock_version_manifest.json" },
-            { BmsUrlKeys.PluginRepoJson, "https://github.com/crowbarmaster/BedrockManagementService/raw/master/BMS_Files/plugin_repo.json"}
+            { BmsUrlKeys.JdsVersionJson, "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json" },
+            { BmsUrlKeys.PluginRepoJson, "https://github.com/crowbarmaster/BedrockManagementService/raw/master/BMS_Files/plugin_repo.json"},
+            { BmsUrlKeys.Jdk17DownloadLink, "https://download.oracle.com/java/17/latest/jdk-17_windows-x64_bin.zip"}
         };
 
         public static Dictionary<BmsDirectoryKeys, string> BmsDirectoryStrings = new() {
@@ -185,34 +216,42 @@ namespace BedrockService.Shared.Classes {
             { BmsDirectoryKeys.ServerPlayerPath, "BmsConfig\\ServerConfigs\\PlayerRecords" },
             { BmsDirectoryKeys.GlobalPlayerPath, "BmsConfig\\ServerConfigs\\GlobalPlayers" },
             { BmsDirectoryKeys.LLBuilds, "BmsConfig\\LLBuilds" },
+            { BmsDirectoryKeys.JavaBuilds, "BmsConfig\\JavaBuilds" },
             { BmsDirectoryKeys.BdsBuilds, "BmsConfig\\BDSBuilds" },
             { BmsDirectoryKeys.BuildArchives, "BmsConfig\\BDSBuilds\\BuildArchives" },
-            { BmsDirectoryKeys.CoreFiles, "BmsConfig\\BDSBuilds\\CoreFiles" },
-            { BmsDirectoryKeys.CoreFileBuild_Ver, "BmsConfig\\BDSBuilds\\CoreFiles\\Build_{0}" }
+            { BmsDirectoryKeys.JavaCoreFiles_Ver, "BmsConfig\\JavaBuilds\\Build_{0}" },
+            { BmsDirectoryKeys.BedrockCoreFiles_Ver, "BmsConfig\\BDSBuilds\\CoreFiles\\Build_{0}" },
+            { BmsDirectoryKeys.Jdk20Path, "Jdk17" },
+            { BmsDirectoryKeys.Jdk17BinPath, "Jdk17\\bin" }
         };
 
         public static Dictionary<BmsFileNameKeys, string> BmsFileNameStrings = new() {
             { BmsFileNameKeys.ServiceConfig, "Service.conf" },
             { BmsFileNameKeys.ClientConfig, "Client.conf" },
             { BmsFileNameKeys.ServerConfig_Name, "{0}.conf" },
-            { BmsFileNameKeys.BedrockVersionIni, "latest_bedrock_ver.ini" },
+            { BmsFileNameKeys.LatestVerIni_Name, "LatestVer-{0}.ini" },
             { BmsFileNameKeys.BmsVersionIni, "ServiceVersion.ini" },
-            { BmsFileNameKeys.StockProps, "stock_props.conf" },
+            { BmsFileNameKeys.BedrockStockProps_Ver, "stock_props.conf" },
+            { BmsFileNameKeys.JavaStockProps_Ver, "server.properties" },
             { BmsFileNameKeys.GlobalPlayerRegistry, "Service.preg" },
             { BmsFileNameKeys.ServerPlayerRegistry_Name, "{0}.preg" },
             { BmsFileNameKeys.GlobalPlayerTelem, "Service.playerdb" },
             { BmsFileNameKeys.ServerPlayerTelem_Name, "{0}.playerdb" },
             { BmsFileNameKeys.BdsUpdatePackage_Ver, "Update_{0}.zip" },
+            { BmsFileNameKeys.JdsUpdatePackage_Ver, "server.jar" },
             { BmsFileNameKeys.LLUpdatePackage_Ver, "LLUpdate_{0}.zip" },
-            { BmsFileNameKeys.LLModUpdatePackage_Ver, "LLModUpdate_{0}.zip" }
+            { BmsFileNameKeys.LLModUpdatePackage_Ver, "LLModUpdate_{0}.zip" },
+            { BmsFileNameKeys.Jdk17JavaVanillaExe, "javaw.exe" },
+            { BmsFileNameKeys.Jdk17JavaMmsExe, "MmsServerInstance.exe" }
         };
 
         public static Dictionary<BdsFileNameKeys, string> BdsFileNameStrings = new() {
             { BdsFileNameKeys.BmsServer_Name, "BedrockService.{0}.exe" },
+            { BdsFileNameKeys.JavaServer_Name, "BedrockService.{0}.jar" },
             { BdsFileNameKeys.VanillaBedrock, "bedrock_server.exe" },
+            { BdsFileNameKeys.VanillaJava, "server.jar" },
             { BdsFileNameKeys.ValidKnownPacks, "valid_known_packs.json" },
-            { BdsFileNameKeys.DeployedBedrockVerIni, "deployed_bedrock_ver.ini" },
-            { BdsFileNameKeys.DeployedLLBDSIni, "deployed_liteloader_ver.ini" },
+            { BdsFileNameKeys.DeployedINI, "DeployedVer.ini" },
             { BdsFileNameKeys.LevelDat, "level.dat" },
             { BdsFileNameKeys.ServerProps, "server.properties" },
             { BdsFileNameKeys.WorldResourcePacks, "world_resource_packs.json" },
@@ -220,7 +259,8 @@ namespace BedrockService.Shared.Classes {
             { BdsFileNameKeys.AllowList, "allowlist.json" },
             { BdsFileNameKeys.WhiteList, "whitelist.json" },
             { BdsFileNameKeys.PermList, "permissions.json" },
-            { BdsFileNameKeys.LLConfig, "LiteLoader.json" }
+            { BdsFileNameKeys.LLConfig, "LiteLoader.json" },
+            { BdsFileNameKeys.JavaEula, "eula.txt" }
         };
 
         public static Dictionary<ServicePropertyKeys, string> ServicePropertyStrings = new() {
@@ -232,16 +272,14 @@ namespace BedrockService.Shared.Classes {
             { ServicePropertyKeys.TimestampLogEntries, "TimestampLogEntries" },
             { ServicePropertyKeys.GlobalizedPlayerDatabase, "GlobalizedPlayerDatabase" },
             { ServicePropertyKeys.DefaultGlobalPermLevel, "DefaultGlobalPermLevel" },
-            { ServicePropertyKeys.UseBetaLiteLoaderVersions, "UseBetaLiteLoaderVersions" },
-            { ServicePropertyKeys.LatestLiteLoaderVersion, "LatestLiteLoaderVersion" }
         };
 
         public static Dictionary<ServerPropertyKeys, string> ServerPropertyStrings = new() {
+            { ServerPropertyKeys.MinecraftType, "MinecraftType" },
             { ServerPropertyKeys.ServerName, "ServerName" },
             { ServerPropertyKeys.FileName, "FileName" },
             { ServerPropertyKeys.ServerPath, "ServerPath" },
             { ServerPropertyKeys.ServerExeName, "ServerExeName" },
-            { ServerPropertyKeys.LiteLoaderEnabled, "LiteLoaderEnabled" },
             { ServerPropertyKeys.ServerAutostartEnabled, "ServerAutostartEnabled" },
             { ServerPropertyKeys.BackupEnabled, "BackupEnabled" },
             { ServerPropertyKeys.BackupPath, "BackupPath" },
@@ -252,10 +290,9 @@ namespace BedrockService.Shared.Classes {
             { ServerPropertyKeys.CheckUpdates, "CheckUpdates" },
             { ServerPropertyKeys.AutoDeployUpdates, "AutoDeployUpdates" },
             { ServerPropertyKeys.UpdateCron, "UpdateCron" },
-            { ServerPropertyKeys.SelectedServerVersion, "SelectedServerVersion" },
-            { ServerPropertyKeys.SelectedLiteLoaderVersion, "SelectedLiteLoaderVersion" },
-            { ServerPropertyKeys.DeployedVersion, "DeployedVersion" },
-            { ServerPropertyKeys.DeployedLiteLoaderVersion, "DeployedLiteLoaderVersion" },
+            { ServerPropertyKeys.ServerVersion, "ServerVersion" },
+            { ServerPropertyKeys.UseBetaVersions, "UseBetaVersions" },
+            { ServerPropertyKeys.JavaArgs, "JavaArgs" }
         };
 
         public static Dictionary<BmsDependServerPropKeys, string> BmsDependServerPropStrings = new() {
@@ -271,6 +308,8 @@ namespace BedrockService.Shared.Classes {
             { MinecraftPackTypes.Resource, "resources" },
             { MinecraftPackTypes.WorldPack, "WorldPack" }
         };
+
+       
 
         public static void SetWorkingDirectory(IProcessInfo processInfo) {
             if (!BmsDirectoryStrings.ContainsKey(BmsDirectoryKeys.WorkingDirectory)) {

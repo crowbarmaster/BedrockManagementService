@@ -46,7 +46,7 @@ namespace BedrockService.Service {
                         .AddSingleton(processInfo)
                         .AddTransient<NetworkStrategyLookup>()
                         .AddTransient<FileUtilities>()
-                        .AddSingleton<IBedrockLogger, BedrockLogger>()
+                        .AddSingleton<IServerLogger, MinecraftServerLogger>()
                         .AddSingleton<ServiceConfigurator>()
                         .AddSingleton<IServiceConfiguration>(x => x.GetRequiredService<ServiceConfigurator>())
                         .AddSingleton<IBedrockConfiguration>(x => x.GetRequiredService<ServiceConfigurator>())

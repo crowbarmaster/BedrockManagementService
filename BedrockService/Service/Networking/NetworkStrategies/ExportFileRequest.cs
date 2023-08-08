@@ -54,8 +54,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
                 }
             }
             if (exportFileInfo.PackageFlags >= PackageFlags.WorldPacks) {
-                FileUtilities fileUtilities = new();
-                fileUtilities.CreatePackBackupFiles(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString(), server.GetProp(BmsDependServerPropKeys.LevelName).ToString(), packageFile);
+                FileUtilities.CreatePackBackupFiles(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString(), server.GetProp(BmsDependServerPropKeys.LevelName).ToString(), packageFile);
             }
             if (exportFileInfo.PackageFlags >= PackageFlags.PlayerDatabase) {
                 if (File.Exists(GetServiceFilePath(BmsFileNameKeys.ServerPlayerTelem_Name, server.GetServerName()))) {

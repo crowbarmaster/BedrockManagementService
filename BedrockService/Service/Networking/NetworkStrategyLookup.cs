@@ -7,7 +7,7 @@ namespace BedrockService.Service.Networking {
         private readonly Dictionary<NetworkMessageTypes, IMessageParser> _standardMessageLookup;
         private readonly Dictionary<NetworkMessageTypes, IFlaggedMessageParser> _flaggedMessageLookup;
 
-        public NetworkStrategyLookup(ITCPListener listener, IBedrockService service, IBedrockLogger logger, IConfigurator configurator, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, FileUtilities fileUtils) {
+        public NetworkStrategyLookup(ITCPListener listener, IBedrockService service, IServerLogger logger, IConfigurator configurator, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, FileUtilities fileUtils) {
             _standardMessageLookup = new Dictionary<NetworkMessageTypes, IMessageParser>()
             {
                 {NetworkMessageTypes.Connect, new Connect(serviceConfiguration) },
@@ -25,7 +25,7 @@ namespace BedrockService.Service.Networking {
                 {NetworkMessageTypes.StartCmdUpdate, new StartCmdUpdate(configurator, serviceConfiguration) },
                 {NetworkMessageTypes.ConsoleLogUpdate, new ConsoleLogUpdate(logger, serviceConfiguration, service) },
                 {NetworkMessageTypes.PackList, new PackList(processInfo, serviceConfiguration, logger) },
-                {NetworkMessageTypes.PackFile, new PackFile(serviceConfiguration, logger, fileUtils) },
+                {NetworkMessageTypes.PackFile, new PackFile(serviceConfiguration, logger) },
                 {NetworkMessageTypes.RemovePack, new RemovePack(serviceConfiguration, logger) },
                 {NetworkMessageTypes.CheckUpdates, new CheckUpdates(service) },
                 {NetworkMessageTypes.PlayersRequest, new PlayerRequest(service) },

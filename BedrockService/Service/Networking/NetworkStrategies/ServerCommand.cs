@@ -4,10 +4,10 @@ using System.Text;
 namespace BedrockService.Service.Networking.NetworkStrategies {
     public class ServerCommand : IMessageParser {
         private readonly IBedrockService _service;
-        private readonly IBedrockLogger _logger;
+        private readonly IServerLogger _logger;
 
 
-        public ServerCommand(IBedrockService service, IBedrockLogger logger) {
+        public ServerCommand(IBedrockService service, IServerLogger logger) {
             _service = service;
             _logger = logger;
         }

@@ -9,7 +9,7 @@ namespace BedrockService.Service.Networking {
         private TcpListener? _inListener;
         private NetworkStream? _stream;
         private readonly IServiceConfiguration _serviceConfiguration;
-        private readonly IBedrockLogger _logger;
+        private readonly IServerLogger _logger;
         private int _heartbeatFailTimeout;
         private readonly int _heartbeatFailTimeoutLimit = 2;
         private Dictionary<NetworkMessageTypes, IMessageParser>? _standardMessageLookup;
@@ -22,7 +22,7 @@ namespace BedrockService.Service.Networking {
         private bool _canClientConnect = true;
         private bool _serviceStarted = false;
 
-        public TCPListener(IServiceConfiguration serviceConfiguration, IBedrockLogger logger, IProcessInfo processInfo) {
+        public TCPListener(IServiceConfiguration serviceConfiguration, IServerLogger logger, IProcessInfo processInfo) {
             _logger = logger;
             _serviceConfiguration = serviceConfiguration;
             _cancelTokenSource = new CancellationTokenSource();

@@ -10,12 +10,12 @@ using static BedrockService.Shared.Classes.SharedStringBase;
 namespace BedrockService.Service.Server.ConsoleFilters {
     public class BackupStringFilter : IConsoleFilter {
         IServerConfiguration _serverConfiguration;
-        IBedrockLogger _logger;
+        IServerLogger _logger;
         IConfigurator _configurator;
-        IBedrockServer _bedrockServer;
+        IServerController _bedrockServer;
         IServiceConfiguration _serviceConfiguration;
 
-        public BackupStringFilter(IBedrockLogger logger, IConfigurator configurator, IServerConfiguration serverConfiguration, IBedrockServer bedrockServer, IServiceConfiguration bedrockService) {
+        public BackupStringFilter(IServerLogger logger, IConfigurator configurator, IServerConfiguration serverConfiguration, IServerController bedrockServer, IServiceConfiguration bedrockService) {
             _serverConfiguration = serverConfiguration;
             _logger = logger;
             _configurator = configurator;

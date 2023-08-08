@@ -6,11 +6,11 @@ namespace BedrockService.Service.Core {
         private readonly IBedrockService _bedrockService;
         private Topshelf.Host? _host;
         private readonly IProcessInfo _processInfo;
-        private readonly IBedrockLogger _logger;
+        private readonly IServerLogger _logger;
         private readonly IHostApplicationLifetime _applicationLifetime;
         TopshelfExitCode _exitCode;
 
-        public WindowsService(IProcessInfo processInfo, IBedrockLogger logger, IBedrockService bedrockService, NetworkStrategyLookup networkStrategyLookup, IHostApplicationLifetime appLifetime) {
+        public WindowsService(IProcessInfo processInfo, IServerLogger logger, IBedrockService bedrockService, NetworkStrategyLookup networkStrategyLookup, IHostApplicationLifetime appLifetime) {
             _logger = logger;
             _processInfo = processInfo;
             _bedrockService = bedrockService;

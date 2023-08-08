@@ -1,5 +1,6 @@
 ﻿using BedrockService.Client.Management;
 using BedrockService.Shared.Classes;
+using BedrockService.Shared.Classes.Configurations;
 using BedrockService.Shared.Interfaces;
 using BedrockService.Shared.SerializeModels;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace BedrockService.Client.Forms {
             ServerPropertyStrings[ServerPropertyKeys.ServerExeName],
             ServerPropertyStrings[ServerPropertyKeys.FileName],
             ServerPropertyStrings[ServerPropertyKeys.ServerPath],
-            ServerPropertyStrings[ServerPropertyKeys.DeployedVersion]
+            ServerPropertyStrings[ServerPropertyKeys.ServerVersion]
         };
 
         public AddNewServerForm(IClientSideServiceConfiguration serviceConfiguration, List<IServerConfiguration> serverConfigurations) {
@@ -27,9 +28,9 @@ namespace BedrockService.Client.Forms {
             InitializeComponent();
             IServerConfiguration server = new BedrockConfiguration(FormManager.processInfo, FormManager.Logger, FormManager.MainWindow.connectedHost);
             server.InitializeDefaults();
-            ServerCombinedPropModel.ServerPropList = FormManager.MainWindow.connectedHost.GetServerDefaultPropList();
+            ServerCombinedPropModel.ServerPropList = FormManager.MainWindow.connectedHost.GetServerDefaultPropList(MinecraftServerArch.Bedrock);
             ServerCombinedPropModel.ServicePropList = server.GetSettingsList();
-            versionTextBox.Text = FormManager.MainWindow.connectedHost.GetLatestBDSVersion();
+            versionTextBox.Text = FormManager.MainWindow.connectedHost.GetLatestVersion(MinecraftServerArch.Bedrock);
         }
 
         private void editPropsBtn_Click(object sender, System.EventArgs e) {
@@ -77,17 +78,17 @@ namespace BedrockService.Client.Forms {
             if (ipV6Box.TextLength > 0)
                 ServerCombinedPropModel.ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.PortI6]).StringValue = ipV6Box.Text;
 
-            ServerCombinedPropModel.ServicePropList.First(prop => prop.KeyName == ServerPropertyStrings[ServerPropertyKeys.DeployedVersion]).StringValue = versionTextBox.Text;
+            ServerCombinedPropModel.ServicePropList.First(prop => prop.KeyName == ServerPropertyStrings[ServerPropertyKeys.ServerVersion]).StringValue = versionTextBox.Text;
             DialogResult = DialogResult.OK;
         }
 
         private void versionTextBox_TextChanged(object sender, System.EventArgs e) {
-            if (versionTextBox.Text != FormManager.MainWindow.connectedHost.GetLatestBDSVersion()) {
+            if (versionTextBox.Text != FormManager.MainWindow.connectedHost.GetLatestVersion(MinecraftServerArch.Bedrock)) {
                 editPropsBtn.Enabled = false;
             } else {
                 editPropsBtn.Enabled = true;
             }
-            ServerCombinedPropModel.ServicePropList.First(prop => prop.KeyName == ServerPropertyStrings[ServerPropertyKeys.SelectedServerVersion]).StringValue = versionTextBox.Text;
+            ServerCombinedPropModel.ServicePropList.First(prop => prop.KeyName == ServerPropertyStrings[ServerPropertyKeys.ServerVersion]).StringValue = versionTextBox.Text;
         }
     }
 }

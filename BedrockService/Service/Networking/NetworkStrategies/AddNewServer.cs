@@ -1,19 +1,21 @@
 ﻿using BedrockService.Service.Networking.Interfaces;
+using BedrockService.Shared.Classes.Configurations;
 using BedrockService.Shared.SerializeModels;
 using Newtonsoft.Json;
 using System.Text;
 using static BedrockService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Service.Networking.NetworkStrategies {
+namespace BedrockService.Service.Networking.NetworkStrategies
+{
     public class AddNewServer : IMessageParser {
         private readonly IProcessInfo _processInfo;
 
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IConfigurator _configurator;
         private readonly IBedrockService _bedrockService;
-        private readonly IBedrockLogger _logger;
+        private readonly IServerLogger _logger;
 
-        public AddNewServer(IBedrockLogger logger, IProcessInfo processInfo, IConfigurator configurator, IServiceConfiguration serviceConfiguration, IBedrockService bedrockService) {
+        public AddNewServer(IServerLogger logger, IProcessInfo processInfo, IConfigurator configurator, IServiceConfiguration serviceConfiguration, IBedrockService bedrockService) {
             _processInfo = processInfo;
             _bedrockService = bedrockService;
             _configurator = configurator;
@@ -31,15 +33,14 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
             Property? serverNameProp = propList?.First(p => p.KeyName == "server-name");
             Property? ipV4Prop = propList?.First(p => p.KeyName == "server-port");
             Property? ipV6Prop = propList?.First(p => p.KeyName == "server-portv6");
-            Property? versionProp = servicePropList?.First(p => p.KeyName == "DeployedVersion");
+            Property? versionProp = servicePropList?.First(p => p.KeyName == "ServerVersion");
             BedrockConfiguration newServer = new(_processInfo, _logger, _serviceConfiguration);
             newServer.ServicePropList = servicePropList;
-            if (_serviceConfiguration.GetLatestBDSVersion() == versionProp?.StringValue) {
+            if (_serviceConfiguration.GetLatestVersion(MinecraftServerArch.Bedrock) == versionProp?.StringValue) {
                 newServer.ServerPropList = propList;
             } else {
                 newServer.SetServerVersion(versionProp?.StringValue);
-                newServer.ValidateVersion(versionProp?.StringValue);
-                newServer.GetSettingsProp(ServerPropertyKeys.DeployedVersion).SetValue(versionProp?.StringValue);
+                newServer.GetSettingsProp(ServerPropertyKeys.ServerVersion).SetValue(versionProp?.StringValue);
                 newServer.SetProp("server-name", serverNameProp?.StringValue);
                 newServer.SetProp("server-port", ipV4Prop?.StringValue);
                 newServer.SetProp("server-portv6", ipV6Prop?.StringValue);

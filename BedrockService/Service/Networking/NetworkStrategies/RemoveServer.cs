@@ -18,7 +18,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
         }
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex, NetworkMessageFlags flag) {
-            _bedrockService.GetBedrockServerByIndex(serverIndex).AwaitableServerStop(true).Wait();
+            _bedrockService.GetBedrockServerByIndex(serverIndex).ServerStop(true).Wait();
             _configurator.RemoveServerConfigs(_serviceConfiguration.GetServerInfoByIndex(serverIndex), flag);
             _bedrockService.RemoveBedrockServerByIndex(serverIndex);
             JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };

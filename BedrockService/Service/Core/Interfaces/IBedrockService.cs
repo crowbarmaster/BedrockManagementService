@@ -8,10 +8,10 @@ namespace BedrockService.Service.Core.Interfaces {
         void InitializeNewServer(IServerConfiguration serverConfiguration);
         Task RestartService();
         ServiceStatusModel GetServiceStatus();
-        IBedrockServer GetBedrockServerByIndex(int index);
-        IBedrockServer? GetBedrockServerByName(string name);
+        IServerController GetBedrockServerByIndex(int index);
+        IServerController? GetBedrockServerByName(string name);
         IPlayerManager GetPlayerManager();
-        List<IBedrockServer> GetAllServers();
+        List<IServerController> GetAllServers();
         void TestStart();
         void TestStop();
         bool ServiceShutdown();

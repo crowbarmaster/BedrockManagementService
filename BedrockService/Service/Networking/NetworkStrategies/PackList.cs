@@ -10,9 +10,9 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
 
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IProcessInfo _processInfo;
-        private readonly IBedrockLogger _logger;
+        private readonly IServerLogger _logger;
 
-        public PackList(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, IBedrockLogger logger) {
+        public PackList(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, IServerLogger logger) {
             _logger = logger;
             _serviceConfiguration = serviceConfiguration;
             _processInfo = processInfo;
@@ -25,7 +25,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
             List<MinecraftPackContainer> list = new();
             foreach (KnownPacksJsonModel pack in knownPacks.InstalledPacks.Contents) {
                 MinecraftPackParser currentParser = new();
-                if (!_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetLiteLoaderStatus()) {
+                if (_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetServerArch() == MinecraftServerArch.LiteLoader) {
                     pack.path = pack.path.Insert(0, "development_");
                 }
                 string packDir = $@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp(ServerPropertyKeys.ServerPath)}\{pack.path.Replace(@"/", @"\")}";

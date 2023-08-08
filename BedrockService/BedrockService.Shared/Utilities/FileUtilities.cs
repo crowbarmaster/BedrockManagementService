@@ -6,24 +6,29 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Shared.Utilities {
     public class FileUtilities {
-        public void CreateInexistantFile(string filePath) {
-            if (!File.Exists(filePath)) {
-                File.Create(filePath).Close();
+        public static void CreateInexistantFile(string filePath) {
+            FileInfo fileInfo = new FileInfo(filePath);
+            if (!Directory.Exists(fileInfo.Directory.FullName)) {
+                fileInfo.Directory.Create();
+            }
+            if (!fileInfo.Exists) {
+                fileInfo.Create().Close();
             }
         }
 
-        public void CreateInexistantDirectory(string DirectoryPath) {
+        public static void CreateInexistantDirectory(string DirectoryPath) {
             if (!Directory.Exists(DirectoryPath)) {
                 Directory.CreateDirectory(DirectoryPath);
             }
         }
 
-        public void CopyFolderTree(DirectoryInfo source, DirectoryInfo target) {
+        public static void CopyFolderTree(DirectoryInfo source, DirectoryInfo target) {
             source.EnumerateFiles("*", SearchOption.AllDirectories)
                 .ToList().ForEach(x => {
                     FileInfo newFile = new(x.FullName.Replace(source.FullName, target.FullName));
@@ -32,7 +37,7 @@ namespace BedrockService.Shared.Utilities {
                 });
         }
 
-        public void CopyFilesMatchingExtension(string source, string target, string extension) {
+        public static void CopyFilesMatchingExtension(string source, string target, string extension) {
             if (!extension.StartsWith('.')) {
                 extension = $".{extension}";
             }
@@ -42,7 +47,7 @@ namespace BedrockService.Shared.Utilities {
                 .ForEach(x => x.CopyTo(Path.Combine(target, x.Name), true));
         }
 
-        public Task DeleteFilesFromDirectory(DirectoryInfo source, bool removeSourceFolder) {
+        public static Task DeleteFilesFromDirectory(DirectoryInfo source, bool removeSourceFolder) {
             return Task.Run(() => {
                 var files = source.EnumerateFiles("*", SearchOption.AllDirectories)
                     .ToList();
@@ -57,7 +62,7 @@ namespace BedrockService.Shared.Utilities {
         }
 
 
-        public void AppendServerPacksToArchive(string serverPath, ZipArchive backupZip, DirectoryInfo levelDirInfo) {
+        public static void AppendServerPacksToArchive(string serverPath, ZipArchive backupZip, DirectoryInfo levelDirInfo) {
             string levelName = levelDirInfo.Name;
             CreatePackBackupFiles(serverPath, levelName, backupZip);
             if (Directory.Exists(GetServerDirectory(BdsDirectoryKeys.ResourcePacksDir, serverPath))) {
@@ -72,7 +77,7 @@ namespace BedrockService.Shared.Utilities {
             }
         }
 
-        public void CreatePackBackupFiles(string serverPath, string levelName, ZipArchive destinationArchive) {
+        public static void CreatePackBackupFiles(string serverPath, string levelName, ZipArchive destinationArchive) {
             string resouceFolderPath = GetServerDirectory(BdsDirectoryKeys.ResourcePacksDir, serverPath);
             string behaviorFolderPath = GetServerDirectory(BdsDirectoryKeys.BehaviorPacksDir, serverPath);
             string behaviorFilePath = GetServerFilePath(BdsFileNameKeys.WorldBehaviorPacks, serverPath);
@@ -98,9 +103,9 @@ namespace BedrockService.Shared.Utilities {
             }
         }
 
-        public void DeleteFilesFromDirectory(string source, bool removeSourceFolder) => DeleteFilesFromDirectory(new DirectoryInfo(source), removeSourceFolder);
+        public static void DeleteFilesFromDirectory(string source, bool removeSourceFolder) => DeleteFilesFromDirectory(new DirectoryInfo(source), removeSourceFolder);
 
-        public Task ClearTempDir() {
+        public static Task ClearTempDir() {
             return Task.Run(() => {
                 DirectoryInfo tempDirectory = new($"{Path.GetTempPath()}\\BMSTemp");
                 if (!tempDirectory.Exists)
@@ -109,7 +114,7 @@ namespace BedrockService.Shared.Utilities {
             });
         }
 
-        public void DeleteFilelist(string[] fileList, string serverPath) {
+        public static void DeleteFilelist(string[] fileList, string serverPath) {
             foreach (string file in fileList)
                 try {
                     File.Delete($@"{serverPath}\{file}");
@@ -122,22 +127,30 @@ namespace BedrockService.Shared.Utilities {
                     Directory.Delete(dir, true);
         }
 
-        public void WriteStringToFile(string path, string content) => File.WriteAllText(path, content);
+        public static void WriteStringToFile(string path, string content) => File.WriteAllText(path, content);
 
-        public void WriteStringArrayToFile(string path, string[] content) => File.WriteAllLines(path, content);
+        public static void WriteStringArrayToFile(string path, string[] content) => File.WriteAllLines(path, content);
 
-        private int RoundOff(int i) {
+        private static int RoundOff(int i) {
             return ((int)Math.Round(i / 10.0)) * 10;
         }
 
-        public Task ExtractZipToDirectory(string zipPath, string directory, IProgress<double> progress) => Task.Run(() => {
+        public static Task ExtractZipToDirectory(string zipPath, string directory, IProgress<double> progress) => Task.Run(() => {
             FileInfo fileInfo = new(zipPath);
             using ZipArchive archive = ZipFile.OpenRead(zipPath);
+            Regex jdkName = new(@"jdk-17\.[0-9]+\.[0-9]+/?(.*)");
             int fileCount = archive.Entries.Count;
             for (int i = 0; i < fileCount; i++) {
                 string fixedEntry = archive.Entries[i].FullName;
-                if (archive.Entries[i].FullName.StartsWith("LiteLoaderBDS/")) {
-                    fixedEntry = archive.Entries[i].FullName.Substring(14, archive.Entries[i].FullName.Length - 14);
+                if (fixedEntry.StartsWith("LiteLoaderBDS/")) {
+                    fixedEntry = fixedEntry[14..];
+                }
+                if (jdkName.IsMatch(fixedEntry)) {
+                    Match match = jdkName.Match(fixedEntry);
+                    fixedEntry = match.Groups[1].Value;
+                }
+                if(string.IsNullOrEmpty(fixedEntry)) {
+                    continue;
                 }
                 string fixedPath = $@"{directory}\{fixedEntry.Replace('/', '\\')}";
                 if (i % (RoundOff(fileCount) / 6) == 0) {

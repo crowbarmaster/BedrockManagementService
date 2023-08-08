@@ -10,12 +10,14 @@ namespace BedrockService.Service.Server {
     public class ConsoleFilterStrategyClass {
         IServerConfiguration _serverConfiguration;
         public Dictionary<string, IConsoleFilter> FilterList;
-        IBedrockLogger _logger;
+        public Dictionary<string, IConsoleFilter> LLFilterList;
+        public Dictionary<string, IConsoleFilter> JavaFilterList;
+        IServerLogger _logger;
         IConfigurator _configurator;
-        IBedrockServer _bedrockServer;
+        IServerController _bedrockServer;
         IServiceConfiguration _serviceConfiguration;
 
-        public ConsoleFilterStrategyClass(IBedrockLogger logger, IConfigurator configurator, IServerConfiguration serverConfiguration, IBedrockServer bedrockServer, IServiceConfiguration bedrockService) {
+        public ConsoleFilterStrategyClass(IServerLogger logger, IConfigurator configurator, IServerConfiguration serverConfiguration, IServerController bedrockServer, IServiceConfiguration bedrockService) {
             _serverConfiguration = serverConfiguration;
             _logger = logger;
             _configurator = configurator;
@@ -26,7 +28,25 @@ namespace BedrockService.Service.Server {
                 { "Player connected", new PlayerConnectedFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
                 { "Player disconnected", new PlayerDisconnectedFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
                 { "Failed to load Vanilla", new ServerRescErrorFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
-                { "Version ", new VersionFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
+                { "Version", new BedrockVersionFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
+                { "A previous save has not been completed.", new SaveIncompleteFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
+                { "/level.dat:", new BackupStringFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) }
+            };
+            LLFilterList = new Dictionary<string, IConsoleFilter> {
+                { "IPv6 supported, port", new StartupFlagFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
+                { "Player connected", new PlayerConnectedFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
+                { "Player disconnected", new PlayerDisconnectedFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
+                { "Failed to load Vanilla", new ServerRescErrorFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
+                { "Version", new LLVersionFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
+                { "A previous save has not been completed.", new SaveIncompleteFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
+                { "/level.dat:", new BackupStringFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) }
+            };
+            JavaFilterList = new Dictionary<string, IConsoleFilter> {
+                { "Done (", new StartupFlagFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
+                { "Player connected", new PlayerConnectedFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
+                { "Player disconnected", new PlayerDisconnectedFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
+                { "Failed to load Vanilla", new ServerRescErrorFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
+                { "minecraft server version", new JavaVersionFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
                 { "A previous save has not been completed.", new SaveIncompleteFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
                 { "/level.dat:", new BackupStringFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) }
             };

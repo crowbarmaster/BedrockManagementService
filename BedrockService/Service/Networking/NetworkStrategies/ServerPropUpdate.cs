@@ -5,12 +5,12 @@ using System.Text;
 
 namespace BedrockService.Service.Networking.NetworkStrategies {
     public class ServerPropUpdate : IMessageParser {
-        private readonly IBedrockLogger _logger;
+        private readonly IServerLogger _logger;
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IBedrockService _bedrockService;
         private readonly IConfigurator _configurator;
 
-        public ServerPropUpdate(IBedrockLogger logger, IConfigurator configurator, IServiceConfiguration serviceConfiguration, IBedrockService bedrockService) {
+        public ServerPropUpdate(IServerLogger logger, IConfigurator configurator, IServiceConfiguration serviceConfiguration, IBedrockService bedrockService) {
             _logger = logger;
             _configurator = configurator;
             _serviceConfiguration = serviceConfiguration;

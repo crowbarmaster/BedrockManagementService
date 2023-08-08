@@ -5,9 +5,9 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
     public class LevelEditFile : IMessageParser {
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IBedrockService _bedrockService;
-        private readonly IBedrockLogger _logger;
+        private readonly IServerLogger _logger;
 
-        public LevelEditFile(IServiceConfiguration serviceConfiguration, IBedrockService bedrockService, IBedrockLogger logger) {
+        public LevelEditFile(IServiceConfiguration serviceConfiguration, IBedrockService bedrockService, IServerLogger logger) {
             _logger = logger;
             _bedrockService = bedrockService;
             _serviceConfiguration = serviceConfiguration;
@@ -18,10 +18,10 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
             Buffer.BlockCopy(data, 5, stripHeaderFromBuffer, 0, stripHeaderFromBuffer.Length);
             IServerConfiguration server = _serviceConfiguration.GetServerInfoByIndex(serverIndex);
             string pathToLevelDat = $@"{_serviceConfiguration.GetProp(ServicePropertyKeys.ServersPath)}\{server.GetProp(BmsDependServerPropKeys.ServerName)}\worlds\{server.GetProp(BmsDependServerPropKeys.LevelName)}\level.dat";
-            _bedrockService.GetBedrockServerByIndex(serverIndex).AwaitableServerStop(false).Wait();
+            _bedrockService.GetBedrockServerByIndex(serverIndex).ServerStop(false).Wait();
             File.WriteAllBytes(pathToLevelDat, stripHeaderFromBuffer);
             _logger.AppendLine($"level.dat writen to server {server.GetServerName()}");
-            _bedrockService.GetBedrockServerByIndex(serverIndex).AwaitableServerStart().Wait();
+            _bedrockService.GetBedrockServerByIndex(serverIndex).ServerStart().Wait();
             return (Array.Empty<byte>(), 0, 0);
         }
     }

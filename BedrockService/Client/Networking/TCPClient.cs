@@ -29,9 +29,9 @@ namespace BedrockService.Client.Networking {
         private CancellationTokenSource? _netCancelSource;
         private int _heartbeatFailTimeout;
         private const int _heartbeatFailTimeoutLimit = 2;
-        private readonly IBedrockLogger _logger;
+        private readonly IServerLogger _logger;
 
-        public TCPClient(IBedrockLogger logger) {
+        public TCPClient(IServerLogger logger) {
             _logger = logger;
         }
 
@@ -51,8 +51,8 @@ namespace BedrockService.Client.Networking {
                 stream = OpenedTcpClient.GetStream();
                 EstablishedLink = true;
                 ClientReciever = Task.Factory.StartNew(new Action(ReceiveListener), _netCancelSource.Token);
-            } catch {
-                _logger.AppendLine("Could not connect to Server");
+            } catch(Exception e) {
+                _logger.AppendLine($"Could not connect to Server: {e.Message}");
                 if (ClientReciever != null)
                     _netCancelSource.Cancel();
                 ClientReciever = null;
@@ -115,6 +115,8 @@ namespace BedrockService.Client.Networking {
                                     }
                                 } catch (Exception e) {
                                     _logger.AppendLine($"Error: ConnectMan reported error: {e.Message}\n{e.StackTrace}");
+                                    CloseConnection();
+                                    _netCancelSource.Cancel();
                                 }
                                 break;
 
@@ -147,13 +149,11 @@ namespace BedrockService.Client.Networking {
                                         int curCount = bedrockServer.GetLog().Count;
                                         if (curCount == srvCurLen) {
                                             bedrockServer.GetLog().Add(new LogEntry(srvText));
-                                            FormManager.MainWindow.ClientLogUpdate();
                                         }
                                     } else {
                                         int curCount = FormManager.MainWindow.connectedHost.GetLog().Count;
                                         if (curCount == srvCurLen) {
                                             FormManager.MainWindow.connectedHost.GetLog().Add(new LogEntry(srvText));
-                                            FormManager.MainWindow.ClientLogUpdate();
                                         }
                                     }
                                 }

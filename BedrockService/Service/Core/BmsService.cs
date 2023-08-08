@@ -8,19 +8,17 @@ using static BedrockService.Shared.Classes.SharedStringBase;
 namespace BedrockService.Service.Core {
     public class BmsService : IBedrockService {
         private readonly IServiceConfiguration _serviceConfiguration;
-        private readonly IBedrockLogger _logger;
+        private readonly IServerLogger _logger;
         private readonly IProcessInfo _processInfo;
         private readonly IConfigurator _configurator;
         private readonly ITCPListener _tCPListener;
-        private readonly FileUtilities _fileUtils;
         private readonly IPlayerManager _playerManager;
         private DateTime _upTime;
 
-        private List<IBedrockServer> _bedrockServers { get; set; } = new();
+        private List<IServerController> _bedrockServers { get; set; } = new();
         private ServiceStatus _CurrentServiceStatus { get; set; }
 
-        public BmsService(IConfigurator configurator, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ITCPListener tCPListener, FileUtilities fileUtils) {
-            _fileUtils = fileUtils;
+        public BmsService(IConfigurator configurator, IServerLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ITCPListener tCPListener) {
             _tCPListener = tCPListener;
             _configurator = configurator;
             _logger = logger;
@@ -86,7 +84,7 @@ namespace BedrockService.Service.Core {
                 ActivePlayerList = serviceActivePlayers,
                 TotalBackups = _serviceConfiguration.GetServiceBackupInfo().totalBackups,
                 TotalBackupSize = _serviceConfiguration.GetServiceBackupInfo().totalSize,
-                LatestVersion = _serviceConfiguration.GetLatestBDSVersion()
+                LatestVersion = _serviceConfiguration.GetLatestVersion(MinecraftServerArch.Bedrock)
             };
         }
 
@@ -104,7 +102,7 @@ namespace BedrockService.Service.Core {
                     if (!brs.ServerAutostartEnabled() && brs.IsPrimaryServer()) {
                         continue;
                     }
-                    brs.AwaitableServerStart().Wait();
+                    brs.ServerStart().Wait();
                     brs.StartWatchdog();
                 }
 
@@ -141,7 +139,7 @@ namespace BedrockService.Service.Core {
             _logger.AppendLine("Shutdown initiated...");
             try {
                 foreach (var brs in _bedrockServers) {
-                    brs.AwaitableServerStop(true).Wait();
+                    brs.ServerStop(true).Wait();
                 }
                 _CurrentServiceStatus = ServiceStatus.Stopped;
                 return true;
@@ -155,8 +153,8 @@ namespace BedrockService.Service.Core {
             return Task.Run(() => {
                 try {
                     _tCPListener.SetServiceStopped();
-                    foreach (IBedrockServer brs in _bedrockServers) {
-                        brs.AwaitableServerStop(true).Wait();
+                    foreach (IServerController brs in _bedrockServers) {
+                        brs.ServerStop(true).Wait();
                     }
                     GC.Collect();
                     Task.Delay(1000).Wait();
@@ -167,11 +165,11 @@ namespace BedrockService.Service.Core {
             });
         }
 
-        public IBedrockServer GetBedrockServerByIndex(int serverIndex) {
+        public IServerController GetBedrockServerByIndex(int serverIndex) {
             return _bedrockServers[serverIndex];
         }
 
-        public IBedrockServer? GetBedrockServerByName(string name) {
+        public IServerController? GetBedrockServerByName(string name) {
             return _bedrockServers.FirstOrDefault(brs => brs.GetServerName() == name);
         }
 
@@ -179,23 +177,22 @@ namespace BedrockService.Service.Core {
             _bedrockServers.RemoveAt(serverIndex);
         }
 
-        public List<IBedrockServer> GetAllServers() => _bedrockServers;
+        public List<IServerController> GetAllServers() => _bedrockServers;
 
         public void InitializeNewServer(IServerConfiguration server) {
-            IBedrockServer bedrockServer = new BedrockServer(server, _configurator, _logger, _serviceConfiguration, _processInfo, _fileUtils, _playerManager);
+            IServerController bedrockServer = ServerTypeLookup.GetServerControllerByArch(server.GetServerArch(), server, _configurator, _logger, _serviceConfiguration, _processInfo, _playerManager);
             bedrockServer.Initialize();
             _bedrockServers.Add(bedrockServer);
             _serviceConfiguration.AddNewServerInfo(server);
             ValidSettingsCheck().Wait();
-            bedrockServer.AwaitableServerStart().Wait();
+            bedrockServer.ServerStart().Wait();
             bedrockServer.StartWatchdog();
         }
 
         private void InstanciateServers() {
             try {
-                List<IServerConfiguration> temp = _serviceConfiguration.GetServerList();
-                foreach (IServerConfiguration server in temp) {
-                    IBedrockServer bedrockServer = new BedrockServer(server, _configurator, _logger, _serviceConfiguration, _processInfo, _fileUtils, _playerManager);
+                foreach (IServerConfiguration server in _serviceConfiguration.GetServerList()) {
+                    IServerController bedrockServer = ServerTypeLookup.GetServerControllerByArch(server.GetServerArch(), server, _configurator, _logger, _serviceConfiguration, _processInfo, _playerManager);
                     bedrockServer.Initialize();
                     _bedrockServers.Add(bedrockServer);
                 }
@@ -209,7 +206,7 @@ namespace BedrockService.Service.Core {
                 if (_serviceConfiguration.GetServerList().Count() < 1) {
                     throw new Exception("No Servers Configured");
                 }
-                var duplicatePortList = _serviceConfiguration.GetServerList()
+                  var duplicatePortList = _serviceConfiguration.GetServerList()
                     .Select(x => x.GetAllProps()
                         .GroupBy(z => z.StringValue)
                         .SelectMany(z => z
@@ -231,25 +228,18 @@ namespace BedrockService.Service.Core {
                     throw new Exception($"Duplicate ports used! Check server configurations targeting port(s) {serverPorts}");
                 }
                 foreach (var server in _serviceConfiguration.GetServerList()) {
+                    string deployedVersion = server.GetDeployedVersion();
                     string serverExePath = $@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath).StringValue}\{server.GetSettingsProp(ServerPropertyKeys.ServerExeName).StringValue}";
-                    if (!File.Exists(serverExePath)) {
-                        string deployedVersion = server.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()
-                                                ? _serviceConfiguration.GetLatestBDSVersion()
-                                                : server.GetSelectedVersion();
-                        _configurator.ReplaceServerBuild(server, deployedVersion).Wait();
+                    if (deployedVersion == "None" || !File.Exists(serverExePath)) {
+                        server.GetUpdater().ReplaceServerBuild().Wait();
                     }
-                    if (!server.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue() && server.GetSelectedVersion() != server.GetServerVersion()) {
-                        _logger.AppendLine("Manually configured server found with wrong version. Replacing server build...");
-                        if (server.GetSettingsProp(ServerPropertyKeys.LiteLoaderEnabled).GetBoolValue()) {
-                            if (Updater.FetchLiteLoaderBuild(server.GetSelectedVersion()).Result) {
-                                _configurator.ReplaceServerBuild(server, server.GetSelectedVersion()).Wait();
-                                _configurator.SaveServerConfiguration(server);
-                            }
-                        } else {
-                            if (Updater.FetchBuild(server.GetSelectedVersion()).Result) {
-                                _configurator.ReplaceServerBuild(server, server.GetSelectedVersion()).Wait();
-                                _configurator.SaveServerConfiguration(server);
-                            }
+                    if (server.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()) {
+                        if (server.GetServerVersion() != _serviceConfiguration.GetLatestVersion(server.GetServerArch())) {
+                            server.GetUpdater().ReplaceServerBuild(_serviceConfiguration.GetLatestVersion(server.GetServerArch())).Wait();
+                        }
+                    } else {
+                        if(server.GetServerVersion() != server.GetDeployedVersion()) {
+                            server.GetUpdater().ReplaceServerBuild().Wait();
                         }
                     }
                 }

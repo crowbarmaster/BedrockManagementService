@@ -15,10 +15,10 @@ using System.Windows.Forms;
 namespace BedrockService.Client.Forms {
     public partial class ManagePacksForms : Form {
         private readonly byte _serverIndex;
-        private readonly IBedrockLogger _logger;
+        private readonly IServerLogger _logger;
         private readonly IProcessInfo _processInfo;
         private readonly DirectoryInfo _packExtractDir;
-        public ManagePacksForms(byte serverIndex, IBedrockLogger logger, IProcessInfo processInfo) {
+        public ManagePacksForms(byte serverIndex, IServerLogger logger, IProcessInfo processInfo) {
             _logger = logger;
             _packExtractDir = new DirectoryInfo($"{Path.GetTempPath()}\\BMSTemp");
             _processInfo = processInfo;

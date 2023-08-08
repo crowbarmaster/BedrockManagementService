@@ -10,12 +10,12 @@ using static BedrockService.Shared.Classes.SharedStringBase;
 namespace BedrockService.Service.Server.ConsoleFilters {
     public class ServerRescErrorFilter : IConsoleFilter {
         IServerConfiguration _serverConfiguration;
-        IBedrockLogger _logger;
+        IServerLogger _logger;
         IConfigurator _configurator;
-        IBedrockServer _bedrockServer;
+        IServerController _bedrockServer;
         IServiceConfiguration _serviceConfiguration;
 
-        public ServerRescErrorFilter(IBedrockLogger logger, IConfigurator configurator, IServerConfiguration serverConfiguration, IBedrockServer bedrockServer, IServiceConfiguration bedrockService) {
+        public ServerRescErrorFilter(IServerLogger logger, IConfigurator configurator, IServerConfiguration serverConfiguration, IServerController bedrockServer, IServiceConfiguration bedrockService) {
             _serverConfiguration = serverConfiguration;
             _logger = logger;
             _configurator = configurator;
@@ -24,7 +24,9 @@ namespace BedrockService.Service.Server.ConsoleFilters {
         }
 
         public void Filter(string input) {
-            throw new NotImplementedException();
+            _bedrockServer.ServerStop(false);
+            _serverConfiguration.GetUpdater().ReplaceServerBuild().Wait();
+            _bedrockServer.ServerStart().Wait();
         }
     }
 }

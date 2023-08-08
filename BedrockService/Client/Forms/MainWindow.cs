@@ -1,5 +1,6 @@
 ﻿using BedrockService.Client.Management;
 using BedrockService.Shared.Classes;
+using BedrockService.Shared.Classes.Configurations;
 using BedrockService.Shared.Interfaces;
 using BedrockService.Shared.SerializeModels;
 using Newtonsoft.Json;
@@ -16,7 +17,8 @@ using System.Timers;
 using System.Windows.Forms;
 using static BedrockService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Client.Forms {
+namespace BedrockService.Client.Forms
+{
     public partial class MainWindow : Form {
         public IServiceConfiguration connectedHost;
         public IServerConfiguration selectedServer;
@@ -29,12 +31,12 @@ namespace BedrockService.Client.Forms {
         private bool _enableLogUpdating = false;
         private const int _connectTimeoutLimit = 3;
         private BackupManagerForm _backupManager;
-        public IBedrockLogger ClientLogger;
+        public IServerLogger ClientLogger;
         private readonly IProcessInfo _processInfo;
         private readonly System.Timers.Timer _connectTimer = new(100.0);
         private readonly LogManager _logManager;
         public ConfigManager ConfigManager;
-        public MainWindow(IProcessInfo processInfo, IBedrockLogger logger) {
+        public MainWindow(IProcessInfo processInfo, IServerLogger logger) {
             _processInfo = processInfo;
             ClientLogger = logger;
             ClientLogger.Initialize();
@@ -48,6 +50,7 @@ namespace BedrockService.Client.Forms {
 
         private void MainWindow_Shown(object sender, EventArgs e) {
             _enableLogUpdating = true;
+            _logManager.InitLogThread();
         }
 
         private void ConnectTimer_Elapsed(object sender, ElapsedEventArgs e) {
@@ -191,7 +194,7 @@ namespace BedrockService.Client.Forms {
             HostInfoLabel.Text = $"Connected to host:";
             ServerSelectBox.Items.Clear();
             if (connectedHost != null) {
-                _logManager.InitLogThread(connectedHost);
+                _logManager.SetConnectedHost(connectedHost);
                 foreach (BedrockConfiguration server in connectedHost.GetServerList()) {
                     ServerSelectBox.Items.Add(server.GetSettingsProp(ServerPropertyKeys.ServerName).ToString());
                 }
@@ -223,11 +226,18 @@ namespace BedrockService.Client.Forms {
             if(!_enableLogUpdating) { return; }
             try {
                 Invoke(() => {
-                    UpdateServerLogBox(clientLogBox, FormManager.ClientLogContainer.GetLog().ToString());
+                    UpdateServerLogBox(clientLogBox, ProcessText(FormManager.ClientLogContainer.GetLog()));
                 });
             } catch (Exception ex) {
                 ClientLogger.AppendLine($"Error! {ex.Message} {ex.StackTrace}");
             }
+        }
+
+        private string ProcessText(List<LogEntry> targetLog) {
+            if (FormManager.MainWindow.ConfigManager.DisplayTimestamps) {
+                return string.Join("\r\n", targetLog.Select(x => $"[{x.TimeStamp:G}] {x.Text}").ToList());
+            }
+            return string.Join("\r\n", targetLog.Select(x => x.Text).ToList());
         }
 
         public void HeartbeatFailDisconnect() {
@@ -367,6 +377,7 @@ namespace BedrockService.Client.Forms {
                     }
                     selectedServer = null;
                     connectedHost = null;
+                    _logManager.SetConnectedHost(null);
                     LogBox.Invoke((MethodInvoker)delegate { LogBox.Text = ""; });
                     FormManager.MainWindow.Invoke((MethodInvoker)delegate {
                         RefreshAllCompenentStates();

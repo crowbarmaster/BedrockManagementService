@@ -11,11 +11,11 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
         }
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
-            IBedrockServer server = _service.GetBedrockServerByIndex(serverIndex);
+            IServerController server = _service.GetBedrockServerByIndex(serverIndex);
             if (server.GetServerStatus().ServerStatus == ServerStatus.Started) {
-                server.AwaitableServerStop(true).Wait();
+                server.ServerStop(true).Wait();
             } else if (server.GetServerStatus().ServerStatus == ServerStatus.Stopped) {
-                server.AwaitableServerStart().Wait();
+                server.ServerStart().Wait();
                 server.StartWatchdog();
             }
             return (Array.Empty<byte>(), 0, NetworkMessageTypes.UICallback);
