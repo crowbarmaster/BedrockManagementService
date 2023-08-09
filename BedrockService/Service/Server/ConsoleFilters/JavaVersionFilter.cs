@@ -35,12 +35,6 @@ namespace BedrockService.Service.Server.ConsoleFilters {
                 _configurator.SaveServerConfiguration(_serverConfiguration);
                 _bedrockServer.ServerStart().Wait();
             }
-            if (versionString.ToLower().Contains("-beta")) {
-                int betaTagLoc = versionString.ToLower().IndexOf("-beta");
-                int betaVer = int.Parse(versionString.Substring(betaTagLoc + 5, versionString.Length - (betaTagLoc + 5)));
-                versionString = versionString.Substring(0, betaTagLoc) + ".";
-                versionString = versionString + betaVer;
-            }
             if (_serverConfiguration.GetServerVersion() != versionString) {
                 if (_serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()) {
                     _logger.AppendLine($"Server {_serverConfiguration.GetServerName()} decected incorrect or out of date version! Replacing build...");
