@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Service.Server.ConsoleFilters {
-    public class PlayerDisconnectedFilter : IConsoleFilter {
+    public class BedrockPlayerConnectedFilter : IConsoleFilter {
         IServerConfiguration _serverConfiguration;
         IServerLogger _logger;
         IConfigurator _configurator;
         IServerController _bedrockServer;
         IServiceConfiguration _serviceConfiguration;
 
-        public PlayerDisconnectedFilter(IServerLogger logger, IConfigurator configurator, IServerConfiguration serverConfiguration, IServerController bedrockServer, IServiceConfiguration bedrockService) {
+        public BedrockPlayerConnectedFilter(IServerLogger logger, IConfigurator configurator, IServerConfiguration serverConfiguration, IServerController bedrockServer, IServiceConfiguration bedrockService) {
             _serverConfiguration = serverConfiguration;
             _logger = logger;
             _configurator = configurator;
@@ -25,8 +25,9 @@ namespace BedrockService.Service.Server.ConsoleFilters {
 
         public void Filter(string input) {
             var playerInfo = ExtractPlayerInfoFromString(input);
-            _logger.AppendLine($"Player {playerInfo.username} disconnected with XUID: {playerInfo.xuid}");
-            _bedrockServer.GetActivePlayerList().Remove(_bedrockServer.GetPlayerManager().PlayerDisconnected(playerInfo.xuid));
+            _logger.AppendLine($"Player {playerInfo.username} connected with XUID: {playerInfo.xuid}");
+            _bedrockServer.SetServerModified(true);
+            _bedrockServer.GetActivePlayerList().Add(_bedrockServer.GetPlayerManager().PlayerConnected(playerInfo.username, playerInfo.xuid));
             _configurator.SavePlayerDatabase(_serverConfiguration);
         }
 
@@ -38,6 +39,5 @@ namespace BedrockService.Service.Server.ConsoleFilters {
             int xuidStart = input.IndexOf(':', usernameEnd) + 2;
             return (input.Substring(usernameStart, usernameLength), input.Substring(xuidStart, input.Length - xuidStart));
         }
-
     }
 }
