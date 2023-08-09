@@ -105,7 +105,7 @@ namespace BedrockService.Shared.Classes.Configurations
                     }
                     switch (split[0])
                     {
-                        case "server-name":
+                        case "ServerName":
                             GetSettingsProp(ServerPropertyKeys.ServerName).SetValue(split[1]);
                             GetSettingsProp(ServerPropertyKeys.ServerPath).SetValue($@"{ServersPath}\{split[1]}");
                             GetSettingsProp(ServerPropertyKeys.ServerExeName).SetValue($"BedrockService.{split[1]}.jar");
