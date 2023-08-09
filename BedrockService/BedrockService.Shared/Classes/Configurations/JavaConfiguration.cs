@@ -52,7 +52,7 @@ namespace BedrockService.Shared.Classes.Configurations
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.UpdateCron], "0 2 * * *"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerVersion], "None"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.UseBetaVersions], "false"));
-            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.JavaArgs], "-Xmx1024M -Xms1024M  -XX:+UnlockExperimentalVMOptions -XX:+AlwaysPreTouch -XX:+UseStringDeduplication -Dfml.ignorePatchDiscrepancies=true -Dfml.ignoreInvalidMinecraftCertificates=true -XX:-OmitStackTraceInFastThrow -XX:+OptimizeStringConcat -Dfml.readTimeout=180 -XX:+UseLargePages"));
+            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.JavaArgs], "-Xmx1024M -Xms1024M -XX:+UnlockExperimentalVMOptions -XX:+AlwaysPreTouch -XX:+UseStringDeduplication -Dfml.ignorePatchDiscrepancies=true -Dfml.ignoreInvalidMinecraftCertificates=true -XX:-OmitStackTraceInFastThrow -XX:+OptimizeStringConcat -Dfml.readTimeout=180 -XX:+UseLargePages"));
             PlayerManager = new(this);
             return true;
         }
