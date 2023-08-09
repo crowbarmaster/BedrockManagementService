@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using System;
 
 namespace BedrockService.Shared.Classes {
-    public class Player : IPlayer {
+    public class BedrockPlayer : IPlayer {
         [JsonProperty]
         private string Username { get; set; }
         [JsonProperty]
@@ -24,7 +24,7 @@ namespace BedrockService.Shared.Classes {
         private bool IgnorePlayerLimits { get; set; }
 
         [JsonConstructor]
-        public Player(string xuid, string username, long firstConn, long lastConn, long lastDiscon, bool whtlist, string perm, bool ignoreLimit) {
+        public BedrockPlayer(string xuid, string username, long firstConn, long lastConn, long lastDiscon, bool whtlist, string perm, bool ignoreLimit) {
             Username = username;
             XUID = xuid;
             FirstConnectedTime = firstConn;
@@ -35,7 +35,7 @@ namespace BedrockService.Shared.Classes {
             IgnorePlayerLimits = ignoreLimit;
         }
 
-        public Player(string serverDefaultPermission) {
+        public BedrockPlayer(string serverDefaultPermission) {
             ServerDefaultPerm = serverDefaultPermission;
             PermissionLevel = serverDefaultPermission;
         }
@@ -126,7 +126,7 @@ namespace BedrockService.Shared.Classes {
         public string GetPermissionLevel() => PermissionLevel;
 
         public override bool Equals(object obj) {
-            return obj is Player player &&
+            return obj is BedrockPlayer player &&
                    Username == player.Username &&
                    XUID == player.XUID;
         }
@@ -135,5 +135,4 @@ namespace BedrockService.Shared.Classes {
             return HashCode.Combine(Username, XUID);
         }
     }
-
 }

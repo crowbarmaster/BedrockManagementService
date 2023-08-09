@@ -42,7 +42,7 @@ namespace BedrockService.Shared.Classes {
         public IPlayer GetOrCreatePlayer(string xuid, string username = null) {
             IPlayer foundPlayer = PlayerList.FirstOrDefault(p => p.GetXUID() == xuid);
             if (foundPlayer == null) {
-                Player player = new(_serverConfiguration.GetProp(BmsDependServerPropKeys.PermLevel).ToString());
+                BedrockPlayer player = new(_serverConfiguration.GetProp(BmsDependServerPropKeys.PermLevel).ToString());
                 player.Initialize(xuid, username);
                 PlayerList.Add(player);
                 return player;

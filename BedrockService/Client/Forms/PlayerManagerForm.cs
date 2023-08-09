@@ -54,7 +54,7 @@ namespace BedrockService.Client.Forms {
                 string playerPermission = playerToEdit.GetPermissionLevel();
                 string playerIgnoreLimit = playerToEdit.PlayerIgnoresLimit().ToString();
                 if ((string)focusedRow.Cells[0].Value != playerToEdit.GetXUID() || (string)focusedRow.Cells[1].Value != playerToEdit.GetUsername() || (string)focusedRow.Cells[2].Value != playerPermission || (string)focusedRow.Cells[3].Value != playerWhitelist || (string)focusedRow.Cells[4].Value != playerIgnoreLimit) {
-                    playerToEdit = new Player((string)focusedRow.Cells[0].Value, (string)focusedRow.Cells[1].Value, playerTimes.First, playerTimes.Conn, playerTimes.Disconn, bool.Parse((string)focusedRow.Cells[3].Value), (string)focusedRow.Cells[2].Value, bool.Parse((string)focusedRow.Cells[4].Value));
+                    playerToEdit = new BedrockPlayer((string)focusedRow.Cells[0].Value, (string)focusedRow.Cells[1].Value, playerTimes.First, playerTimes.Conn, playerTimes.Disconn, bool.Parse((string)focusedRow.Cells[3].Value), (string)focusedRow.Cells[2].Value, bool.Parse((string)focusedRow.Cells[4].Value));
                     if (modifiedPlayers.Contains(playerToEdit)) {
                         modifiedPlayers[modifiedPlayers.IndexOf(playerToEdit)] = playerToEdit;
                     } else {
@@ -124,7 +124,7 @@ namespace BedrockService.Client.Forms {
                             cmd = finalSplit[0].ToLower();
                             value = finalSplit[1].ToLower();
                             tempList = new List<IPlayer>();
-                            foreach (Player player in playersFound) {
+                            foreach (BedrockPlayer player in playersFound) {
                                 string key = player.SearchForProperty(cmd);
                                 if (key != null && key.Contains(value)) {
                                     tempList.Add(player);

@@ -102,7 +102,7 @@ namespace BedrockService.Service.Management
             }
             lock (_fileLock) {
                 TextWriter writer = new StreamWriter(dbPath);
-                foreach (Player entry in playerList) {
+                foreach (BedrockPlayer entry in playerList) {
                     writer.WriteLine(entry.ToString("Known"));
                 }
                 writer.Flush();

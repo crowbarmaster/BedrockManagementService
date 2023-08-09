@@ -13,7 +13,7 @@ namespace BedrockService.Client.Forms {
         private void saveClick(object sender, EventArgs e) {
             long curTime = DateTime.Now.Ticks;
             if (usernameTextBox.TextLength > 0 && xuidTextBox.TextLength == 16) {
-                PlayerToAdd = new Player(xuidTextBox.Text, usernameTextBox.Text, curTime, curTime, curTime, whitelistedChkBox.Checked, permissionComboBox.SelectedItem.ToString(), ignoreLimitChkBox.Checked);
+                PlayerToAdd = new BedrockPlayer(xuidTextBox.Text, usernameTextBox.Text, curTime, curTime, curTime, whitelistedChkBox.Checked, permissionComboBox.SelectedItem.ToString(), ignoreLimitChkBox.Checked);
                 DialogResult = DialogResult.OK;
             }
         }
