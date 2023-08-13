@@ -48,7 +48,7 @@ namespace BedrockService.Service.Server {
                 { "Failed to load Vanilla", new ServerRescErrorFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
                 { "minecraft server version", new JavaVersionFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
                 { "A previous save has not been completed.", new SaveIncompleteFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
-                { "/level.dat:", new BackupStringFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) }
+                { "Saved the game", new JavaBackupDetectFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) }
             };
         }
     }
