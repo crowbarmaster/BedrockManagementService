@@ -35,10 +35,11 @@ namespace BedrockService.Shared.Classes.Updaters {
             if (!File.Exists(GetServiceFilePath(BmsFileNameKeys.Jdk17JavaVanillaExe))) {
                 if (HTTPHandler.RetrieveFileFromUrl(BmsUrlStrings[BmsUrlKeys.Jdk17DownloadLink], "Jdk.zip").Result) {
                     Progress<double> progress = new(percent => {
-                        _logger.AppendLine($"Extracting JDK 20 for Java support, {percent}% completed...");
+                        _logger.AppendLine($"Extracting JDK 17 for Java support, {percent}% completed...");
                     });
                     FileUtilities.ExtractZipToDirectory("Jdk.zip", GetServiceDirectory(BmsDirectoryKeys.Jdk20Path), progress).Wait();
                     File.Copy(GetServiceFilePath(BmsFileNameKeys.Jdk17JavaVanillaExe), GetServiceFilePath(BmsFileNameKeys.Jdk17JavaMmsExe));
+                    File.Delete("Jdk.zip");
                 }
             }
             if (!File.Exists(GetServiceFilePath(BmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[_serverArch]))) {
