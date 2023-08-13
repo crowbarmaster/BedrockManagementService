@@ -40,12 +40,14 @@ namespace BedrockService.Client.Forms
             this.label4 = new System.Windows.Forms.Label();
             this.serverSettingsBtn = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
-            this.versionTextBox = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.ServerTypeComboBox = new System.Windows.Forms.ComboBox();
+            this.VersionSelectComboBox = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // srvNameBox
             // 
-            this.srvNameBox.Location = new System.Drawing.Point(124, 65);
+            this.srvNameBox.Location = new System.Drawing.Point(124, 94);
             this.srvNameBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.srvNameBox.Name = "srvNameBox";
             this.srvNameBox.Size = new System.Drawing.Size(116, 23);
@@ -54,7 +56,7 @@ namespace BedrockService.Client.Forms
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(35, 68);
+            this.label1.Location = new System.Drawing.Point(41, 97);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(75, 15);
@@ -64,7 +66,7 @@ namespace BedrockService.Client.Forms
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(35, 98);
+            this.label2.Location = new System.Drawing.Point(56, 127);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(60, 15);
@@ -73,7 +75,7 @@ namespace BedrockService.Client.Forms
             // 
             // ipV4Box
             // 
-            this.ipV4Box.Location = new System.Drawing.Point(124, 95);
+            this.ipV4Box.Location = new System.Drawing.Point(124, 124);
             this.ipV4Box.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.ipV4Box.Name = "ipV4Box";
             this.ipV4Box.Size = new System.Drawing.Size(116, 23);
@@ -82,7 +84,7 @@ namespace BedrockService.Client.Forms
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(35, 128);
+            this.label3.Location = new System.Drawing.Point(56, 157);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(60, 15);
@@ -91,7 +93,7 @@ namespace BedrockService.Client.Forms
             // 
             // ipV6Box
             // 
-            this.ipV6Box.Location = new System.Drawing.Point(124, 125);
+            this.ipV6Box.Location = new System.Drawing.Point(124, 154);
             this.ipV6Box.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.ipV6Box.Name = "ipV6Box";
             this.ipV6Box.Size = new System.Drawing.Size(116, 23);
@@ -99,7 +101,7 @@ namespace BedrockService.Client.Forms
             // 
             // editPropsBtn
             // 
-            this.editPropsBtn.Location = new System.Drawing.Point(38, 186);
+            this.editPropsBtn.Location = new System.Drawing.Point(38, 215);
             this.editPropsBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.editPropsBtn.Name = "editPropsBtn";
             this.editPropsBtn.Size = new System.Drawing.Size(202, 27);
@@ -110,7 +112,7 @@ namespace BedrockService.Client.Forms
             // 
             // saveBtn
             // 
-            this.saveBtn.Location = new System.Drawing.Point(124, 252);
+            this.saveBtn.Location = new System.Drawing.Point(124, 281);
             this.saveBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.saveBtn.Name = "saveBtn";
             this.saveBtn.Size = new System.Drawing.Size(117, 27);
@@ -133,7 +135,7 @@ namespace BedrockService.Client.Forms
             // 
             // serverSettingsBtn
             // 
-            this.serverSettingsBtn.Location = new System.Drawing.Point(39, 219);
+            this.serverSettingsBtn.Location = new System.Drawing.Point(39, 248);
             this.serverSettingsBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.serverSettingsBtn.Name = "serverSettingsBtn";
             this.serverSettingsBtn.Size = new System.Drawing.Size(202, 27);
@@ -145,29 +147,50 @@ namespace BedrockService.Client.Forms
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(35, 158);
+            this.label5.Location = new System.Drawing.Point(29, 187);
             this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(88, 15);
             this.label5.TabIndex = 11;
             this.label5.Text = "Deploy version:";
             // 
-            // versionTextBox
+            // label6
             // 
-            this.versionTextBox.Location = new System.Drawing.Point(124, 155);
-            this.versionTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.versionTextBox.Name = "versionTextBox";
-            this.versionTextBox.Size = new System.Drawing.Size(116, 23);
-            this.versionTextBox.TabIndex = 5;
-            this.versionTextBox.TextChanged += new System.EventHandler(this.versionTextBox_TextChanged);
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(49, 67);
+            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(68, 15);
+            this.label6.TabIndex = 12;
+            this.label6.Text = "Server type:";
+            // 
+            // ServerTypeComboBox
+            // 
+            this.ServerTypeComboBox.FormattingEnabled = true;
+            this.ServerTypeComboBox.Location = new System.Drawing.Point(124, 64);
+            this.ServerTypeComboBox.Name = "ServerTypeComboBox";
+            this.ServerTypeComboBox.Size = new System.Drawing.Size(116, 23);
+            this.ServerTypeComboBox.TabIndex = 13;
+            this.ServerTypeComboBox.SelectedIndexChanged += new System.EventHandler(this.ServerTypeComboBox_SelectedIndexChanged);
+            // 
+            // VersionSelectComboBox
+            // 
+            this.VersionSelectComboBox.FormattingEnabled = true;
+            this.VersionSelectComboBox.Location = new System.Drawing.Point(124, 184);
+            this.VersionSelectComboBox.Name = "VersionSelectComboBox";
+            this.VersionSelectComboBox.Size = new System.Drawing.Size(116, 23);
+            this.VersionSelectComboBox.TabIndex = 14;
+            this.VersionSelectComboBox.SelectedIndexChanged += new System.EventHandler(this.VersionSelectComboBox_SelectedIndexChanged);
             // 
             // AddNewServerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(274, 291);
+            this.ClientSize = new System.Drawing.Size(274, 321);
+            this.Controls.Add(this.VersionSelectComboBox);
+            this.Controls.Add(this.ServerTypeComboBox);
+            this.Controls.Add(this.label6);
             this.Controls.Add(this.label5);
-            this.Controls.Add(this.versionTextBox);
             this.Controls.Add(this.serverSettingsBtn);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.saveBtn);
@@ -180,9 +203,9 @@ namespace BedrockService.Client.Forms
             this.Controls.Add(this.srvNameBox);
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.MaximizeBox = false;
-            this.MaximumSize = new System.Drawing.Size(290, 330);
+            this.MaximumSize = new System.Drawing.Size(290, 360);
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(290, 330);
+            this.MinimumSize = new System.Drawing.Size(290, 360);
             this.Name = "AddNewServerForm";
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
@@ -205,6 +228,8 @@ namespace BedrockService.Client.Forms
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button serverSettingsBtn;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.TextBox versionTextBox;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.ComboBox ServerTypeComboBox;
+        private System.Windows.Forms.ComboBox VersionSelectComboBox;
     }
 }

@@ -604,10 +604,7 @@ namespace BedrockService.Client.Forms
         }
 
         private bool IsPrimaryServer() {
-            return selectedServer.GetProp(BmsDependServerPropKeys.PortI4).StringValue == "19132" ||
-            selectedServer.GetProp(BmsDependServerPropKeys.PortI4).StringValue == "19133" ||
-            selectedServer.GetProp(BmsDependServerPropKeys.PortI6).StringValue == "19132" ||
-            selectedServer.GetProp(BmsDependServerPropKeys.PortI6).StringValue == "19133";
+            return selectedServer.IsPrimaryServer();
         }
 
         private void serverPropMenuItem_Click(object sender, EventArgs e) {

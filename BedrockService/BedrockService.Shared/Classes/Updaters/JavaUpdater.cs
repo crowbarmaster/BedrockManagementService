@@ -186,5 +186,18 @@ namespace BedrockService.Shared.Classes.Updaters {
         public string GetBaseVersion(string version) {
             return version;
         }
+
+        public List<string> GetVersionList() {
+            List<string> result = new List<string>();
+            string content = HTTPHandler.FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.JdsVersionJson]).Result;
+            if (content == null)
+                return new List<string>();
+            JavaVersionHistoryModel versionList = JsonConvert.DeserializeObject<JavaVersionHistoryModel>(content);
+            versionList.Versions.Reverse();
+            foreach (var version in versionList.Versions) {
+                result.Add(version.Id);
+            }
+            return result;
+        }
     }
 }

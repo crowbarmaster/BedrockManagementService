@@ -221,6 +221,18 @@ namespace BedrockService.Shared.Classes.Updaters
                 _logger.AppendLine($"Extraction of files for {_serverConfiguration.GetServerName()} completed.");
             });
         }
-
+        public List<string> GetVersionList() {
+            List<string> result = new List<string>();
+            string content = HTTPHandler.FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.LLReleasesJson]).Result;
+            List<LiteLoaderVersionManifest> versionList = JsonSerializer.Deserialize<List<LiteLoaderVersionManifest>>(content);
+            versionList.Reverse();
+            if (content == null)
+                return new List<string>();
+            versionList.Reverse();
+            foreach (var version in versionList) {
+                result.Add(version.Version);
+            }
+            return result;
+        }
     }
 }
