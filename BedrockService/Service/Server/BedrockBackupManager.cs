@@ -1,10 +1,11 @@
 ﻿using BedrockService.Service.Server.Interfaces;
+using BedrockService.Shared.PackParser;
 using BedrockService.Shared.SerializeModels;
 using System.IO.Compression;
 using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Service.Server {
-    public class BackupManager {
+    public class BedrockBackupManager {
         private readonly IServerLogger _logger;
         private readonly IServerController _server;
         private readonly IServiceConfiguration _serviceConfiguration;
@@ -18,7 +19,7 @@ namespace BedrockService.Service.Server {
             Manual
         }
 
-        public BackupManager(IServerLogger logger, IServerController server, IServerConfiguration serverConfiguration, IServiceConfiguration serviceConfiguration) {
+        public BedrockBackupManager(IServerLogger logger, IServerController server, IServerConfiguration serverConfiguration, IServiceConfiguration serviceConfiguration) {
             _logger = logger;
             _server = server;
             _serverConfiguration = serverConfiguration;
@@ -26,11 +27,11 @@ namespace BedrockService.Service.Server {
             _autoBackupsContainPacks = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoBackupsContainPacks).GetBoolValue();
         }
 
-        public bool BackupRunning() => _backupRunning;
+        public virtual bool BackupRunning() => _backupRunning;
 
-        public bool SetBackupComplete() => _backupRunning = false;
+        public virtual bool SetBackupComplete() => _backupRunning = false;
 
-        public void InitializeBackup() {
+        public virtual void InitializeBackup() {
             if (!_backupRunning && _server.GetServerStatus().ServerStatus == ServerStatus.Started) {
                 _backupRunning = true;
                 _server.WriteToStandardIn("save hold");
@@ -40,7 +41,7 @@ namespace BedrockService.Service.Server {
             }
         }
 
-        public bool PerformBackup(string queryString) {
+        public virtual bool PerformBackup(string queryString) {
             try {
                 string serverPath = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString();
                 string backupPath = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupPath).ToString();
@@ -60,7 +61,7 @@ namespace BedrockService.Service.Server {
                 string levelDir = @$"\{_serverConfiguration.GetProp(BmsDependServerPropKeys.LevelName)}";
                 using FileStream fs = File.Create($@"{backupDir.FullName}\Backup-{DateTime.Now:yyyyMMdd_HHmmssff}.zip");
                 using ZipArchive backupZip = new(fs, ZipArchiveMode.Create);
-                bool resuilt = BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, backupZip).Result;
+                bool result = BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, backupZip).Result;
                 DirectoryInfo levelDirInfo = new(worldsDir.FullName + levelDir);
                 List<FileInfo> levelFiles = levelDirInfo.GetFiles("*.json").ToList();
                 levelFiles.AddRange(levelDirInfo.GetFiles("world_icon*"));
@@ -73,7 +74,7 @@ namespace BedrockService.Service.Server {
                     FileUtilities.AppendServerPacksToArchive(serverPath, backupZip, levelDirInfo);
                 }
                 _serviceConfiguration.CalculateTotalBackupsAllServers().Wait();
-                return resuilt;
+                return result;
 
             } catch (Exception e) {
                 _logger.AppendLine($"Error with Backup: {e.Message} {e.StackTrace}");
@@ -83,7 +84,34 @@ namespace BedrockService.Service.Server {
             }
         }
 
-        private void PruneBackups(DirectoryInfo backupDir) {
+        public virtual void PerformRollback(string zipFilePath) {
+            DirectoryInfo worldsDir = new($@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\worlds");
+            FileInfo backupZipFileInfo = new($@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupPath)}\{_serverConfiguration.GetServerName()}\{zipFilePath}");
+            DirectoryInfo backupPacksDir = new($@"{worldsDir.FullName}\InstalledPacks");
+            FileUtilities.DeleteFilesFromDirectory(worldsDir, true).Wait();
+            _logger.AppendLine($"Deleted world folder \"{worldsDir.Name}\"");
+            ZipFile.ExtractToDirectory(backupZipFileInfo.FullName, worldsDir.FullName);
+            _logger.AppendLine($"Copied files from backup \"{backupZipFileInfo.Name}\" to server worlds directory.");
+            MinecraftPackParser parser = new();
+            foreach (FileInfo file in backupPacksDir.GetFiles()) {
+                FileUtilities.ClearTempDir().Wait();
+                ZipFile.ExtractToDirectory(file.FullName, $@"{Path.GetTempPath()}\BMSTemp\PackTemp", true);
+                parser.FoundPacks.Clear();
+                parser.ParseDirectory($@"{Path.GetTempPath()}\BMSTemp\PackTemp");
+                if (parser.FoundPacks[0].ManifestType == "data") {
+                    string folderPath = $@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\development_behavior_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
+                    Task.Run(() => FileUtilities.DeleteFilesFromDirectory(folderPath, false)).Wait();
+                    ZipFile.ExtractToDirectory(file.FullName, folderPath, true);
+                }
+                if (parser.FoundPacks[0].ManifestType == "resources") {
+                    string folderPath = $@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\development_resource_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
+                    Task.Run(() => FileUtilities.DeleteFilesFromDirectory(folderPath, false)).Wait();
+                    ZipFile.ExtractToDirectory(file.FullName, folderPath, true);
+                }
+            }
+        }
+
+        internal void PruneBackups(DirectoryInfo backupDir) {
             if (!backupDir.Exists) {
                 backupDir.Create();
             }

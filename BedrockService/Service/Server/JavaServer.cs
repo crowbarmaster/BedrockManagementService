@@ -23,7 +23,7 @@ namespace BedrockService.Service.Server {
         private readonly IServerLogger _logger;
         private readonly IProcessInfo _processInfo;
         private readonly IPlayerManager _playerManager;
-        private readonly BackupManager _backupManager;
+        private readonly JavaBackupManager _backupManager;
         private System.Timers.Timer? _backupTimer { get; set; }
         private CrontabSchedule? _backupCron { get; set; }
         private CrontabSchedule? _updaterCron { get; set; }
@@ -43,7 +43,7 @@ namespace BedrockService.Service.Server {
             _playerManager = serviceConfiguration.GetProp(ServicePropertyKeys.GlobalizedPlayerDatabase).GetBoolValue() || processInfo.DeclaredType() == "Client" ? servicePlayerManager : new ServerPlayerManager(serverConfiguration);
             _configurator = configurator;
             _logger = logger;
-            _backupManager = new BackupManager(_logger, this, serverConfiguration, serviceConfiguration);
+            _backupManager = new JavaBackupManager(_logger, this, serverConfiguration, serviceConfiguration);
         }
 
         public void Initialize() {
@@ -311,12 +311,13 @@ namespace BedrockService.Service.Server {
                 }
                 _serverLogger.AppendLine(input.Substring(trimIndex));
                 if (e.Data != null) {
-                    if (input.Contains("All dimensions are saved")) {
+                    if (input.Contains("All dimensions are saved") && !_backupManager.BackupRunning()) {
                         _logger.AppendLine($"Server {GetServerName()} received quit signal.");
                         _AwaitingStopSignal = false;
                     }
-                    if (input.Contains("Changes to the world are resumed")) {
+                    if (input.Contains("Automatic saving is now enabled")) {
                         _backupManager.SetBackupComplete();
+                        WriteToStandardIn("say Server backup complete.");
                     }
                     foreach (KeyValuePair<string, IConsoleFilter> filter in consoleFilter.JavaFilterList) {
                         if (input.Contains(filter.Key)) {
@@ -398,7 +399,7 @@ namespace BedrockService.Service.Server {
 
         public bool LiteLoadedServer() => _LiteLoadedServer;
 
-        public BackupManager GetBackupManager() => _backupManager;
+        public BedrockBackupManager GetBackupManager() => _backupManager;
 
         public void SetStartupStatus(ServerStatus status) => _currentServerStatus = status;
 

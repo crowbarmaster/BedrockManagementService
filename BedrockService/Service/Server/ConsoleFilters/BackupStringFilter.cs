@@ -27,7 +27,7 @@ namespace BedrockService.Service.Server.ConsoleFilters {
             if (input.Contains("[Server]")) {
                 input = input.Substring(input.IndexOf(']') + 2);
             }
-            _logger.AppendLine("Save data string detected! Performing backup now!");
+            _logger.AppendLine($"Save data string {_serverConfiguration.GetServerName()} detected! Performing backup now!");
             if (_bedrockServer.GetBackupManager().PerformBackup(input)) {
                 _logger.AppendLine($"Backup for server {_serverConfiguration.GetServerName()} Completed.");
                 if (_bedrockServer.GetActivePlayerList().Count == 0) {

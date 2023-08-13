@@ -167,5 +167,25 @@ namespace BedrockService.Shared.Utilities {
                 }
             }
         });
+
+        public static Task AppendFileToArchive(string targetFile, string entryName, ZipArchive zipArchive) {
+            return Task.Run(() => {
+                if (string.IsNullOrEmpty(targetFile)) {
+                    return;
+                }
+                if(!File.Exists(targetFile)) {
+                    return;
+                }
+                if(zipArchive == null) {
+                    return;
+                }
+                using (FileStream fs = File.Open(targetFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
+                    ZipArchiveEntry newZippedFile = zipArchive.CreateEntry(entryName, CompressionLevel.Optimal);
+                    using Stream zipStream = newZippedFile.Open();
+                    fs.CopyTo(zipStream);
+                    zipStream.Close();
+                }
+            });
+        }
     }
 }
