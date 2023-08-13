@@ -43,8 +43,8 @@ namespace BedrockService.Service.Server {
             };
             JavaFilterList = new Dictionary<string, IConsoleFilter> {
                 { "Done (", new StartupFlagFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
-                { "joined the game", new BedrockPlayerConnectedFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
-                { "left the game", new BedrockPlayerDisconnectedFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
+                { "[User Authenticator", new JavaPlayerConnectedFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
+                { "left the game", new JavaPlayerDisconnectedFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
                 { "Failed to load Vanilla", new ServerRescErrorFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
                 { "minecraft server version", new JavaVersionFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
                 { "A previous save has not been completed.", new SaveIncompleteFilter(_logger, _configurator, _serverConfiguration, _bedrockServer, _serviceConfiguration ) },
