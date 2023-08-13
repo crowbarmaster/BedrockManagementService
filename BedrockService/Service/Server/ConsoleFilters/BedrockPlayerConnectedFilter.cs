@@ -25,7 +25,7 @@ namespace BedrockService.Service.Server.ConsoleFilters {
 
         public void Filter(string input) {
             var playerInfo = ExtractPlayerInfoFromString(input);
-            _logger.AppendLine($"Player {playerInfo.username} connected with XUID: {playerInfo.xuid}");
+            _logger.AppendLine($"Player {playerInfo.username} connected with XUID: {playerInfo.xuid} to server {_serverConfiguration.GetServerName()}.");
             _bedrockServer.SetServerModified(true);
             _bedrockServer.GetActivePlayerList().Add(_bedrockServer.GetPlayerManager().PlayerConnected(playerInfo.username, playerInfo.xuid));
             _configurator.SavePlayerDatabase(_serverConfiguration);

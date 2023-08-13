@@ -40,7 +40,7 @@ namespace BedrockService.Service.Server {
             _serverConfiguration = serverConfiguration;
             _processInfo = processInfo;
             _serviceConfiguration = serviceConfiguration;
-            _playerManager = serviceConfiguration.GetProp(ServicePropertyKeys.GlobalizedPlayerDatabase).GetBoolValue() || processInfo.DeclaredType() == "Client" ? servicePlayerManager : new ServerPlayerManager(serverConfiguration);
+            _playerManager = serviceConfiguration.GetProp(ServicePropertyKeys.GlobalizedPlayerDatabase).GetBoolValue() || processInfo.DeclaredType() == "Client" ? servicePlayerManager : serverConfiguration.GetPlayerManager();
             _configurator = configurator;
             _logger = logger;
             _backupManager = new JavaBackupManager(_logger, this, serverConfiguration, serviceConfiguration);

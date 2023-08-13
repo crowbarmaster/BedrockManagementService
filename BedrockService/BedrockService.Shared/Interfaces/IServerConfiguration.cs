@@ -25,9 +25,10 @@ namespace BedrockService.Shared.Interfaces {
         void SetServerVersion(string newVersion);
         string GetServerVersion();
         void SetStatus(ServerStatusModel status);
+        bool IsPrimaryServer();
         ServerStatusModel GetStatus();
         void SetBackupTotals(int totalBackups, int totalSize);
-        void SetSettingsProp(SharedStringBase.ServerPropertyKeys key, string value);
+        void SetSettingsProp(ServerPropertyKeys key, string value);
         void SetSettingsProp(string key, string value);
         List<Property> GetSettingsList();
         void SetAllSettings(List<Property> settingsList);
@@ -35,6 +36,7 @@ namespace BedrockService.Shared.Interfaces {
         string GetDeployedVersion();
         void SetDeployedVersion(string version);
         IUpdater GetUpdater();
+        IPlayerManager GetPlayerManager();
         void ValidateDeployedServer();
     }
 }

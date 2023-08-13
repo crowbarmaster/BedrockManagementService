@@ -25,17 +25,20 @@ namespace BedrockService.Service.Server.ConsoleFilters {
 
         public void Filter(string input) {
             var playerInfo = ExtractPlayerInfoFromString(input);
-            _logger.AppendLine($"Player {playerInfo.username} connected.");
+            _logger.AppendLine($"Player {playerInfo.username} connected to server {_serverConfiguration.GetServerName()}.");
             _bedrockServer.SetServerModified(true);
-            _bedrockServer.GetActivePlayerList().Add(_bedrockServer.GetPlayerManager().PlayerConnected(playerInfo.username, playerInfo.xuid));
+            _bedrockServer.GetActivePlayerList().Add(_bedrockServer.GetPlayerManager().PlayerConnected(playerInfo.username, playerInfo.uuid));
             _configurator.SavePlayerDatabase(_serverConfiguration);
         }
 
-        private (string username, string xuid) ExtractPlayerInfoFromString(string input) {
+        private (string username, string uuid) ExtractPlayerInfoFromString(string input) {
             int msgStartIndex = input.IndexOf("]:") + 3;
-            int usernameEnd = input.IndexOf("joined", msgStartIndex) - 1;
-            int usernameLength = usernameEnd - msgStartIndex;
-            return (input.Substring(msgStartIndex, usernameLength), "");
+            int userStart = msgStartIndex + "UUID of player ".Length;
+            int uuidLength = 36;
+            int uuidStart = input.Length - uuidLength;
+            int userEnd = uuidStart - 4;
+            int userLength = userEnd - userStart;
+            return (input.Substring(userStart, userLength), input.Substring(uuidStart, uuidLength));
         }
     }
 }

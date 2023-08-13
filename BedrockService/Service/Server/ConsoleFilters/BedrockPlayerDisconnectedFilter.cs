@@ -25,8 +25,8 @@ namespace BedrockService.Service.Server.ConsoleFilters {
 
         public void Filter(string input) {
             var playerInfo = ExtractPlayerInfoFromString(input);
-            _logger.AppendLine($"Player {playerInfo.username} disconnected with XUID: {playerInfo.xuid}");
-            _bedrockServer.GetActivePlayerList().Remove(_bedrockServer.GetPlayerManager().PlayerDisconnected(playerInfo.xuid));
+            _logger.AppendLine($"Player {playerInfo.username} disconnected from server {_serverConfiguration.GetServerName()}.");
+            _bedrockServer.GetActivePlayerList().Remove(_bedrockServer.GetPlayerManager().PlayerDisconnected(null, playerInfo.xuid));
             _configurator.SavePlayerDatabase(_serverConfiguration);
         }
 

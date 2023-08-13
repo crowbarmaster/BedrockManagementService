@@ -30,7 +30,7 @@ namespace BedrockService.Shared.Classes {
             return playerFound;
         }
 
-        public IPlayer PlayerDisconnected(string xuid) {
+        public IPlayer PlayerDisconnected(string username, string xuid) {
             IPlayer playerFound = GetOrCreatePlayer(xuid);
             playerFound.UpdateTimes(playerFound.GetTimes().Conn, DateTime.Now.Ticks);
             return playerFound;

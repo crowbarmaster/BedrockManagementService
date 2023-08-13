@@ -321,8 +321,6 @@ namespace BedrockService.Shared.Classes {
             { MinecraftPackTypes.WorldPack, "WorldPack" }
         };
 
-       
-
         public static void SetWorkingDirectory(IProcessInfo processInfo) {
             if (!BmsDirectoryStrings.ContainsKey(BmsDirectoryKeys.WorkingDirectory)) {
                 BmsDirectoryStrings.Add(BmsDirectoryKeys.WorkingDirectory, processInfo.GetDirectory());
