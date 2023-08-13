@@ -49,7 +49,7 @@ namespace BedrockService.Shared.Classes.Configurations {
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.UpdateCron], "0 2 * **"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerVersion], "None"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.UseBetaVersions], "false"));
-            PlayerManager = new(this);
+            PlayerManager = new BedrockPlayerManager(this);
             return true;
         }
 
@@ -263,6 +263,8 @@ namespace BedrockService.Shared.Classes.Configurations {
         public void SetPlayerList(List<IPlayer> newList) => PlayerManager.SetPlayerList(newList);
 
         public IPlayer GetOrCreatePlayer(string xuid, string username = null) => PlayerManager.GetOrCreatePlayer(xuid, username);
+
+        public IPlayerManager GetPlayerManager() => PlayerManager;
 
         public IServerConfiguration GetServerInfo() => this;
 

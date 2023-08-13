@@ -53,7 +53,7 @@ namespace BedrockService.Shared.Classes.Configurations
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerVersion], "None"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.UseBetaVersions], "false"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.JavaArgs], "-Xmx1024M -Xms1024M -XX:+UnlockExperimentalVMOptions -XX:+AlwaysPreTouch -XX:+UseStringDeduplication -Dfml.ignorePatchDiscrepancies=true -Dfml.ignoreInvalidMinecraftCertificates=true -XX:-OmitStackTraceInFastThrow -XX:+OptimizeStringConcat -Dfml.readTimeout=180 -XX:+UseLargePages"));
-            PlayerManager = new(this);
+            PlayerManager = new JavaPlayerManager(this);
             return true;
         }
 
@@ -322,6 +322,8 @@ namespace BedrockService.Shared.Classes.Configurations
         public void SetPlayerList(List<IPlayer> newList) => PlayerManager.SetPlayerList(newList);
 
         public IPlayer GetOrCreatePlayer(string xuid, string username = null) => PlayerManager.GetOrCreatePlayer(xuid, username);
+
+        public IPlayerManager GetPlayerManager() => PlayerManager;
 
         public IServerConfiguration GetServerInfo() => this;
 

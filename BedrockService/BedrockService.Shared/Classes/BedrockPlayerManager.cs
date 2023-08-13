@@ -8,14 +8,14 @@ using System.Linq;
 using static BedrockService.Shared.Classes.SharedStringBase;
 #nullable enable
 namespace BedrockService.Shared.Classes {
-    public class ServerPlayerManager : IPlayerManager {
+    public class BedrockPlayerManager : IPlayerManager {
         public List<IPlayer> PlayerList = new();
 
         readonly IServerConfiguration? _serverConfiguration;
         readonly string? _knownDatabasePath;
         readonly string? _registeredDatabasePath;
 
-        public ServerPlayerManager(IServerConfiguration? serverConfiguration) {
+        public BedrockPlayerManager(IServerConfiguration? serverConfiguration) {
             if(serverConfiguration == null) {
                 throw new ArgumentNullException(nameof(serverConfiguration));
             }
@@ -25,7 +25,7 @@ namespace BedrockService.Shared.Classes {
         }
 
         [JsonConstructor]
-        public ServerPlayerManager() { }
+        public BedrockPlayerManager() { }
 
         public IPlayer PlayerConnected(string username, string xuid) {
             IPlayer playerFound = GetOrCreatePlayer(xuid, username);
@@ -33,16 +33,16 @@ namespace BedrockService.Shared.Classes {
             return playerFound;
         }
 
-        public IPlayer PlayerDisconnected(string xuid) {
+        public IPlayer PlayerDisconnected(string username, string xuid) {
             IPlayer playerFound = GetOrCreatePlayer(xuid);
             playerFound.UpdateTimes(playerFound.GetTimes().Conn, DateTime.Now.Ticks);
             return playerFound;
         }
 
         public IPlayer GetOrCreatePlayer(string xuid, string username = null) {
-            IPlayer foundPlayer = PlayerList.FirstOrDefault(p => p.GetXUID() == xuid);
+            IPlayer foundPlayer = PlayerList.FirstOrDefault(p => p.GetPlayerID() == xuid);
             if (foundPlayer == null) {
-                BedrockPlayer player = new(_serverConfiguration.GetProp(BmsDependServerPropKeys.PermLevel).ToString());
+                Player player = new(_serverConfiguration.GetProp(BmsDependServerPropKeys.PermLevel).ToString());
                 player.Initialize(xuid, username);
                 PlayerList.Add(player);
                 return player;
@@ -51,7 +51,7 @@ namespace BedrockService.Shared.Classes {
         }
 
         public void AddUpdatePlayer(IPlayer player) {
-            IPlayer foundPlayer = PlayerList.FirstOrDefault(p => p.GetXUID() == player.GetXUID());
+            IPlayer foundPlayer = PlayerList.FirstOrDefault(p => p.GetPlayerID() == player.GetPlayerID());
             if (foundPlayer == null) {
                 PlayerList.Add(player);
                 return;

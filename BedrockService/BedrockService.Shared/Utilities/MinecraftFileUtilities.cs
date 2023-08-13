@@ -52,12 +52,12 @@ namespace BedrockService.Shared.Utilities {
             server.GetPlayerList()
                 .Where(x => x.IsPlayerWhitelisted())
                 .ToList().ForEach(x => {
-                    whitelistFile.Contents.Add(new WhitelistEntryJsonModel(x.PlayerIgnoresLimit(), x.GetXUID(), x.GetUsername()));
+                    whitelistFile.Contents.Add(new WhitelistEntryJsonModel(x.PlayerIgnoresLimit(), x.GetPlayerID(), x.GetUsername()));
                 });
             server.GetPlayerList()
                 .Where(x => !x.IsDefaultRegistration())
                 .ToList().ForEach(x => {
-                    permissionsFile.Contents.Add(new PermissionsEntryJsonModel(x.GetPermissionLevel(), x.GetXUID()));
+                    permissionsFile.Contents.Add(new PermissionsEntryJsonModel(x.GetPermissionLevel(), x.GetPlayerID()));
                 });
             permissionsFile.SaveToFile(permissionsFile.Contents);
             whitelistFile.SaveToFile(whitelistFile.Contents);

@@ -102,7 +102,7 @@ namespace BedrockService.Service.Management
             }
             lock (_fileLock) {
                 TextWriter writer = new StreamWriter(dbPath);
-                foreach (BedrockPlayer entry in playerList) {
+                foreach (Player entry in playerList) {
                     writer.WriteLine(entry.ToString("Known"));
                 }
                 writer.Flush();
@@ -187,26 +187,26 @@ namespace BedrockService.Service.Management
             if (_serviceConfiguration.GetProp(ServicePropertyKeys.GlobalizedPlayerDatabase).GetBoolValue()) {
                 _serviceConfiguration.GetPlayerList()
                     .Where(x => x.IsPlayerWhitelisted())
-                    .Select(x => (xuid: x.GetXUID(), userName: x.GetUsername(), ignoreLimits: x.PlayerIgnoresLimit()))
+                    .Select(x => (xuid: x.GetPlayerID(), userName: x.GetUsername(), ignoreLimits: x.PlayerIgnoresLimit()))
                     .ToList().ForEach(x => {
                         whitelistFile.Contents.Add(new WhitelistEntryJsonModel(x.ignoreLimits, x.xuid, x.userName));
                     });
                 _serviceConfiguration.GetPlayerList()
                     .Where(x => !x.IsDefaultRegistration())
-                    .Select(x => (xuid: x.GetXUID(), permLevel: x.GetPermissionLevel()))
+                    .Select(x => (xuid: x.GetPlayerID(), permLevel: x.GetPermissionLevel()))
                     .ToList().ForEach(x => {
                         permissionsFile.Contents.Add(new PermissionsEntryJsonModel(x.permLevel, x.xuid));
                     });
             } else {
                 server.GetPlayerList()
                     .Where(x => x.IsPlayerWhitelisted())
-                    .Select(x => (xuid: x.GetXUID(), userName: x.GetUsername(), ignoreLimits: x.PlayerIgnoresLimit()))
+                    .Select(x => (xuid: x.GetPlayerID(), userName: x.GetUsername(), ignoreLimits: x.PlayerIgnoresLimit()))
                     .ToList().ForEach(x => {
                         whitelistFile.Contents.Add(new WhitelistEntryJsonModel(x.ignoreLimits, x.xuid, x.userName));
                     });
                 server.GetPlayerList()
                     .Where(x => !x.IsDefaultRegistration())
-                    .Select(x => (xuid: x.GetXUID(), permLevel: x.GetPermissionLevel()))
+                    .Select(x => (xuid: x.GetPlayerID(), permLevel: x.GetPermissionLevel()))
                     .ToList().ForEach(x => {
                         permissionsFile.Contents.Add(new PermissionsEntryJsonModel(x.permLevel, x.xuid));
                     });

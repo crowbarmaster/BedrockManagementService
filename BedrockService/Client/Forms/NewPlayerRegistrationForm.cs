@@ -14,6 +14,7 @@ namespace BedrockService.Client.Forms {
             long curTime = DateTime.Now.Ticks;
             if (usernameTextBox.TextLength > 0 && xuidTextBox.TextLength == 16) {
                 PlayerToAdd = new BedrockPlayer(xuidTextBox.Text, usernameTextBox.Text, curTime, curTime, curTime, whitelistedChkBox.Checked, permissionComboBox.SelectedItem.ToString(), ignoreLimitChkBox.Checked);
+                    new Player(xuidTextBox.Text, usernameTextBox.Text, curTime, curTime, curTime, whitelistedChkBox.Checked,
                 DialogResult = DialogResult.OK;
             }
         }
