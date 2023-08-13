@@ -99,10 +99,15 @@ namespace BedrockService.Service.Core {
             try {
                 ValidSettingsCheck().Wait();
                 foreach (var brs in _bedrockServers) {
-                    if (!brs.ServerAutostartEnabled() && brs.IsPrimaryServer()) {
+                    if (brs.IsPrimaryServer()) {
+                        brs.ServerStart().Wait();
+                    }
+                    if (!brs.ServerAutostartEnabled()) {
                         continue;
                     }
-                    brs.ServerStart().Wait();
+                    if (!brs.IsPrimaryServer()) {
+                        brs.ServerStart();
+                    }
                     brs.StartWatchdog();
                 }
 
@@ -139,7 +144,10 @@ namespace BedrockService.Service.Core {
             _logger.AppendLine("Shutdown initiated...");
             try {
                 foreach (var brs in _bedrockServers) {
-                    brs.ServerStop(true).Wait();
+                    brs.ServerStop(true);
+                }
+                while (HasRunningServer()) {
+                    Task.Delay(200).Wait();
                 }
                 _CurrentServiceStatus = ServiceStatus.Stopped;
                 return true;
@@ -187,6 +195,15 @@ namespace BedrockService.Service.Core {
             ValidSettingsCheck().Wait();
             bedrockServer.ServerStart().Wait();
             bedrockServer.StartWatchdog();
+        }
+
+        private bool HasRunningServer() {
+            foreach(IServerController server in _bedrockServers) {
+                if (server.IsServerStarted()) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private void InstanciateServers() {

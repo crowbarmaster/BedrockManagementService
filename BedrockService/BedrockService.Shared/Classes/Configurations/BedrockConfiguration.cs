@@ -114,6 +114,13 @@ namespace BedrockService.Shared.Classes.Configurations {
             }
         }
 
+        public bool IsPrimaryServer() {
+            return GetProp(BmsDependServerPropKeys.PortI4).StringValue == "19132" ||
+            GetProp(BmsDependServerPropKeys.PortI4).StringValue == "19133" ||
+            GetProp(BmsDependServerPropKeys.PortI6).StringValue == "19132" ||
+            GetProp(BmsDependServerPropKeys.PortI6).StringValue == "19133";
+        }
+
         public void UpdateServerProps(string version) {
             DefaultPropList.Clear();
             DefaultPropList = MinecraftFileUtilities.GetDefaultPropListFromFile(GetServiceFilePath(BmsFileNameKeys.BedrockStockProps_Ver, version));

@@ -130,6 +130,11 @@ namespace BedrockService.Shared.Classes.Configurations
             }
         }
 
+
+        public bool IsPrimaryServer() {
+            return GetProp(BmsDependServerPropKeys.PortI4).StringValue == "19132";
+        }
+
         public void UpdateServerProps(string version)
         {
             DefaultPropList.Clear();

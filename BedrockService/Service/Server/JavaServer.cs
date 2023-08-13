@@ -277,12 +277,7 @@ namespace BedrockService.Service.Server {
 
         public bool ServerAutostartEnabled() => _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerAutostartEnabled).GetBoolValue();
 
-        public bool IsPrimaryServer() {
-            return _serverConfiguration.GetProp(BmsDependServerPropKeys.PortI4).StringValue == "19132" ||
-            _serverConfiguration.GetProp(BmsDependServerPropKeys.PortI4).StringValue == "19133" ||
-            _serverConfiguration.GetProp(BmsDependServerPropKeys.PortI6).StringValue == "19132" ||
-            _serverConfiguration.GetProp(BmsDependServerPropKeys.PortI6).StringValue == "19133";
-        }
+        public bool IsPrimaryServer() => _serverConfiguration.IsPrimaryServer();
 
         public IPlayerManager GetPlayerManager() => _playerManager;
 
@@ -406,5 +401,7 @@ namespace BedrockService.Service.Server {
         public BackupManager GetBackupManager() => _backupManager;
 
         public void SetStartupStatus(ServerStatus status) => _currentServerStatus = status;
+
+        public bool IsServerStarted() => _currentServerStatus == ServerStatus.Started;
     }
 }
