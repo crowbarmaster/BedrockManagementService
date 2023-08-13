@@ -138,13 +138,13 @@ namespace BedrockService.Service.Management
                         return;
                     }
                 }
-                output[index++] = $"{prop.KeyName}={prop}";
+                output[index++] = prop.PropFileFormatString();
             });
             output[index++] = string.Empty;
 
             output[index++] = "#Server";
             server.GetAllProps().ForEach(prop => {
-                output[index++] = $"{prop.KeyName}={prop}";
+                output[index++] = prop.PropFileFormatString();
             });
             if (!Directory.Exists(serverPath)) {
                 Directory.CreateDirectory(serverPath);

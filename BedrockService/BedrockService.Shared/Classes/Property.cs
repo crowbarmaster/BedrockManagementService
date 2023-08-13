@@ -20,9 +20,11 @@ namespace BedrockService.Shared.Classes {
             DefaultValue = newProp.DefaultValue;
         }
 
-        public override string ToString() {
-            return StringValue;
-        }
+        public override string ToString() => StringValue;
+        
+
+        public string PropFileFormatString() => $"{KeyName}={StringValue}"; 
+        
 
         public void SetValue(string newValue) {
             StringValue = newValue;
