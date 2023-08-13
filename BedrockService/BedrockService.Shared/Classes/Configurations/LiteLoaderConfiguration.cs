@@ -28,8 +28,8 @@ namespace BedrockService.Shared.Classes.Configurations {
 
         public bool InitializeDefaults() {
             _servicePath = _processInfo.GetDirectory();
-            _defaultPropList = _serviceConfiguration.GetServerDefaultPropList(MinecraftServerArch.Bedrock);
-            ServerPropList = MinecraftFileUtilities.CopyPropList(_defaultPropList);
+            DefaultPropList = _serviceConfiguration.GetServerDefaultPropList(MinecraftServerArch.Bedrock);
+            ServerPropList = MinecraftFileUtilities.CopyPropList(DefaultPropList);
             ServersPath = new Property(ServicePropertyStrings[ServicePropertyKeys.ServersPath], _serviceConfiguration.GetProp(ServicePropertyKeys.ServersPath).StringValue);
             ServicePropList.Clear();
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerName], "LiteLoader Server"));
@@ -106,7 +106,7 @@ namespace BedrockService.Shared.Classes.Configurations {
         }
 
         public void UpdateServerProps(string version) {
-            _defaultPropList.Clear();
+            DefaultPropList.Clear();
             try {
                 File.ReadAllLines(GetServiceFilePath(BmsFileNameKeys.BedrockStockProps_Ver, _updater.GetBaseVersion(version))).ToList().ForEach(entry => {
                     string[] splitEntry = entry.Split('=');
@@ -119,7 +119,7 @@ namespace BedrockService.Shared.Classes.Configurations {
                     } else {
                         ServerPropList.Add(propToSet);
                     }
-                    _defaultPropList.Add(propToSet);
+                    DefaultPropList.Add(propToSet);
                 });
             } catch (Exception) {
                 _updater.ReplaceServerBuild(version).Wait();
@@ -254,9 +254,9 @@ namespace BedrockService.Shared.Classes.Configurations {
             return GetSettingsProp(ServerPropertyKeys.FileName).StringValue;
         }
 
-        public List<LogEntry> GetLog() => ConsoleBuffer = ConsoleBuffer ?? new List<LogEntry>();
+        public List<LogEntry> GetLog() => ServerLogs = ServerLogs ?? new List<LogEntry>();
 
-        public void SetLog(List<LogEntry> newLog) => ConsoleBuffer = newLog;
+        public void SetLog(List<LogEntry> newLog) => ServerLogs = newLog;
 
         public List<IPlayer> GetPlayerList() => PlayerManager.GetPlayerList();
 

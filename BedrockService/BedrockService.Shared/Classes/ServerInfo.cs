@@ -13,11 +13,11 @@ namespace BedrockService.Shared.Classes {
         public int TotalBackupSizeKilobytes { get; set; }
         public int TotalBackupsStored { get; set; }
         public ServerStatusModel ServerStatus { get; set; } = new();
-        public List<LogEntry> ConsoleBuffer = new();
+        public List<LogEntry> ServerLogs = new();
         public LiteLoaderConfigNodeModel LiteLoaderConfigProps { get; set; }
         public List<Property> ServicePropList = new();
         public List<Property> ServerPropList = new();
-        public List<Property> _defaultPropList = new();
+        public List<Property> DefaultPropList = new();
         public List<StartCmdEntry> StartCmds = new();
 
         public ServerInfo() {

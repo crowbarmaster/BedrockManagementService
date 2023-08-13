@@ -27,8 +27,8 @@ namespace BedrockService.Shared.Classes.Configurations {
 
         public bool InitializeDefaults() {
             _servicePath = _processInfo.GetDirectory();
-            _defaultPropList = _serviceConfiguration.GetServerDefaultPropList(_serverArch);
-            ServerPropList = MinecraftFileUtilities.CopyPropList(_defaultPropList);
+            DefaultPropList = _serviceConfiguration.GetServerDefaultPropList(_serverArch);
+            ServerPropList = MinecraftFileUtilities.CopyPropList(DefaultPropList);
             ServersPath = new Property(ServicePropertyStrings[ServicePropertyKeys.ServersPath], _serviceConfiguration.GetProp(ServicePropertyKeys.ServersPath).StringValue);
             ServicePropList.Clear();
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerName], "Dedicated Server"));
@@ -115,11 +115,11 @@ namespace BedrockService.Shared.Classes.Configurations {
         }
 
         public void UpdateServerProps(string version) {
-            _defaultPropList.Clear();
-            _defaultPropList = MinecraftFileUtilities.GetDefaultPropListFromFile(GetServiceFilePath(BmsFileNameKeys.BedrockStockProps_Ver, version));
+            DefaultPropList.Clear();
+            DefaultPropList = MinecraftFileUtilities.GetDefaultPropListFromFile(GetServiceFilePath(BmsFileNameKeys.BedrockStockProps_Ver, version));
             List<Property> newList = new List<Property>();
             ServerPropList.ForEach(prop => {
-                if (_defaultPropList.Where(x => x.KeyName == prop.KeyName).Count() > 0) {
+                if (DefaultPropList.Where(x => x.KeyName == prop.KeyName).Count() > 0) {
                     newList.Add(prop);
                 }
             });
@@ -254,9 +254,9 @@ namespace BedrockService.Shared.Classes.Configurations {
             return GetSettingsProp(ServerPropertyKeys.FileName).StringValue;
         }
 
-        public List<LogEntry> GetLog() => ConsoleBuffer ?? new List<LogEntry>();
+        public List<LogEntry> GetLog() => ServerLogs ?? new List<LogEntry>();
 
-        public void SetLog(List<LogEntry> newLog) => ConsoleBuffer = newLog;
+        public void SetLog(List<LogEntry> newLog) => ServerLogs = newLog;
 
         public List<IPlayer> GetPlayerList() => PlayerManager.GetPlayerList();
 
