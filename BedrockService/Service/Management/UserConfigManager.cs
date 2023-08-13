@@ -31,11 +31,6 @@ namespace BedrockService.Service.Management
 
         public Task LoadGlobals() => Task.Run(() => {
             _serviceConfiguration.InitializeDefaults();
-            EnumTypeLookup typeLookup = new EnumTypeLookup(_logger, _serviceConfiguration);
-            foreach (KeyValuePair<MinecraftServerArch, IUpdater> kvp in typeLookup.UpdatersByArch) {
-                kvp.Value.Initialize();
-            }
-
             if (File.Exists(GetServiceFilePath(BmsFileNameKeys.ServiceConfig))) {
                 _serviceConfiguration.ProcessUserConfiguration(File.ReadAllLines(GetServiceFilePath(BmsFileNameKeys.ServiceConfig)));
                 _logger.AppendLine("Loaded Service props.");

@@ -2,6 +2,7 @@
 using BedrockService.Service.Networking.Interfaces;
 using BedrockService.Service.Server;
 using BedrockService.Service.Server.Interfaces;
+using BedrockService.Shared.JsonModels.MinecraftJsonModels;
 using BedrockService.Shared.SerializeModels;
 using static BedrockService.Shared.Classes.SharedStringBase;
 
@@ -62,6 +63,10 @@ namespace BedrockService.Service.Core {
                         _logger.AppendLine("You have not accepted Mojang's EULA.\n Read terms at: https://minecraft.net/terms \n BedrockService will now terminate.");
                         return false;
                     }
+                }
+                EnumTypeLookup typeLookup = new EnumTypeLookup(_logger, _serviceConfiguration);
+                foreach (KeyValuePair<MinecraftServerArch, IUpdater> kvp in typeLookup.UpdatersByArch) {
+                    kvp.Value.Initialize();
                 }
                 _configurator.LoadServerConfigurations().Wait();
                 _bedrockServers.Clear();
