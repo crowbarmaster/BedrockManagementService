@@ -192,16 +192,20 @@ namespace BedrockService.Client.Forms
 
         public override void Refresh() {
             HostInfoLabel.Text = $"Connected to host:";
+            if (_logManager.LogTask.Status != TaskStatus.Running) {
+                _logManager.InitLogThread();
+            }
             ServerSelectBox.Items.Clear();
             if (connectedHost != null) {
                 _logManager.SetConnectedHost(connectedHost);
-                foreach (BedrockConfiguration server in connectedHost.GetServerList()) {
+                foreach (IServerConfiguration server in connectedHost.GetServerList()) {
                     ServerSelectBox.Items.Add(server.GetSettingsProp(ServerPropertyKeys.ServerName).ToString());
                 }
 
                 if (ServerSelectBox.Items.Count > 0) {
                     ServerSelectBox.SelectedIndex = 0;
                     selectedServer = connectedHost.GetServerInfoByName((string)ServerSelectBox.SelectedItem);
+                    FormManager.TCPClient.SendData(FormManager.MainWindow.connectedHost.GetServerIndex(FormManager.MainWindow.selectedServer), NetworkMessageTypes.ServerStatusRequest);
                 }
             }
         }
@@ -304,7 +308,7 @@ namespace BedrockService.Client.Forms
 
         private void ServerSelectBox_SelectedIndexChanged(object sender, EventArgs e) {
             if (connectedHost != null) {
-                foreach (BedrockConfiguration server in connectedHost.GetServerList()) {
+                foreach (IServerConfiguration server in connectedHost.GetServerList()) {
                     if (ServerSelectBox.SelectedItem != null && ServerSelectBox.SelectedItem.ToString() == server.GetServerName()) {
                         selectedServer = server;
                         FormManager.TCPClient.SendData(connectedHost.GetServerIndex(server), NetworkMessageTypes.EnumBackups);
@@ -341,7 +345,7 @@ namespace BedrockService.Client.Forms
             using (AddNewServerForm newServerForm = new(clientSideServiceConfiguration, connectedHost.GetServerList())) {
                 if (newServerForm.ShowDialog() == DialogResult.OK) {
                     JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-                    byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(newServerForm.ServerCombinedPropModel, Formatting.Indented, settings));
+                    byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(newServerForm.SelectedPropModel, Formatting.Indented, settings));
                     FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageTypes.AddNewServer);
                     newServerForm.Close();
                     newServerForm.Dispose();
@@ -368,27 +372,24 @@ namespace BedrockService.Client.Forms
 
         private void Disconn_Click(object sender, EventArgs e) {
             _connectTimer.Stop();
-            if (_logManager.StopLogThread()) {
-                try {
-                    if (FormManager.TCPClient.Connected) {
-                        FormManager.TCPClient.SendData(NetworkMessageTypes.Disconnect);
-                        Thread.Sleep(500);
-                        FormManager.TCPClient.CloseConnection();
-                    }
-                    selectedServer = null;
-                    connectedHost = null;
-                    _logManager.SetConnectedHost(null);
-                    LogBox.Invoke((MethodInvoker)delegate { LogBox.Text = ""; });
-                    FormManager.MainWindow.Invoke((MethodInvoker)delegate {
-                        RefreshAllCompenentStates();
-                        ServerSelectBox.Items.Clear();
-                        ServerSelectBox.SelectedIndex = -1;
-                        ServerInfoBox.Text = "";
-                        HostInfoLabel.Text = $"Select a host below:";
-                    });
-                } catch (Exception) { }
-
-            }
+            try {
+                if (FormManager.TCPClient.Connected) {
+                    FormManager.TCPClient.SendData(NetworkMessageTypes.Disconnect);
+                    Thread.Sleep(500);
+                    FormManager.TCPClient.CloseConnection();
+                }
+                selectedServer = null;
+                connectedHost = null;
+                _logManager.SetConnectedHost(null);
+                LogBox.Invoke((MethodInvoker)delegate { LogBox.Text = ""; });
+                FormManager.MainWindow.Invoke((MethodInvoker)delegate {
+                    RefreshAllCompenentStates();
+                    ServerSelectBox.Items.Clear();
+                    ServerSelectBox.SelectedIndex = -1;
+                    ServerInfoBox.Text = "";
+                    HostInfoLabel.Text = $"Select a host below:";
+                });
+            } catch (Exception) { }
         }
 
         private void SendCmd_Click(object sender, EventArgs e) {
