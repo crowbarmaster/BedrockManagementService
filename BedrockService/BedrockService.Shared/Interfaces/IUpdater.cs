@@ -1,4 +1,5 @@
 ﻿using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace BedrockService.Shared.Interfaces {
@@ -8,5 +9,6 @@ namespace BedrockService.Shared.Interfaces {
         string GetBaseVersion(string version);
         Task<bool> FetchBuild(string version);
         Task ReplaceServerBuild(string versionOverride = "");
+        List<string> GetVersionList();
     }
 }

@@ -26,17 +26,7 @@ namespace BedrockService.Shared.Classes {
 
         public IUpdater GetUpdaterByArch (MinecraftServerArch arch) => UpdatersByArch[arch];
 
-        public IUpdater GetUpdaterByArchName(string archName) {
-            switch (archName) {
-                case "Bedrock":
-                    return UpdatersByArch[MinecraftServerArch.Bedrock];
-                case "LiteLoader":
-                    return UpdatersByArch[MinecraftServerArch.LiteLoader];
-                case "Java":
-                    return UpdatersByArch[MinecraftServerArch.Java];
-            }
-            return null;
-        }
+        public IUpdater GetUpdaterByArchName(string archName) => UpdatersByArch[GetArchFromString(archName)];
 
         public IServerConfiguration PrepareNewServerByArchName(string archName, IProcessInfo processInfo, IServerLogger logger, IServiceConfiguration service) {
             switch (archName) {

@@ -186,6 +186,18 @@ namespace BedrockService.Shared.Classes {
             { MinecraftServerArch.Java, "Java" }
         };
 
+        public static MinecraftServerArch GetArchFromString(string archName) {
+            switch (archName) {
+                case "Bedrock":
+                    return MinecraftServerArch.Bedrock;
+                case "LiteLoader":
+                    return MinecraftServerArch.LiteLoader;
+                case "Java":
+                    return MinecraftServerArch.Java;
+            }
+            return MinecraftServerArch.Bedrock;
+        }
+
         public static Dictionary<BdsDirectoryKeys, string> BdsDirectoryStrings = new() {
             { BdsDirectoryKeys.ServerRoot, "" },
             { BdsDirectoryKeys.ServerWorldDir_LevelName, "worlds\\{0}" },
