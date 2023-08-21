@@ -185,6 +185,13 @@ namespace BedrockService.Shared.Classes.Configurations {
             }
         }
 
+        public void ProcessNewServerConfiguration() {
+            Property srvNameProp = ServerPropList.FirstOrDefault(prop => prop != null && prop.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.ServerName]);
+            GetSettingsProp(ServerPropertyKeys.ServerPath).SetValue($@"{ServersPath}\{srvNameProp.StringValue}");
+            GetSettingsProp(ServerPropertyKeys.ServerExeName).SetValue($"BedrockService.{srvNameProp.StringValue}.exe");
+            GetSettingsProp(ServerPropertyKeys.FileName).SetValue($@"{srvNameProp.StringValue}.conf");
+        }
+
         public List<Property> GetSettingsList() => ServicePropList;
 
         public Property GetProp(string key) {

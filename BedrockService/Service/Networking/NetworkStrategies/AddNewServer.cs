@@ -49,6 +49,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies
             newServer.GetSettingsProp(ServerPropertyKeys.ServerExeName).SetValue($"BedrockService.{serverNameProp.StringValue}.exe");
             newServer.GetSettingsProp(ServerPropertyKeys.FileName).SetValue($@"{serverNameProp.StringValue}.conf");
             newServer.SetServerVersion(versionProp?.StringValue);
+            newServer.ProcessNewServerConfiguration();
             _configurator.SaveServerConfiguration(newServer);
             _bedrockService.InitializeNewServer(newServer);
 

@@ -130,6 +130,12 @@ namespace BedrockService.Shared.Classes.Configurations
             }
         }
 
+        public void ProcessNewServerConfiguration() {
+            Property srvNameProp = ServicePropList.FirstOrDefault(prop => prop != null && prop.KeyName == ServerPropertyStrings[ServerPropertyKeys.ServerName]);
+            GetSettingsProp(ServerPropertyKeys.ServerPath).SetValue($@"{ServersPath}\{srvNameProp.StringValue}");
+            GetSettingsProp(ServerPropertyKeys.ServerExeName).SetValue($"BedrockService.{srvNameProp.StringValue}.jar");
+            GetSettingsProp(ServerPropertyKeys.FileName).SetValue($@"{srvNameProp.StringValue}.conf");
+        }
 
         public bool IsPrimaryServer() {
             return GetProp(BmsDependServerPropKeys.PortI4).StringValue == "19132";
