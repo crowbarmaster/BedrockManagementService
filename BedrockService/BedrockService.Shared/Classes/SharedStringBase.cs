@@ -1,4 +1,5 @@
 ﻿using BedrockService.Shared.Interfaces;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 #nullable enable
@@ -96,7 +97,7 @@ namespace BedrockService.Shared.Classes {
             CoreFiles,
             BedrockCoreFiles_Ver,
             JavaCoreFiles_Ver,
-            Jdk20Path,
+            Jdk17Path,
             Jdk17BinPath
         }
 
@@ -235,7 +236,7 @@ namespace BedrockService.Shared.Classes {
             { BmsDirectoryKeys.BuildArchives, "BmsConfig\\BDSBuilds\\BuildArchives" },
             { BmsDirectoryKeys.JavaCoreFiles_Ver, "BmsConfig\\JavaBuilds\\Build_{0}" },
             { BmsDirectoryKeys.BedrockCoreFiles_Ver, "BmsConfig\\BDSBuilds\\CoreFiles\\Build_{0}" },
-            { BmsDirectoryKeys.Jdk20Path, "Jdk17" },
+            { BmsDirectoryKeys.Jdk17Path, "Jdk17" },
             { BmsDirectoryKeys.Jdk17BinPath, "Jdk17\\bin" }
         };
 
