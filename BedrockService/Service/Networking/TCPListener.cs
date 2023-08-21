@@ -68,7 +68,14 @@ namespace BedrockService.Service.Networking {
                             }
                             if (!_canClientConnect) {
                                 try {
-                                    _inListener.AcceptTcpClientAsync(_cancelTokenSource.Token).Result.Close();
+                                    TcpClient tempClient = _inListener.AcceptTcpClientAsync(_cancelTokenSource.Token).Result;
+                                    if (tempClient != null) {
+                                        _logger.AppendLine("Client connected before ready, or client already active. Rejected!");
+                                        tempClient.GetStream().Write(CreatePacketHeader(new byte[0], NetworkMessageSource.Service, NetworkMessageDestination.Client, 0, NetworkMessageTypes.ClientReject, NetworkMessageFlags.None));
+                                        tempClient.GetStream().Flush();
+                                        tempClient.GetStream().Close();
+                                    }
+                                    tempClient.Close();
                                 } catch (OperationCanceledException) {
                                     _logger.AppendLine("Client connected before ready - rejected.");
                                 }

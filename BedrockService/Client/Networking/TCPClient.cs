@@ -202,6 +202,12 @@ namespace BedrockService.Client.Networking {
                                 }
 
                                 break;
+                            case NetworkMessageTypes.ClientReject:
+                                
+                                FormManager.MainWindow.Invoke((MethodInvoker)delegate { FormManager.MainWindow.ServerInfoBox.Text = "Connection attempt rejected by Service!"; });
+                                FormManager.MainWindow.Invoke((MethodInvoker)delegate { FormManager.MainWindow.HostInfoLabel.Text = "Connection attempt rejected by Service!"; });
+
+                                break;
                             case NetworkMessageTypes.ExportFile:
 
                                 ExportImportFileModel exportModel = JsonConvert.DeserializeObject<ExportImportFileModel>(data, settings);

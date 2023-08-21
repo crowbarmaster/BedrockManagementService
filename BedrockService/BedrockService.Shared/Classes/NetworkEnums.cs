@@ -41,7 +41,7 @@
         ServerStatusRequest,
         Heartbeat,
         Disconnect,
-        UICallback
+        ClientReject,
     }
 
     public enum FileTypeFlags {
