@@ -1,6 +1,10 @@
-﻿using System;
+﻿using BedrockService.Shared.Classes;
+using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using static BedrockService.Shared.Classes.SharedStringBase;
@@ -47,21 +51,28 @@ namespace BedrockService.Shared.Utilities {
 
         public static void KillJarProcess(string jarName) {
             try {
-                Process[] processList = Process.GetProcessesByName(GetServiceFileName(BmsFileNameKeys.Jdk17JavaMmsExe)[..^4]);
-                foreach (Process process in processList) {
-                    process.Kill();
+                List<RunningJavaProcessInfo> processList = GetJpsInfo().Result;
+                foreach (RunningJavaProcessInfo process in processList) {
+                    if (process.ProcessName.Contains(jarName)) {
+                        Process jarProc = Process.GetProcessById(process.ProcessId);
+                        if (jarProc != null) {
+                            jarProc.Kill();
+                        }
+                    }
                 }
             } catch { }
         }
 
-        public static bool JarProcessExists(string jarName) {
+        public static int JarProcessExists(string jarName) {
             try {
-                Process[] processList = Process.GetProcessesByName(GetServiceFileName(BmsFileNameKeys.Jdk17JavaMmsExe)[..^4]);
-                if (processList.Length > 0) {
-                    return true;
+                List<RunningJavaProcessInfo> processList = GetJpsInfo().Result;
+                foreach (RunningJavaProcessInfo process in processList) {
+                    if (process.ProcessName.Contains(jarName)) {
+                        return process.ProcessId;
+                    }
                 }
             } catch { }
-            return false;
+            return 0;
         }
 
         public static Task QuickLaunchJar(string jarPath) {
@@ -82,5 +93,26 @@ namespace BedrockService.Shared.Utilities {
                 process.WaitForExit(10000);
             });
         }
+
+        public static Task<List<RunningJavaProcessInfo>> GetJpsInfo() => Task.Run(() => {
+            ProcessStartInfo processStartInfo = new ProcessStartInfo() {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                WorkingDirectory = GetServiceDirectory(BmsDirectoryKeys.Jdk17BinPath),
+                FileName = @"Jps.exe",
+                Arguments = $@"-m"
+            };
+            Process process = Process.Start(processStartInfo);
+            List<RunningJavaProcessInfo> output = new();
+            process.OutputDataReceived += (s, e) => {
+                if (!string.IsNullOrEmpty(e.Data)) {
+                    output.Add(new(e.Data));
+                }
+            };
+            process.BeginOutputReadLine();
+            process.WaitForExit(1000);
+            return output;
+        });
     }
 }
