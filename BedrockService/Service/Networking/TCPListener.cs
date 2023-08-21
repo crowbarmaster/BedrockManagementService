@@ -43,7 +43,6 @@ namespace BedrockService.Service.Networking {
 
         public Task StartListening() {
             return new Task(() => {
-                _logger.AppendLine("TCP listener task started.");
                 _inListener = new TcpListener(_ipAddress, _serviceConfiguration.GetProp(ServicePropertyKeys.ClientPort).GetIntValue());
                 try {
 
@@ -54,10 +53,11 @@ namespace BedrockService.Service.Networking {
                     Thread.Sleep(2000);
                     Environment.Exit(1);
                 }
-                while (true) {
+                while (!_cancelTokenSource.IsCancellationRequested) {
                     try {
                         if (_inListener != null && _inListener.Pending() && _serviceStarted) {
                             if (_canClientConnect) {
+                                _logger.AppendLine("BMS Client has connected to service.");
                                 _canClientConnect = false;
                                 _cancelTokenSource = new CancellationTokenSource();
                                 _client = _inListener.AcceptTcpClient();
@@ -65,8 +65,7 @@ namespace BedrockService.Service.Networking {
                                 if (_recieverTask != null) {
                                     _recieverTask.Start();
                                 }
-                            }
-                            if (!_canClientConnect) {
+                            } else {
                                 try {
                                     TcpClient tempClient = _inListener.AcceptTcpClientAsync(_cancelTokenSource.Token).Result;
                                     if (tempClient != null) {
@@ -77,15 +76,8 @@ namespace BedrockService.Service.Networking {
                                     }
                                     tempClient.Close();
                                 } catch (OperationCanceledException) {
-                                    _logger.AppendLine("Client connected before ready - rejected.");
                                 }
                             }
-                        }
-                        if (_cancelTokenSource.IsCancellationRequested) {
-                            _logger.AppendLine("TCP Listener task canceled!");
-                            _inListener?.Stop();
-                            _inListener = null;
-                            return;
                         }
                         Task.Delay(500).Wait();
                     } catch (NullReferenceException) {
@@ -97,6 +89,9 @@ namespace BedrockService.Service.Networking {
                         _logger.AppendLine(e.ToString());
                     }
                 }
+                _logger.AppendLine("TCP Listener task canceled!");
+                _inListener?.Stop();
+                _inListener = null;
             }, _cancelTokenSource.Token);
         }
 
@@ -142,22 +137,17 @@ namespace BedrockService.Service.Networking {
         }
 
         private void SendData(byte[] bytesToSend, NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type, NetworkMessageFlags status) {
-            byte[] byteHeader = new byte[9 + bytesToSend.Length];
-            byte[] len = BitConverter.GetBytes(5 + bytesToSend.Length);
-            Buffer.BlockCopy(len, 0, byteHeader, 0, 4);
-            byteHeader[4] = (byte)source;
-            byteHeader[5] = (byte)destination;
-            byteHeader[6] = serverIndex;
-            byteHeader[7] = (byte)type;
-            byteHeader[8] = (byte)status;
-            Buffer.BlockCopy(bytesToSend, 0, byteHeader, 9, bytesToSend.Length);
+            byte[] byteHeader = CreatePacketHeader(bytesToSend, source, destination, serverIndex, type, status);
 
-            if (_tcpTask?.Status == TaskStatus.Running && _recieverTask?.Status == TaskStatus.Running) {
+            if (_tcpTask?.Status == TaskStatus.Running && _recieverTask?.Status == TaskStatus.Running && !_cancelTokenSource.IsCancellationRequested) {
                 try {
                     _stream.Write(byteHeader, 0, byteHeader.Length);
                     _stream.Flush();
                     _heartbeatFailTimeout = 0;
                 } catch {
+                    if (_cancelTokenSource.IsCancellationRequested) {
+                        return;
+                    }
                     _logger.AppendLine("Error writing to network stream!");
                     _heartbeatFailTimeout++;
                     if (_heartbeatFailTimeout >= _heartbeatFailTimeoutLimit) {
@@ -168,6 +158,19 @@ namespace BedrockService.Service.Networking {
             }
         }
 
+        private static byte[] CreatePacketHeader(byte[] bytesToSend, NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type, NetworkMessageFlags status) {
+            byte[] byteHeader = new byte[9 + bytesToSend.Length];
+            byte[] len = BitConverter.GetBytes(5 + bytesToSend.Length);
+            Buffer.BlockCopy(len, 0, byteHeader, 0, 4);
+            byteHeader[4] = (byte)source;
+            byteHeader[5] = (byte)destination;
+            byteHeader[6] = serverIndex;
+            byteHeader[7] = (byte)type;
+            byteHeader[8] = (byte)status;
+            Buffer.BlockCopy(bytesToSend, 0, byteHeader, 9, bytesToSend.Length);
+            return byteHeader;
+        }
+
         private void SendData((byte[] data, byte srvIndex, NetworkMessageTypes type) tuple) => SendData(tuple.data, NetworkMessageSource.Service, NetworkMessageDestination.Client, tuple.srvIndex, tuple.type, NetworkMessageFlags.None);
 
         private void SendData(NetworkMessageTypes type) => SendData(Array.Empty<byte>(), NetworkMessageSource.Service, NetworkMessageDestination.Client, 0, type, NetworkMessageFlags.None);
@@ -175,20 +178,15 @@ namespace BedrockService.Service.Networking {
         private Task IncomingListener() {
             return new Task(() => {
                 _logger.AppendLine("TCP Client packet listener started.");
-                int AvailBytes = 0;
                 int byteCount = 0;
                 NetworkMessageSource msgSource = 0;
                 NetworkMessageDestination msgDest = 0;
                 byte serverIndex = 0xFF;
                 NetworkMessageTypes msgType = 0;
                 NetworkMessageFlags msgFlag = 0;
-                while (true) {
-                    SendData(NetworkMessageTypes.Heartbeat);
-                    if (_cancelTokenSource.IsCancellationRequested) {
-                        _logger.AppendLine("TCP Client packet listener canceled!");
-                        return;
-                    }
+                while (!_cancelTokenSource.IsCancellationRequested) {
                     try {
+                        SendData(NetworkMessageTypes.Heartbeat);
                         byte[] buffer = new byte[4];
                         while (_client?.Client != null && _client.Client.Available != 0) // Recieve data from client.
                         {
@@ -232,11 +230,11 @@ namespace BedrockService.Service.Networking {
                     } catch (Exception e) {
                         _logger.AppendLine($"Error: {e.Message} {e.StackTrace}");
                     }
-                    try {
-                        AvailBytes = _client.Client != null ? _client.Client.Available : 0;
-                    } catch { }
                 }
+                _logger.AppendLine("TCP Client packet listener canceled!");
             }, _cancelTokenSource.Token);
         }
+
+        
     }
 }
