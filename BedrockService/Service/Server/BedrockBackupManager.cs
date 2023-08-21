@@ -85,29 +85,36 @@ namespace BedrockService.Service.Server {
         }
 
         public virtual void PerformRollback(string zipFilePath) {
-            DirectoryInfo worldsDir = new($@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\worlds");
-            FileInfo backupZipFileInfo = new($@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupPath)}\{_serverConfiguration.GetServerName()}\{zipFilePath}");
-            DirectoryInfo backupPacksDir = new($@"{worldsDir.FullName}\InstalledPacks");
-            FileUtilities.DeleteFilesFromDirectory(worldsDir, true).Wait();
-            _logger.AppendLine($"Deleted world folder \"{worldsDir.Name}\"");
-            ZipFile.ExtractToDirectory(backupZipFileInfo.FullName, worldsDir.FullName);
-            _logger.AppendLine($"Copied files from backup \"{backupZipFileInfo.Name}\" to server worlds directory.");
-            MinecraftPackParser parser = new();
-            foreach (FileInfo file in backupPacksDir.GetFiles()) {
-                FileUtilities.ClearTempDir().Wait();
-                ZipFile.ExtractToDirectory(file.FullName, $@"{Path.GetTempPath()}\BMSTemp\PackTemp", true);
-                parser.FoundPacks.Clear();
-                parser.ParseDirectory($@"{Path.GetTempPath()}\BMSTemp\PackTemp");
-                if (parser.FoundPacks[0].ManifestType == "data") {
-                    string folderPath = $@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\development_behavior_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
-                    Task.Run(() => FileUtilities.DeleteFilesFromDirectory(folderPath, false)).Wait();
-                    ZipFile.ExtractToDirectory(file.FullName, folderPath, true);
+            try {
+                DirectoryInfo worldsDir = new($@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\worlds");
+                FileInfo backupZipFileInfo = new($@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupPath)}\{_serverConfiguration.GetServerName()}\{zipFilePath}");
+                DirectoryInfo backupPacksDir = new($@"{worldsDir.FullName}\{_serverConfiguration.GetProp(BmsDependServerPropKeys.LevelName)}\InstalledPacks");
+                FileUtilities.DeleteFilesFromDirectory(worldsDir, true).Wait();
+                _logger.AppendLine($"Deleted world folder \"{worldsDir.Name}\"");
+                if (!backupPacksDir.Exists) {
+                    backupPacksDir.Create();
                 }
-                if (parser.FoundPacks[0].ManifestType == "resources") {
-                    string folderPath = $@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\development_resource_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
-                    Task.Run(() => FileUtilities.DeleteFilesFromDirectory(folderPath, false)).Wait();
-                    ZipFile.ExtractToDirectory(file.FullName, folderPath, true);
+                ZipFile.ExtractToDirectory(backupZipFileInfo.FullName, worldsDir.FullName);
+                _logger.AppendLine($"Copied files from backup \"{backupZipFileInfo.Name}\" to server worlds directory.");
+                MinecraftPackParser parser = new();
+                foreach (FileInfo file in backupPacksDir.GetFiles()) {
+                    FileUtilities.ClearTempDir().Wait();
+                    ZipFile.ExtractToDirectory(file.FullName, $@"{Path.GetTempPath()}\BMSTemp\PackTemp", true);
+                    parser.FoundPacks.Clear();
+                    parser.ParseDirectory($@"{Path.GetTempPath()}\BMSTemp\PackTemp");
+                    if (parser.FoundPacks[0].ManifestType == "data") {
+                        string folderPath = $@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\development_behavior_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
+                        Task.Run(() => FileUtilities.DeleteFilesFromDirectory(folderPath, false)).Wait();
+                        ZipFile.ExtractToDirectory(file.FullName, folderPath, true);
+                    }
+                    if (parser.FoundPacks[0].ManifestType == "resources") {
+                        string folderPath = $@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\development_resource_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
+                        Task.Run(() => FileUtilities.DeleteFilesFromDirectory(folderPath, false)).Wait();
+                        ZipFile.ExtractToDirectory(file.FullName, folderPath, true);
+                    }
                 }
+            } catch (Exception ex) {
+                _logger.AppendLine($"Error with backup rollback: {ex.Message}");
             }
         }
 
