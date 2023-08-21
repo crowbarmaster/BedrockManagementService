@@ -612,7 +612,7 @@
         #endregion
 
         private System.Windows.Forms.Button Connect;
-        private System.Windows.Forms.Label HostInfoLabel;
+        public System.Windows.Forms.Label HostInfoLabel;
         public System.Windows.Forms.ComboBox HostListBox;
         private System.Windows.Forms.ListBox ServerSelectBox;
         private System.Windows.Forms.Button Disconn;

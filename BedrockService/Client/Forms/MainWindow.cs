@@ -156,6 +156,23 @@ namespace BedrockService.Client.Forms
         public void RefreshServerContents() {
             Invoke((MethodInvoker)delegate {
                 Refresh();
+                HostInfoLabel.Text = $"Connected to host:";
+                if (_logManager.LogTask.Status != TaskStatus.Running) {
+                    _logManager.InitLogThread();
+                }
+                ServerSelectBox.Items.Clear();
+                if (connectedHost != null) {
+                    _logManager.SetConnectedHost(connectedHost);
+                    foreach (IServerConfiguration server in connectedHost.GetServerList()) {
+                        ServerSelectBox.Items.Add(server.GetSettingsProp(ServerPropertyKeys.ServerName).ToString());
+                    }
+
+                    if (ServerSelectBox.Items.Count > 0) {
+                        ServerSelectBox.SelectedIndex = 0;
+                        selectedServer = connectedHost.GetServerInfoByName((string)ServerSelectBox.SelectedItem);
+                        FormManager.TCPClient.SendData(FormManager.MainWindow.connectedHost.GetServerIndex(FormManager.MainWindow.selectedServer), NetworkMessageTypes.ServerStatusRequest);
+                    }
+                }
                 return;
             });
         }
@@ -194,8 +211,8 @@ namespace BedrockService.Client.Forms
         public void BackupRollbackCompleted(bool backupPassed) {
             if(_backupManager != null) {
                 _backupManager.MarkRollbackComplete(backupPassed);
-                }
             }
+        }
 
         public void InitForm() {
             ConfigManager.LoadConfigs();
