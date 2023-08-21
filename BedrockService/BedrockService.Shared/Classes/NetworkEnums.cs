@@ -27,6 +27,7 @@
         LLPluginFile,
         ExportFile,
         ImportFile,
+        VersionListRequest,
         LevelEditRequest,
         LevelEditFile,
         RemovePack,
@@ -42,6 +43,8 @@
         Heartbeat,
         Disconnect,
         ClientReject,
+        UICallback,
+        BackupCallback
     }
 
     public enum FileTypeFlags {
