@@ -33,6 +33,7 @@ namespace BedrockService.Shared.Interfaces {
         List<Property> GetSettingsList();
         void SetAllSettings(List<Property> settingsList);
         void UpdateServerProps(string version);
+        void ProcessNewServerConfiguration();
         string GetDeployedVersion();
         void SetDeployedVersion(string version);
         IUpdater GetUpdater();
