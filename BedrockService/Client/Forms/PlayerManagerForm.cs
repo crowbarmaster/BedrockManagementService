@@ -52,6 +52,9 @@ namespace BedrockService.Client.Forms {
                 var playerTimes = playerToEdit.GetTimes();
                 string playerWhitelist = playerToEdit.IsPlayerWhitelisted().ToString();
                 string playerPermission = playerToEdit.GetPermissionLevel();
+                if (FormManager.MainWindow.selectedServer.GetServerArch() == SharedStringBase.MinecraftServerArch.Java) {
+                    playerPermission = GetJavaPermLevel(playerToEdit.GetPermissionLevel());
+                }
                 string playerIgnoreLimit = playerToEdit.PlayerIgnoresLimit().ToString();
                 if ((string)focusedRow.Cells[0].Value != playerToEdit.GetPlayerID() || (string)focusedRow.Cells[1].Value != playerToEdit.GetUsername() || (string)focusedRow.Cells[2].Value != playerPermission || (string)focusedRow.Cells[3].Value != playerWhitelist || (string)focusedRow.Cells[4].Value != playerIgnoreLimit) {
                     playerToEdit = new Player((string)focusedRow.Cells[0].Value, (string)focusedRow.Cells[1].Value, playerTimes.First, playerTimes.Conn, playerTimes.Disconn, bool.Parse((string)focusedRow.Cells[3].Value), (string)focusedRow.Cells[2].Value, bool.Parse((string)focusedRow.Cells[4].Value));
@@ -69,6 +72,26 @@ namespace BedrockService.Client.Forms {
             entryTextToolTip.Show(_searchLegendText, searchEntryBox, 30000);
         }
 
+
+        private string GetJavaPermLevel(string permLevel) {
+            switch (permLevel) {
+                case "visitor":
+                    return "2";
+                case "member":
+                    return "3";
+                case "op":
+                    return "4";
+                case "2":
+                    return "visitor";
+                case "3":
+                    return "member";
+                case "4":
+                    return "op";
+                default:
+                    return "";
+            }
+        }
+
         private void RefreshGridContents() {
             gridView.Rows.Clear();
             foreach (IPlayer ply in playersFound) {
@@ -78,6 +101,9 @@ namespace BedrockService.Client.Forms {
                 }
                 var playerTimes = player.GetTimes();
                 string playerPermission = player.GetPermissionLevel();
+                if(FormManager.MainWindow.selectedServer.GetServerArch() == SharedStringBase.MinecraftServerArch.Java) {
+                    playerPermission = GetJavaPermLevel(player.GetPermissionLevel());
+                }
                 TimeSpan timeSpent = TimeSpan.FromTicks(playerTimes.Disconn - playerTimes.Conn);
                 DateTime firstConnDateTime = new(playerTimes.First);
                 DateTime connectDateTime = new(playerTimes.Conn);
@@ -113,13 +139,13 @@ namespace BedrockService.Client.Forms {
             string cmd;
             string value;
 
-            if (curText.Contains(":")) {
-                if (curText.Contains(",")) {
+            if (curText.Contains(':')) {
+                if (curText.Contains(',')) {
                     splitCommands = curText.Split(',', StringSplitOptions.TrimEntries);
                 }
                 if (splitCommands.Length > 0) {
                     foreach (string s in splitCommands) {
-                        if (s.Contains(":")) {
+                        if (s.Contains(':')) {
                             string[] finalSplit = s.Split(':', StringSplitOptions.TrimEntries);
                             cmd = finalSplit[0].ToLower();
                             value = finalSplit[1].ToLower();
