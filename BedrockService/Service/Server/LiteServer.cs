@@ -47,6 +47,7 @@ namespace BedrockService.Service.Server {
         public void Initialize() {
             _serverLogger = new MinecraftServerLogger(_processInfo, _serviceConfiguration, _serverConfiguration);
             _serverLogger.Initialize();
+            _serverConfiguration.GetUpdater().SetNewLogger(_serverLogger);
         }
 
         public void CheckUpdates() {
@@ -149,7 +150,7 @@ namespace BedrockService.Service.Server {
                         _backupTimer = null;
                     }
                     _backupTimer = new System.Timers.Timer(interval);
-                    _logger.AppendLine($"Automatic backups for server {GetServerName()} enabled, next backup at: {_backupCron.GetNextOccurrence(DateTime.Now):G}.");
+                    _serverLogger.AppendLine($"Automatic backups for server {GetServerName()} enabled, next backup at: {_backupCron.GetNextOccurrence(DateTime.Now):G}.");
                     _backupTimer.Elapsed += BackupTimer_Elapsed;
                     _backupTimer.AutoReset = false;
                     _backupTimer.Start();
@@ -169,7 +170,7 @@ namespace BedrockService.Service.Server {
                 if ((shouldBackup && _serverModifiedFlag) || !shouldBackup) {
                     _backupManager.InitializeBackup();
                 } else {
-                    _logger.AppendLine($"Backup for server {GetServerName()} was skipped due to inactivity.");
+                    _serverLogger.AppendLine($"Backup for server {GetServerName()} was skipped due to inactivity.");
                 }
                 ((System.Timers.Timer)sender).Stop();
                 InitializeBackupTimer();
@@ -190,7 +191,7 @@ namespace BedrockService.Service.Server {
                 if (interval >= 0) {
                     _updaterTimer = new System.Timers.Timer(interval);
                     _updaterTimer.Elapsed += UpdateTimer_Elapsed;
-                    _logger.AppendLine($"Automatic updates Enabled, will be checked at: {_updaterCron.GetNextOccurrence(DateTime.Now):G}.");
+                    _serverLogger.AppendLine($"Automatic updates Enabled, will be checked at: {_updaterCron.GetNextOccurrence(DateTime.Now):G}.");
                     _updaterTimer.Start();
                 }
             }
