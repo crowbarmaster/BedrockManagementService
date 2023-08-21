@@ -28,7 +28,7 @@ namespace BedrockService.Shared.Classes.Configurations {
 
         public bool InitializeDefaults() {
             _servicePath = _processInfo.GetDirectory();
-            DefaultPropList = _serviceConfiguration.GetServerDefaultPropList(MinecraftServerArch.Bedrock);
+            DefaultPropList = _serviceConfiguration.GetServerDefaultPropList(MinecraftServerArch.LiteLoader);
             ServerPropList = MinecraftFileUtilities.CopyPropList(DefaultPropList);
             ServersPath = new Property(ServicePropertyStrings[ServicePropertyKeys.ServersPath], _serviceConfiguration.GetProp(ServicePropertyKeys.ServersPath).StringValue);
             ServicePropList.Clear();
