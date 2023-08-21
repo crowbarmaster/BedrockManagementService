@@ -10,8 +10,7 @@ using System.Globalization;
 using System.Xml.Linq;
 using static BedrockService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Service.Management
-{
+namespace BedrockService.Service.Management {
     public class ConfigManager : IConfigurator {
         private static readonly object _fileLock = new();
         private readonly IServiceConfiguration _serviceConfiguration;
@@ -62,7 +61,7 @@ namespace BedrockService.Service.Management
                 _serviceConfiguration.AddNewServerInfo(serverInfo);
                 SaveServerConfiguration(serverInfo);
             }
-            if (_serviceConfiguration .GetServerList().Count == 0) {
+            if (_serviceConfiguration.GetServerList().Count == 0) {
                 serverInfo = new BedrockConfiguration(_processInfo, _logger, _serviceConfiguration);
                 if (!serverInfo.InitializeDefaults()) {
                     _logger.AppendLine("Error creating default server!");
@@ -131,7 +130,7 @@ namespace BedrockService.Service.Management
             server.GetSettingsList().ForEach(prop => {
                 if (serviceConfigExcludeList.Contains(prop.KeyName)) {
                     if (server.GetServerArch() == MinecraftServerArch.Java) {
-                        if(prop.KeyName != ServerPropertyStrings[ServerPropertyKeys.ServerName]) {
+                        if (prop.KeyName != ServerPropertyStrings[ServerPropertyKeys.ServerName]) {
                             return;
                         }
                     } else {
@@ -245,8 +244,8 @@ namespace BedrockService.Service.Management
 
         public void RemoveServerConfigs(IServerConfiguration serverInfo, NetworkMessageFlags flag) {
             try {
-                _logger.AppendLine("Beginning removal of selected options. This may take up to five minutes, depending on selections and server features. Please wait!");
-                File.Delete(GetServiceFilePath(BmsFileNameKeys.ServiceConfig));
+                _logger.AppendLine("Beginning removal of selected options. Please wait!");
+                Task.Delay(3000).Wait();
                 switch (flag) {
                     case NetworkMessageFlags.RemoveBckPly:
                         if (DeleteAllBackups(serverInfo))
@@ -290,7 +289,6 @@ namespace BedrockService.Service.Management
                         break;
                 }
                 _serviceConfiguration.RemoveServerInfo(serverInfo);
-
             } catch { }
         }
 
@@ -345,17 +343,25 @@ namespace BedrockService.Service.Management
                     dir.Delete();
                 }
                 return true;
-            } catch { return false; }
+            } catch (Exception e) { 
+                _logger.AppendLine($"Error deleting server backups: {e.Message}");
+                return false;
+            }
         }
 
-        private static bool DeleteServerFiles(IServerConfiguration serverInfo) {
+        private bool DeleteServerFiles(IServerConfiguration serverInfo) {
             try {
-                FileUtilities.DeleteFilesFromDirectory(new DirectoryInfo(serverInfo.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString()), false).Wait();
+                string serverPath = serverInfo.GetSettingsProp(ServerPropertyKeys.ServerPath).StringValue;
+                DirectoryInfo serverDirInfo = new DirectoryInfo(serverPath);
+                FileUtilities.DeleteFilesFromDirectory(serverDirInfo, true).Wait();
                 return true;
-            } catch { return false; }
+            } catch (Exception e) {
+                _logger.AppendLine($"Error deleting server files: {e.Message}");
+                return false;
+            }
         }
 
-        private static bool DeletePlayerFiles(IServerConfiguration serverInfo) {
+        private bool DeletePlayerFiles(IServerConfiguration serverInfo) {
             try {
                 DirectoryInfo configDirInfo = new(GetServiceDirectory(BmsDirectoryKeys.ServerConfigs));
                 foreach (DirectoryInfo dir in configDirInfo.GetDirectories()) {
@@ -368,7 +374,10 @@ namespace BedrockService.Service.Management
                     }
                 }
                 return true;
-            } catch { return false; }
+            } catch (Exception e) {
+                _logger.AppendLine($"Error deleting server player files: {e.Message}");
+                return false; 
+            }
         }
     }
 }
