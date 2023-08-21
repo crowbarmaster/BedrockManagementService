@@ -282,5 +282,9 @@ namespace BedrockService.Shared.Classes {
         public Property GetSettingsProp(ServerPropertyKeys key) {
             return null;
         }
+
+        public void SetProp(BmsDependServerPropKeys key, string value) {
+            throw new NotImplementedException();
+        }
     }
 }
