@@ -47,7 +47,7 @@ namespace BedrockService.Service.Server {
                 string serverPath = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString();
                 string backupPath = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupPath).ToString();
                 string levelName = _serverConfiguration.GetProp(BmsDependServerPropKeys.LevelName).ToString();
-                DirectoryInfo levelDir = new($@"{serverPath}\{_serverConfiguration.GetProp(BmsDependServerPropKeys.LevelName)}");
+                DirectoryInfo levelDir = new($@"{serverPath}\{levelName}");
                 DirectoryInfo backupDir = new($@"{backupPath}\{_serverConfiguration.GetServerName()}");
                 base.PruneBackups(backupDir);
                 _logger.AppendLine($"Backing up files for server {_serverConfiguration.GetServerName()}. Please wait!");
@@ -70,30 +70,13 @@ namespace BedrockService.Service.Server {
         }
 
         public override void PerformRollback(string zipFilePath) {
-            DirectoryInfo worldsDir = new($@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\worlds");
+            string serverPath = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString();
+            DirectoryInfo worldsDir = new($@"{serverPath}\{_serverConfiguration.GetProp(BmsDependServerPropKeys.LevelName)}");
             FileInfo backupZipFileInfo = new($@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupPath)}\{_serverConfiguration.GetServerName()}\{zipFilePath}");
-            DirectoryInfo backupPacksDir = new($@"{worldsDir.FullName}\InstalledPacks");
             FileUtilities.DeleteFilesFromDirectory(worldsDir, true).Wait();
             _logger.AppendLine($"Deleted world folder \"{worldsDir.Name}\"");
-            ZipFile.ExtractToDirectory(backupZipFileInfo.FullName, worldsDir.FullName);
+            ZipFile.ExtractToDirectory(backupZipFileInfo.FullName, serverPath);
             _logger.AppendLine($"Copied files from backup \"{backupZipFileInfo.Name}\" to server worlds directory.");
-            MinecraftPackParser parser = new();
-            foreach (FileInfo file in backupPacksDir.GetFiles()) {
-                FileUtilities.ClearTempDir().Wait();
-                ZipFile.ExtractToDirectory(file.FullName, $@"{Path.GetTempPath()}\BMSTemp\PackTemp", true);
-                parser.FoundPacks.Clear();
-                parser.ParseDirectory($@"{Path.GetTempPath()}\BMSTemp\PackTemp");
-                if (parser.FoundPacks[0].ManifestType == "data") {
-                    string folderPath = $@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\development_behavior_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
-                    Task.Run(() => FileUtilities.DeleteFilesFromDirectory(folderPath, false)).Wait();
-                    ZipFile.ExtractToDirectory(file.FullName, folderPath, true);
-                }
-                if (parser.FoundPacks[0].ManifestType == "resources") {
-                    string folderPath = $@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\development_resource_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
-                    Task.Run(() => FileUtilities.DeleteFilesFromDirectory(folderPath, false)).Wait();
-                    ZipFile.ExtractToDirectory(file.FullName, folderPath, true);
-                }
-            }
         }
 
         private Task AppendBackupToArchive(string serverPath, DirectoryInfo currentDirectory, ZipArchive backupZip) =>
