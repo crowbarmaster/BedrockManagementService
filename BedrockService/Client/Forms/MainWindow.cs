@@ -249,7 +249,7 @@ namespace BedrockService.Client.Forms
 
         public void UpdateServerLogBox(TextBox targetBox, string contents) {
             int curPos;
-            if (contents.Length > 0 && targetBox.TextLength != contents.Length) {
+            if (contents.Length > 0) {
                 curPos = GetScrollPosition(targetBox);
                 targetBox.Text = contents;
                 SetScrollPosition(targetBox, curPos);
