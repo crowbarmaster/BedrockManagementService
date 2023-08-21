@@ -39,6 +39,14 @@ namespace BedrockService.Client.Forms {
 
         }
 
+        public void MarkRollbackComplete(bool backupPassed) {
+            Invoke(() => {
+                string backupResult = backupPassed ? "completed successfully" : "failed";
+                infoTextBox.Lines = new string[4] { string.Empty, string.Empty, string.Empty, $"Rollback has {backupResult}!" };
+                closeBtn.Enabled = true;
+            });
+        }
+
         private void deleteThisBackupToolStripMenuItem_Click(object sender, EventArgs e) {
             if (backupSelectBox.SelectedIndex < 0) {
                 return;
@@ -55,6 +63,8 @@ namespace BedrockService.Client.Forms {
             if (backupSelectBox.SelectedIndex < 0) {
                 return;
             }
+            closeBtn.Enabled = false;
+            infoTextBox.Lines = new string[4] { string.Empty, string.Empty, string.Empty, "Now rolling back to selected backup... Please wait!" };
             byte[] backupName = Encoding.UTF8.GetBytes(backupSelectBox.Text);
             FormManager.TCPClient.SendData(backupName, _serviceConfig.GetServerIndex(FormManager.MainWindow.selectedServer), NetworkMessageTypes.BackupRollback);
         }
@@ -126,12 +136,14 @@ namespace BedrockService.Client.Forms {
             if (backupSelectBox.SelectedIndex < 1) {
                 backupSelectBox.SelectedIndex = 0;
             }
-            string[] displayTextStrings = new string[8];
-            ((BackupInfoModel)backupSelectBox.SelectedItem).GetBackupInfo().CopyTo(displayTextStrings, 0);
-            displayTextStrings[6] = $"Total backups contained in this server: {FormManager.MainWindow.selectedServer.GetStatus().TotalBackups}";
-            displayTextStrings[7] = $"Total backups size for this server: {FormManager.MainWindow.selectedServer.GetStatus().TotalSizeOfBackups / 1000} MB";
-            infoTextBox.Lines = displayTextStrings;
-            infoTextBox.Refresh();
+            if (backupSelectBox.SelectedItem != null && closeBtn.Enabled) {
+                string[] displayTextStrings = new string[8];
+                ((BackupInfoModel)backupSelectBox.SelectedItem).GetBackupInfo().CopyTo(displayTextStrings, 0);
+                displayTextStrings[6] = $"Total backups contained in this server: {FormManager.MainWindow.selectedServer.GetStatus().TotalBackups}";
+                displayTextStrings[7] = $"Total backups size for this server: {FormManager.MainWindow.selectedServer.GetStatus().TotalSizeOfBackups / 1000} MB";
+                infoTextBox.Lines = displayTextStrings;
+                infoTextBox.Refresh();
+            }
         }
     }
 }

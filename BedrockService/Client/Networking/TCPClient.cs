@@ -12,6 +12,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace BedrockService.Client.Networking {
     public class TCPClient {
@@ -132,8 +133,10 @@ namespace BedrockService.Client.Networking {
                                 UnlockUI();
 
                                 break;
-                            case NetworkMessageTypes.UICallback:
+                            case NetworkMessageTypes.BackupCallback:
 
+                                bool rollbackPassed = buffer[5] == 1;
+                                FormManager.MainWindow.BackupRollbackCompleted(rollbackPassed);
                                 UnlockUI();
 
                                 break;
