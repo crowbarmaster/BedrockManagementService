@@ -166,9 +166,9 @@ namespace BedrockService.Shared.Classes.Configurations {
             }
         }
 
-        public void SetProp(ServerPropertyKeys key, string newValue) {
+        public void SetProp(BmsDependServerPropKeys key, string newValue) {
             try {
-                Property serverProp = ServerPropList.First(prop => prop.KeyName == ServerPropertyStrings[key]);
+                Property serverProp = ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[key]);
                 ServerPropList[ServerPropList.IndexOf(serverProp)].SetValue(newValue);
             } catch (Exception e) {
                 throw new FormatException($"Could not find key {key} in server property list!", e);
