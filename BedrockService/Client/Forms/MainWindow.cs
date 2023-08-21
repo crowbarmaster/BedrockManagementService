@@ -342,13 +342,16 @@ namespace BedrockService.Client.Forms
                 clientSideServiceConfiguration = ConfigManager.HostConnectList.First(host => host.GetHostName() == HostListBox.Text);
             }
             DisableUI();
-            using (AddNewServerForm newServerForm = new(clientSideServiceConfiguration, connectedHost.GetServerList())) {
-                if (newServerForm.ShowDialog() == DialogResult.OK) {
-                    JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-                    byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(newServerForm.SelectedPropModel, Formatting.Indented, settings));
+            FormManager.TCPClient.SendData(NetworkMessageTypes.VersionListRequest);
+        }
+
+        public void VersionListArrived(Dictionary<SharedStringBase.MinecraftServerArch, SimpleVersionModel[]> verLists) {
+            using (_newServerForm = new(clientSideServiceConfiguration, connectedHost.GetServerList(), verLists)) {
+                if (_newServerForm.ShowDialog() == DialogResult.OK) {
+                    byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_newServerForm.SelectedPropModel, Formatting.Indented, GlobalJsonSerialierSettings));
                     FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageTypes.AddNewServer);
-                    newServerForm.Close();
-                    newServerForm.Dispose();
+                    _newServerForm.Close();
+                    _newServerForm.Dispose();
                 }
             }
             ServerBusy = false;

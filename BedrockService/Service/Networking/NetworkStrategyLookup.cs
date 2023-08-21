@@ -24,6 +24,7 @@ namespace BedrockService.Service.Networking {
                 {NetworkMessageTypes.PropUpdate, new ServerPropUpdate(logger, configurator, serviceConfiguration, service) },
                 {NetworkMessageTypes.StartCmdUpdate, new StartCmdUpdate(configurator, serviceConfiguration) },
                 {NetworkMessageTypes.ConsoleLogUpdate, new ConsoleLogUpdate(logger, serviceConfiguration, service) },
+                {NetworkMessageTypes.VersionListRequest, new VersionListRequest(logger, serviceConfiguration) },
                 {NetworkMessageTypes.PackList, new PackList(processInfo, serviceConfiguration, logger) },
                 {NetworkMessageTypes.PackFile, new PackFile(serviceConfiguration, logger) },
                 {NetworkMessageTypes.RemovePack, new RemovePack(serviceConfiguration, logger) },

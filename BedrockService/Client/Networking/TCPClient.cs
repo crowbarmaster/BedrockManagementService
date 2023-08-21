@@ -137,6 +137,12 @@ namespace BedrockService.Client.Networking {
                                 UnlockUI();
 
                                 break;
+                            case NetworkMessageTypes.VersionListRequest:
+
+                                Dictionary<SharedStringBase.MinecraftServerArch, SimpleVersionModel[]> versionLists = JsonConvert.DeserializeObject<Dictionary<SharedStringBase.MinecraftServerArch, SimpleVersionModel[]>>(data, SharedStringBase.GlobalJsonSerialierSettings);
+                                FormManager.MainWindow.VersionListArrived(versionLists);
+
+                                break;
                             case NetworkMessageTypes.ConsoleLogUpdate:
                                 string[] strings = data.Split('|');
                                 for (int i = 0; i < strings.Length; i++) {
