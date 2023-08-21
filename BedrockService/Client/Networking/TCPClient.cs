@@ -81,6 +81,10 @@ namespace BedrockService.Client.Networking {
         public void ReceiveListener() {
             while (!_netCancelSource.IsCancellationRequested) {
                 SendData(NetworkMessageTypes.Heartbeat);
+                NetworkMessageSource source = 0;
+                NetworkMessageDestination destination = 0;
+                byte serverIndex = 0;
+                NetworkMessageTypes msgType = 0;
                 try {
                     byte[] buffer = new byte[4];
                     while (OpenedTcpClient.Client.Available > 0) {
@@ -88,10 +92,10 @@ namespace BedrockService.Client.Networking {
                         int expectedLen = BitConverter.ToInt32(buffer, 0);
                         buffer = new byte[expectedLen];
                         byteCount = stream.Read(buffer, 0, expectedLen);
-                        NetworkMessageSource source = (NetworkMessageSource)buffer[0];
-                        NetworkMessageDestination destination = (NetworkMessageDestination)buffer[1];
-                        byte serverIndex = buffer[2];
-                        NetworkMessageTypes msgType = (NetworkMessageTypes)buffer[3];
+                        source = (NetworkMessageSource)buffer[0];
+                        destination = (NetworkMessageDestination)buffer[1];
+                        serverIndex = buffer[2];
+                        msgType = (NetworkMessageTypes)buffer[3];
                         NetworkMessageFlags msgStatus = (NetworkMessageFlags)buffer[4];
                         string data = "";
                         if (msgType != NetworkMessageTypes.PackFile || msgType != NetworkMessageTypes.LevelEditFile)
@@ -128,8 +132,8 @@ namespace BedrockService.Client.Networking {
 
                                 break;
                             case NetworkMessageTypes.CheckUpdates:
+                            case NetworkMessageTypes.UICallback:
 
-                                //TODO: Ask user if update now or perform later.
                                 UnlockUI();
 
                                 break;
@@ -223,12 +227,11 @@ namespace BedrockService.Client.Networking {
                                 if (exportModel != null) {
                                     FormManager.MainWindow.Invoke(() => FormManager.MainWindow.RecieveExportData(exportModel));
                                 }
-
                                 break;
                         }
                     }
                 } catch (Exception e) {
-                    _logger.AppendLine($"TCPClient error! Stacktrace: {e.Message}\n{e.StackTrace}");
+                    _logger.AppendLine($"TCPClient error! MsgSource: {source} ServerIndex: {serverIndex} MsgType: {msgType} Stacktrace: {e.Message}\n{e.StackTrace}");
                 }
                 Thread.Sleep(200);
             }
