@@ -15,7 +15,7 @@ namespace BedrockService.Service.Networking {
                 {NetworkMessageTypes.Command, new ServerCommand(service, logger) },
                 {NetworkMessageTypes.Restart, new ServerRestart(service) },
                 {NetworkMessageTypes.StartStop, new StartStopServer(service) },
-                {NetworkMessageTypes.ServerStatusRequest, new StatusRequest(service, serviceConfiguration) },
+                {NetworkMessageTypes.ServerStatusRequest, new ServerStatusRequest(service, serviceConfiguration) },
                 {NetworkMessageTypes.Backup, new ServerBackup(service) },
                 {NetworkMessageTypes.BackupAll, new ServerBackupAll(service) },
                 {NetworkMessageTypes.EnumBackups, new EnumBackups(configurator) },
