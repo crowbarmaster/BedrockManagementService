@@ -14,7 +14,7 @@ using System.Diagnostics;
 
 namespace BedrockService.Shared.Classes.Updaters {
     public class BedrockUpdater : IUpdater {
-        private readonly IServerLogger _logger;
+        private IServerLogger _logger;
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IServerConfiguration _serverConfiguration;
         private readonly MinecraftServerArch _serverArch = MinecraftServerArch.Bedrock;
@@ -137,17 +137,18 @@ namespace BedrockService.Shared.Classes.Updaters {
             return version;
         }
 
-        public List<string> GetVersionList() {
-            List<string> result = new List<string>();
+        public List<SimpleVersionModel> GetVersionList() {
+            List<SimpleVersionModel> result = new List<SimpleVersionModel>();
             string content = HTTPHandler.FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.BdsVersionJson]).Result;
             if (content == null)
-                return new List<string>();
+                return new List<SimpleVersionModel>();
             List<BedrockVersionHistoryJson> versionList = JsonSerializer.Deserialize<List<BedrockVersionHistoryJson>>(content);
-            versionList.Reverse();
             foreach (var version in versionList) {
-                result.Add(version.Version);
+                result.Add(new(version.Version, false));
             }
             return result;
         }
+
+        public void SetNewLogger(IServerLogger logger) => _logger = logger;
     }
 }

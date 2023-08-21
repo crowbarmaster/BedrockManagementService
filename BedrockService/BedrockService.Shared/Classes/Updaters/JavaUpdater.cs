@@ -15,7 +15,7 @@ using Newtonsoft.Json;
 
 namespace BedrockService.Shared.Classes.Updaters {
     public class JavaUpdater : IUpdater {
-        private readonly IServerLogger _logger;
+        private IServerLogger _logger;
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IServerConfiguration _serverConfiguration;
         private readonly MinecraftServerArch _serverArch = MinecraftServerArch.Java;
@@ -37,7 +37,7 @@ namespace BedrockService.Shared.Classes.Updaters {
                     Progress<double> progress = new(percent => {
                         _logger.AppendLine($"Extracting JDK 17 for Java support, {percent}% completed...");
                     });
-                    FileUtilities.ExtractZipToDirectory("Jdk.zip", GetServiceDirectory(BmsDirectoryKeys.Jdk20Path), progress).Wait();
+                    FileUtilities.ExtractZipToDirectory("Jdk.zip", GetServiceDirectory(BmsDirectoryKeys.Jdk17Path), progress).Wait();
                     File.Copy(GetServiceFilePath(BmsFileNameKeys.Jdk17JavaVanillaExe), GetServiceFilePath(BmsFileNameKeys.Jdk17JavaMmsExe));
                     File.Delete("Jdk.zip");
                 }
@@ -51,6 +51,7 @@ namespace BedrockService.Shared.Classes.Updaters {
             if (_serverConfiguration == null) {
                 CheckLatestVersion().Wait();
             }
+            _logger.Initialize();
         }
 
         public virtual Task CheckLatestVersion() {
@@ -188,17 +189,19 @@ namespace BedrockService.Shared.Classes.Updaters {
             return version;
         }
 
-        public List<string> GetVersionList() {
-            List<string> result = new List<string>();
+        public List<SimpleVersionModel> GetVersionList() {
+            List<SimpleVersionModel> result = new List<SimpleVersionModel>();
             string content = HTTPHandler.FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.JdsVersionJson]).Result;
             if (content == null)
-                return new List<string>();
+                return new List<SimpleVersionModel>();
             JavaVersionHistoryModel versionList = JsonConvert.DeserializeObject<JavaVersionHistoryModel>(content);
             versionList.Versions.Reverse();
             foreach (var version in versionList.Versions) {
-                result.Add(version.Id);
+                result.Add(new(version.Id, version.Type != "release"));
             }
             return result;
         }
+
+        public void SetNewLogger(IServerLogger logger) => _logger = logger;
     }
 }
