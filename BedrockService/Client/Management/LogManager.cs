@@ -53,44 +53,40 @@ namespace BedrockService.Client.Management {
                             UpdateLogBoxInvoked(FormManager.MainWindow.LogBox, "");
                         } else {
                             FormManager.TCPClient.SendData(FormManager.MainWindow.connectedHost.GetServerIndex(FormManager.MainWindow.selectedServer), NetworkMessageTypes.ServerStatusRequest);
+                            if(FormManager.MainWindow.selectedServer.GetStatus() != null) {
+                                Task.Run(() => {
+                                    IServerConfiguration serverConfiguration = FormManager.MainWindow.selectedServer;
+                                    bool autoStartEnabled = serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerAutostartEnabled).GetBoolValue();
+                                    ServerStatusModel status = serverConfiguration.GetStatus();
+                                    ServiceStatusModel serviceStatus = FormManager.MainWindow.ServiceStatus;
+                                    string statusMsg = $"{serverConfiguration.GetServerName()} is {status.ServerStatus}";
+
+                                    if (FormManager.MainWindow.ServiceStatus != null) {
+                                        statusMsg += $"\r\nStarted at: {status.ServerUptime:g}";
+                                        statusMsg += $"\r\n{status.ActivePlayerList.Count} players online";
+
+                                        if (!autoStartEnabled) {
+                                            statusMsg += $"\r\nAutoStart disabled for this server!";
+                                        }
+                                        if (!serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue() && status.DeployedVersion != null && serviceStatus.LatestVersion != null && status.DeployedVersion != "None") {
+                                            Version serverVersion = Version.Parse(status.DeployedVersion);
+                                            Version latestVersion = Version.Parse(serviceStatus.LatestVersion);
+                                            if (serverVersion < latestVersion) {
+                                                statusMsg += $"\r\nUpdate {latestVersion} available";
+                                            }
+                                        }
+                                        statusMsg += "\r\n  --------------------------------";
+                                        statusMsg += $"\r\nTotal service-wide backups: {FormManager.MainWindow.ServiceStatus.TotalBackups}\r\nTotal backup size: {FormManager.MainWindow.ServiceStatus.TotalBackupSize / 1000} MB\r\nService started: {FormManager.MainWindow.ServiceStatus.ServiceUptime:g}";
+                                    }
+                                    UpdateLogBoxInvoked(FormManager.MainWindow.ServerInfoBox, statusMsg);
+                                });
+                            }
                         }
                         if (_connectedHost.GetLog().Count != currentServiceLogLength) {
                             UpdateLogBoxInvoked(FormManager.MainWindow.serviceTextbox, ProcessText(_connectedHost.GetLog()));
                         }
                         if (FormManager.MainWindow.selectedServer != null && FormManager.MainWindow.selectedServer.GetLog() != null && FormManager.MainWindow.selectedServer.GetLog().Count != currentServerLogLength) {
                             UpdateLogBoxInvoked(FormManager.MainWindow.LogBox, ProcessText(FormManager.MainWindow.selectedServer.GetLog()));
-                        }
-
-                        if (FormManager.MainWindow.selectedServer != null && FormManager.MainWindow.selectedServer.GetStatus() != null) {
-                            Task.Run(() => {
-                                IServerConfiguration serverConfiguration = FormManager.MainWindow.selectedServer;
-                                bool autoStartEnabled = serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerAutostartEnabled).GetBoolValue();
-                                ServerStatusModel status = serverConfiguration.GetStatus();
-                                ServiceStatusModel serviceStatus = FormManager.MainWindow.ServiceStatus;
-                                string statusMsg = $"{serverConfiguration.GetServerName()} is {status.ServerStatus}";
-
-                                if (FormManager.MainWindow.ServiceStatus != null) {
-                                    statusMsg += $"\r\nStarted at: {status.ServerUptime:g}";
-                                    statusMsg += $"\r\n{status.ActivePlayerList.Count} players online";
-
-                                    if (!autoStartEnabled) {
-                                        statusMsg += $"\r\nAutoStart disabled for this server!";
-                                    }
-                                    if (!serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue() && status.DeployedVersion != null && serviceStatus.LatestVersion != null && status.DeployedVersion != "None") {
-                                        Version serverVersion = Version.Parse(status.DeployedVersion);
-                                        Version latestVersion = Version.Parse(serviceStatus.LatestVersion);
-                                        if (serverVersion < latestVersion) {
-                                            statusMsg += $"\r\nUpdate {latestVersion} available";
-                                        }
-                                    }
-                                    statusMsg += "\r\n  --------------------------------";
-                                    statusMsg += $"\r\nTotal service-wide backups: {FormManager.MainWindow.ServiceStatus.TotalBackups}\r\nTotal backup size: {FormManager.MainWindow.ServiceStatus.TotalBackupSize / 1000} MB\r\nService started: {FormManager.MainWindow.ServiceStatus.ServiceUptime:g}";
-                                }
-                                UpdateLogBoxInvoked(FormManager.MainWindow.ServerInfoBox, statusMsg);
-                            });
-                        }
-                        if (FormManager.MainWindow.selectedServer != null) {
-                            FormManager.TCPClient.SendData(FormManager.MainWindow.connectedHost.GetServerIndex(FormManager.MainWindow.selectedServer), NetworkMessageTypes.ServerStatusRequest);
                         }
                         currentServerLogLength = serverCount;
                         currentServiceLogLength = serviceCount;
