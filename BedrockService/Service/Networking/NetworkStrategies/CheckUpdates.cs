@@ -10,7 +10,6 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
         }
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
-            //_updater.CheckUpdates().Wait();
             _service.GetBedrockServerByIndex(serverIndex).CheckUpdates();
             return (Array.Empty<byte>(), 0, NetworkMessageTypes.UICallback);
         }
