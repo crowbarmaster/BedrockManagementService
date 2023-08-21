@@ -58,6 +58,9 @@ namespace BedrockService.Service.Core {
                         string answer = Console.ReadLine();
                         if (answer != null && answer == "Yes") {
                             _serviceConfiguration.GetProp(ServicePropertyKeys.AcceptedMojangLic).SetValue("True");
+                        } else {
+                            _logger.AppendLine("You have not accepted Mojang's EULA.\n Read terms at: https://minecraft.net/terms \n BedrockService will now terminate.");
+                            return false;
                         }
                     } else {
                         _logger.AppendLine("You have not accepted Mojang's EULA.\n Read terms at: https://minecraft.net/terms \n BedrockService will now terminate.");
