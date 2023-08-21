@@ -29,26 +29,24 @@ namespace BedrockService.Service.Networking.NetworkStrategies
             string serversPath = _serviceConfiguration.GetProp(ServicePropertyKeys.ServersPath).ToString();
             List<Property>? propList = propModel?.ServerPropList;
             List<Property>? servicePropList = propModel?.ServicePropList;
-            Property? serverNameProp = propList?.First(p => p.KeyName == "server-name");
-            Property? ipV4Prop = propList?.First(p => p.KeyName == "server-port");
-            Property? ipV6Prop = propList?.First(p => p.KeyName == "server-portv6");
-            Property? versionProp = servicePropList?.First(p => p.KeyName == "ServerVersion");
-            BedrockConfiguration newServer = new(_processInfo, _logger, _serviceConfiguration);
-            newServer.ServicePropList = servicePropList;
-            if (_serviceConfiguration.GetLatestVersion(MinecraftServerArch.Bedrock) == versionProp?.StringValue) {
-                newServer.ServerPropList = propList;
+            Property? serverNameProp = new(string.Empty, string.Empty);
+            Property? ipV6Prop = new(string.Empty, string.Empty);
+            Property? archProp = servicePropList?.First(x => x.KeyName == ServerPropertyStrings[ServerPropertyKeys.MinecraftType]);
+            if(archProp.StringValue == "Java") { 
+                serverNameProp = servicePropList?.First(p => p.KeyName == ServerPropertyStrings[ServerPropertyKeys.ServerName]);
             } else {
-                newServer.SetServerVersion(versionProp?.StringValue);
-                newServer.GetSettingsProp(ServerPropertyKeys.ServerVersion).SetValue(versionProp?.StringValue);
-                newServer.SetProp("server-name", serverNameProp?.StringValue);
-                newServer.SetProp("server-port", ipV4Prop?.StringValue);
-                newServer.SetProp("server-portv6", ipV6Prop?.StringValue);
+                serverNameProp = propList?.First(p => p.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.ServerName]);
             }
-            newServer.GetSettingsProp(ServerPropertyKeys.ServerName).SetValue(serverNameProp.StringValue);
-            newServer.GetSettingsProp(ServerPropertyKeys.ServerPath).SetValue($@"{serversPath}\{serverNameProp.StringValue}");
-            newServer.GetSettingsProp(ServerPropertyKeys.ServerExeName).SetValue($"BedrockService.{serverNameProp.StringValue}.exe");
-            newServer.GetSettingsProp(ServerPropertyKeys.FileName).SetValue($@"{serverNameProp.StringValue}.conf");
-            newServer.SetServerVersion(versionProp?.StringValue);
+            Property? ipV4Prop = propList?.First(p => p.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.PortI4]);
+            if(archProp.StringValue != "Java") {
+                ipV6Prop = propList?.First(p => p.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.PortI6]);
+            }
+            Property? versionProp = servicePropList?.First(p => p.KeyName == ServerPropertyStrings[ServerPropertyKeys.ServerVersion]);
+            EnumTypeLookup typeLookup = new(_logger, _serviceConfiguration);
+            IServerConfiguration newServer = typeLookup.PrepareNewServerByArchName(archProp.StringValue, _processInfo, _logger, _serviceConfiguration);
+            newServer.InitializeDefaults();
+            newServer.SetAllSettings(servicePropList);
+            newServer.SetAllProps(propList);
             newServer.ProcessNewServerConfiguration();
             _configurator.SaveServerConfiguration(newServer);
             _bedrockService.InitializeNewServer(newServer);
