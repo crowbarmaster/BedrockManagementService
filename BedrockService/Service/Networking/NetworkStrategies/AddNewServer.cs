@@ -25,8 +25,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
             string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
-            JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-            ServerCombinedPropModel propModel = JsonConvert.DeserializeObject<ServerCombinedPropModel>(stringData, settings);
+            ServerCombinedPropModel propModel = JsonConvert.DeserializeObject<ServerCombinedPropModel>(stringData, GlobalJsonSerialierSettings);
             string serversPath = _serviceConfiguration.GetProp(ServicePropertyKeys.ServersPath).ToString();
             List<Property>? propList = propModel?.ServerPropList;
             List<Property>? servicePropList = propModel?.ServicePropList;
@@ -53,7 +52,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies
             _configurator.SaveServerConfiguration(newServer);
             _bedrockService.InitializeNewServer(newServer);
 
-            byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_serviceConfiguration, Formatting.Indented, settings));
+            byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_serviceConfiguration, Formatting.Indented, GlobalJsonSerialierSettings));
             return (serializeToBytes, 0, NetworkMessageTypes.Connect);
         }
     }

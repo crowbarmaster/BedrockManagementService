@@ -13,8 +13,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
         }
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
-            JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-            byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_service.GetBedrockServerByIndex(serverIndex).GetPlayerManager().GetPlayerList(), Formatting.Indented, settings));
+            byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_service.GetBedrockServerByIndex(serverIndex).GetPlayerManager().GetPlayerList(), Formatting.Indented, SharedStringBase.GlobalJsonSerialierSettings));
             return (serializeToBytes, serverIndex, NetworkMessageTypes.PlayersRequest);
         }
     }

@@ -20,8 +20,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
             string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
             string pathToWorldFolder = $@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp(ServerPropertyKeys.ServerPath)}\worlds\{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp(BmsDependServerPropKeys.LevelName)}";
             MinecraftKnownPacksClass knownPacks = new($@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp(ServerPropertyKeys.ServerPath)}\valid_known_packs.json", pathToWorldFolder);
-            JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-            List<MinecraftPackContainer>? container = JsonConvert.DeserializeObject<List<MinecraftPackContainer>>(stringData, settings);
+            List<MinecraftPackContainer>? container = JsonConvert.DeserializeObject<List<MinecraftPackContainer>>(stringData, SharedStringBase.GlobalJsonSerialierSettings);
             foreach (MinecraftPackContainer content in container) {
                 knownPacks.RemovePackFromServer(_serviceConfiguration.GetServerInfoByIndex(serverIndex), content);
                 _logger.AppendLine($@"{content.JsonManifest.header.name} removed from server.");

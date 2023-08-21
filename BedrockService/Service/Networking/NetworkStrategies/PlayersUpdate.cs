@@ -19,8 +19,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
             string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
-            JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-            List<IPlayer> fetchedPlayers = JsonConvert.DeserializeObject<List<IPlayer>>(stringData, settings);
+            List<IPlayer> fetchedPlayers = JsonConvert.DeserializeObject<List<IPlayer>>(stringData, GlobalJsonSerialierSettings);
             foreach (IPlayer player in fetchedPlayers) {
                 try {
                     _service.GetBedrockServerByIndex(serverIndex).GetPlayerManager().AddUpdatePlayer(player);

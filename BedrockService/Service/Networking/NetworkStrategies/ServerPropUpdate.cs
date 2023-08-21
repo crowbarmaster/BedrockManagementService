@@ -18,9 +18,8 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
         }
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
-            JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
             string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
-            List<Property> propList = JsonConvert.DeserializeObject<List<Property>>(stringData, settings);
+            List<Property> propList = JsonConvert.DeserializeObject<List<Property>>(stringData, SharedStringBase.GlobalJsonSerialierSettings);
             Property prop = propList.FirstOrDefault(p => p.KeyName == "AcceptedMojangLic");
             if (prop != null) {
                 _serviceConfiguration.SetAllProps(propList);

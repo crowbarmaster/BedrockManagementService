@@ -1,3 +1,4 @@
+using BedrockService.Shared.Classes;
 using BedrockService.Shared.JsonModels.MinecraftJsonModels;
 using BedrockService.Shared.Utilities;
 using Newtonsoft.Json;
@@ -84,9 +85,8 @@ namespace BedrockService.Shared.PackParser {
                             FolderName = file.Directory.Name,
                             IconBytes = iconBytes
                         };
-                        JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                         container.JsonManifest = System.Text.Json.JsonSerializer.Deserialize<PackManifestJsonModel>(File.ReadAllText(file.FullName));
-                        container.JsonManifest = JsonConvert.DeserializeObject<PackManifestJsonModel>(File.ReadAllText(file.FullName), settings);
+                        container.JsonManifest = JsonConvert.DeserializeObject<PackManifestJsonModel>(File.ReadAllText(file.FullName), SharedStringBase.GlobalJsonSerialierSettings);
                         container.ManifestType = container.JsonManifest.modules[0].type;
                         FoundPacks.Add(container);
                     }

@@ -6,6 +6,8 @@ using System.Collections.Generic;
 namespace BedrockService.Shared.Classes {
     public static class SharedStringBase {
 
+        public static JsonSerializerSettings GlobalJsonSerialierSettings = new() { TypeNameHandling = TypeNameHandling.All, ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
+
         public enum MinecraftServerArch {
             Bedrock,
             LiteLoader,

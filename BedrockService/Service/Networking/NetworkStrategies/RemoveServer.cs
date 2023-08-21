@@ -21,8 +21,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
             _bedrockService.GetBedrockServerByIndex(serverIndex).ServerStop(true).Wait();
             _configurator.RemoveServerConfigs(_serviceConfiguration.GetServerInfoByIndex(serverIndex), flag);
             _bedrockService.RemoveBedrockServerByIndex(serverIndex);
-            JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-            byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_serviceConfiguration, Formatting.Indented, settings));
+            byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_serviceConfiguration, Formatting.Indented, SharedStringBase.GlobalJsonSerialierSettings));
             return (serializeToBytes, 0, NetworkMessageTypes.Connect);
 
         }
