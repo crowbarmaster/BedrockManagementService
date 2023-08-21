@@ -25,17 +25,18 @@ namespace BedrockService.Client.Forms
         public IClientSideServiceConfiguration clientSideServiceConfiguration;
         public ServiceStatusModel ServiceStatus;
         public bool ServerBusy = false;
+        public IServerLogger ClientLogger;
+        public ConfigManager ConfigManager;
         private int _connectTimeout;
         private bool _followTail = false;
         private bool _blockConnect = false;
         private bool _enableLogUpdating = false;
-        private const int _connectTimeoutLimit = 3;
+        private AddNewServerForm _newServerForm;
         private BackupManagerForm _backupManager;
-        public IServerLogger ClientLogger;
+        private const int _connectTimeoutLimit = 3;
         private readonly IProcessInfo _processInfo;
         private readonly System.Timers.Timer _connectTimer = new(100.0);
         private readonly LogManager _logManager;
-        public ConfigManager ConfigManager;
         public MainWindow(IProcessInfo processInfo, IServerLogger logger) {
             _processInfo = processInfo;
             ClientLogger = logger;
@@ -233,10 +234,6 @@ namespace BedrockService.Client.Forms
         public void HeartbeatFailDisconnect() {
             Disconn_Click(null, null);
             try {
-                if (selectedServer != null && _backupManager != null && _backupManager.Created) {
-                    _backupManager.Close();
-                    _backupManager.Dispose();
-                }
                 HostInfoLabel.Invoke((MethodInvoker)delegate { HostInfoLabel.Text = "Lost connection to host!"; });
                 ServerInfoBox.Invoke((MethodInvoker)delegate { ServerInfoBox.Text = "Lost connection to host!"; });
                 ServerBusy = false;
@@ -362,6 +359,10 @@ namespace BedrockService.Client.Forms
         private void Disconn_Click(object sender, EventArgs e) {
             _connectTimer.Stop();
             try {
+                if (selectedServer != null && _backupManager != null) {
+                    _backupManager.Close();
+                    _backupManager.Dispose();
+                }
                 if (FormManager.TCPClient.Connected) {
                     FormManager.TCPClient.SendData(NetworkMessageTypes.Disconnect);
                     Thread.Sleep(500);
