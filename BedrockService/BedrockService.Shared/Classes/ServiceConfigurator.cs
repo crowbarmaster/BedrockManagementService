@@ -160,6 +160,7 @@ namespace BedrockService.Shared.Classes {
 
         public void RemoveServerInfo(IServerConfiguration serverConfiguration) {
             ServerList.Remove(serverConfiguration.GetServerInfo());
+            File.Delete(GetServiceFilePath(BmsFileNameKeys.ServerConfig_Name, serverConfiguration.GetServerName()));
         }
 
         public void SetServerInfo(IServerConfiguration newInfo) {
