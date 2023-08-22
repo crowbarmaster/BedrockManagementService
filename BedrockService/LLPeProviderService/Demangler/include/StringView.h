@@ -20,10 +20,6 @@
 #include <cassert>
 #include <cstring>
 
-#ifdef _WIN32
-#define NOMINMAX
-#endif // _WIN32
-
 DEMANGLE_NAMESPACE_BEGIN
 
 class StringView {
