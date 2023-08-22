@@ -8,13 +8,14 @@ namespace BedrockService.Client.Management {
     public class ConfigManager {
         public string ConfigDir = $@"{Directory.GetCurrentDirectory()}";
         public string ConfigFile;
-        public List<IClientSideServiceConfiguration> HostConnectList = new List<IClientSideServiceConfiguration>();
+        public List<IClientSideServiceConfiguration> HostConnectList = new();
         public string NBTStudioPath;
         public bool DefaultScrollLock = false;
         public bool DisplayTimestamps = false;
-        private readonly IBedrockLogger Logger;
+        public bool DebugNetworkOutput = false;
+        private readonly IServerLogger Logger;
 
-        public ConfigManager(IBedrockLogger logger) {
+        public ConfigManager(IServerLogger logger) {
             Logger = logger;
             ConfigFile = $@"{ConfigDir}\Client.conf";
         }
@@ -44,7 +45,7 @@ namespace BedrockService.Client.Management {
                     if (entrySplit[0] == "EnableScrollbarLockDefault") {
                         DefaultScrollLock = entrySplit[1].ToLower().Equals(bool.TrueString.ToLower());
                     }
-                    if(entrySplit[0] == "DisplayTimestamps") {
+                    if (entrySplit[0] == "DisplayTimestamps") {
                         DisplayTimestamps = entrySplit[1].ToLower().Equals(bool.TrueString.ToLower());
                     }
                 }
@@ -56,7 +57,7 @@ namespace BedrockService.Client.Management {
             {
                 "HostEntry=host1;127.0.0.1:19134"
             };
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new();
             builder.Append("# Hosts\n");
             foreach (string entry in Config) {
                 builder.Append($"{entry}\n");
@@ -68,7 +69,7 @@ namespace BedrockService.Client.Management {
         }
 
         public void SaveConfigFile() {
-            StringBuilder fileContent = new StringBuilder();
+            StringBuilder fileContent = new();
             fileContent.Append("# hosts\n\n");
             foreach (ClientSideServiceConfiguration host in HostConnectList) {
                 fileContent.Append($"HostEntry={host.GetHostName()};{host.GetAddress()}:{host.GetPort()}\n");

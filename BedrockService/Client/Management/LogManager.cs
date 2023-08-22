@@ -4,23 +4,27 @@ using BedrockService.Shared.SerializeModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Client.Management {
     class LogManager {
         public Task LogTask;
         public bool Working = false;
-        public List<string> ServiceLogs = new List<string>();
+        public bool DisplayTimestamps = false;
+        public List<string> ServiceLogs = new();
         private CancellationTokenSource _logTaskCancelSource;
         private IServiceConfiguration _connectedHost;
-        private readonly IBedrockLogger _logger;
+        private readonly IServerLogger _logger;
         private int currentServerLogLength;
         private int currentServiceLogLength;
+        private int currentClientLogLength;
 
-        public LogManager(IBedrockLogger logger) {
+        public LogManager(IServerLogger logger) {
             _logger = logger;
         }
 
@@ -28,59 +32,66 @@ namespace BedrockService.Client.Management {
             while (!_logTaskCancelSource.Token.IsCancellationRequested) {
                 try {
                     Working = true;
-                    StringBuilder sendString = new StringBuilder();
-                    foreach (ServerConfigurator server in _connectedHost.GetServerList()) {
-                        server.ConsoleBuffer = server.ConsoleBuffer ?? new List<LogEntry>();
-                        sendString.Append($"{server.GetSettingsProp("ServerName")};{server.ConsoleBuffer.Count}|");
+                    int clientCount = FormManager.ClientLogContainer.GetLog() == null ? 0 : FormManager.ClientLogContainer.GetLog().Count;
+                    if (FormManager.ClientLogContainer.GetLog() != null && FormManager.ClientLogContainer.GetLog().Count != currentClientLogLength) {
+                        UpdateLogBoxInvoked(FormManager.MainWindow.clientLogBox, ProcessText(FormManager.ClientLogContainer.GetLog()));
                     }
-                    sendString.Append($"Service;{_connectedHost.GetLog().Count}");
-                    byte[] stringsToBytes = Encoding.UTF8.GetBytes(sendString.ToString());
-                    FormManager.TCPClient.SendData(stringsToBytes, NetworkMessageTypes.ConsoleLogUpdate);
-                    int serverCount = FormManager.MainWindow.selectedServer == null || FormManager.MainWindow.selectedServer.GetLog() == null ? 0 : FormManager.MainWindow.selectedServer.GetLog().Count;
-                    int serviceCount = _connectedHost.GetLog() == null ? 0 : _connectedHost.GetLog().Count;
-                    Task.Delay(300).Wait();
+                    if (_connectedHost != null) {
+                        StringBuilder sendString = new();
+                        foreach (IServerConfiguration server in _connectedHost.GetServerList()) {
+                            server.SetLog(server.GetLog() ?? new List<LogEntry>());
+                            sendString.Append($"{server.GetSettingsProp(ServerPropertyKeys.ServerName)};{server.GetLog().Count}|");
+                        }
+                        sendString.Append($"Service;{_connectedHost.GetLog().Count}");
+                        int serverCount = FormManager.MainWindow.selectedServer == null || FormManager.MainWindow.selectedServer.GetLog() == null ? 0 : FormManager.MainWindow.selectedServer.GetLog().Count;
+                        int serviceCount = _connectedHost.GetLog() == null ? 0 : _connectedHost.GetLog().Count;
+                        byte[] stringsToBytes = Encoding.UTF8.GetBytes(sendString.ToString());
+                        FormManager.TCPClient.SendData(stringsToBytes, NetworkMessageTypes.ConsoleLogUpdate);
+                        Task.Delay(300).Wait();
 
-                    if (FormManager.MainWindow.selectedServer == null) {
-                        UpdateLogBoxInvoked(FormManager.MainWindow.LogBox, "");
-                    } else {
-                        FormManager.TCPClient.SendData(FormManager.MainWindow.connectedHost.GetServerIndex(FormManager.MainWindow.selectedServer), NetworkMessageTypes.ServerStatusRequest);
-                    }
-                    if (_connectedHost.GetLog().Count != currentServiceLogLength) {
-                        UpdateLogBoxInvoked(FormManager.MainWindow.serviceTextbox, ProcessText(_connectedHost.GetLog()));
-                    }
-                    if (FormManager.MainWindow.selectedServer != null && FormManager.MainWindow.selectedServer.GetLog() != null && FormManager.MainWindow.selectedServer.GetLog().Count != currentServerLogLength) {
-                        UpdateLogBoxInvoked(FormManager.MainWindow.LogBox, ProcessText(FormManager.MainWindow.selectedServer.GetLog()));
-                    }
-                    if (FormManager.MainWindow.selectedServer != null && FormManager.MainWindow.selectedServer.GetStatus() != null) {
-                        Task.Run(() => {
-                            IServerConfiguration serverConfiguration = FormManager.MainWindow.selectedServer;
-                            bool autoStartEnabled = serverConfiguration.GetSettingsProp("ServerAutostartEnabled").GetBoolValue();
-                            ServerStatusModel status = serverConfiguration.GetStatus();
-                            ServiceStatusModel serviceStatus = FormManager.MainWindow.ServiceStatus;
-                            string statusMsg = $"{serverConfiguration.GetServerName()} is {status.ServerStatus}";
+                        if (FormManager.MainWindow.selectedServer == null) {
+                            UpdateLogBoxInvoked(FormManager.MainWindow.LogBox, "");
+                        } else {
+                            FormManager.TCPClient.SendData(FormManager.MainWindow.connectedHost.GetServerIndex(FormManager.MainWindow.selectedServer), NetworkMessageTypes.ServerStatusRequest);
+                            if(FormManager.MainWindow.selectedServer.GetStatus() != null) {
+                                Task.Run(() => {
+                                    IServerConfiguration serverConfiguration = FormManager.MainWindow.selectedServer;
+                                    bool autoStartEnabled = serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerAutostartEnabled).GetBoolValue();
+                                    ServerStatusModel status = serverConfiguration.GetStatus();
+                                    ServiceStatusModel serviceStatus = FormManager.MainWindow.ServiceStatus;
+                                    string statusMsg = $"{serverConfiguration.GetServerName()} is {status.ServerStatus}";
 
-                            if (FormManager.MainWindow.ServiceStatus != null) {
-                                statusMsg += $"\r\nStarted at: {status.ServerUptime:g}";
-                                statusMsg += $"\r\n{status.ActivePlayerList.Count} players online";
+                                    if (FormManager.MainWindow.ServiceStatus != null) {
+                                        statusMsg += $"\r\nStarted at: {status.ServerUptime:g}";
+                                        statusMsg += $"\r\n{status.ActivePlayerList.Count} players online";
 
-                                if (!autoStartEnabled) {
-                                    statusMsg += $"\r\nAutoStart disabled for this server!";
-                                }
-                                if (!serverConfiguration.GetSettingsProp("AutoDeployUpdates").GetBoolValue() && status.DeployedVersion != null && serviceStatus.LatestVersion != null && status.DeployedVersion != "None") {
-                                    Version serverVersion = Version.Parse(status.DeployedVersion);
-                                    Version latestVersion = Version.Parse(serviceStatus.LatestVersion);
-                                    if (serverVersion < latestVersion) {
-                                        statusMsg += $"\r\nUpdate {latestVersion} available";
+                                        if (!autoStartEnabled) {
+                                            statusMsg += $"\r\nAutoStart disabled for this server!";
+                                        }
+                                        if (!serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue() && status.DeployedVersion != null && serviceStatus.LatestVersion != null && status.DeployedVersion != "None") {
+                                            Version serverVersion = Version.Parse(status.DeployedVersion);
+                                            Version latestVersion = Version.Parse(serviceStatus.LatestVersion);
+                                            if (serverVersion < latestVersion) {
+                                                statusMsg += $"\r\nUpdate {latestVersion} available";
+                                            }
+                                        }
+                                        statusMsg += "\r\n  --------------------------------";
+                                        statusMsg += $"\r\nTotal service-wide backups: {FormManager.MainWindow.ServiceStatus.TotalBackups}\r\nTotal backup size: {FormManager.MainWindow.ServiceStatus.TotalBackupSize / 1000} MB\r\nService started: {FormManager.MainWindow.ServiceStatus.ServiceUptime:g}";
                                     }
-                                }
-                                statusMsg += "\r\n  --------------------------------";
-                                statusMsg += $"\r\nTotal service-wide backups: {FormManager.MainWindow.ServiceStatus.TotalBackups}\r\nTotal backup size: {FormManager.MainWindow.ServiceStatus.TotalBackupSize / 1000} MB\r\nService started: {FormManager.MainWindow.ServiceStatus.ServiceUptime:g}";
+                                    UpdateLogBoxInvoked(FormManager.MainWindow.ServerInfoBox, statusMsg);
+                                });
                             }
-                            UpdateLogBoxInvoked(FormManager.MainWindow.ServerInfoBox, statusMsg);
-                        });
+                        }
+                        if (_connectedHost.GetLog().Count != currentServiceLogLength) {
+                            UpdateLogBoxInvoked(FormManager.MainWindow.serviceTextbox, ProcessText(_connectedHost.GetLog()));
+                        }
+                        if (FormManager.MainWindow.selectedServer != null && FormManager.MainWindow.selectedServer.GetLog() != null && FormManager.MainWindow.selectedServer.GetLog().Count != currentServerLogLength) {
+                            UpdateLogBoxInvoked(FormManager.MainWindow.LogBox, ProcessText(FormManager.MainWindow.selectedServer.GetLog()));
+                        }
+                        currentServerLogLength = serverCount;
+                        currentServiceLogLength = serviceCount;
+                        currentClientLogLength = clientCount;
                     }
-                    currentServerLogLength = serverCount;
-                    currentServiceLogLength = serviceCount;
                 } catch (Exception e) {
                     _logger.AppendLine($"LogManager Error! Stacetrace: {e.StackTrace}");
                 }
@@ -94,11 +105,13 @@ namespace BedrockService.Client.Management {
             return string.Join("\r\n", targetLog.Select(x => x.Text).ToList());
         }
 
-        public bool InitLogThread(IServiceConfiguration host) {
-            _connectedHost = host;
+        public bool InitLogThread() {
+            DisplayTimestamps = FormManager.MainWindow.ConfigManager.DisplayTimestamps;
             _logTaskCancelSource = new CancellationTokenSource();
             return StartLogThread();
         }
+
+        public void SetConnectedHost(IServiceConfiguration host) => _connectedHost = host;
 
         public bool StartLogThread() {
             try {

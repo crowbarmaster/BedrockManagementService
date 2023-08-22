@@ -1,65 +1,59 @@
-﻿using BedrockService.Service.Management.Interfaces;
-using BedrockService.Service.Networking.Interfaces;
-using BedrockService.Service.Server.Interfaces;
+﻿using BedrockService.Service.Server.Interfaces;
+using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
 using BedrockService.Shared.PackParser;
 using BedrockService.Shared.SerializeModels;
+using BedrockService.Shared.Utilities;
 using NCrontab;
 using System.IO.Compression;
 using System.Timers;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Service.Server {
-    public class BedrockServer : IBedrockServer {
+    public class BedrockServer : IServerController {
         private Task? _serverTask;
         private Task? _watchdogTask;
-        private CancellationTokenSource _serverCanceler = new CancellationTokenSource();
-        private CancellationTokenSource _watchdogCanceler = new CancellationTokenSource();
+        private CancellationTokenSource _serverCanceler = new();
+        private CancellationTokenSource _watchdogCanceler = new();
         private StreamWriter _stdInStream;
         private Process? _serverProcess;
         private ServerStatus _currentServerStatus;
         private readonly IServerConfiguration _serverConfiguration;
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IConfigurator _configurator;
-        private readonly IBedrockLogger _logger;
+        private readonly IServerLogger _logger;
         private readonly IProcessInfo _processInfo;
-        private readonly IUpdater _updater;
-        private readonly FileUtilities _fileUtils;
-        private readonly BackupManager _backupManager;
+        private readonly IPlayerManager _playerManager;
+        private readonly BedrockBackupManager _backupManager;
         private System.Timers.Timer? _backupTimer { get; set; }
         private CrontabSchedule? _backupCron { get; set; }
         private CrontabSchedule? _updaterCron { get; set; }
         private System.Timers.Timer? _updaterTimer { get; set; }
-        private IBedrockLogger _serverLogger;
-        private IPlayerManager _playerManager;
-        private List<IPlayer> _connectedPlayers = new List<IPlayer>();
+        private IServerLogger _serverLogger;
+        private List<IPlayer> _connectedPlayers = new();
         private DateTime _startTime;
         private const string _startupMessage = "INFO] Server started.";
         private bool _AwaitingStopSignal = true;
-        private bool _backupRunning = false;
         private bool _serverModifiedFlag = true;
+        private bool _LiteLoadedServer = false;
 
-        public BedrockServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, FileUtilities fileUtils) {
-            _fileUtils = fileUtils;
+        public BedrockServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IServerLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, IPlayerManager servicePlayerManager) {
             _serverConfiguration = serverConfiguration;
             _processInfo = processInfo;
             _serviceConfiguration = serviceConfiguration;
+            _playerManager = serviceConfiguration.GetProp(ServicePropertyKeys.GlobalizedPlayerDatabase).GetBoolValue() || processInfo.DeclaredType() == "Client" ? servicePlayerManager : serverConfiguration.GetPlayerManager();
             _configurator = configurator;
             _logger = logger;
-            _backupManager = new BackupManager(_processInfo, _logger, this, serverConfiguration, serviceConfiguration);
-            _updater = new Updater(_processInfo, _logger, _serviceConfiguration);
+            _backupManager = new BedrockBackupManager(_logger, this, serverConfiguration, serviceConfiguration);
         }
 
         public void Initialize() {
-            _serverLogger = new BedrockLogger(_processInfo, _serviceConfiguration, _serverConfiguration);
+            _serverLogger = new MinecraftServerLogger(_processInfo, _serviceConfiguration, _serverConfiguration);
             _serverLogger.Initialize();
-            _updater.Initialize();
-            if (_serverConfiguration.GetSettingsProp("CheckUpdates").GetBoolValue()) {
-                _updater.CheckLatestVersion().Wait();
-            }
-            _playerManager = new PlayerManager(_serverConfiguration);
+            _serverConfiguration.GetUpdater().SetNewLogger(_serverLogger);
         }
 
         public void CheckUpdates() {
-           _updater.CheckLatestVersion().Wait();
+            _serverConfiguration.GetUpdater().CheckLatestVersion().Wait();
         }
 
         public void StartWatchdog() {
@@ -69,14 +63,15 @@ namespace BedrockService.Service.Server {
             _watchdogTask.Start();
         }
 
-        public Task AwaitableServerStart() {
+        public Task ServerStart() {
             return Task.Run(() => {
-                string exeName = _serverConfiguration.GetSettingsProp("ServerExeName").ToString();
+                string exeName = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName).ToString();
                 string appName = exeName.Substring(0, exeName.Length - 4);
-                if (MonitoredAppExists(appName)) {
-                    KillProcesses(Process.GetProcessesByName(appName));
+                if (ProcessUtilities.MonitoredAppExists(appName)) {
+                    ProcessUtilities.KillProcessList(Process.GetProcessesByName(appName));
                     Task.Delay(500).Wait();
                 }
+                _serverConfiguration.ValidateDeployedServer();
                 StartServerTask();
                 InitializeBackupTimer();
                 InitializeUpdateTimer();
@@ -87,9 +82,9 @@ namespace BedrockService.Service.Server {
             });
         }
 
-        public Task AwaitableServerStop(bool stopWatchdog) {
+        public Task ServerStop(bool stopWatchdog) {
             return Task.Run(() => {
-                while (_backupRunning) {
+                while (_backupManager.BackupRunning()) {
                     Task.Delay(100).Wait();
                 }
                 if (stopWatchdog) {
@@ -121,25 +116,36 @@ namespace BedrockService.Service.Server {
                 }
             });
         }
-
         public Task RestartServer() {
             return Task.Run(() => {
-                AwaitableServerStop(false).Wait();
-                AwaitableServerStart().Wait();
+                ServerStop(false).Wait();
+                ServerStart().Wait();
             });
         }
+
+        public void PerformOfflineServerTask(Action taskToRun) {
+            if (_currentServerStatus == ServerStatus.Started) {
+                ServerStop(false).Wait();
+                Task.Run(taskToRun).Wait();
+                ServerStart().Wait();
+            } else {
+                Task.Run(taskToRun).Wait();
+            }
+        }
+
+        public void ForceKillServer() => _serverProcess.Kill();
 
         public string GetServerName() => _serverConfiguration.GetServerName();
 
         public void WriteToStandardIn(string command) {
-            if(_stdInStream != null) {
+            if (_stdInStream != null) {
                 _stdInStream.WriteLine(command);
             }
         }
 
         private void InitializeBackupTimer() {
-             _backupCron = CrontabSchedule.TryParse(_serverConfiguration.GetSettingsProp("BackupCron").ToString());
-            if (_serverConfiguration.GetSettingsProp("BackupEnabled").GetBoolValue() && _backupCron != null) {
+            _backupCron = CrontabSchedule.TryParse(_serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupCron).ToString());
+            if (_serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupEnabled).GetBoolValue() && _backupCron != null) {
                 double interval = (_backupCron.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds;
                 if (interval >= 0) {
                     if (_backupTimer != null) {
@@ -147,13 +153,13 @@ namespace BedrockService.Service.Server {
                         _backupTimer = null;
                     }
                     _backupTimer = new System.Timers.Timer(interval);
-                    _logger.AppendLine($"Automatic backups for server {GetServerName()} enabled, next backup at: {_backupCron.GetNextOccurrence(DateTime.Now):G}.");
+                    _serverLogger.AppendLine($"Automatic backups for server {GetServerName()} enabled, next backup at: {_backupCron.GetNextOccurrence(DateTime.Now):G}.");
                     _backupTimer.Elapsed += BackupTimer_Elapsed;
                     _backupTimer.AutoReset = false;
                     _backupTimer.Start();
                 }
             }
-            if (!_serverConfiguration.GetSettingsProp("BackupEnabled").GetBoolValue()) {
+            if (!_serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupEnabled).GetBoolValue()) {
                 if (_backupTimer != null) {
                     _backupTimer.Stop();
                     _backupTimer = null;
@@ -163,11 +169,11 @@ namespace BedrockService.Service.Server {
 
         private void BackupTimer_Elapsed(object sender, ElapsedEventArgs e) {
             try {
-                bool shouldBackup = _serverConfiguration.GetSettingsProp("IgnoreInactiveBackups").GetBoolValue();
+                bool shouldBackup = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.IgnoreInactiveBackups).GetBoolValue();
                 if ((shouldBackup && _serverModifiedFlag) || !shouldBackup) {
-                    InitializeBackup();
+                    _backupManager.InitializeBackup();
                 } else {
-                    _logger.AppendLine($"Backup for server {GetServerName()} was skipped due to inactivity.");
+                    _serverLogger.AppendLine($"Backup for server {GetServerName()} was skipped due to inactivity.");
                 }
                 ((System.Timers.Timer)sender).Stop();
                 InitializeBackupTimer();
@@ -179,9 +185,13 @@ namespace BedrockService.Service.Server {
         }
 
         private void InitializeUpdateTimer() {
-            _updaterCron = CrontabSchedule.TryParse(_serverConfiguration.GetSettingsProp("UpdateCron").ToString());
-            if (_serverConfiguration.GetSettingsProp("CheckUpdates").GetBoolValue() && _updaterCron != null) {
+            _updaterCron = CrontabSchedule.TryParse(_serverConfiguration.GetSettingsProp(ServerPropertyKeys.UpdateCron).ToString());
+            if (_serverConfiguration.GetSettingsProp(ServerPropertyKeys.CheckUpdates).GetBoolValue() && _updaterCron != null) {
                 double interval = (_updaterCron.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds;
+                if (_updaterTimer != null) {
+                    _updaterTimer.Stop();
+                    _updaterTimer = null;
+                }
                 if (interval >= 0) {
                     if(_updaterTimer != null) {
                         _updaterTimer.Stop();
@@ -189,11 +199,11 @@ namespace BedrockService.Service.Server {
                     }
                     _updaterTimer = new System.Timers.Timer(interval);
                     _updaterTimer.Elapsed += UpdateTimer_Elapsed;
-                    _logger.AppendLine($"Automatic updates Enabled, will be checked at: {_updaterCron.GetNextOccurrence(DateTime.Now):G}.");
+                    _serverLogger.AppendLine($"Automatic updates Enabled, will be checked at: {_updaterCron.GetNextOccurrence(DateTime.Now):G}.");
                     _updaterTimer.Start();
                 }
             }
-            if (!_serverConfiguration.GetSettingsProp("CheckUpdates").GetBoolValue()) {
+            if (!_serverConfiguration.GetSettingsProp(ServerPropertyKeys.CheckUpdates).GetBoolValue()) {
                 if (_updaterTimer != null) {
                     _updaterTimer.Stop();
                     _updaterTimer = null;
@@ -203,13 +213,9 @@ namespace BedrockService.Service.Server {
 
         private void UpdateTimer_Elapsed(object sender, ElapsedEventArgs e) {
             try {
-                if(_currentServerStatus != ServerStatus.Started) {
-                    return;
-                }
-                _updater.CheckLatestVersion().Wait();
-                if (_serverConfiguration.GetSettingsProp("AutoDeployUpdates").GetBoolValue() && _serverConfiguration.GetSettingsProp("DeployedVersion").StringValue != _serviceConfiguration.GetLatestBDSVersion() && !_serverConfiguration.ServerHasSetVersion()) {
+                if (_serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue() && _serverConfiguration.GetDeployedVersion() != _serviceConfiguration.GetLatestVersion(MinecraftServerArch.Bedrock)) {
                     _logger.AppendLine("Version change detected! Restarting server(s) to apply update...");
-                    RestartServer().Wait();
+                    PerformOfflineServerTask(new Action(() => _serverConfiguration.GetUpdater().ReplaceServerBuild(_serviceConfiguration.GetLatestVersion(MinecraftServerArch.Bedrock)).Wait()));
                 }
                 ((System.Timers.Timer)sender).Stop();
                 InitializeUpdateTimer();
@@ -220,35 +226,9 @@ namespace BedrockService.Service.Server {
             }
         }
 
-        public bool RollbackToBackup(byte serverIndex, string zipFilePath) {
-            IServerConfiguration server = _serviceConfiguration.GetServerInfoByIndex(serverIndex);
-            DirectoryInfo worldsDir = new DirectoryInfo($@"{server.GetSettingsProp("ServerPath")}\worlds");
-            FileInfo backupZipFileInfo = new FileInfo($@"{server.GetSettingsProp("BackupPath")}\{server.GetServerName()}\{zipFilePath}");
-            DirectoryInfo backupPacksDir = new DirectoryInfo($@"{worldsDir.FullName}\InstalledPacks");
-            AwaitableServerStop(false).Wait();
+        public bool RollbackToBackup(string zipFilePath) {
             try {
-                _fileUtils.DeleteFilesFromDirectory(worldsDir, true).Wait();
-                _logger.AppendLine($"Deleted world folder \"{worldsDir.Name}\"");
-                ZipFile.ExtractToDirectory(backupZipFileInfo.FullName, worldsDir.FullName);
-                _logger.AppendLine($"Copied files from backup \"{backupZipFileInfo.Name}\" to server worlds directory.");
-                MinecraftPackParser parser = new MinecraftPackParser(_processInfo);
-                foreach (FileInfo file in backupPacksDir.GetFiles()) {
-                    _fileUtils.ClearTempDir().Wait();
-                    ZipFile.ExtractToDirectory(file.FullName, $@"{Path.GetTempPath()}\BMSTemp\PackTemp", true);
-                    parser.FoundPacks.Clear();
-                    parser.ParseDirectory($@"{Path.GetTempPath()}\BMSTemp\PackTemp");
-                    if (parser.FoundPacks[0].ManifestType == "data") {
-                        string folderPath = $@"{server.GetSettingsProp("ServerPath")}\behavior_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
-                        Task.Run(() => _fileUtils.DeleteFilesFromDirectory(folderPath, false)).Wait();
-                        ZipFile.ExtractToDirectory(file.FullName, folderPath, true);
-                    }
-                    if (parser.FoundPacks[0].ManifestType == "resources") {
-                        string folderPath = $@"{server.GetSettingsProp("ServerPath")}\resource_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
-                        Task.Run(() => _fileUtils.DeleteFilesFromDirectory(folderPath, false)).Wait();
-                        ZipFile.ExtractToDirectory(file.FullName, folderPath, true);
-                    }
-                }
-                AwaitableServerStart().Wait();
+                PerformOfflineServerTask(new Action(() => PerformRollback(zipFilePath)));
                 return true;
             } catch (IOException e) {
                 _logger.AppendLine($"Error deleting selected backups! {e.Message}");
@@ -256,7 +236,9 @@ namespace BedrockService.Service.Server {
             return false;
         }
 
-        public ServerStatusModel GetServerStatus() => new ServerStatusModel() {
+        private void PerformRollback(string zipFilePath) => _backupManager.PerformRollback(zipFilePath);
+    
+        public ServerStatusModel GetServerStatus() => new() {
             ServerUptime = _startTime,
             ServerStatus = _currentServerStatus,
             ActivePlayerList = _connectedPlayers,
@@ -266,20 +248,19 @@ namespace BedrockService.Service.Server {
             DeployedVersion = _serverConfiguration.GetServerVersion()
         };
 
-        public IBedrockLogger GetLogger() => _serverLogger;
+        public List<IPlayer> GetActivePlayerList() => _connectedPlayers;
+
+        public IServerLogger GetLogger() => _serverLogger;
 
         public bool IsServerModified() => _serverModifiedFlag;
 
-        public void ForceServerModified() => _serverModifiedFlag = true;
+        public void SetServerModified(bool isModified) => _serverModifiedFlag = isModified;
 
-        public bool ServerAutostartEnabled() => _serverConfiguration.GetSettingsProp("ServerAutostartEnabled").GetBoolValue();
+        public bool ServerAutostartEnabled() => _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerAutostartEnabled).GetBoolValue();
 
-        public bool IsPrimaryServer() {
-            return _serverConfiguration.GetProp("server-port").StringValue == "19132" ||
-            _serverConfiguration.GetProp("server-port").StringValue == "19133" ||
-            _serverConfiguration.GetProp("server-portv6").StringValue == "19132" ||
-            _serverConfiguration.GetProp("server-portv6").StringValue == "19133";
-        }
+        public bool IsPrimaryServer() => _serverConfiguration.IsPrimaryServer();
+
+        public IPlayerManager GetPlayerManager() => _playerManager;
 
         private Task StopWatchdog() {
             return Task.Run(() => {
@@ -295,124 +276,51 @@ namespace BedrockService.Service.Server {
             _serverCanceler = new CancellationTokenSource();
             _serverTask = RunServer();
             _serverTask.Start();
+            _configurator.SaveServerConfiguration(_serverConfiguration);
         }
 
         private void StdOutToLog(object sender, DataReceivedEventArgs e) {
-            if (e.Data != null && !e.Data.Contains("INFO] Running AutoCompaction...")) {
-                string dataMsg = e.Data;
+            if (e.Data != null && !e.Data.Contains("Running AutoCompaction...")) {
+                ConsoleFilterStrategyClass consoleFilter = new ConsoleFilterStrategyClass(_logger, _configurator, _serverConfiguration, this, _serviceConfiguration);
+                string input = e.Data;
                 string logFileText = "NO LOG FILE! - ";
-                if (dataMsg.StartsWith(logFileText))
-                    dataMsg = dataMsg.Substring(logFileText.Length, dataMsg.Length - logFileText.Length);
-                if (dataMsg.StartsWith('[')) {
-                    int secondBracketLoc = dataMsg.IndexOf(']');
-                    _serverLogger.AppendLine(dataMsg.Substring(secondBracketLoc + 2));
-                } else {
-                    _serverLogger.AppendLine(dataMsg);
+                int trimIndex = 0;
+                if (input.StartsWith(logFileText))
+                    input = input.Substring(logFileText.Length);
+                if (input.StartsWith('[')) {
+                    trimIndex = input.IndexOf(']') + 2;
                 }
+                _serverLogger.AppendLine(input.Substring(trimIndex));
                 if (e.Data != null) {
-
-                    if (dataMsg.Contains(_startupMessage)) {
-                        _currentServerStatus = ServerStatus.Started;
-                        Task.Delay(3000).Wait();
-
-                        if (_serverConfiguration.GetStartCommands().Count > 0) {
-                            RunStartupCommands();
-                        }
-                    }
-                    if (dataMsg.Equals("Quit correctly")) {
+                    if (input.Equals("Quit correctly")) {
                         _logger.AppendLine($"Server {GetServerName()} received quit signal.");
                         _AwaitingStopSignal = false;
                     }
-                    if (dataMsg.Contains("Player connected")) {
-                        var playerInfo = ExtractPlayerInfoFromString(dataMsg);
-                        _logger.AppendLine($"Player {playerInfo.username} connected with XUID: {playerInfo.xuid}");
-                        _serverModifiedFlag = true;
-                        _connectedPlayers.Add(_playerManager.PlayerConnected(playerInfo.username, playerInfo.xuid));
-                        _configurator.SavePlayerDatabase(_serverConfiguration);
+                    if (input.Contains("[PreLoader]")) {
+                        _LiteLoadedServer = true;
                     }
-                    if (dataMsg.Contains("Player disconnected")) {
-                        var playerInfo = ExtractPlayerInfoFromString(dataMsg);
-                        _logger.AppendLine($"Player {playerInfo.username} disconnected with XUID: {playerInfo.xuid}");
-                        _connectedPlayers.Remove(_playerManager.PlayerDisconnected(playerInfo.xuid));
-                        _configurator.SavePlayerDatabase(_serverConfiguration);
+                    if (input.Contains("Changes to the world are resumed")) {
+                        _backupManager.SetBackupComplete();
                     }
-                    if (dataMsg.Contains("Failed to load Vanilla")) {
-                        AwaitableServerStop(false).Wait();
-                        _configurator.ReplaceServerBuild(_serverConfiguration, _serverConfiguration.GetSelectedVersion()).Wait();
-                        AwaitableServerStart().Wait();
-                    }
-                    if (dataMsg.Contains("Version ")) {
-                        int msgStartIndex = dataMsg.IndexOf(']') + 2;
-                        string focusedMsg = dataMsg.Substring(msgStartIndex, dataMsg.Length - msgStartIndex);
-                        int versionIndex = focusedMsg.IndexOf(' ') + 1;
-                        string versionString = focusedMsg.Substring(versionIndex, focusedMsg.Length - versionIndex);
-                        if(_serverConfiguration.GetSettingsProp("DeployedVersion").StringValue == "None") {
-                            _logger.AppendLine("Service detected version, restarting server to apply correct configuration.");
-                            AwaitableServerStop(false).Wait();
-                            _serverConfiguration.GetSettingsProp("DeployedVersion").SetValue(versionString);
-                            _serverConfiguration.ValidateVersion(versionString);
-                            _configurator.LoadServerConfigurations().Wait();
-                            _configurator.SaveServerConfiguration(_serverConfiguration);
-                            AwaitableServerStart().Wait();
+                    foreach (KeyValuePair<string, IConsoleFilter> filter in consoleFilter.FilterList) {
+                        if (input.Contains(filter.Key)) {
+                            filter.Value.Filter(input);
+                            break;
                         }
-                        if (versionString.ToLower().Contains("-beta")) {
-                        int betaTagLoc = versionString.ToLower().IndexOf("-beta");
-                        int betaVer = int.Parse(versionString.Substring(betaTagLoc + 5, versionString.Length - (betaTagLoc + 5)));
-                            versionString = versionString.Substring(0, betaTagLoc) + ".";
-                            versionString = versionString + betaVer;
-                        }
-                        if (_serverConfiguration.GetSelectedVersion() != versionString) {
-                            if (_serverConfiguration.GetSettingsProp("AutoDeployUpdates").GetBoolValue()) {
-                                _logger.AppendLine($"Server {GetServerName()} decected incorrect or out of date version! Replacing build...");
-                                AwaitableServerStop(false).Wait();
-                                _configurator.ReplaceServerBuild(_serverConfiguration, _serverConfiguration.GetSelectedVersion()).Wait();
-                                AwaitableServerStart();
-                            } else {
-                                _logger.AppendLine($"Server {GetServerName()} is out of date, Enable AutoDeployUpdates option to update to latest!");
-                            }
-                        }
-                    }
-                    if (dataMsg.Contains("A previous save has not been completed.")) {
-                        Task.Delay(1000).Wait();
-                        WriteToStandardIn("save query");
-                    }
-                    if (dataMsg.Contains($@"{_serverConfiguration.GetProp("level-name")}/db/")) {
-                        _logger.AppendLine("Save data string detected! Performing backup now!");
-                        if (_backupManager.PerformBackup(dataMsg)) {
-                            _logger.AppendLine($"Backup for server {_serverConfiguration.GetServerName()} Completed.");
-                            _backupRunning = false;
-                            if (_connectedPlayers.Count == 0) {
-                                _serverModifiedFlag = false;
-                            }
-                            return;
-                        }
-                        _backupRunning = false;
-                        _logger.AppendLine($"Backup for server {_serverConfiguration.GetServerName()} Failed. Check logs!");
                     }
                 }
-            }
-        }
-
-        public void InitializeBackup() {
-            if(!_backupRunning && _currentServerStatus == ServerStatus.Started) {
-                _backupRunning = true;
-                WriteToStandardIn("save hold");
-                Task.Delay(1000).Wait();
-                WriteToStandardIn("say Server backup started.");
-                WriteToStandardIn("save query");
             }
         }
 
         private Task ApplicationWatchdogMonitor() {
             return new Task(() => {
                 while (true) {
-                    string exeName = _serverConfiguration.GetSettingsProp("ServerExeName").ToString();
-                    string appName = exeName.Substring(0, exeName.Length - 4);
-                    bool appExists = MonitoredAppExists(appName);
+                    int procId = _serverConfiguration.GetRunningPid();
+                    bool appExists = ProcessUtilities.MonitoredAppExists(procId);
                     if (!appExists && _currentServerStatus == ServerStatus.Started && !_watchdogCanceler.IsCancellationRequested) {
-                        _logger.AppendLine($"Started application {appName} was not found in running processes... Resarting.");
+                        _logger.AppendLine($"Started application {_serverConfiguration.GetSettingsProp(ServerPropertyKeys.FileName)} was not found in running processes... Resarting.");
                         _currentServerStatus = ServerStatus.Stopped;
-                        AwaitableServerStart().Wait();
+                        ServerStart().Wait();
                     }
                     if (_watchdogCanceler.IsCancellationRequested) {
                         break;
@@ -424,7 +332,7 @@ namespace BedrockService.Service.Server {
 
         private Task RunServer() {
             return new Task(() => {
-                string exeName = _serverConfiguration.GetSettingsProp("ServerExeName").ToString();
+                string exeName = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName).ToString();
                 string appName = exeName.Substring(0, exeName.Length - 4);
                 if(_serverConfiguration.GetSettingsProp("DeployedVersion").StringValue != _serviceConfiguration.GetLatestBDSVersion()) {
                     _configurator.ReplaceServerBuild(_serverConfiguration, _serverConfiguration.GetSelectedVersion()).Wait();
@@ -433,18 +341,13 @@ namespace BedrockService.Service.Server {
                 MinecraftFileUtilities.WriteServerPropsFile(_serverConfiguration);
 
                 try {
-                    if (File.Exists($@"{_serverConfiguration.GetSettingsProp("ServerPath")}\{_serverConfiguration.GetSettingsProp("ServerExeName")}")) {
-                        if (MonitoredAppExists(appName)) {
-                            Process[] processList = Process.GetProcessesByName(appName);
-                            if (processList.Length != 0) {
-                                _logger.AppendLine($@"Application {appName} was found running! Killing to proceed.");
-                                KillProcesses(processList);
-                            }
+                    if (File.Exists(GetServerFilePath(BdsFileNameKeys.BmsServer_Name, _serverConfiguration, _serverConfiguration.GetServerName()))) {
+                        if (ProcessUtilities.MonitoredAppExists(appName)) {
+                            ProcessUtilities.KillProcessList(Process.GetProcessesByName(appName));
                         }
-                        // Fires up a new process to run inside this one
                         CreateProcess();
                     } else {
-                        _logger.AppendLine($"The Bedrock Server is not accessible at {$@"{_serverConfiguration.GetSettingsProp("ServerPath")}\{_serverConfiguration.GetSettingsProp("ServerExeName")}"}\r\nCheck if the file is at that location and that permissions are correct.");
+                        _logger.AppendLine($"The Bedrock Server is not accessible at {$@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName)}"}\r\nCheck if the file is at that location and that permissions are correct.");
                     }
                 } catch (Exception e) {
                     _logger.AppendLine($"Error Running Bedrock Server: {e.Message}\n{e.StackTrace}");
@@ -453,8 +356,8 @@ namespace BedrockService.Service.Server {
         }
 
         private void CreateProcess() {
-            string fileName = $@"{_serverConfiguration.GetSettingsProp("ServerPath")}\{_serverConfiguration.GetSettingsProp("ServerExeName")}";
-            ProcessStartInfo processStartInfo = new ProcessStartInfo {
+            string fileName = $@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath).StringValue}\{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName).StringValue} ";
+            ProcessStartInfo processStartInfo = new() {
                 UseShellExecute = false,
                 RedirectStandardError = true,
                 RedirectStandardInput = true,
@@ -464,6 +367,7 @@ namespace BedrockService.Service.Server {
             };
             _serverProcess = Process.Start(processStartInfo);
             if (_serverProcess != null) {
+                _serverConfiguration.SetRunningPid(_serverProcess.Id);
                 _serverProcess.PriorityClass = ProcessPriorityClass.High;
                 _serverProcess.OutputDataReceived += StdOutToLog;
                 _serverProcess.BeginOutputReadLine();
@@ -472,46 +376,19 @@ namespace BedrockService.Service.Server {
             }
         }
 
-        private void KillProcesses(Process[] processList) {
-            foreach (Process process in processList) {
-                try {
-                    process.Kill();
-                    Thread.Sleep(1000);
-                    _logger.AppendLine($@"App {_serverConfiguration.GetSettingsProp("ServerExeName")} killed!");
-                } catch (Exception e) {
-                    _logger.AppendLine($"Killing proccess resulted in error: {e.StackTrace}");
-                }
-            }
-        }
-
-        private bool MonitoredAppExists(string monitoredAppName) {
-            try {
-                Process[] processList = Process.GetProcessesByName(monitoredAppName);
-                if (processList.Length == 0) {
-                    return false;
-                } else {
-                    return true;
-                }
-            } catch (Exception ex) {
-                _logger.AppendLine("ApplicationWatcher MonitoredAppExists Exception: " + ex.StackTrace);
-                return true;
-            }
-        }
-
-        private (string username, string xuid) ExtractPlayerInfoFromString(string dataMsg) {
-            int msgStartIndex = dataMsg.IndexOf(']') + 2;
-            int usernameStart = dataMsg.IndexOf(':', msgStartIndex) + 2;
-            int usernameEnd = dataMsg.IndexOf(',', usernameStart);
-            int usernameLength = usernameEnd - usernameStart;
-            int xuidStart = dataMsg.IndexOf(':', usernameEnd) + 2;
-            return (dataMsg.Substring(usernameStart, usernameLength), dataMsg.Substring(xuidStart, dataMsg.Length - xuidStart));
-        }
-
-        private void RunStartupCommands() {
+        public void RunStartupCommands() {
             foreach (StartCmdEntry cmd in _serverConfiguration.GetStartCommands()) {
                 _stdInStream.WriteLine(cmd.Command.Trim());
                 Thread.Sleep(1000);
             }
         }
+
+        public bool LiteLoadedServer() => _LiteLoadedServer;
+
+        public BedrockBackupManager GetBackupManager() => _backupManager;
+
+        public void SetStartupStatus(ServerStatus status) => _currentServerStatus = status;
+
+        public bool IsServerStarted() => _currentServerStatus == ServerStatus.Started;
     }
 }

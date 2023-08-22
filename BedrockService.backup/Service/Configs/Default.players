@@ -1,5 +1,0 @@
-# Registered player list
-# Register player entries: xuid,username,permission,isWhitelisted,ignoreMaxPlayers
-# Example: TestUser,555111222333444,visitor,false,false
-
-1234111222333444,TestUser,visitor,false,false

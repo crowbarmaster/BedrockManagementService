@@ -4,11 +4,11 @@ using System.Text;
 namespace BedrockService.Service.Networking.NetworkStrategies {
     public class ConsoleLogUpdate : IMessageParser {
 
-        private readonly IBedrockLogger _logger;
+        private readonly IServerLogger _logger;
         private readonly IBedrockService _service;
         private readonly IServiceConfiguration _serviceConfiguration;
 
-        public ConsoleLogUpdate(IBedrockLogger logger, IServiceConfiguration serviceConfiguration, IBedrockService service) {
+        public ConsoleLogUpdate(IServerLogger logger, IServiceConfiguration serviceConfiguration, IBedrockService service) {
             _service = service;
             _logger = logger;
 
@@ -17,7 +17,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
             string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
-            StringBuilder srvString = new StringBuilder();
+            StringBuilder srvString = new();
             string[] split = stringData.Split('|');
             for (int i = 0; i < split.Length; i++) {
                 string[] dataSplit = split[i].Split(';');
@@ -25,7 +25,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
                 int srvTextLen;
                 int clientCurLen;
                 int loop;
-                IBedrockLogger srvText;
+                IServerLogger srvText;
                 if (srvName != "Service") {
                     try {
                         srvText = _service.GetBedrockServerByName(srvName).GetLogger();

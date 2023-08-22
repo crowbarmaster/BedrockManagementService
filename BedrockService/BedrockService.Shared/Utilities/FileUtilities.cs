@@ -1,46 +1,43 @@
-﻿using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.MinecraftJsonModels.FileModels;
-using BedrockService.Shared.MinecraftJsonModels.JsonModels;
+﻿using BedrockService.Shared.FileModels.MinecraftFileModels;
+using BedrockService.Shared.JsonModels.MinecraftJsonModels;
 using BedrockService.Shared.PackParser;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Shared.Utilities {
     public class FileUtilities {
-        readonly string _servicePath;
-        private readonly IProcessInfo _processInfo;
-
-        public FileUtilities(IProcessInfo processInfo) {
-            _processInfo = processInfo;
-            _servicePath = _processInfo.GetDirectory();
-        }
-
-        public void CreateInexistantFile(string filePath) {
-            if (!File.Exists(filePath)) {
-                File.Create(filePath).Close();
+        public static void CreateInexistantFile(string filePath) {
+            FileInfo fileInfo = new FileInfo(filePath);
+            if (!Directory.Exists(fileInfo.Directory.FullName)) {
+                fileInfo.Directory.Create();
+            }
+            if (!fileInfo.Exists) {
+                fileInfo.Create().Close();
             }
         }
 
-        public void CreateInexistantDirectory(string DirectoryPath) {
-            if (!Directory.Exists(DirectoryPath)) { 
+        public static void CreateInexistantDirectory(string DirectoryPath) {
+            if (!Directory.Exists(DirectoryPath)) {
                 Directory.CreateDirectory(DirectoryPath);
             }
         }
 
-        public void CopyFolderTree(DirectoryInfo source, DirectoryInfo target) {
+        public static void CopyFolderTree(DirectoryInfo source, DirectoryInfo target) {
             source.EnumerateFiles("*", SearchOption.AllDirectories)
                 .ToList().ForEach(x => {
                     FileInfo newFile = new(x.FullName.Replace(source.FullName, target.FullName));
                     CreateInexistantDirectory(newFile.DirectoryName);
-                    x.CopyTo(newFile.FullName, true); 
+                    x.CopyTo(newFile.FullName, true);
                 });
         }
 
-        public void CopyFilesMatchingExtension(string source, string target, string extension) {
+        public static void CopyFilesMatchingExtension(string source, string target, string extension) {
             if (!extension.StartsWith('.')) {
                 extension = $".{extension}";
             }
@@ -50,7 +47,7 @@ namespace BedrockService.Shared.Utilities {
                 .ForEach(x => x.CopyTo(Path.Combine(target, x.Name), true));
         }
 
-        public Task DeleteFilesFromDirectory(DirectoryInfo source, bool removeSourceFolder) {
+        public static Task DeleteFilesFromDirectory(DirectoryInfo source, bool removeSourceFolder) {
             return Task.Run(() => {
                 if(!source.Exists) {
                     return;
@@ -68,27 +65,27 @@ namespace BedrockService.Shared.Utilities {
         }
 
 
-        public void AppendServerPacksToArchive(string serverPath, ZipArchive backupZip, DirectoryInfo levelDirInfo) {
+        public static void AppendServerPacksToArchive(string serverPath, ZipArchive backupZip, DirectoryInfo levelDirInfo) {
             string levelName = levelDirInfo.Name;
             CreatePackBackupFiles(serverPath, levelName, backupZip);
-            if (Directory.Exists(levelDirInfo.FullName + "\\resource_packs")) {
+            if (Directory.Exists(GetServerDirectory(BdsDirectoryKeys.ResourcePacksDir, serverPath))) {
                 ClearTempDir().Wait();
-                ZipFile.CreateFromDirectory(levelDirInfo.FullName + "\\resource_packs", $@"{Path.GetTempPath()}\BMSTemp\resource_packs.zip");
+                ZipFile.CreateFromDirectory(string.Format(GetServerDirectory(BdsDirectoryKeys.ResourcePacksDir, serverPath), levelName), $@"{Path.GetTempPath()}\BMSTemp\resource_packs.zip");
                 backupZip.CreateEntryFromFile($@"{Path.GetTempPath()}\BMSTemp\resource_packs.zip", "resource_packs.zip");
             }
-            if (Directory.Exists(levelDirInfo.FullName + "\\behavior_packs")) {
+            if (Directory.Exists(GetServerDirectory(BdsDirectoryKeys.BehaviorPacksDir, serverPath))) {
                 ClearTempDir().Wait();
-                ZipFile.CreateFromDirectory(levelDirInfo.FullName + "\\behavior_packs", $@"{Path.GetTempPath()}\BMSTemp\behavior_packs.zip");
+                ZipFile.CreateFromDirectory(string.Format(GetServerDirectory(BdsDirectoryKeys.BehaviorPacksDir, serverPath), levelName), $@"{Path.GetTempPath()}\BMSTemp\behavior_packs.zip");
                 backupZip.CreateEntryFromFile($@"{Path.GetTempPath()}\BMSTemp\behavior_packs.zip", "behavior_packs.zip");
             }
         }
 
-        public void CreatePackBackupFiles(string serverPath, string levelName, ZipArchive destinationArchive) {
-            string resouceFolderPath = $@"{serverPath}\resource_packs";
-            string behaviorFolderPath = $@"{serverPath}\behavior_packs";
-            string behaviorFilePath = $@"{serverPath}\worlds\{levelName}\world_behavior_packs.json";
-            string resoruceFilePath = $@"{serverPath}\worlds\{levelName}\world_resource_packs.json";
-            MinecraftPackParser packParser = new(_processInfo);
+        public static void CreatePackBackupFiles(string serverPath, string levelName, ZipArchive destinationArchive) {
+            string resouceFolderPath = GetServerDirectory(BdsDirectoryKeys.ResourcePacksDir, serverPath);
+            string behaviorFolderPath = GetServerDirectory(BdsDirectoryKeys.BehaviorPacksDir, serverPath);
+            string behaviorFilePath = GetServerFilePath(BdsFileNameKeys.WorldBehaviorPacks, serverPath);
+            string resoruceFilePath = GetServerFilePath(BdsFileNameKeys.WorldResourcePacks, serverPath);
+            MinecraftPackParser packParser = new();
             packParser.ParseDirectory(resouceFolderPath);
             packParser.ParseDirectory(behaviorFolderPath);
             WorldPackFileModel worldPacks = new(resoruceFilePath);
@@ -109,9 +106,13 @@ namespace BedrockService.Shared.Utilities {
             }
         }
 
+<<<<<<< HEAD
+        public static void DeleteFilesFromDirectory(string source, bool removeSourceFolder) => DeleteFilesFromDirectory(new DirectoryInfo(source), removeSourceFolder);
+=======
         public Task DeleteFilesFromDirectory(string source, bool removeSourceFolder) => DeleteFilesFromDirectory(new DirectoryInfo(source), removeSourceFolder);
+>>>>>>> ee005abfff58424f505083543281ebaa75cbd2f5
 
-        public Task ClearTempDir() {
+        public static Task ClearTempDir() {
             return Task.Run(() => {
                 DirectoryInfo tempDirectory = new($"{Path.GetTempPath()}\\BMSTemp");
                 if (!tempDirectory.Exists)
@@ -120,7 +121,7 @@ namespace BedrockService.Shared.Utilities {
             });
         }
 
-        public void DeleteFilelist(string[] fileList, string serverPath) {
+        public static void DeleteFilelist(string[] fileList, string serverPath) {
             foreach (string file in fileList)
                 try {
                     File.Delete($@"{serverPath}\{file}");
@@ -133,8 +134,65 @@ namespace BedrockService.Shared.Utilities {
                     Directory.Delete(dir, true);
         }
 
-        public void WriteStringToFile(string path, string content) => File.WriteAllText(path, content);
+        public static void WriteStringToFile(string path, string content) => File.WriteAllText(path, content);
 
-        public void WriteStringArrayToFile(string path, string[] content) => File.WriteAllLines(path, content);
+        public static void WriteStringArrayToFile(string path, string[] content) => File.WriteAllLines(path, content);
+
+        private static int RoundOff(int i) {
+            return ((int)Math.Round(i / 10.0)) * 10;
+        }
+
+        public static Task ExtractZipToDirectory(string zipPath, string directory, IProgress<double> progress) => Task.Run(() => {
+            FileInfo fileInfo = new(zipPath);
+            using ZipArchive archive = ZipFile.OpenRead(zipPath);
+            Regex jdkName = new(@"jdk-17\.[0-9]+\.[0-9]+/?(.*)");
+            int fileCount = archive.Entries.Count;
+            for (int i = 0; i < fileCount; i++) {
+                string fixedEntry = archive.Entries[i].FullName;
+                if (fixedEntry.StartsWith("LiteLoaderBDS/")) {
+                    fixedEntry = fixedEntry[14..];
+                }
+                if (jdkName.IsMatch(fixedEntry)) {
+                    Match match = jdkName.Match(fixedEntry);
+                    fixedEntry = match.Groups[1].Value;
+                }
+                if(string.IsNullOrEmpty(fixedEntry)) {
+                    continue;
+                }
+                string fixedPath = $@"{directory}\{fixedEntry.Replace('/', '\\')}";
+                if (i % (RoundOff(fileCount) / 6) == 0) {
+                    progress.Report(Math.Round(i / (double)fileCount, 2) * 100);
+                }
+                if (fixedPath.EndsWith("\\")) {
+                    if (!Directory.Exists(fixedPath)) {
+                        Directory.CreateDirectory(fixedPath);
+                    }
+                } else {
+                    Task.Run(() => {
+                        archive.Entries[i].ExtractToFile(fixedPath, true);
+                    }).Wait();
+                }
+            }
+        });
+
+        public static Task AppendFileToArchive(string targetFile, string entryName, ZipArchive zipArchive) {
+            return Task.Run(() => {
+                if (string.IsNullOrEmpty(targetFile)) {
+                    return;
+                }
+                if(!File.Exists(targetFile)) {
+                    return;
+                }
+                if(zipArchive == null) {
+                    return;
+                }
+                using (FileStream fs = File.Open(targetFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
+                    ZipArchiveEntry newZippedFile = zipArchive.CreateEntry(entryName, CompressionLevel.Optimal);
+                    using Stream zipStream = newZippedFile.Open();
+                    fs.CopyTo(zipStream);
+                    zipStream.Close();
+                }
+            });
+        }
     }
 }

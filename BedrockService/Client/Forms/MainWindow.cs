@@ -1,5 +1,6 @@
 ﻿using BedrockService.Client.Management;
 using BedrockService.Shared.Classes;
+using BedrockService.Shared.Classes.Configurations;
 using BedrockService.Shared.Interfaces;
 using BedrockService.Shared.SerializeModels;
 using Newtonsoft.Json;
@@ -15,25 +16,29 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Client.Forms {
+namespace BedrockService.Client.Forms
+{
     public partial class MainWindow : Form {
         public IServiceConfiguration connectedHost;
         public IServerConfiguration selectedServer;
         public IClientSideServiceConfiguration clientSideServiceConfiguration;
         public ServiceStatusModel ServiceStatus;
         public bool ServerBusy = false;
+        public IServerLogger ClientLogger;
+        public ConfigManager ConfigManager;
         private int _connectTimeout;
         private bool _followTail = false;
         private bool _blockConnect = false;
-        private const int _connectTimeoutLimit = 3;
+        private bool _enableLogUpdating = false;
+        private AddNewServerForm _newServerForm;
         private BackupManagerForm _backupManager;
-        public IBedrockLogger ClientLogger;
+        private const int _connectTimeoutLimit = 3;
         private readonly IProcessInfo _processInfo;
         private readonly System.Timers.Timer _connectTimer = new(100.0);
         private readonly LogManager _logManager;
-        public ConfigManager ConfigManager;
-        public MainWindow(IProcessInfo processInfo, IBedrockLogger logger) {
+        public MainWindow(IProcessInfo processInfo, IServerLogger logger) {
             _processInfo = processInfo;
             ClientLogger = logger;
             ClientLogger.Initialize();
@@ -42,6 +47,12 @@ namespace BedrockService.Client.Forms {
             InitializeComponent();
             InitForm();
             _connectTimer.Elapsed += ConnectTimer_Elapsed;
+            Shown += MainWindow_Shown;
+        }
+
+        private void MainWindow_Shown(object sender, EventArgs e) {
+            _enableLogUpdating = true;
+            _logManager.InitLogThread();
         }
 
         private void ConnectTimer_Elapsed(object sender, ElapsedEventArgs e) {
@@ -146,6 +157,23 @@ namespace BedrockService.Client.Forms {
         public void RefreshServerContents() {
             Invoke((MethodInvoker)delegate {
                 Refresh();
+                HostInfoLabel.Text = $"Connected to host:";
+                if (_logManager.LogTask.Status != TaskStatus.Running) {
+                    _logManager.InitLogThread();
+                }
+                ServerSelectBox.Items.Clear();
+                if (connectedHost != null) {
+                    _logManager.SetConnectedHost(connectedHost);
+                    foreach (IServerConfiguration server in connectedHost.GetServerList()) {
+                        ServerSelectBox.Items.Add(server.GetSettingsProp(ServerPropertyKeys.ServerName).ToString());
+                    }
+
+                    if (ServerSelectBox.Items.Count > 0) {
+                        ServerSelectBox.SelectedIndex = 0;
+                        selectedServer = connectedHost.GetServerInfoByName((string)ServerSelectBox.SelectedItem);
+                        FormManager.TCPClient.SendData(FormManager.MainWindow.connectedHost.GetServerIndex(FormManager.MainWindow.selectedServer), NetworkMessageTypes.ServerStatusRequest);
+                    }
+                }
                 return;
             });
         }
@@ -158,7 +186,7 @@ namespace BedrockService.Client.Forms {
                 _backupManager.RecieveExportData(file.Data);
             }
             if (file.FileType == FileTypeFlags.ServerPackage) {
-                SaveFileDialog saveFileDialog = new SaveFileDialog {
+                SaveFileDialog saveFileDialog = new() {
                     Filter = "Zip file|*.zip",
                     FileName = $"{file.FileType}-{selectedServer.GetServerName()}-{DateTime.Now:yyyyMMdd_hhmmssff}.zip",
                     RestoreDirectory = true,
@@ -169,7 +197,7 @@ namespace BedrockService.Client.Forms {
                 }
             }
             if (file.FileType == FileTypeFlags.ServicePackage) {
-                SaveFileDialog saveFileDialog = new SaveFileDialog {
+                SaveFileDialog saveFileDialog = new() {
                     Filter = "Zip file|*.zip",
                     FileName = $"BMS_{file.FileType}-{DateTime.Now:yyyyMMdd_hhmmssff}.zip",
                     RestoreDirectory = true,
@@ -181,19 +209,9 @@ namespace BedrockService.Client.Forms {
             }
         }
 
-        public override void Refresh() {
-            HostInfoLabel.Text = $"Connected to host:";
-            ServerSelectBox.Items.Clear();
-            if (connectedHost != null) {
-                _logManager.InitLogThread(connectedHost);
-                foreach (ServerConfigurator server in connectedHost.GetServerList()) {
-                    ServerSelectBox.Items.Add(server.GetSettingsProp("ServerName").ToString());
-                }
-
-                if (ServerSelectBox.Items.Count > 0) {
-                    ServerSelectBox.SelectedIndex = 0;
-                    selectedServer = connectedHost.GetServerInfoByName((string)ServerSelectBox.SelectedItem);
-                }
+        public void BackupRollbackCompleted(bool backupPassed) {
+            if(_backupManager != null) {
+                _backupManager.MarkRollbackComplete(backupPassed);
             }
         }
 
@@ -213,13 +231,27 @@ namespace BedrockService.Client.Forms {
             }
         }
 
+        public void ClientLogUpdate() {
+            if(!_enableLogUpdating) { return; }
+            try {
+                Invoke(() => {
+                    UpdateServerLogBox(clientLogBox, ProcessText(FormManager.ClientLogContainer.GetLog()));
+                });
+            } catch (Exception ex) {
+                ClientLogger.AppendLine($"Error! {ex.Message} {ex.StackTrace}");
+            }
+        }
+
+        private string ProcessText(List<LogEntry> targetLog) {
+            if (FormManager.MainWindow.ConfigManager.DisplayTimestamps) {
+                return string.Join("\r\n", targetLog.Select(x => $"[{x.TimeStamp:G}] {x.Text}").ToList());
+            }
+            return string.Join("\r\n", targetLog.Select(x => x.Text).ToList());
+        }
+
         public void HeartbeatFailDisconnect() {
             Disconn_Click(null, null);
             try {
-                if (selectedServer != null && _backupManager != null && _backupManager.Created) {
-                    _backupManager.Close();
-                    _backupManager.Dispose();
-                }
                 HostInfoLabel.Invoke((MethodInvoker)delegate { HostInfoLabel.Text = "Lost connection to host!"; });
                 ServerInfoBox.Invoke((MethodInvoker)delegate { ServerInfoBox.Text = "Lost connection to host!"; });
                 ServerBusy = false;
@@ -231,16 +263,23 @@ namespace BedrockService.Client.Forms {
         }
 
         public void UpdateServerLogBox(TextBox targetBox, string contents) {
-            int curPos = 0;
-            if (contents.Length > 0 && targetBox.TextLength != contents.Length) {
+            int curPos;
+            if (contents.Length > 0) {
                 curPos = GetScrollPosition(targetBox);
-            }
-            targetBox.Text = contents;
-            if (contents.Length > 0 && targetBox.TextLength != contents.Length) {
+                targetBox.Text = contents;
                 SetScrollPosition(targetBox, curPos);
             }
             if (_followTail)
                 ScrollToEnd(targetBox);
+        }
+
+        public void RecievePlayerData(byte serverIndex, List<IPlayer> playerList) {
+            connectedHost.GetServerInfoByIndex(serverIndex).SetPlayerList(playerList);
+
+            PlayerManagerForm form = new(selectedServer);
+            if (form.ShowDialog() != DialogResult.OK) {
+                ServerBusy = false;
+            }
         }
 
         private static void OnExit(object sender, EventArgs e) {
@@ -270,7 +309,7 @@ namespace BedrockService.Client.Forms {
 
         private void ServerSelectBox_SelectedIndexChanged(object sender, EventArgs e) {
             if (connectedHost != null) {
-                foreach (ServerConfigurator server in connectedHost.GetServerList()) {
+                foreach (IServerConfiguration server in connectedHost.GetServerList()) {
                     if (ServerSelectBox.SelectedItem != null && ServerSelectBox.SelectedItem.ToString() == server.GetServerName()) {
                         selectedServer = server;
                         FormManager.TCPClient.SendData(connectedHost.GetServerIndex(server), NetworkMessageTypes.EnumBackups);
@@ -304,20 +343,23 @@ namespace BedrockService.Client.Forms {
                 clientSideServiceConfiguration = ConfigManager.HostConnectList.First(host => host.GetHostName() == HostListBox.Text);
             }
             DisableUI();
-            using (AddNewServerForm newServerForm = new AddNewServerForm(clientSideServiceConfiguration, connectedHost.GetServerList())) {
-                if (newServerForm.ShowDialog() == DialogResult.OK) {
-                    JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-                    byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(newServerForm.ServerCombinedPropModel, Formatting.Indented, settings));
+            FormManager.TCPClient.SendData(NetworkMessageTypes.VersionListRequest);
+        }
+
+        public void VersionListArrived(Dictionary<SharedStringBase.MinecraftServerArch, SimpleVersionModel[]> verLists) {
+            using (_newServerForm = new(clientSideServiceConfiguration, connectedHost.GetServerList(), verLists)) {
+                if (_newServerForm.ShowDialog() == DialogResult.OK) {
+                    byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_newServerForm.SelectedPropModel, Formatting.Indented, GlobalJsonSerialierSettings));
                     FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageTypes.AddNewServer);
-                    newServerForm.Close();
-                    newServerForm.Dispose();
+                    _newServerForm.Close();
+                    _newServerForm.Dispose();
                 }
             }
             ServerBusy = false;
         }
 
         private void RemoveSrvBtn_Click(object sender, EventArgs e) {
-            using (RemoveServerControl form = new RemoveServerControl()) {
+            using (RemoveServerControl form = new()) {
                 if (form.ShowDialog() == DialogResult.OK) {
                     FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.RemoveServer, form.SelectedFlag);
                     form.Close();
@@ -330,36 +372,32 @@ namespace BedrockService.Client.Forms {
         private void PlayerManager_Click(object sender, EventArgs e) {
             FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PlayersRequest);
             DisableUI();
-            WaitForServerData().Wait();
-            FormManager.TCPClient.PlayerInfoArrived = false;
-            PlayerManagerForm form = new PlayerManagerForm(selectedServer);
-            if (form.ShowDialog() != DialogResult.OK) {
-                ServerBusy = false;
-            }
         }
 
         private void Disconn_Click(object sender, EventArgs e) {
             _connectTimer.Stop();
-            if (_logManager.StopLogThread()) {
-                try {
-                    if (FormManager.TCPClient.Connected) {
-                        FormManager.TCPClient.SendData(NetworkMessageTypes.Disconnect);
-                        Thread.Sleep(500);
-                        FormManager.TCPClient.CloseConnection();
-                    }
-                    selectedServer = null;
-                    connectedHost = null;
-                    LogBox.Invoke((MethodInvoker)delegate { LogBox.Text = ""; });
-                    FormManager.MainWindow.Invoke((MethodInvoker)delegate {
-                        RefreshAllCompenentStates();
-                        ServerSelectBox.Items.Clear();
-                        ServerSelectBox.SelectedIndex = -1;
-                        ServerInfoBox.Text = "";
-                        HostInfoLabel.Text = $"Select a host below:";
-                    });
-                } catch (Exception) { }
-
-            }
+            try {
+                if (selectedServer != null && _backupManager != null) {
+                    _backupManager.Close();
+                    _backupManager.Dispose();
+                }
+                if (FormManager.TCPClient.Connected) {
+                    FormManager.TCPClient.SendData(NetworkMessageTypes.Disconnect);
+                    Thread.Sleep(500);
+                    FormManager.TCPClient.CloseConnection();
+                }
+                selectedServer = null;
+                connectedHost = null;
+                _logManager.SetConnectedHost(null);
+                LogBox.Invoke((MethodInvoker)delegate { LogBox.Text = ""; });
+                FormManager.MainWindow.Invoke((MethodInvoker)delegate {
+                    RefreshAllCompenentStates();
+                    ServerSelectBox.Items.Clear();
+                    ServerSelectBox.SelectedIndex = -1;
+                    ServerInfoBox.Text = "";
+                    HostInfoLabel.Text = $"Select a host below:";
+                });
+            } catch (Exception) { }
         }
 
         private void SendCmd_Click(object sender, EventArgs e) {
@@ -379,7 +417,7 @@ namespace BedrockService.Client.Forms {
         }
 
         public int GetScrollPosition(TextBox targetBox) {
-            ScrollInfo si = new ScrollInfo();
+            ScrollInfo si = new();
             si.Size = (uint)Marshal.SizeOf(si);
             si.Mask = (uint)ScrollInfoMask.All;
             GetScrollInfo(targetBox.Handle, (int)ScrollBarDirection.Vertical, ref si);
@@ -387,7 +425,7 @@ namespace BedrockService.Client.Forms {
         }
 
         public void SetScrollPosition(TextBox targetBox, int pos) {
-            ScrollInfo si = new ScrollInfo();
+            ScrollInfo si = new();
             si.Size = (uint)Marshal.SizeOf(si);
             si.Mask = (uint)ScrollInfoMask.All;
             GetScrollInfo(targetBox.Handle, (int)ScrollBarDirection.Vertical, ref si);
@@ -398,13 +436,11 @@ namespace BedrockService.Client.Forms {
 
         public void ScrollToEnd(TextBox targetBox) {
 
-            // Get the current scroll info.
-            ScrollInfo si = new ScrollInfo();
+            ScrollInfo si = new();
             si.Size = (uint)Marshal.SizeOf(si);
             si.Mask = (uint)ScrollInfoMask.All;
             GetScrollInfo(targetBox.Handle, (int)ScrollBarDirection.Vertical, ref si);
 
-            // Set the scroll position to maximum.
             si.Pos = si.Max - (int)si.Page;
             if (si.Pos > 0) {
                 SetScrollInfo(targetBox.Handle, (int)ScrollBarDirection.Vertical, ref si, true);
@@ -478,6 +514,16 @@ namespace BedrockService.Client.Forms {
             }
         }
 
+        public void RecievePackData(byte serverIndex, List<Shared.PackParser.MinecraftPackContainer> incomingPacks) {
+            Invoke((MethodInvoker)delegate {
+                using (ManagePacksForms form = new(serverIndex, ClientLogger, _processInfo)) {
+                    form.PopulateServerData(incomingPacks);
+                    form.ShowDialog();
+                    ServerBusy = false;
+                }
+            });
+        }
+
         private void scrollLockChkBox_CheckedChanged(object sender, EventArgs e) => _followTail = scrollLockChkBox.Checked;
 
         private void cmdTextBox_KeyPress(object sender, KeyPressEventArgs e) {
@@ -506,17 +552,11 @@ namespace BedrockService.Client.Forms {
         private void ManPacks_Click(object sender, EventArgs e) {
             FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PackList);
             DisableUI();
-            WaitForServerData().Wait();
-            using (ManagePacksForms form = new ManagePacksForms(connectedHost.GetServerIndex(selectedServer), ClientLogger, _processInfo)) {
-                form.PopulateServerPacks(FormManager.TCPClient.RecievedPacks);
-                form.ShowDialog();
-                ServerBusy = false;
-            }
         }
 
         private void nbtStudioBtn_Click(object sender, EventArgs e) {
             if (string.IsNullOrEmpty(ConfigManager.NBTStudioPath))
-                using (OpenFileDialog openFile = new OpenFileDialog()) {
+                using (OpenFileDialog openFile = new()) {
                     openFile.FileName = "NBTStudio.exe";
                     openFile.Title = "Please locate NBT Studio executable...";
                     openFile.Filter = "NBTStudio.exe|NBTStudio.exe";
@@ -528,7 +568,7 @@ namespace BedrockService.Client.Forms {
             ServerBusy = true;
             FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.LevelEditRequest);
             DisableUI();
-            using (Process nbtStudioProcess = new Process()) {
+            using (Process nbtStudioProcess = new()) {
                 string tempPath = $@"{Path.GetTempPath()}level.dat";
                 nbtStudioProcess.StartInfo = new ProcessStartInfo(ConfigManager.NBTStudioPath, tempPath);
                 nbtStudioProcess.Start();
@@ -549,7 +589,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void clientConfigBtn_Click(object sender, EventArgs e) {
-            using (ClientConfigForm form = new ClientConfigForm(ConfigManager)) {
+            using (ClientConfigForm form = new(ConfigManager)) {
                 if (form.ShowDialog() == DialogResult.OK) {
                     form.Close();
                     InitForm();
@@ -572,14 +612,11 @@ namespace BedrockService.Client.Forms {
         }
 
         private bool IsPrimaryServer() {
-            return selectedServer.GetProp("server-port").StringValue == "19132" ||
-            selectedServer.GetProp("server-port").StringValue == "19133" ||
-            selectedServer.GetProp("server-portv6").StringValue == "19132" ||
-            selectedServer.GetProp("server-portv6").StringValue == "19133";
+            return selectedServer.IsPrimaryServer();
         }
 
         private void serverPropMenuItem_Click(object sender, EventArgs e) {
-            using (PropEditorForm _editDialog = new PropEditorForm()) {
+            using (PropEditorForm _editDialog = new()) {
                 _editDialog.PopulateBoxes(selectedServer.GetAllProps());
                 if (_editDialog.ShowDialog() == DialogResult.OK) {
                     JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
@@ -592,7 +629,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void startCmdMenuItem_Click(object sender, EventArgs e) {
-            PropEditorForm editSrvDialog = new PropEditorForm();
+            PropEditorForm editSrvDialog = new();
             editSrvDialog.PopulateStartCmds(selectedServer.GetStartCommands());
             if (editSrvDialog.ShowDialog() == DialogResult.OK) {
                 JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
@@ -606,11 +643,10 @@ namespace BedrockService.Client.Forms {
         }
 
         private void servicePropMenuItem_Click(object sender, EventArgs e) {
-            using (PropEditorForm _editDialog = new PropEditorForm()) {
-                List<string> serviceConfigExcludeList = new List<string>() { "ServerName", "ServerExeName", "FileName", "ServerPath", "DeployedVersion" };
-                List<Property> filteredProps = selectedServer.GetSettingsList()
-                            .Where(x => !serviceConfigExcludeList.Contains(x.KeyName))
-                            .ToList();
+            using (PropEditorForm _editDialog = new()) {
+                List<string> serviceConfigExcludeList = new() { "ServerName", "ServerExeName", "FileName", "ServerPath", "DeployedVersion" };
+                List<Property> filteredProps = new List<Property>(selectedServer.GetSettingsList()
+                            .Where(x => !serviceConfigExcludeList.Contains(x.KeyName)));
                 _editDialog.PopulateBoxes(filteredProps);
                 if (_editDialog.ShowDialog() == DialogResult.OK) {
                     JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
@@ -623,7 +659,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private void editCoreServicePropertiesToolStripMenuItem_Click(object sender, EventArgs e) {
-            using (PropEditorForm _editDialog = new PropEditorForm()) {
+            using (PropEditorForm _editDialog = new()) {
                 _editDialog.PopulateBoxes(connectedHost.GetAllProps());
                 if (_editDialog.ShowDialog() == DialogResult.OK) {
                     JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
@@ -685,7 +721,7 @@ namespace BedrockService.Client.Forms {
         private void serverPackageFileToolStripMenuItem_Click(object sender, EventArgs e) {
             byte[] fileBytes = OpenPackageFile();
             if (fileBytes != null) {
-                ExportImportFileModel fileModel = new ExportImportFileModel {
+                ExportImportFileModel fileModel = new() {
                     Data = fileBytes,
                     FileType = FileTypeFlags.ServerPackage
                 };
@@ -699,7 +735,7 @@ namespace BedrockService.Client.Forms {
         }
 
         private byte[] OpenPackageFile() {
-            OpenFileDialog ofd = new OpenFileDialog {
+            OpenFileDialog ofd = new() {
                 Filter = "Zip file|*.zip",
                 Multiselect = false,
                 RestoreDirectory = true,

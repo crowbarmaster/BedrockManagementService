@@ -454,7 +454,7 @@
             this.importToolStripMenuItem,
             this.exportToolStripMenuItem});
             this.serverConfigBtnMenu.Name = "serverConfigBtnMenu";
-            this.serverConfigBtnMenu.Size = new System.Drawing.Size(223, 158);
+            this.serverConfigBtnMenu.Size = new System.Drawing.Size(223, 136);
             // 
             // serverPropMenuItem
             // 
@@ -496,14 +496,14 @@
             // serverPackageFileToolStripMenuItem
             // 
             this.serverPackageFileToolStripMenuItem.Name = "serverPackageFileToolStripMenuItem";
-            this.serverPackageFileToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.serverPackageFileToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
             this.serverPackageFileToolStripMenuItem.Text = "Server package file";
             this.serverPackageFileToolStripMenuItem.Click += new System.EventHandler(this.serverPackageFileToolStripMenuItem_Click);
             // 
             // serviceConfigFileToolStripMenuItem
             // 
             this.serviceConfigFileToolStripMenuItem.Name = "serviceConfigFileToolStripMenuItem";
-            this.serviceConfigFileToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.serviceConfigFileToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
             this.serviceConfigFileToolStripMenuItem.Text = "Service config file";
             this.serviceConfigFileToolStripMenuItem.Click += new System.EventHandler(this.serviceConfigFileToolStripMenuItem_Click);
             // 
@@ -612,7 +612,7 @@
         #endregion
 
         private System.Windows.Forms.Button Connect;
-        private System.Windows.Forms.Label HostInfoLabel;
+        public System.Windows.Forms.Label HostInfoLabel;
         public System.Windows.Forms.ComboBox HostListBox;
         private System.Windows.Forms.ListBox ServerSelectBox;
         private System.Windows.Forms.Button Disconn;

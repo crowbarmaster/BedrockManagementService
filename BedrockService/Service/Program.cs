@@ -21,7 +21,7 @@ global using System.Reflection;
 global using System.Threading;
 global using System.Threading.Tasks;
 global using Topshelf;
-using BedrockService.Service.Management.Interfaces;
+
 using BedrockService.Service.Networking.Interfaces;
 
 namespace BedrockService.Service {
@@ -32,7 +32,7 @@ namespace BedrockService.Service {
         private static bool _shouldStartService = true;
         public static void Main(string[] args) {
             if (args.Length > 0) {
-                _isDebugEnabled = args[0].ToLower() == "-debug";
+                _isDebugEnabled = args[0].ToLower() == "--debug";
             }
             CreateHostBuilder(args).Build().Run();
         }
@@ -41,15 +41,16 @@ namespace BedrockService.Service {
             Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hostContext, services) => {
                     IProcessInfo processInfo = new ServiceProcessInfo(_declaredType, Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), Process.GetCurrentProcess().Id, _isDebugEnabled, _shouldStartService);
-                    services.AddHostedService<Core.Service>()
+                    SharedStringBase.SetWorkingDirectory(processInfo);
+                    services.AddHostedService<Core.WindowsService>()
                         .AddSingleton(processInfo)
                         .AddTransient<NetworkStrategyLookup>()
                         .AddTransient<FileUtilities>()
-                        .AddSingleton<IBedrockLogger, BedrockLogger>()
+                        .AddSingleton<IServerLogger, MinecraftServerLogger>()
                         .AddSingleton<ServiceConfigurator>()
                         .AddSingleton<IServiceConfiguration>(x => x.GetRequiredService<ServiceConfigurator>())
                         .AddSingleton<IBedrockConfiguration>(x => x.GetRequiredService<ServiceConfigurator>())
-                        .AddSingleton<IBedrockService, Core.BedrockService>()
+                        .AddSingleton<IBedrockService, Core.BmsService>()
                         .AddSingleton<ITCPListener, TCPListener>()
                         .AddSingleton<IConfigurator, ConfigManager>();
                 });

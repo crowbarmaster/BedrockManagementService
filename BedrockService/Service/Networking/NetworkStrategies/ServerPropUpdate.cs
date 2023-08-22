@@ -1,16 +1,16 @@
-﻿using BedrockService.Service.Management.Interfaces;
+﻿
 using BedrockService.Service.Networking.Interfaces;
 using Newtonsoft.Json;
 using System.Text;
 
 namespace BedrockService.Service.Networking.NetworkStrategies {
     public class ServerPropUpdate : IMessageParser {
-        private readonly IBedrockLogger _logger;
+        private readonly IServerLogger _logger;
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IBedrockService _bedrockService;
         private readonly IConfigurator _configurator;
 
-        public ServerPropUpdate(IBedrockLogger logger, IConfigurator configurator, IServiceConfiguration serviceConfiguration, IBedrockService bedrockService) {
+        public ServerPropUpdate(IServerLogger logger, IConfigurator configurator, IServiceConfiguration serviceConfiguration, IBedrockService bedrockService) {
             _logger = logger;
             _configurator = configurator;
             _serviceConfiguration = serviceConfiguration;
@@ -18,9 +18,8 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
         }
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
-            JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
             string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
-            List<Property> propList = JsonConvert.DeserializeObject<List<Property>>(stringData, settings);
+            List<Property> propList = JsonConvert.DeserializeObject<List<Property>>(stringData, SharedStringBase.GlobalJsonSerialierSettings);
             Property prop = propList.FirstOrDefault(p => p.KeyName == "AcceptedMojangLic");
             if (prop != null) {
                 _serviceConfiguration.SetAllProps(propList);

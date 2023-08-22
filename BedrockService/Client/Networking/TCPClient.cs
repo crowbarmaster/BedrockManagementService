@@ -1,5 +1,4 @@
-﻿using BedrockService.Client.Forms;
-using BedrockService.Client.Management;
+﻿using BedrockService.Client.Management;
 using BedrockService.Shared.Classes;
 using BedrockService.Shared.Interfaces;
 using BedrockService.Shared.PackParser;
@@ -13,6 +12,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace BedrockService.Client.Networking {
     public class TCPClient {
@@ -30,9 +30,9 @@ namespace BedrockService.Client.Networking {
         private CancellationTokenSource? _netCancelSource;
         private int _heartbeatFailTimeout;
         private const int _heartbeatFailTimeoutLimit = 2;
-        private readonly IBedrockLogger _logger;
+        private readonly IServerLogger _logger;
 
-        public TCPClient(IBedrockLogger logger) {
+        public TCPClient(IServerLogger logger) {
             _logger = logger;
         }
 
@@ -52,8 +52,8 @@ namespace BedrockService.Client.Networking {
                 stream = OpenedTcpClient.GetStream();
                 EstablishedLink = true;
                 ClientReciever = Task.Factory.StartNew(new Action(ReceiveListener), _netCancelSource.Token);
-            } catch {
-                _logger.AppendLine("Could not connect to Server");
+            } catch(Exception e) {
+                _logger.AppendLine($"Could not connect to Server: {e.Message}");
                 if (ClientReciever != null)
                     _netCancelSource.Cancel();
                 ClientReciever = null;
@@ -81,6 +81,10 @@ namespace BedrockService.Client.Networking {
         public void ReceiveListener() {
             while (!_netCancelSource.IsCancellationRequested) {
                 SendData(NetworkMessageTypes.Heartbeat);
+                NetworkMessageSource source = 0;
+                NetworkMessageDestination destination = 0;
+                byte serverIndex = 0;
+                NetworkMessageTypes msgType = 0;
                 try {
                     byte[] buffer = new byte[4];
                     while (OpenedTcpClient.Client.Available > 0) {
@@ -88,14 +92,18 @@ namespace BedrockService.Client.Networking {
                         int expectedLen = BitConverter.ToInt32(buffer, 0);
                         buffer = new byte[expectedLen];
                         byteCount = stream.Read(buffer, 0, expectedLen);
-                        NetworkMessageSource source = (NetworkMessageSource)buffer[0];
-                        NetworkMessageDestination destination = (NetworkMessageDestination)buffer[1];
-                        byte serverIndex = buffer[2];
-                        NetworkMessageTypes msgType = (NetworkMessageTypes)buffer[3];
+                        source = (NetworkMessageSource)buffer[0];
+                        destination = (NetworkMessageDestination)buffer[1];
+                        serverIndex = buffer[2];
+                        msgType = (NetworkMessageTypes)buffer[3];
                         NetworkMessageFlags msgStatus = (NetworkMessageFlags)buffer[4];
                         string data = "";
                         if (msgType != NetworkMessageTypes.PackFile || msgType != NetworkMessageTypes.LevelEditFile)
                             data = GetOffsetString(buffer);
+                        if (FormManager.MainWindow.ConfigManager.DebugNetworkOutput) {
+                            _logger.AppendLine($@"Network msg: {source} * {destination} * {msgType} * {msgStatus} * {serverIndex}");
+                            _logger.AppendLine($@"Data: {data}");
+                        }
                         if (destination != NetworkMessageDestination.Client)
                             continue;
                         int srvCurLen = 0;
@@ -112,6 +120,8 @@ namespace BedrockService.Client.Networking {
                                     }
                                 } catch (Exception e) {
                                     _logger.AppendLine($"Error: ConnectMan reported error: {e.Message}\n{e.StackTrace}");
+                                    CloseConnection();
+                                    _netCancelSource.Cancel();
                                 }
                                 break;
 
@@ -122,14 +132,22 @@ namespace BedrockService.Client.Networking {
 
                                 break;
                             case NetworkMessageTypes.CheckUpdates:
-
-                                //TODO: Ask user if update now or perform later.
-                                UnlockUI();
-
-                                break;
                             case NetworkMessageTypes.UICallback:
 
                                 UnlockUI();
+
+                                break;
+                            case NetworkMessageTypes.BackupCallback:
+
+                                bool rollbackPassed = buffer[5] == 1;
+                                FormManager.MainWindow.BackupRollbackCompleted(rollbackPassed);
+                                UnlockUI();
+
+                                break;
+                            case NetworkMessageTypes.VersionListRequest:
+
+                                Dictionary<SharedStringBase.MinecraftServerArch, SimpleVersionModel[]> versionLists = JsonConvert.DeserializeObject<Dictionary<SharedStringBase.MinecraftServerArch, SimpleVersionModel[]>>(data, SharedStringBase.GlobalJsonSerialierSettings);
+                                FormManager.MainWindow.VersionListArrived(versionLists);
 
                                 break;
                             case NetworkMessageTypes.ConsoleLogUpdate:
@@ -160,19 +178,17 @@ namespace BedrockService.Client.Networking {
                                 break;
                             case NetworkMessageTypes.PackList:
 
-                                List<MinecraftPackContainer> temp = new List<MinecraftPackContainer>();
+                                List<MinecraftPackContainer> temp = new();
                                 JArray jArray = JArray.Parse(data);
                                 foreach (JToken token in jArray)
                                     temp.Add(token.ToObject<MinecraftPackContainer>());
-                                RecievedPacks = temp;
+                                FormManager.MainWindow.RecievePackData(serverIndex, temp);
 
                                 break;
                             case NetworkMessageTypes.PlayersRequest:
 
                                 List<IPlayer> fetchedPlayers = JsonConvert.DeserializeObject<List<IPlayer>>(data, settings);
-                                FormManager.MainWindow.connectedHost.GetServerInfoByIndex(serverIndex).SetPlayerList(fetchedPlayers);
-                                Task.Delay(500).Wait();
-                                PlayerInfoArrived = true;
+                                FormManager.MainWindow.RecievePlayerData(serverIndex, fetchedPlayers);
 
                                 break;
                             case NetworkMessageTypes.LevelEditFile:
@@ -187,9 +203,9 @@ namespace BedrockService.Client.Networking {
                             case NetworkMessageTypes.ServerStatusRequest:
 
                                 StatusUpdateModel status = JsonConvert.DeserializeObject<StatusUpdateModel>(data, settings);
-                                if(status != null && status.ServerStatusModel != null && status.ServerStatusModel.ServerIndex != 255) {
+                                if (status != null && status.ServerStatusModel != null && status.ServerStatusModel.ServerIndex != 255) {
                                     ServerStatusModel formerServerStatus = FormManager.MainWindow.selectedServer.GetStatus();
-                                    if(!status.ServerStatusModel.Equals(formerServerStatus)) {
+                                    if (!status.ServerStatusModel.Equals(formerServerStatus)) {
                                         FormManager.MainWindow.connectedHost.GetServerInfoByIndex(status.ServerStatusModel.ServerIndex).SetStatus(status.ServerStatusModel);
                                         FormManager.MainWindow.Invoke(() => FormManager.MainWindow.RefreshAllCompenentStates());
                                         FormManager.TCPClient.SendData(serverIndex, NetworkMessageTypes.EnumBackups);
@@ -199,18 +215,23 @@ namespace BedrockService.Client.Networking {
                                 }
 
                                 break;
+                            case NetworkMessageTypes.ClientReject:
+                                
+                                FormManager.MainWindow.Invoke((MethodInvoker)delegate { FormManager.MainWindow.ServerInfoBox.Text = "Connection attempt rejected by Service!"; });
+                                FormManager.MainWindow.Invoke((MethodInvoker)delegate { FormManager.MainWindow.HostInfoLabel.Text = "Connection attempt rejected by Service!"; });
+
+                                break;
                             case NetworkMessageTypes.ExportFile:
 
-                                ExportImportFileModel exportModel =  JsonConvert.DeserializeObject<ExportImportFileModel>(data, settings);
+                                ExportImportFileModel exportModel = JsonConvert.DeserializeObject<ExportImportFileModel>(data, settings);
                                 if (exportModel != null) {
                                     FormManager.MainWindow.Invoke(() => FormManager.MainWindow.RecieveExportData(exportModel));
                                 }
-
                                 break;
                         }
                     }
                 } catch (Exception e) {
-                    _logger.AppendLine($"TCPClient error! Stacktrace: {e.Message}\n{e.StackTrace}");
+                    _logger.AppendLine($"TCPClient error! MsgSource: {source} ServerIndex: {serverIndex} MsgType: {msgType} Stacktrace: {e.Message}\n{e.StackTrace}");
                 }
                 Thread.Sleep(200);
             }

@@ -1,28 +1,35 @@
 ﻿using BedrockService.Service.Networking.Interfaces;
-using BedrockService.Shared.MinecraftJsonModels.JsonModels;
+using BedrockService.Shared.JsonModels.MinecraftJsonModels;
 using BedrockService.Shared.PackParser;
 using Newtonsoft.Json;
 using System.Text;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Service.Networking.NetworkStrategies {
     public class PackList : IMessageParser {
 
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IProcessInfo _processInfo;
-        private readonly IBedrockLogger _logger;
+        private readonly IServerLogger _logger;
 
-        public PackList(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, IBedrockLogger logger) {
+        public PackList(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, IServerLogger logger) {
             _logger = logger;
             _serviceConfiguration = serviceConfiguration;
             _processInfo = processInfo;
         }
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
-            MinecraftKnownPacksClass knownPacks = new MinecraftKnownPacksClass($@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp("ServerPath")}\valid_known_packs.json", $@"{_processInfo.GetDirectory()}\BmsConfig\BDSBuilds\CoreFiles\Build_{_serviceConfiguration.GetLatestBDSVersion()}\stock_packs.json");
-            List<MinecraftPackContainer> list = new List<MinecraftPackContainer>();
+            string knownPackFileLocation = $@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp(ServerPropertyKeys.ServerPath)}\valid_known_packs.json";
+            string pathToWorldFolder = $@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp(ServerPropertyKeys.ServerPath)}\worlds\{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp(BmsDependServerPropKeys.LevelName)}";
+            MinecraftKnownPacksClass knownPacks = new(knownPackFileLocation, pathToWorldFolder);
+            List<MinecraftPackContainer> list = new();
             foreach (KnownPacksJsonModel pack in knownPacks.InstalledPacks.Contents) {
-                MinecraftPackParser currentParser = new MinecraftPackParser(_processInfo);
-                currentParser.ParseDirectory($@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp("ServerPath")}\{pack.path.Replace(@"/", @"\")}");
+                MinecraftPackParser currentParser = new();
+                if (_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetServerArch() == MinecraftServerArch.LiteLoader) {
+                    pack.path = pack.path.Insert(0, "development_");
+                }
+                string packDir = $@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp(ServerPropertyKeys.ServerPath)}\{pack.path.Replace(@"/", @"\")}";
+                currentParser.ParseDirectory(packDir);
                 list.AddRange(currentParser.FoundPacks);
             }
             string arrayString = JsonConvert.SerializeObject(list);

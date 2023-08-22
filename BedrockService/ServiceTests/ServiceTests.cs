@@ -1,6 +1,6 @@
 using BedrockService.Service;
-using BedrockService.Service.Core;
 using BedrockService.Service.Core.Interfaces;
+using BedrockService.Shared.SerializeModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;

@@ -1,19 +1,21 @@
-﻿using BedrockService.Service.Management.Interfaces;
-using BedrockService.Service.Networking.Interfaces;
+﻿using BedrockService.Service.Networking.Interfaces;
+using BedrockService.Shared.Classes.Configurations;
 using BedrockService.Shared.SerializeModels;
 using Newtonsoft.Json;
 using System.Text;
+using static BedrockService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Service.Networking.NetworkStrategies {
+namespace BedrockService.Service.Networking.NetworkStrategies
+{
     public class AddNewServer : IMessageParser {
         private readonly IProcessInfo _processInfo;
 
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IConfigurator _configurator;
         private readonly IBedrockService _bedrockService;
-        private readonly IBedrockLogger _logger;
+        private readonly IServerLogger _logger;
 
-        public AddNewServer(IBedrockLogger logger, IProcessInfo processInfo, IConfigurator configurator, IServiceConfiguration serviceConfiguration, IBedrockService bedrockService) {
+        public AddNewServer(IServerLogger logger, IProcessInfo processInfo, IConfigurator configurator, IServiceConfiguration serviceConfiguration, IBedrockService bedrockService) {
             _processInfo = processInfo;
             _bedrockService = bedrockService;
             _configurator = configurator;
@@ -23,36 +25,33 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
             string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
-            JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-            ServerCombinedPropModel propModel = JsonConvert.DeserializeObject<ServerCombinedPropModel>(stringData, settings);
-            string serversPath = _serviceConfiguration.GetProp("ServersPath").ToString();
+            ServerCombinedPropModel propModel = JsonConvert.DeserializeObject<ServerCombinedPropModel>(stringData, GlobalJsonSerialierSettings);
+            string serversPath = _serviceConfiguration.GetProp(ServicePropertyKeys.ServersPath).ToString();
             List<Property>? propList = propModel?.ServerPropList;
             List<Property>? servicePropList = propModel?.ServicePropList;
-            Property? serverNameProp = propList?.First(p => p.KeyName == "server-name");
-            Property? ipV4Prop = propList?.First(p => p.KeyName == "server-port");
-            Property? ipV6Prop = propList?.First(p => p.KeyName == "server-portv6");
-            Property? versionProp = servicePropList?.First(p => p.KeyName == "DeployedVersion");
-            ServerConfigurator newServer = new ServerConfigurator(_processInfo, _logger, _serviceConfiguration);
-            newServer.ServicePropList = servicePropList;
-            if (_serviceConfiguration.GetLatestBDSVersion() == versionProp?.StringValue) {
-                newServer.ServerPropList = propList;
+            Property? serverNameProp = new(string.Empty, string.Empty);
+            Property? ipV6Prop = new(string.Empty, string.Empty);
+            Property? archProp = servicePropList?.First(x => x.KeyName == ServerPropertyStrings[ServerPropertyKeys.MinecraftType]);
+            if(archProp.StringValue == "Java") { 
+                serverNameProp = servicePropList?.First(p => p.KeyName == ServerPropertyStrings[ServerPropertyKeys.ServerName]);
             } else {
-                newServer.SetServerVersion(versionProp?.StringValue);
-                newServer.ValidateVersion(versionProp?.StringValue);
-                newServer.GetSettingsProp("DeployedVersion").SetValue(versionProp?.StringValue);
-                newServer.SetProp("server-name", serverNameProp?.StringValue);
-                newServer.SetProp("server-port", ipV4Prop?.StringValue);
-                newServer.SetProp("server-portv6", ipV6Prop?.StringValue);
+                serverNameProp = propList?.First(p => p.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.ServerName]);
             }
-            newServer.GetSettingsProp("ServerName").SetValue(serverNameProp.StringValue);
-            newServer.GetSettingsProp("ServerPath").SetValue($@"{serversPath}\{serverNameProp.StringValue}");
-            newServer.GetSettingsProp("ServerExeName").SetValue($"BedrockService.{serverNameProp.StringValue}.exe");
-            newServer.GetSettingsProp("FileName").SetValue($@"{serverNameProp.StringValue}.conf");
-            newServer.SetServerVersion(versionProp?.StringValue);
+            Property? ipV4Prop = propList?.First(p => p.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.PortI4]);
+            if(archProp.StringValue != "Java") {
+                ipV6Prop = propList?.First(p => p.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.PortI6]);
+            }
+            Property? versionProp = servicePropList?.First(p => p.KeyName == ServerPropertyStrings[ServerPropertyKeys.ServerVersion]);
+            EnumTypeLookup typeLookup = new(_logger, _serviceConfiguration);
+            IServerConfiguration newServer = typeLookup.PrepareNewServerByArchName(archProp.StringValue, _processInfo, _logger, _serviceConfiguration);
+            newServer.InitializeDefaults();
+            newServer.SetAllSettings(servicePropList);
+            newServer.SetAllProps(propList);
+            newServer.ProcessNewServerConfiguration();
             _configurator.SaveServerConfiguration(newServer);
             _bedrockService.InitializeNewServer(newServer);
 
-            byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_serviceConfiguration, Formatting.Indented, settings));
+            byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_serviceConfiguration, Formatting.Indented, GlobalJsonSerialierSettings));
             return (serializeToBytes, 0, NetworkMessageTypes.Connect);
         }
     }

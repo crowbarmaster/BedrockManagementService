@@ -1,5 +1,5 @@
-using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.MinecraftJsonModels.JsonModels;
+using BedrockService.Shared.Classes;
+using BedrockService.Shared.JsonModels.MinecraftJsonModels;
 using BedrockService.Shared.Utilities;
 using Newtonsoft.Json;
 using System.Collections.Generic;
@@ -8,19 +8,16 @@ using System.IO.Compression;
 
 namespace BedrockService.Shared.PackParser {
     public class MinecraftPackParser {
-        private readonly IProcessInfo _processInfo;
         public string PackExtractDirectory;
-        public List<MinecraftPackContainer> FoundPacks = new List<MinecraftPackContainer>();
+        public List<MinecraftPackContainer> FoundPacks = new();
 
         [JsonConstructor]
-        public MinecraftPackParser(IProcessInfo processInfo) {
-            _processInfo = processInfo;
+        public MinecraftPackParser() {
         }
 
-        public MinecraftPackParser(byte[] fileContents, IProcessInfo processInfo) {
-            PackExtractDirectory = $@"{processInfo.GetDirectory()}\Temp";
-            _processInfo = processInfo;
-            new FileUtilities(processInfo).ClearTempDir().Wait();
+        public MinecraftPackParser(byte[] fileContents) {
+            PackExtractDirectory = $"{Path.GetTempPath()}\\BMSTemp";
+            FileUtilities.ClearTempDir().Wait();
             using (MemoryStream fileStream = new(fileContents, 5, fileContents.Length - 5)) {
                 using ZipArchive zipArchive = new(fileStream, ZipArchiveMode.Read);
                 zipArchive.ExtractToDirectory(PackExtractDirectory);
@@ -28,15 +25,14 @@ namespace BedrockService.Shared.PackParser {
             ParseDirectory(PackExtractDirectory);
         }
 
-        public MinecraftPackParser(string[] files, string extractDir, IProcessInfo processInfo) {
+        public MinecraftPackParser(string[] files, string extractDir) {
             PackExtractDirectory = extractDir;
-            _processInfo = processInfo;
-            new FileUtilities(_processInfo).ClearTempDir().Wait();
+            FileUtilities.ClearTempDir().Wait();
             if (Directory.Exists($@"{PackExtractDirectory}\ZipTemp")) {
                 Directory.CreateDirectory($@"{PackExtractDirectory}\ZipTemp");
             }
             foreach (string file in files) {
-                FileInfo fInfo = new FileInfo(file);
+                FileInfo fInfo = new(file);
                 string zipFilePath = $@"{PackExtractDirectory}\{fInfo.Name.Replace(fInfo.Extension, "")}";
                 ZipFile.ExtractToDirectory(file, zipFilePath);
                 foreach (FileInfo extractedFile in new DirectoryInfo(zipFilePath).GetFiles()) {
@@ -89,8 +85,8 @@ namespace BedrockService.Shared.PackParser {
                             FolderName = file.Directory.Name,
                             IconBytes = iconBytes
                         };
-                        JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-                        container.JsonManifest = JsonConvert.DeserializeObject<PackManifestJsonModel>(File.ReadAllText(file.FullName), settings);
+                        container.JsonManifest = System.Text.Json.JsonSerializer.Deserialize<PackManifestJsonModel>(File.ReadAllText(file.FullName));
+                        container.JsonManifest = JsonConvert.DeserializeObject<PackManifestJsonModel>(File.ReadAllText(file.FullName), SharedStringBase.GlobalJsonSerialierSettings);
                         container.ManifestType = container.JsonManifest.modules[0].type;
                         FoundPacks.Add(container);
                     }

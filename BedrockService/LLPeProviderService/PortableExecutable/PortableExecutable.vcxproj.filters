@@ -1,0 +1,261 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="entropy.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="file_version_info.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="message_table.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_base.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_bound_import.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_checksum.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_debug.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_directory.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_dotnet.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_exception.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_exception_directory.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_exports.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_factory.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_imports.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_load_config.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_properties.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_properties_generic.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_rebuilder.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_relocations.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_resource_manager.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_resource_viewer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_resources.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_rich_data.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_section.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_tls.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="resource_bitmap_reader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="resource_bitmap_writer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="resource_cursor_icon_reader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="resource_cursor_icon_writer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="resource_data_info.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="resource_message_list_reader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="resource_string_table_reader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="resource_version_info_reader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="resource_version_info_writer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="utils.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="version_info_editor.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="version_info_viewer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="entropy.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="file_version_info.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="message_table.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_base.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_bliss.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_bliss_resources.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_bound_import.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_checksum.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_debug.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_directory.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_dotnet.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_exception.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_exception_directory.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_exports.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_factory.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_imports.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_load_config.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_properties.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_properties_generic.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_rebuilder.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_relocations.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_resource_manager.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_resource_viewer.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_resources.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_rich_data.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_section.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_structures.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_tls.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="resource_bitmap_reader.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="resource_bitmap_writer.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="resource_cursor_icon_reader.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="resource_cursor_icon_writer.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="resource_data_info.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="resource_internal.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="resource_message_list_reader.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="resource_string_table_reader.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="resource_version_info_reader.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="resource_version_info_writer.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="stdint_defs.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="version_info_editor.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="version_info_types.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="version_info_viewer.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

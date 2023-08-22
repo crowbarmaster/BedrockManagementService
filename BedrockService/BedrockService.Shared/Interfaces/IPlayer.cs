@@ -3,7 +3,7 @@
         IPlayer Initialize(string xuid, string username);
         string SearchForProperty(string input);
         string GetUsername();
-        string GetXUID();
+        string GetPlayerID();
         (long First, long Conn, long Disconn) GetTimes();
         void UpdateTimes(long conn, long disconn);
         bool IsPlayerWhitelisted();
