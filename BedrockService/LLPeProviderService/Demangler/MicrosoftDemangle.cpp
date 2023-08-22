@@ -26,6 +26,10 @@
 #include <cstdio>
 #include <tuple>
 
+#ifdef _WIN32
+#define NOMINMAX
+#endif // _WIN32
+
 using namespace llvm;
 using namespace ms_demangle;
 
