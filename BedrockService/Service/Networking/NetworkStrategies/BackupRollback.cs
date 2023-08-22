@@ -12,8 +12,14 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
             string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
-            _service.GetBedrockServerByIndex(serverIndex).RollbackToBackup(serverIndex, stringData);
-            return (Array.Empty<byte>(), 0, NetworkMessageTypes.UICallback);
+            byte[] sendBytes = new byte[1];
+
+            if (_service.GetBedrockServerByIndex(serverIndex).RollbackToBackup(stringData)) {
+                sendBytes[0] = 1;
+            } else {
+                sendBytes[0] = 0;
+            }
+            return (sendBytes, serverIndex, NetworkMessageTypes.BackupCallback);
         }
     }
 }

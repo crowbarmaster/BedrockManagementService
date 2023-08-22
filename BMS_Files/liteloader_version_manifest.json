@@ -41,9 +41,9 @@
   },
   {
     "Version": "2.12.0-beta.1",
-    "BDSVersion": "1.19.63.01",
-    "ProtocolVer": "568",
-    "IsBeta": "false",
+    "BDSVersion": "1.19.72.01",
+    "ProtocolVer": "575",
+    "IsBeta": "true",
     "LLUrl": "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/2.12.0-beta.1/LiteLoaderBDS.zip",
     "ModuleUrl": "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/2.12.0-beta.1/Modules.zip"
   },
@@ -88,22 +88,6 @@
     "ModuleUrl": "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/2.12.4/Modules.zip"
   },
   {
-    "Version": "2.13.0-beta.1",
-    "BDSVersion": "1.19.81.01",
-    "ProtocolVer": "582",
-    "IsBeta": "false",
-    "LLUrl": "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/2.13.0-beta.1/LiteLoaderBDS.zip",
-    "ModuleUrl": "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/2.13.0-beta.1/Modules.zip"
-  },
-  {
-    "Version": "2.12.4",
-    "BDSVersion": "1.19.73.02",
-    "ProtocolVer": "575",
-    "IsBeta": "false",
-    "LLUrl": "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/2.12.4/LiteLoaderBDS.zip",
-    "ModuleUrl": "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/2.12.4/Modules.zip"
-  },
-  {
     "Version": "2.13.0",
     "BDSVersion": "1.19.81.01",
     "ProtocolVer": "582",
@@ -123,7 +107,7 @@
     "Version": "2.14.0-beta.1",
     "BDSVersion": "1.20.0.01",
     "ProtocolVer": "589",
-    "IsBeta": "false",
+    "IsBeta": "true",
     "LLUrl": "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/2.14.0-beta.1/LiteLoaderBDS.zip",
     "ModuleUrl": "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/2.14.0-beta.1/Modules.zip"
   },
@@ -147,8 +131,16 @@
     "Version": "2.15.0-beta.1",
     "BDSVersion": "1.20.11.01",
     "ProtocolVer": "594",
-    "IsBeta": "false",
+    "IsBeta": "true",
     "LLUrl": "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/2.15.0-beta.1/LiteLoaderBDS.zip",
     "ModuleUrl": "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/2.15.0-beta.1/Modules.zip"
+  },
+  {
+    "Version": "2.15.0",
+    "BDSVersion": "1.20.11.01",
+    "ProtocolVer": "594",
+    "IsBeta": "false",
+    "LLUrl": "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/2.15.0/LiteLoaderBDS.zip",
+    "ModuleUrl": "https://github.com/LiteLDev/LiteLoaderBDS/releases/download/2.15.0/Modules.zip"
   }
 ]

@@ -1,4 +1,4 @@
-﻿using BedrockService.Shared.Interfaces;
+﻿   using BedrockService.Shared.Interfaces;
 using Newtonsoft.Json;
 using System;
 
@@ -7,7 +7,7 @@ namespace BedrockService.Shared.Classes {
         [JsonProperty]
         private string Username { get; set; }
         [JsonProperty]
-        private string XUID { get; set; }
+        private string PlayerID { get; set; }
         [JsonProperty]
         private string PermissionLevel;
         [JsonProperty]
@@ -24,9 +24,9 @@ namespace BedrockService.Shared.Classes {
         private bool IgnorePlayerLimits { get; set; }
 
         [JsonConstructor]
-        public Player(string xuid, string username, long firstConn, long lastConn, long lastDiscon, bool whtlist, string perm, bool ignoreLimit) {
+        public Player(string playerID, string username, long firstConn, long lastConn, long lastDiscon, bool whtlist, string perm, bool ignoreLimit) {
             Username = username;
-            XUID = xuid;
+            PlayerID = playerID;
             FirstConnectedTime = firstConn;
             LastConnectedTime = lastConn;
             LastDisconnectTime = lastDiscon;
@@ -40,8 +40,13 @@ namespace BedrockService.Shared.Classes {
             PermissionLevel = serverDefaultPermission;
         }
 
+        public Player() {
+            ServerDefaultPerm = "2";
+            PermissionLevel = "2";
+        }
+
         public IPlayer Initialize(string xuid, string username) {
-            XUID = xuid;
+            PlayerID = xuid;
             Username = username;
             FirstConnectedTime = DateTime.Now.Ticks;
             LastConnectedTime = DateTime.Now.Ticks;
@@ -55,8 +60,10 @@ namespace BedrockService.Shared.Classes {
             input = input.ToLower();
             if (input == "name" || input == "username" || input == "un")
                 return Username.ToLower();
-            if (input == "xuid" || input == "id")
-                return XUID;
+            if (input == "xuid" || input == "xd")
+                return PlayerID;
+            if (input == "uuid" || input == "ud")
+                return PlayerID;
             if (input == "perm" || input == "permission" || input == "pl")
                 return PermissionLevel.ToLower();
             if (input == "whitelist" || input == "white" || input == "wl")
@@ -66,7 +73,7 @@ namespace BedrockService.Shared.Classes {
             return null;
         }
 
-        public string GetXUID() => XUID;
+        public string GetPlayerID() => PlayerID;
 
         public (long First, long Conn, long Disconn) GetTimes() {
             return (FirstConnectedTime, LastConnectedTime, LastDisconnectTime);
@@ -83,16 +90,16 @@ namespace BedrockService.Shared.Classes {
 
         public string ToString(string format) {
             if (format == "Known") {
-                return $"{XUID},{Username},{FirstConnectedTime},{LastConnectedTime},{LastDisconnectTime}";
+                return $"{PlayerID},{Username},{FirstConnectedTime},{LastConnectedTime},{LastDisconnectTime}";
             }
             if (format == "Registered") {
-                return $"{XUID},{Username},{PermissionLevel},{Whitelisted},{IgnorePlayerLimits}";
+                return $"{PlayerID},{Username},{PermissionLevel},{Whitelisted},{IgnorePlayerLimits}";
             }
             return null;
         }
 
         public IPlayer UpdatePlayerFromDbStrings(string[] dbString) {
-            if (dbString == null || dbString[0] != XUID) {
+            if (dbString == null || dbString[0] != PlayerID) {
                 throw new ArgumentException("Input null or Player update attempted with incorrect xuid!");
             }
             Username = dbString[1];
@@ -106,7 +113,7 @@ namespace BedrockService.Shared.Classes {
         }
 
         public IPlayer UpdatePlayerFromRegStrings(string[] regString) {
-            if (regString == null || regString[0] != XUID) {
+            if (regString == null || regString[0] != PlayerID) {
                 throw new ArgumentException("Input null or Player update attempted with incorrect xuid!");
             }
             Username = regString[1];
@@ -128,11 +135,11 @@ namespace BedrockService.Shared.Classes {
         public override bool Equals(object obj) {
             return obj is Player player &&
                    Username == player.Username &&
-                   XUID == player.XUID;
+                   PlayerID == player.PlayerID;
         }
 
         public override int GetHashCode() {
-            return HashCode.Combine(Username, XUID);
+            return HashCode.Combine(Username, PlayerID);
         }
     }
 

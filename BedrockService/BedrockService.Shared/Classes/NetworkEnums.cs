@@ -24,8 +24,10 @@
         CheckUpdates,
         PackFile,
         PackList,
+        LLPluginFile,
         ExportFile,
         ImportFile,
+        VersionListRequest,
         LevelEditRequest,
         LevelEditFile,
         RemovePack,
@@ -40,7 +42,9 @@
         ServerStatusRequest,
         Heartbeat,
         Disconnect,
-        UICallback
+        ClientReject,
+        UICallback,
+        BackupCallback
     }
 
     public enum FileTypeFlags {

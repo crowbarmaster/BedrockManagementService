@@ -1,5 +1,4 @@
-﻿using BedrockService.Service.Management;
-using BedrockService.Shared.Classes;
+﻿using BedrockService.Shared.Classes;
 using BedrockService.Shared.Interfaces;
 using System.IO;
 using Xunit;
@@ -10,11 +9,12 @@ namespace ServiceTests {
         private readonly DirectoryInfo _directory = new(_testFilePath);
         [Fact]
         public void Can_Create_JsonFiles() {
+            _directory.Create();
+            DirectoryInfo outDir = new DirectoryInfo(_testFilePath + @"\Output");
             IProcessInfo processInfo = new ServiceProcessInfo("TestHost", _directory.FullName, 0, true, true);
-            MinecraftUpdatePackageProcessor processor = new(new BedrockLogger(processInfo, new ServiceConfigurator(processInfo)), processInfo, "1.0", @$"{_testFilePath}\Output");
-            processor.ExtractBuildToDirectory();
+            BedrockUpdatePackageProcessor processor = new(new MinecraftServerLogger(processInfo, new ServiceConfigurator(processInfo)), "1.0", @$"{_testFilePath}\Output");
+            processor.ExtractCoreFiles();
             Assert.True(File.Exists(@$"{_testFilePath}\Output\stock_props.conf"));
-            Assert.True(File.Exists(@$"{_testFilePath}\Output\stock_packs.json"));
         }
     }
 }

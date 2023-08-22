@@ -3,9 +3,9 @@ using System;
 
 namespace BedrockService.Shared.Classes {
     public class Property {
-        public string KeyName { get; set; }
-        public string StringValue { get; set; }
-        public string DefaultValue { get; set; }
+        public string KeyName { get; set; } = string.Empty;
+        public string StringValue { get; set; } = string.Empty;
+        public string DefaultValue { get; set; } = string.Empty;
 
         [JsonConstructor]
         public Property(string key, string defaultValue) {
@@ -14,9 +14,17 @@ namespace BedrockService.Shared.Classes {
             DefaultValue = defaultValue;
         }
 
-        public override string ToString() {
-            return StringValue;
+        public Property(Property newProp) {
+            KeyName = newProp.KeyName;
+            StringValue = newProp.StringValue;
+            DefaultValue = newProp.DefaultValue;
         }
+
+        public override string ToString() => StringValue;
+        
+
+        public string PropFileFormatString() => $"{KeyName}={StringValue}"; 
+        
 
         public void SetValue(string newValue) {
             StringValue = newValue;
@@ -50,6 +58,17 @@ namespace BedrockService.Shared.Classes {
                 throw new FormatException($"Value for property {KeyName} tried to parse as a bool and failed! Check configs!", e);
             }
             return 0;
+        }
+
+        public override bool Equals(object obj) {
+            return obj is Property property &&
+                   KeyName == property.KeyName &&
+                   StringValue == property.StringValue &&
+                   DefaultValue == property.DefaultValue;
+        }
+
+        public override int GetHashCode() {
+            return HashCode.Combine(KeyName, StringValue, DefaultValue);
         }
     }
 }

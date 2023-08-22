@@ -1,4 +1,5 @@
-﻿using BedrockService.Shared.MinecraftJsonModels.FileModels;
+﻿using BedrockService.Shared.FileModels.MinecraftFileModels;
+using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
 using System.IO;
 using Xunit;
 
@@ -24,6 +25,33 @@ namespace ServiceTests {
                                 "{\"permission\": \"operator\",\"xuid\": \"2098765432112345\"}]";
             File.WriteAllText(".\\sample_permissions_model.json", sampleJson);
             PermissionsFileModel fileModel = new(".\\sample_permissions_model.json");
+        }
+
+        [Fact]
+        public void Can_Create_LiteLoader_Plugin_Json() {
+            LLServerPluginRegistry reg = new();
+            reg.ServerPluginList = new() {
+                new() { BmsServerName = "TestServer" }
+            };
+            reg.ServerPluginList[0].InstalledPlugins = new() {
+                new() { BedrockVersion = "1.19.41.01", LiteLoaderVersion = "2.8.1", PluginFileName = "TestPlugin.dll" }
+            };
+            File.WriteAllText("LiteLoaderPluginDatabase.json", System.Text.Json.JsonSerializer.Serialize(reg, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true }));
+        }
+
+        [Fact]
+        public void Can_Create_Plugin_Repo_Json() {
+            LLPluginRepoJsonModel model = new();
+            model.PluginRepo.Add(new() {
+                Name = "CrowbarTools",
+                Description = "A toolbox of commands for LLBDS",
+                PluginVersion = "1.0",
+                ProtoVersion = 557,
+                ExtendedInfo = "Currently contains comands for inventory manipulation, multiple commands truncated to one, and tele2server control.",
+                ProtoBlacklist = new int[1],
+                RepoURL = "http://127.0.0.1/bms_files/CrowbarTools.zip"
+            });
+            File.WriteAllText("LiteLoaderPluginRepo.json", System.Text.Json.JsonSerializer.Serialize(model, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true }));
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using BedrockService.Service.Management.Interfaces;
+﻿
 using BedrockService.Service.Networking.Interfaces;
 using Newtonsoft.Json;
 using System.Text;
@@ -18,11 +18,10 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
         }
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex, NetworkMessageFlags flag) {
-            _bedrockService.GetBedrockServerByIndex(serverIndex).AwaitableServerStop(true).Wait();
+            _bedrockService.GetBedrockServerByIndex(serverIndex).ServerStop(true).Wait();
             _configurator.RemoveServerConfigs(_serviceConfiguration.GetServerInfoByIndex(serverIndex), flag);
             _bedrockService.RemoveBedrockServerByIndex(serverIndex);
-            JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-            byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_serviceConfiguration, Formatting.Indented, settings));
+            byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_serviceConfiguration, Formatting.Indented, SharedStringBase.GlobalJsonSerialierSettings));
             return (serializeToBytes, 0, NetworkMessageTypes.Connect);
 
         }
