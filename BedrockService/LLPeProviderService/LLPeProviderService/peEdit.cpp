@@ -1,6 +1,10 @@
 #include "pch.h"
 #include "global.h"
 
+#ifdef _WIN32
+#define NOMINMAX
+#endif // _WIN32
+
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -25,6 +29,7 @@
 #include <windows.h>
 
 #include "PeEdit.h"
+
 
 using namespace pe_bliss;
 namespace LLPE {
