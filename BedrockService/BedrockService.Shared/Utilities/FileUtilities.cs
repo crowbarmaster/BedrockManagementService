@@ -106,11 +106,7 @@ namespace BedrockService.Shared.Utilities {
             }
         }
 
-<<<<<<< HEAD
         public static void DeleteFilesFromDirectory(string source, bool removeSourceFolder) => DeleteFilesFromDirectory(new DirectoryInfo(source), removeSourceFolder);
-=======
-        public Task DeleteFilesFromDirectory(string source, bool removeSourceFolder) => DeleteFilesFromDirectory(new DirectoryInfo(source), removeSourceFolder);
->>>>>>> ee005abfff58424f505083543281ebaa75cbd2f5
 
         public static Task ClearTempDir() {
             return Task.Run(() => {
@@ -142,6 +138,15 @@ namespace BedrockService.Shared.Utilities {
             return ((int)Math.Round(i / 10.0)) * 10;
         }
 
+
+        public void WriteStringArrayToFile(string path, string[] content) => File.WriteAllLines(path, content);
+
+        public List<string> ReadLines(string path)
+        {
+            CreateInexistantFile(path);
+            return File.ReadLines(path).ToList();
+        }
+      
         public static Task ExtractZipToDirectory(string zipPath, string directory, IProgress<double> progress) => Task.Run(() => {
             FileInfo fileInfo = new(zipPath);
             using ZipArchive archive = ZipFile.OpenRead(zipPath);

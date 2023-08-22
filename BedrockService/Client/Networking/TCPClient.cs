@@ -69,7 +69,8 @@ namespace BedrockService.Client.Networking {
                 stream = null;
                 Connected = false;
                 EstablishedLink = false;
-                _netCancelSource.Cancel();
+                if (_netCancelSource != null)
+                    _netCancelSource.Cancel();
             } catch (NullReferenceException) {
                 Connected = false;
                 EstablishedLink = false;
