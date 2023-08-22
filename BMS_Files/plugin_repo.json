@@ -1,0 +1,32 @@
+{
+  "PluginRepo": [
+    {
+      "Name": "CrowbarTools",
+      "Description": "A toolbox of commands for LLBDS",
+      "PluginVersion": "1.0.0.21",
+      "ProtoVersion": 568,
+      "ExtendedInfo": "Currently contains comands for inventory manipulation, multiple commands truncated to one, and tele2server control.",
+      "ProtectedFiles": [
+        "CrowbarTools.ini"
+      ],
+      "ProtoBlacklist": [
+        0
+      ],
+      "RepoURL": "https://github.com/crowbarmaster/CrowbarsLLBDSPlugins/releases/download/Latest/CrowbarTools.zip"
+    },
+    {
+      "Name": "BETweaker",
+      "Description": "Adds features to the game, giving survival players a very rich and useful feature set. By dreamguxiang.",
+      "PluginVersion": "2.0.0.2",
+      "ProtoVersion": 568,
+      "ExtendedInfo": "Current version stripped of a few functions, but is mostly complete.",
+      "ProtectedFiles": [
+        "BETweaker\\*.*"
+      ],
+      "ProtoBlacklist": [
+        0
+      ],
+      "RepoURL": "https://github.com/crowbarmaster/BETweaker/releases/download/2.0.0.2/BETweaker.zip"
+    }
+  ]
+}

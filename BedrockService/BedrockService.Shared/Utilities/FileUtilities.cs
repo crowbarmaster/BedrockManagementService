@@ -49,6 +49,9 @@ namespace BedrockService.Shared.Utilities {
 
         public static Task DeleteFilesFromDirectory(DirectoryInfo source, bool removeSourceFolder) {
             return Task.Run(() => {
+                if(!source.Exists) {
+                    return;
+                }
                 var files = source.EnumerateFiles("*", SearchOption.AllDirectories)
                     .ToList();
                 files.ForEach(x => x.Delete());
@@ -103,7 +106,11 @@ namespace BedrockService.Shared.Utilities {
             }
         }
 
+<<<<<<< HEAD
         public static void DeleteFilesFromDirectory(string source, bool removeSourceFolder) => DeleteFilesFromDirectory(new DirectoryInfo(source), removeSourceFolder);
+=======
+        public Task DeleteFilesFromDirectory(string source, bool removeSourceFolder) => DeleteFilesFromDirectory(new DirectoryInfo(source), removeSourceFolder);
+>>>>>>> ee005abfff58424f505083543281ebaa75cbd2f5
 
         public static Task ClearTempDir() {
             return Task.Run(() => {

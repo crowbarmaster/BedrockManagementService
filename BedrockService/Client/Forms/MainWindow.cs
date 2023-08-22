@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -464,7 +465,6 @@ namespace BedrockService.Client.Forms
             EditCfg.Enabled = serverConnectedIdle;
             PlayerManagerBtn.Enabled = serverConnectedIdle;
             SingBackup.Enabled = serverConnectedIdle;
-            ServerInfoBox.Enabled = serverConnectedIdle;
             SendCmd.Enabled = serverConnectedIdle;
             cmdTextBox.Enabled = serverConnectedIdle;
             RestartSrv.Enabled = serverConnectedIdle && selectedServer.GetStatus() != null && selectedServer.GetStatus().ServerStatus == ServerStatus.Started;

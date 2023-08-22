@@ -143,7 +143,7 @@ namespace BedrockService.Client.Management {
         }
 
         private static void UpdateLogBoxInvoked(TextBox targetBox, string contents) {
-            FormManager.MainWindow.LogBox.Invoke((MethodInvoker)delegate {
+            FormManager.MainWindow.Invoke((MethodInvoker)delegate {
                 FormManager.MainWindow.UpdateServerLogBox(targetBox, contents);
             });
         }

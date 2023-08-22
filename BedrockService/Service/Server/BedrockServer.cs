@@ -180,6 +180,7 @@ namespace BedrockService.Service.Server {
             } catch (Exception ex) {
                 ((System.Timers.Timer)sender).Stop();
                 _logger.AppendLine($"Error in BackupTimer_Elapsed {ex}");
+                InitializeBackupTimer();
             }
         }
 
@@ -192,6 +193,10 @@ namespace BedrockService.Service.Server {
                     _updaterTimer = null;
                 }
                 if (interval >= 0) {
+                    if(_updaterTimer != null) {
+                        _updaterTimer.Stop();
+                        _updaterTimer = null;
+                    }
                     _updaterTimer = new System.Timers.Timer(interval);
                     _updaterTimer.Elapsed += UpdateTimer_Elapsed;
                     _serverLogger.AppendLine($"Automatic updates Enabled, will be checked at: {_updaterCron.GetNextOccurrence(DateTime.Now):G}.");
@@ -217,6 +222,7 @@ namespace BedrockService.Service.Server {
             } catch (Exception ex) {
                 ((System.Timers.Timer)sender).Stop();
                 _logger.AppendLine($"Error in UpdateTimer_Elapsed {ex}");
+                InitializeUpdateTimer();
             }
         }
 
@@ -328,6 +334,9 @@ namespace BedrockService.Service.Server {
             return new Task(() => {
                 string exeName = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName).ToString();
                 string appName = exeName.Substring(0, exeName.Length - 4);
+                if(_serverConfiguration.GetSettingsProp("DeployedVersion").StringValue != _serviceConfiguration.GetLatestBDSVersion()) {
+                    _configurator.ReplaceServerBuild(_serverConfiguration, _serverConfiguration.GetSelectedVersion()).Wait();
+                }
                 _configurator.WriteJSONFiles(_serverConfiguration);
                 MinecraftFileUtilities.WriteServerPropsFile(_serverConfiguration);
 
