@@ -8,7 +8,7 @@ jobs:
   build:
     if: github.event.pull_request.merged == true
 
-    runs-on: windows-2022
+    runs-on: windows-2019
 
     steps:
     - uses: actions/checkout@v2
