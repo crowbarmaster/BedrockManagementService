@@ -138,10 +138,7 @@ namespace BedrockService.Shared.Utilities {
             return ((int)Math.Round(i / 10.0)) * 10;
         }
 
-
-        public void WriteStringArrayToFile(string path, string[] content) => File.WriteAllLines(path, content);
-
-        public List<string> ReadLines(string path)
+        public static List<string> ReadLines(string path)
         {
             CreateInexistantFile(path);
             return File.ReadLines(path).ToList();

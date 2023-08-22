@@ -334,9 +334,6 @@ namespace BedrockService.Service.Server {
             return new Task(() => {
                 string exeName = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName).ToString();
                 string appName = exeName.Substring(0, exeName.Length - 4);
-                if(_serverConfiguration.GetSettingsProp("DeployedVersion").StringValue != _serviceConfiguration.GetLatestBDSVersion()) {
-                    _configurator.ReplaceServerBuild(_serverConfiguration, _serverConfiguration.GetSelectedVersion()).Wait();
-                }
                 _configurator.WriteJSONFiles(_serverConfiguration);
                 MinecraftFileUtilities.WriteServerPropsFile(_serverConfiguration);
 

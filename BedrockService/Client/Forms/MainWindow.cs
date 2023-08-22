@@ -48,7 +48,6 @@ namespace BedrockService.Client.Forms
             ClientLogger.Initialize();
             _logManager = new LogManager(ClientLogger);
             ConfigManager = new ConfigManager(ClientLogger);
-            _fileUtils = new FileUtilities(_processInfo);
             InitializeComponent();
             InitForm();
             _connectTimer.Elapsed += ConnectTimer_Elapsed;
@@ -409,7 +408,7 @@ namespace BedrockService.Client.Forms
 
         private void SendCmd_Click(object sender, EventArgs e) {
             // store the last command in the consoleHistory.txt file
-            List<string> lines = _fileUtils.ReadLines(_commandHistoryPath);
+            List<string> lines = FileUtilities.ReadLines(_commandHistoryPath);
             if (lines.Count == 0 || (lines.Last() != cmdTextBox.Text && !string.IsNullOrEmpty(cmdTextBox.Text))) {
                 lines.Add(cmdTextBox.Text);
             }
@@ -418,7 +417,7 @@ namespace BedrockService.Client.Forms
                 int linesToRemove = lines.Count - 500;
                 lines.RemoveRange(0, linesToRemove);
             }
-            _fileUtils.WriteStringArrayToFile(_commandHistoryPath, lines.ToArray());
+            FileUtilities.WriteStringArrayToFile(_commandHistoryPath, lines.ToArray());
 
             // send the command to the server
             if (cmdTextBox.Text.Length > 0 && connectedHost != null) {
@@ -557,7 +556,7 @@ namespace BedrockService.Client.Forms
 
         private void cmdTextBox_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e) {
             if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down) {
-                List<string> lines = _fileUtils.ReadLines(_commandHistoryPath);
+                List<string> lines = FileUtilities.ReadLines(_commandHistoryPath);
 
                 if (lines.Count > 0) {
                     _commandHistoryIndex = _commandHistoryIndex < 0 ? 0 : _commandHistoryIndex;
