@@ -16,14 +16,6 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.x
-    - name: Setup LibClang   
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |
-        curl https://ziglang.org/deps/llvm%2bclang%2blld-13.0.1-x86_64-windows-msvc-release-mt.tar.xz -o LibClang.tar.xz
-        7z e LibClang.tar.xz
-        7z x LibClang.tar
-        mv llvm+clang+lld-13.0.1-x86_64-windows-msvc-release-mt BedrockService/LLPeProviderService/LibClang
-      shell: bash
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.1
     - name: Restore NuGet packages
