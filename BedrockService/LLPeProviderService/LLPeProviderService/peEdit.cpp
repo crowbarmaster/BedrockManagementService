@@ -22,8 +22,6 @@
 
 #include "../PortableExecutable/pe_bliss.h"
 
-#include <windows.h>
-
 #include "PeEdit.h"
 
 
