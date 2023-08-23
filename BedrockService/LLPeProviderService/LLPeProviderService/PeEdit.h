@@ -1,6 +1,5 @@
 #pragma once
 #include "pch.h"
-#include <Windows.h>
 
 namespace LLPE {
 	bool LLPEAPI ProcessFunctionList(const char* workingDir, const char* pdbFile);
