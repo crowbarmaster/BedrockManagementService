@@ -137,7 +137,4 @@
     <Content Include="appsettings.json" />
     <Content Include="mc_icon.ico" />
   </ItemGroup>
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="copy &quot;$(SolutionDir)x64\release\LLPeProviderService.dll&quot; &quot;$(SolutionDir)BedrockService.Shared\LLPeProviderService.dll&quot;&#xD;&#xA;copy &quot;$(SolutionDir)x64\release\LLPeProviderService.pdb&quot; &quot;$(SolutionDir)BedrockService.Shared\LLPeProviderService.pdb&quot;" />
-  </Target>
 </Project>
