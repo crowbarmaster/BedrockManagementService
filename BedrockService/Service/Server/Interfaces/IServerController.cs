@@ -23,7 +23,7 @@ namespace BedrockService.Service.Server.Interfaces {
         bool IsPrimaryServer();
         bool IsServerStarted();
         void CheckUpdates();
-        bool LiteLoadedServer();
+        IBackupManager GetBackupManager();
         BedrockBackupManager GetBackupManager();
         void PerformOfflineServerTask(Action methodToRun);
     }

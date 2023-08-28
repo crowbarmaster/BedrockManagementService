@@ -380,8 +380,6 @@ namespace BedrockService.Service.Server {
             }
         }
 
-        public bool LiteLoadedServer() => _LiteLoadedServer;
-
         public BedrockBackupManager GetBackupManager() => _backupManager;
 
         public void SetStartupStatus(ServerStatus status) => _currentServerStatus = status;

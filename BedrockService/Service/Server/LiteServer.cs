@@ -361,7 +361,7 @@ namespace BedrockService.Service.Server {
             }
         }
 
-        public bool LiteLoadedServer() => _LiteLoadedServer;
+        public IBackupManager GetBackupManager() => _backupManager;
 
         public BedrockBackupManager GetBackupManager() => _backupManager;
 

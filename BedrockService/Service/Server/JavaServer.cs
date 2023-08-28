@@ -364,20 +364,5 @@ namespace BedrockService.Service.Server {
                 _serverProcess.EnableRaisingEvents = false;
             }
         }
-
-        public void RunStartupCommands() {
-            foreach (StartCmdEntry cmd in _serverConfiguration.GetStartCommands()) {
-                _stdInStream.WriteLine(cmd.Command.Trim());
-                Thread.Sleep(1000);
-            }
-        }
-
-        public bool LiteLoadedServer() => _LiteLoadedServer;
-
-        public BedrockBackupManager GetBackupManager() => _backupManager;
-
-        public void SetStartupStatus(ServerStatus status) => _currentServerStatus = status;
-
-        public bool IsServerStarted() => _currentServerStatus == ServerStatus.Started;
     }
 }
