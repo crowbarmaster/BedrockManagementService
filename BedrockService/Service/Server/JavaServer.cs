@@ -23,7 +23,7 @@ namespace BedrockService.Service.Server {
         private readonly IServerLogger _logger;
         private readonly IProcessInfo _processInfo;
         private readonly IPlayerManager _playerManager;
-        private readonly JavaBackupManager _backupManager;
+        private readonly IBackupManager _backupManager;
         private System.Timers.Timer? _backupTimer { get; set; }
         private CrontabSchedule? _backupCron { get; set; }
         private CrontabSchedule? _updaterCron { get; set; }

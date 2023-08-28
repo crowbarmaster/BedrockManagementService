@@ -24,7 +24,6 @@ namespace BedrockService.Service.Server.Interfaces {
         bool IsServerStarted();
         void CheckUpdates();
         IBackupManager GetBackupManager();
-        BedrockBackupManager GetBackupManager();
         void PerformOfflineServerTask(Action methodToRun);
     }
 }

@@ -21,11 +21,11 @@ namespace BedrockService.Service.Server {
         private readonly IServerLogger _logger;
         private readonly IProcessInfo _processInfo;
         private readonly IPlayerManager _playerManager;
-        private readonly BedrockBackupManager _backupManager;
-        private System.Timers.Timer? _backupTimer { get; set; }
-        private CrontabSchedule? _backupCron { get; set; }
-        private CrontabSchedule? _updaterCron { get; set; }
-        private System.Timers.Timer? _updaterTimer { get; set; }
+        private readonly IBackupManager _backupManager;
+        private System.Timers.Timer? _backupTimer;
+        private CrontabSchedule? _backupCron;
+        private CrontabSchedule? _updaterCron;
+        private System.Timers.Timer? _updaterTimer;
         private IServerLogger _serverLogger;
         private List<IPlayer> _connectedPlayers = new();
         private DateTime _startTime;

@@ -6,12 +6,11 @@ using System.IO.Compression;
 using static BedrockService.Shared.Classes.SharedStringBase;
 
 namespace BedrockService.Service.Server {
-    public class JavaBackupManager : BedrockBackupManager {
+    public class JavaBackupManager : BedrockBackupManager, IBackupManager {
         private readonly IServerLogger _logger;
         private readonly IServerController _server;
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IServerConfiguration _serverConfiguration;
-        private readonly FileUtilities FileUtilities;
         private bool _autoBackupsContainPacks = false;
         private bool _backupRunning = false;
 
