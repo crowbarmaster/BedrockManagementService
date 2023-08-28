@@ -10,10 +10,10 @@ namespace BedrockService.Shared.Classes {
 
         public static async Task<bool> RetrieveFileFromUrl(string url, string outputPath) {
             FileInfo outputFileInfo = new(outputPath);
-            if(!outputFileInfo.Directory.Exists) {
+            if (!outputFileInfo.Directory.Exists) {
                 outputFileInfo.Directory.Create();
             }
-            if(outputFileInfo.Exists && outputFileInfo.Length > 1024) {
+            if (outputFileInfo.Exists && outputFileInfo.Length > 1024) {
                 return true;
             }
             using HttpClient httpClient = new();
@@ -32,7 +32,7 @@ namespace BedrockService.Shared.Classes {
                     return false;
                 }
             } catch (Exception e) {
-                Logger.AppendErrorFromException(e);
+                Logger.AppendLine($"RetrieveFileFromUrl resulted in error: {e.Message}\n{e.InnerException}\n{e.StackTrace}");
                 return false;
             }
             httpClient.Dispose();
