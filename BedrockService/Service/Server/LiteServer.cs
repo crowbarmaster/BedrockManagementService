@@ -29,10 +29,7 @@ namespace BedrockService.Service.Server {
         private IServerLogger _serverLogger;
         private List<IPlayer> _connectedPlayers = new();
         private DateTime _startTime;
-        private const string _startupMessage = "INFO] Server started.";
-        private bool _AwaitingStopSignal = true;
         private bool _serverModifiedFlag = true;
-        private bool _LiteLoadedServer = false;
 
         public LiteServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IServerLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, IPlayerManager servicePlayerManager) {
             _serverConfiguration = serverConfiguration;
@@ -272,9 +269,6 @@ namespace BedrockService.Service.Server {
                         _logger.AppendLine($"Server {GetServerName()} received quit signal.");
                         _currentServerStatus = ServerStatus.Stopped;
                     }
-                    if (text.Contains("[PreLoader]")) {
-                        _LiteLoadedServer = true;
-                    }
                     if (text.Contains("Changes to the world are resumed")) {
                         _backupManager.SetBackupComplete();
                     }
@@ -357,8 +351,6 @@ namespace BedrockService.Service.Server {
         }
 
         public IBackupManager GetBackupManager() => _backupManager;
-
-        public BedrockBackupManager GetBackupManager() => _backupManager;
 
         public void SetStartupStatus(ServerStatus status) => _currentServerStatus = status;
 

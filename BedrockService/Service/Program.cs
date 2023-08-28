@@ -21,10 +21,10 @@ global using System.Reflection;
 global using System.Threading;
 global using System.Threading.Tasks;
 global using Topshelf;
-
 using BedrockService.Service.Networking.Interfaces;
 
-namespace BedrockService.Service {
+namespace BedrockService.Service
+{
     public class Program {
         public static bool IsExiting = false;
         private static readonly string _declaredType = "Service";

@@ -26,15 +26,14 @@ namespace BedrockService.Service.Server {
         private readonly IBackupManager _backupManager;
         private System.Timers.Timer? _backupTimer { get; set; }
         private CrontabSchedule? _backupCron { get; set; }
-        private CrontabSchedule? _updaterCron { get; set; }
-        private System.Timers.Timer? _updaterTimer { get; set; }
+        private CrontabSchedule? _updaterCron;
+        private System.Timers.Timer? _updaterTimer;
         private IServerLogger _serverLogger;
         private List<IPlayer> _connectedPlayers = new();
         private DateTime _startTime;
-        private const string _startupMessage = "INFO] Server started.";
         private bool _AwaitingStopSignal = true;
         private bool _serverModifiedFlag = true;
-        private bool _LiteLoadedServer = false;
+        private const string _startupMessage = "INFO] Server started.";
 
         public JavaServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IServerLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, IPlayerManager servicePlayerManager) {
             _serverConfiguration = serverConfiguration;
@@ -107,7 +106,7 @@ namespace BedrockService.Service.Server {
                 } else {
                     _currentServerStatus = ServerStatus.Stopping;
                     WriteToStandardIn("stop");
-                    }
+                }
             });
         }
 
@@ -128,15 +127,64 @@ namespace BedrockService.Service.Server {
             }
         }
 
-        public void ForceKillServer() => _serverProcess.Kill();
-
-        public string GetServerName() => _serverConfiguration.GetServerName();
+        public ServerStatusModel GetServerStatus() => new() {
+            ServerUptime = _startTime,
+            ServerStatus = _currentServerStatus,
+            ActivePlayerList = _connectedPlayers,
+            ServerIndex = _serviceConfiguration.GetServerIndex(_serverConfiguration),
+            TotalBackups = _serverConfiguration.GetStatus().TotalBackups,
+            TotalSizeOfBackups = _serverConfiguration.GetStatus().TotalSizeOfBackups,
+            DeployedVersion = _serverConfiguration.GetServerVersion()
+        };
 
         public void WriteToStandardIn(string command) {
             if (_stdInStream != null) {
                 _stdInStream.WriteLine(command);
             }
         }
+
+        public bool RollbackToBackup(string zipFilePath) {
+            try {
+                PerformOfflineServerTask(new Action(() => PerformRollback(zipFilePath)));
+                return true;
+            } catch (IOException e) {
+                _logger.AppendLine($"Error deleting selected backups! {e.Message}");
+            }
+            return false;
+        }
+
+        public void RunStartupCommands() {
+            foreach (StartCmdEntry cmd in _serverConfiguration.GetStartCommands()) {
+                _stdInStream.WriteLine(cmd.Command.Trim());
+                Thread.Sleep(1000);
+            }
+        }
+
+        public void ForceKillServer() => _serverProcess.Kill();
+
+        public string GetServerName() => _serverConfiguration.GetServerName();
+
+        public List<IPlayer> GetActivePlayerList() => _connectedPlayers;
+
+        public IServerLogger GetLogger() => _serverLogger;
+
+        private void PerformRollback(string zipFilePath) => _backupManager.PerformRollback(zipFilePath);
+
+        public bool IsServerModified() => _serverModifiedFlag;
+
+        public void SetServerModified(bool isModified) => _serverModifiedFlag = isModified;
+
+        public bool ServerAutostartEnabled() => _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerAutostartEnabled).GetBoolValue();
+
+        public bool IsPrimaryServer() => _serverConfiguration.IsPrimaryServer();
+
+        public IPlayerManager GetPlayerManager() => _playerManager;
+
+        public IBackupManager GetBackupManager() => _backupManager;
+
+        public void SetStartupStatus(ServerStatus status) => _currentServerStatus = status;
+
+        public bool IsServerStarted() => _currentServerStatus == ServerStatus.Started;
 
         private void InitializeBackupTimer() {
             _backupCron = CrontabSchedule.TryParse(_serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupCron).ToString());
@@ -214,42 +262,6 @@ namespace BedrockService.Service.Server {
                 _logger.AppendLine($"Error in UpdateTimer_Elapsed {ex}");
             }
         }
-
-        public bool RollbackToBackup(string zipFilePath) {
-            try {
-                PerformOfflineServerTask(new Action(() => PerformRollback(zipFilePath)));
-                return true;
-            } catch (IOException e) {
-                _logger.AppendLine($"Error deleting selected backups! {e.Message}");
-            }
-            return false;
-        }
-
-        private void PerformRollback(string zipFilePath) => _backupManager.PerformRollback(zipFilePath);
-
-        public ServerStatusModel GetServerStatus() => new() {
-            ServerUptime = _startTime,
-            ServerStatus = _currentServerStatus,
-            ActivePlayerList = _connectedPlayers,
-            ServerIndex = _serviceConfiguration.GetServerIndex(_serverConfiguration),
-            TotalBackups = _serverConfiguration.GetStatus().TotalBackups,
-            TotalSizeOfBackups = _serverConfiguration.GetStatus().TotalSizeOfBackups,
-            DeployedVersion = _serverConfiguration.GetServerVersion()
-        };
-
-        public List<IPlayer> GetActivePlayerList() => _connectedPlayers;
-
-        public IServerLogger GetLogger() => _serverLogger;
-
-        public bool IsServerModified() => _serverModifiedFlag;
-
-        public void SetServerModified(bool isModified) => _serverModifiedFlag = isModified;
-
-        public bool ServerAutostartEnabled() => _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerAutostartEnabled).GetBoolValue();
-
-        public bool IsPrimaryServer() => _serverConfiguration.IsPrimaryServer();
-
-        public IPlayerManager GetPlayerManager() => _playerManager;
 
         private Task StopWatchdog() {
             return Task.Run(() => {
