@@ -37,13 +37,6 @@ namespace BedrockService.Service.Core {
                         Directory.CreateDirectory(GetServiceDirectory(key));
                     }
                 }
-                if (!File.Exists($@"{_processInfo.GetDirectory()}\ServiceVersion.ini")) {
-                    if (UpgradeAssistant_26RC2.IsUpgradeRequired(_processInfo.GetDirectory())) {
-                        _logger.AppendLine("Former service of version 2.6RC2 found. Upgrading...");
-                        UpgradeAssistant_26RC2.PerformUpgrade(_processInfo.GetDirectory());
-                        _logger.AppendLine($"Upgrade to version {startedVersion} has completed.");
-                    }
-                }
                 if (startedVersion != null) {
                     File.WriteAllText($@"{_processInfo.GetDirectory()}\ServiceVersion.ini", startedVersion);
                 }
