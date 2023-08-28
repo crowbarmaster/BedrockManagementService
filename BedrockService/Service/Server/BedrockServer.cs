@@ -107,12 +107,6 @@ namespace BedrockService.Service.Server {
                 } else {
                     _currentServerStatus = ServerStatus.Stopping;
                     WriteToStandardIn("stop");
-                    while (_AwaitingStopSignal) {
-                        Task.Delay(100).Wait();
-                    }
-                    _currentServerStatus = ServerStatus.Stopped;
-                    _AwaitingStopSignal = true;
-                    Task.Delay(500).Wait();
                 }
             });
         }
@@ -295,6 +289,7 @@ namespace BedrockService.Service.Server {
                     if (input.Equals("Quit correctly")) {
                         _logger.AppendLine($"Server {GetServerName()} received quit signal.");
                         _AwaitingStopSignal = false;
+                        _currentServerStatus = ServerStatus.Stopped;
                     }
                     if (input.Contains("[PreLoader]")) {
                         _LiteLoadedServer = true;

@@ -107,15 +107,10 @@ namespace BedrockService.Service.Server {
                 } else {
                     _currentServerStatus = ServerStatus.Stopping;
                     WriteToStandardIn("stop");
-                    while (_AwaitingStopSignal) {
-                        Task.Delay(100).Wait();
                     }
-                    _currentServerStatus = ServerStatus.Stopped;
-                    _AwaitingStopSignal = true;
-                    Task.Delay(500).Wait();
-                }
             });
         }
+
         public Task RestartServer() {
             return Task.Run(() => {
                 ServerStop(false).Wait();
@@ -289,6 +284,7 @@ namespace BedrockService.Service.Server {
                     if (input.Contains("All dimensions are saved") && !_backupManager.BackupRunning()) {
                         _logger.AppendLine($"Server {GetServerName()} received quit signal.");
                         _AwaitingStopSignal = false;
+                        _currentServerStatus = ServerStatus.Stopped;
                     }
                     if (input.Contains("Automatic saving is now enabled")) {
                         _backupManager.SetBackupComplete();
