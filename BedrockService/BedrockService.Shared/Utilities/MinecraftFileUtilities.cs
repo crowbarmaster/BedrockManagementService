@@ -64,7 +64,7 @@ namespace BedrockService.Shared.Utilities {
         }
 
         public static void CreateDefaultLoaderConfigFile(IServerConfiguration server) {
-            string configFilePath = GetServerFilePath(BdsFileNameKeys.LLConfig, server);
+            string configFilePath = GetServerFilePath(ServerFileNameKeys.LLConfig, server);
             FileInfo fileInfo = new(configFilePath);
             if (!fileInfo.Directory.Exists) {
                 fileInfo.Directory.Create();
@@ -111,10 +111,10 @@ namespace BedrockService.Shared.Utilities {
         }
 
         public static LiteLoaderConfigNodeModel LoadLiteLoaderConfigFile(IServerConfiguration server) {
-            if (!File.Exists(GetServerFilePath(BdsFileNameKeys.LLConfig, server))) {
+            if (!File.Exists(GetServerFilePath(ServerFileNameKeys.LLConfig, server))) {
                 CreateDefaultLoaderConfigFile(server);
             }
-            return new("Root", File.ReadAllText(GetServerFilePath(BdsFileNameKeys.LLConfig, server)));
+            return new("Root", File.ReadAllText(GetServerFilePath(ServerFileNameKeys.LLConfig, server)));
         }
 
         public static void VerifyLiteLoaderCompatableSettings(IProcessInfo processInfo, IServerConfiguration server) {
@@ -126,7 +126,7 @@ namespace BedrockService.Shared.Utilities {
                 server.GetLiteLoaderConfig().Properties["DebugMode"] = false;
                 server.GetLiteLoaderConfig().GetChildByName("Modules").GetChildByName("CrashLogger").Properties["enabled"] = false;
             }
-            server.GetLiteLoaderConfig().SaveToFile(GetServerFilePath(BdsFileNameKeys.LLConfig, server));
+            server.GetLiteLoaderConfig().SaveToFile(GetServerFilePath(ServerFileNameKeys.LLConfig, server));
         }
 
         public static void WriteServerPropsFile(IServerConfiguration server) {
@@ -140,7 +140,7 @@ namespace BedrockService.Shared.Utilities {
             if (!Directory.Exists(serverPath)) {
                 Directory.CreateDirectory(serverPath);
             }
-            File.WriteAllLines(GetServerFilePath(BdsFileNameKeys.ServerProps, server), output);
+            File.WriteAllLines(GetServerFilePath(ServerFileNameKeys.ServerProps, server), output);
         }
 
         public static List<Property> GetDefaultPropListFromFile(string filePath) {
@@ -189,7 +189,7 @@ namespace BedrockService.Shared.Utilities {
                 if (file.Extension.Equals(".exe") || file.Extension.Equals(".dll")) {
                     File.Delete(file.FullName);
                 }
-                if ((file.Name + file.Extension) == GetServerFileName(BdsFileNameKeys.DeployedINI)) {
+                if ((file.Name + file.Extension) == GetServerFileName(ServerFileNameKeys.DeployedINI)) {
                     file.Delete();
                 }
             }
@@ -203,14 +203,14 @@ namespace BedrockService.Shared.Utilities {
                 }
             }
             foreach (FileInfo file in workingDir.EnumerateFiles()) {
-                if (file.Name != GetServerFileName(BdsFileNameKeys.DeployedINI)) {
+                if (file.Name != GetServerFileName(ServerFileNameKeys.DeployedINI)) {
                     file.Delete();
                 }
             }
         }
 
         public static void WriteJavaEulaFile(IServerConfiguration server) {
-            File.WriteAllText(GetServerFilePath(BdsFileNameKeys.JavaEula, server), "eula=true\r\n");
+            File.WriteAllText(GetServerFilePath(ServerFileNameKeys.JavaEula, server), "eula=true\r\n");
         }
     }
 }

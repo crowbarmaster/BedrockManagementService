@@ -85,7 +85,7 @@ namespace BedrockService.Shared.Utilities {
                 ProcessStartInfo processStartInfo = new ProcessStartInfo() {
                     UseShellExecute = false,
                     CreateNoWindow = true,
-                    FileName = GetServiceFilePath(BmsFileNameKeys.Jdk17JavaMmsExe),
+                    FileName = GetServiceFilePath(MmsFileNameKeys.Jdk17JavaMmsExe),
                     WorkingDirectory = jarInfo.Directory.FullName,
                     Arguments = $@"-Xmx1024M -Xms1024M -jar {jarInfo.Name} nogui"
                 };
@@ -99,7 +99,7 @@ namespace BedrockService.Shared.Utilities {
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 RedirectStandardOutput = true,
-                WorkingDirectory = GetServiceDirectory(BmsDirectoryKeys.Jdk17BinPath),
+                WorkingDirectory = GetServiceDirectory(ServiceDirectoryKeys.Jdk17BinPath),
                 FileName = @"Jps.exe",
                 Arguments = $@"-mv"
             };

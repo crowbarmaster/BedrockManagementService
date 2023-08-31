@@ -30,8 +30,8 @@ namespace BedrockService.Service.Management {
 
         public Task LoadGlobals() => Task.Run(() => {
             _serviceConfiguration.InitializeDefaults();
-            if (File.Exists(GetServiceFilePath(BmsFileNameKeys.ServiceConfig))) {
-                _serviceConfiguration.ProcessUserConfiguration(File.ReadAllLines(GetServiceFilePath(BmsFileNameKeys.ServiceConfig)));
+            if (File.Exists(GetServiceFilePath(MmsFileNameKeys.ServiceConfig))) {
+                _serviceConfiguration.ProcessUserConfiguration(File.ReadAllLines(GetServiceFilePath(MmsFileNameKeys.ServiceConfig)));
                 _logger.AppendLine("Loaded Service props.");
                 return;
             }
@@ -43,7 +43,7 @@ namespace BedrockService.Service.Management {
             IServerConfiguration serverInfo;
             EnumTypeLookup typeLookup = new(_logger, _serviceConfiguration);
             _serviceConfiguration.GetServerList().Clear();
-            string[] files = Directory.GetFiles(GetServiceDirectory(BmsDirectoryKeys.ServerConfigs), "*.conf");
+            string[] files = Directory.GetFiles(GetServiceDirectory(ServiceDirectoryKeys.ServerConfigs), "*.conf");
             foreach (string file in files) {
                 FileInfo FInfo = new(file);
                 string[] fileEntries = File.ReadAllLines(file);
@@ -82,16 +82,16 @@ namespace BedrockService.Service.Management {
             }
             output[index++] = string.Empty;
 
-            File.WriteAllLines(GetServiceFilePath(BmsFileNameKeys.ServiceConfig), output);
+            File.WriteAllLines(GetServiceFilePath(MmsFileNameKeys.ServiceConfig), output);
         }
 
         public void SavePlayerDatabase(IServerConfiguration server) {
-            string dbPath = GetServiceFilePath(BmsFileNameKeys.ServerPlayerTelem_Name, server.GetServerName());
-            string regPath = GetServiceFilePath(BmsFileNameKeys.ServerPlayerRegistry_Name, server.GetServerName());
+            string dbPath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerTelem_Name, server.GetServerName());
+            string regPath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerRegistry_Name, server.GetServerName());
             List<IPlayer> playerList = server.GetPlayerList();
             if (_serviceConfiguration.GetProp(ServicePropertyKeys.GlobalizedPlayerDatabase).GetBoolValue()) {
-                dbPath = GetServiceFilePath(BmsFileNameKeys.GlobalPlayerTelem);
-                regPath = GetServiceFilePath(BmsFileNameKeys.GlobalPlayerRegistry);
+                dbPath = GetServiceFilePath(MmsFileNameKeys.GlobalPlayerTelem);
+                regPath = GetServiceFilePath(MmsFileNameKeys.GlobalPlayerRegistry);
                 playerList = _serviceConfiguration.GetPlayerList();
             }
             lock (_fileLock) {
@@ -159,7 +159,7 @@ namespace BedrockService.Service.Management {
             output[index++] = $"ServerVersion={server.GetSettingsProp(ServerPropertyKeys.ServerVersion)}";
             output[index++] = string.Empty;
 
-            File.WriteAllLines(GetServiceFilePath(BmsFileNameKeys.ServerConfig_Name, server.GetServerName()), output);
+            File.WriteAllLines(GetServiceFilePath(MmsFileNameKeys.ServerConfig_Name, server.GetServerName()), output);
             Task.Delay(500).Wait();
         }
 
@@ -168,14 +168,14 @@ namespace BedrockService.Service.Management {
             System.Version allowStartVersion = System.Version.Parse("1.18.11.01");
             string whitelistFilePath = string.Empty;
             if (server.GetServerVersion() != "None" && System.Version.Parse(serverVer) >= allowStartVersion) {
-                whitelistFilePath = GetServerFilePath(BdsFileNameKeys.AllowList, server);
-                if (File.Exists(GetServerFilePath(BdsFileNameKeys.WhiteList, server))) {
-                    File.Delete(GetServerFilePath(BdsFileNameKeys.WhiteList, server));
+                whitelistFilePath = GetServerFilePath(ServerFileNameKeys.AllowList, server);
+                if (File.Exists(GetServerFilePath(ServerFileNameKeys.WhiteList, server))) {
+                    File.Delete(GetServerFilePath(ServerFileNameKeys.WhiteList, server));
                 }
             } else {
-                whitelistFilePath = GetServerFilePath(BdsFileNameKeys.WhiteList, server);
+                whitelistFilePath = GetServerFilePath(ServerFileNameKeys.WhiteList, server);
             }
-            string permFilePath = GetServerFilePath(BdsFileNameKeys.PermList, server);
+            string permFilePath = GetServerFilePath(ServerFileNameKeys.PermList, server);
             PermissionsFileModel permissionsFile = new() { FilePath = permFilePath };
             WhitelistFileModel whitelistFile = new() { FilePath = whitelistFilePath };
             if (_serviceConfiguration.GetProp(ServicePropertyKeys.GlobalizedPlayerDatabase).GetBoolValue()) {
@@ -309,8 +309,8 @@ namespace BedrockService.Service.Management {
 
         private void LoadPlayerDatabase(IServerConfiguration server) {
             if (_serviceConfiguration.GetProp(ServicePropertyKeys.GlobalizedPlayerDatabase).GetBoolValue()) {
-                string dbPath = GetServiceFilePath(BmsFileNameKeys.GlobalPlayerTelem);
-                string regPath = GetServiceFilePath(BmsFileNameKeys.GlobalPlayerRegistry);
+                string dbPath = GetServiceFilePath(MmsFileNameKeys.GlobalPlayerTelem);
+                string regPath = GetServiceFilePath(MmsFileNameKeys.GlobalPlayerRegistry);
                 List<string[]> playerDbEntries = MinecraftFileUtilities.FilterLinesFromPlayerDbFile(dbPath);
                 List<string[]> playerRegEntries = MinecraftFileUtilities.FilterLinesFromPlayerDbFile(regPath);
                 playerDbEntries.ForEach(x => {
@@ -322,8 +322,8 @@ namespace BedrockService.Service.Management {
 
             } else {
                 string serverName = server.GetServerName();
-                string dbPath = GetServiceFilePath(BmsFileNameKeys.ServerPlayerTelem_Name, server.GetServerName());
-                string regPath = GetServiceFilePath(BmsFileNameKeys.ServerPlayerRegistry_Name, server.GetServerName());
+                string dbPath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerTelem_Name, server.GetServerName());
+                string regPath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerRegistry_Name, server.GetServerName());
                 List<string[]> playerDbEntries = MinecraftFileUtilities.FilterLinesFromPlayerDbFile(dbPath);
                 List<string[]> playerRegEntries = MinecraftFileUtilities.FilterLinesFromPlayerDbFile(regPath);
                 playerDbEntries.ForEach(x => {
@@ -363,7 +363,7 @@ namespace BedrockService.Service.Management {
 
         private bool DeletePlayerFiles(IServerConfiguration serverInfo) {
             try {
-                DirectoryInfo configDirInfo = new(GetServiceDirectory(BmsDirectoryKeys.ServerConfigs));
+                DirectoryInfo configDirInfo = new(GetServiceDirectory(ServiceDirectoryKeys.ServerConfigs));
                 foreach (DirectoryInfo dir in configDirInfo.GetDirectories()) {
                     if (dir.Name == "KnownPlayers" || dir.Name == "RegisteredPlayers") {
                         foreach (FileInfo file in dir.GetFiles()) {

@@ -110,8 +110,8 @@ namespace BedrockService.Shared.Classes.Configurations {
                 }
             }
             PlayerManager.LoadPlayerDatabase();
-            if (File.Exists(GetServerFilePath(BdsFileNameKeys.DeployedINI, this)) && GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()) {
-                SetSettingsProp(ServerPropertyKeys.ServerVersion, File.ReadAllText(GetServerFilePath(BdsFileNameKeys.DeployedINI, this)));
+            if (File.Exists(GetServerFilePath(ServerFileNameKeys.DeployedINI, this)) && GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()) {
+                SetSettingsProp(ServerPropertyKeys.ServerVersion, File.ReadAllText(GetServerFilePath(ServerFileNameKeys.DeployedINI, this)));
             }
         }
 
@@ -123,12 +123,12 @@ namespace BedrockService.Shared.Classes.Configurations {
         }
 
         public bool IsPrimaryServer() {
-            return GetProp(BmsDependServerPropKeys.PortI4).StringValue == "19132";
+            return GetProp(MmsDependServerPropKeys.PortI4).StringValue == "19132";
         }
 
         public void UpdateServerProps(string version) {
             DefaultPropList.Clear();
-            DefaultPropList = MinecraftFileUtilities.GetDefaultPropListFromFile(GetServiceFilePath(BmsFileNameKeys.JavaStockProps_Ver, version));
+            DefaultPropList = MinecraftFileUtilities.GetDefaultPropListFromFile(GetServiceFilePath(MmsFileNameKeys.JavaStockProps_Ver, version));
             List<Property> newList = new List<Property>();
             ServerPropList.ForEach(prop => {
                 if (DefaultPropList.Where(x => x.KeyName == prop.KeyName).Count() > 0) {
@@ -172,7 +172,7 @@ namespace BedrockService.Shared.Classes.Configurations {
         }
 
 
-        public void SetProp(BmsDependServerPropKeys key, string newValue) {
+        public void SetProp(MmsDependServerPropKeys key, string newValue) {
             try {
                 Property serverProp = ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[key]);
                 ServerPropList[ServerPropList.IndexOf(serverProp)].SetValue(newValue);
@@ -203,7 +203,7 @@ namespace BedrockService.Shared.Classes.Configurations {
 
         }
 
-        public Property GetProp(BmsDependServerPropKeys key) {
+        public Property GetProp(MmsDependServerPropKeys key) {
             try {
                 Property foundProp = ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[key]);
                 return foundProp;
@@ -300,7 +300,7 @@ namespace BedrockService.Shared.Classes.Configurations {
 
         public string GetDeployedVersion() {
             try {
-                return File.ReadAllText(GetServerFilePath(BdsFileNameKeys.DeployedINI, this));
+                return File.ReadAllText(GetServerFilePath(ServerFileNameKeys.DeployedINI, this));
 
             } catch {
                 return "None";
@@ -308,7 +308,7 @@ namespace BedrockService.Shared.Classes.Configurations {
         }
 
         public void SetDeployedVersion(string version) {
-            File.WriteAllText(GetServerFilePath(BdsFileNameKeys.DeployedINI, this), version);
+            File.WriteAllText(GetServerFilePath(ServerFileNameKeys.DeployedINI, this), version);
         }
 
         public IUpdater GetUpdater() => _updater;

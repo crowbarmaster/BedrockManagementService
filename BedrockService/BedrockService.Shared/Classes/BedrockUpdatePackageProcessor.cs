@@ -35,7 +35,7 @@ namespace BedrockService.Shared.Classes {
             try {
                 FileUtilities.ClearTempDir().Wait();
                 Directory.CreateDirectory(_workingDirectory);
-                string zipPath = GetServiceFilePath(BmsFileNameKeys.BdsUpdatePackage_Ver, _packageVersion);
+                string zipPath = GetServiceFilePath(MmsFileNameKeys.BdsUpdatePackage_Ver, _packageVersion);
                 if (!File.Exists(zipPath)) {
                     if (_loggingEnabled) _logger.AppendLine("Requested build package was not found.");
                     return false;
@@ -75,14 +75,14 @@ namespace BedrockService.Shared.Classes {
         private void CreateFiles() {
             if (_loggingEnabled) _logger.AppendLine($"Now building necessary files");
             Directory.CreateDirectory(_fileTargetDirectory);
-            string propFile = $@"{_workingDirectory}\{GetServerFileName(BdsFileNameKeys.ServerProps)}";
+            string propFile = $@"{_workingDirectory}\{GetServerFileName(ServerFileNameKeys.ServerProps)}";
 
             List<string> propFileContents = new(File.ReadAllLines(propFile));
             propFileContents = propFileContents
                 .Where(x => !x.StartsWith('#'))
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .ToList();
-            File.WriteAllLines($@"{_fileTargetDirectory}\{GetServiceFileName(BmsFileNameKeys.BedrockStockProps_Ver, _packageVersion)}", propFileContents);
+            File.WriteAllLines($@"{_fileTargetDirectory}\{GetServiceFileName(MmsFileNameKeys.BedrockStockProps_Ver, _packageVersion)}", propFileContents);
         }
     }
 }

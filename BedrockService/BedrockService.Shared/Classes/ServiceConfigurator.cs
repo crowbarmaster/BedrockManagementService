@@ -73,7 +73,7 @@ namespace BedrockService.Shared.Classes {
         public void SetLatestVersion(MinecraftServerArch serverArch, string version) {
             LatestServerVersion = version;
             try {
-            File.WriteAllText(GetServiceFilePath(BmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[serverArch]), version);
+            File.WriteAllText(GetServiceFilePath(MmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[serverArch]), version);
             } catch (Exception) {
 
             }
@@ -81,7 +81,7 @@ namespace BedrockService.Shared.Classes {
 
         public string GetLatestVersion(MinecraftServerArch serverArch) {
             try {
-                LatestServerVersion = File.ReadAllText(GetServiceFilePath(BmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[serverArch]));
+                LatestServerVersion = File.ReadAllText(GetServiceFilePath(MmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[serverArch]));
             } catch (Exception) {
 
             }
@@ -89,7 +89,7 @@ namespace BedrockService.Shared.Classes {
         }
 
         public bool ValidateServerVersion(IServerConfiguration server, string version) {
-            string propFile = GetServiceFilePath(BmsFileNameKeys.BedrockStockProps_Ver, version);
+            string propFile = GetServiceFilePath(MmsFileNameKeys.BedrockStockProps_Ver, version);
             if (version != "None" && _processInfo.DeclaredType() != "Client") {
                 if (!File.Exists(propFile)) {
                     FileInfo file = new(propFile);
@@ -160,7 +160,7 @@ namespace BedrockService.Shared.Classes {
 
         public void RemoveServerInfo(IServerConfiguration serverConfiguration) {
             ServerList.Remove(serverConfiguration.GetServerInfo());
-            File.Delete(GetServiceFilePath(BmsFileNameKeys.ServerConfig_Name, serverConfiguration.GetServerName()));
+            File.Delete(GetServiceFilePath(MmsFileNameKeys.ServerConfig_Name, serverConfiguration.GetServerName()));
         }
 
         public void SetServerInfo(IServerConfiguration newInfo) {
@@ -177,7 +177,7 @@ namespace BedrockService.Shared.Classes {
             if (ServerList.Count == 0) {
 
             }
-            if (serverConfiguration.GetProp(BmsDependServerPropKeys.PortI4).StringValue == "19132" && serverConfiguration.GetProp(BmsDependServerPropKeys.PortI6).StringValue == "19133") {
+            if (serverConfiguration.GetProp(MmsDependServerPropKeys.PortI4).StringValue == "19132" && serverConfiguration.GetProp(MmsDependServerPropKeys.PortI6).StringValue == "19133") {
                 ServerList.Insert(0, serverConfiguration);
                 return;
             }
@@ -218,7 +218,7 @@ namespace BedrockService.Shared.Classes {
             globals.FirstOrDefault(prop => prop.KeyName == ServicePropertyStrings[keyName]).SetValue(value);
         }
 
-        public Property GetProp(BmsDependServerPropKeys key) {
+        public Property GetProp(MmsDependServerPropKeys key) {
             throw new NotImplementedException();
         }
 
@@ -283,7 +283,7 @@ namespace BedrockService.Shared.Classes {
             return null;
         }
 
-        public void SetProp(BmsDependServerPropKeys key, string value) {
+        public void SetProp(MmsDependServerPropKeys key, string value) {
             throw new NotImplementedException();
         }
     }

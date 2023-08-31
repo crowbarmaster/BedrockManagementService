@@ -11,8 +11,8 @@ namespace BedrockService.Shared.Interfaces {
         Property GetProp(string keyName);
         Property GetProp(ServicePropertyKeys key);
         Property GetSettingsProp(ServerPropertyKeys key);
-        Property GetProp(BmsDependServerPropKeys key);
-        void SetProp(BmsDependServerPropKeys key, string value);
+        Property GetProp(MmsDependServerPropKeys key);
+        void SetProp(MmsDependServerPropKeys key, string value);
         List<Property> GetAllProps();
         void SetAllProps(List<Property> newPropList);
         List<LogEntry> GetLog();

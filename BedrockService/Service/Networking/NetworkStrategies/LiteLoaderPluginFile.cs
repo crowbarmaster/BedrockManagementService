@@ -17,7 +17,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
             using MemoryStream memoryStream = new(data, _messageHeaderLength, data.Length - _messageHeaderLength);
             using ZipArchive zipArchive = new(memoryStream, ZipArchiveMode.Read);
             PluginVersionInfo pluginVersionInfo = new();
-            zipArchive.ExtractToDirectory(GetServerDirectory(BdsDirectoryKeys.LLPlugins, _serviceConfiguration.GetServerInfoByIndex(serverIndex)), true);
+            zipArchive.ExtractToDirectory(GetServerDirectory(ServerDirectoryKeys.LLPlugins, _serviceConfiguration.GetServerInfoByIndex(serverIndex)), true);
 
             PluginVersionInfo versionInfo = new() {
                 BedrockVersion = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp(ServerPropertyKeys.ServerVersion).StringValue,

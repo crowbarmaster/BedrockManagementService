@@ -45,7 +45,7 @@ namespace BedrockService.Service.Server {
             try {
                 string serverPath = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString();
                 string backupPath = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupPath).ToString();
-                string levelName = _serverConfiguration.GetProp(BmsDependServerPropKeys.LevelName).ToString();
+                string levelName = _serverConfiguration.GetProp(MmsDependServerPropKeys.LevelName).ToString();
                 DirectoryInfo levelDir = new($@"{serverPath}\{levelName}");
                 DirectoryInfo backupDir = new($@"{backupPath}\{_serverConfiguration.GetServerName()}");
                 base.PruneBackups(backupDir);
@@ -70,7 +70,7 @@ namespace BedrockService.Service.Server {
 
         public override void PerformRollback(string zipFilePath) {
             string serverPath = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString();
-            DirectoryInfo worldsDir = new($@"{serverPath}\{_serverConfiguration.GetProp(BmsDependServerPropKeys.LevelName)}");
+            DirectoryInfo worldsDir = new($@"{serverPath}\{_serverConfiguration.GetProp(MmsDependServerPropKeys.LevelName)}");
             FileInfo backupZipFileInfo = new($@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupPath)}\{_serverConfiguration.GetServerName()}\{zipFilePath}");
             FileUtilities.DeleteFilesFromDirectory(worldsDir, true).Wait();
             _logger.AppendLine($"Deleted world folder \"{worldsDir.Name}\"");

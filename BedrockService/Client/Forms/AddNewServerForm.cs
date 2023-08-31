@@ -52,11 +52,11 @@ namespace BedrockService.Client.Forms {
         private void editPropsBtn_Click(object sender, System.EventArgs e) {
             using PropEditorForm editSrvDialog = new();
             if (srvNameBox.TextLength > 0)
-                SelectedPropModel.ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.ServerName]).StringValue = srvNameBox.Text;
+                SelectedPropModel.ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[MmsDependServerPropKeys.ServerName]).StringValue = srvNameBox.Text;
             if (ipV4Box.TextLength > 0)
-                SelectedPropModel.ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.PortI4]).StringValue = ipV4Box.Text;
+                SelectedPropModel.ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[MmsDependServerPropKeys.PortI4]).StringValue = ipV4Box.Text;
             if (ipV6Box.Enabled && ipV6Box.TextLength > 0)
-                SelectedPropModel.ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.PortI6]).StringValue = ipV6Box.Text;
+                SelectedPropModel.ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[MmsDependServerPropKeys.PortI6]).StringValue = ipV6Box.Text;
             editSrvDialog.PopulateBoxes(SelectedPropModel.ServerPropList);
             if (editSrvDialog.ShowDialog() == DialogResult.OK) {
                 SelectedPropModel.ServerPropList = editSrvDialog.workingProps;
@@ -79,9 +79,9 @@ namespace BedrockService.Client.Forms {
                 _serviceConfiguration.GetPort()
             };
             foreach (IServerConfiguration serverConfiguration in _serverConfigurations) {
-                usedPorts.Add(serverConfiguration.GetProp(BmsDependServerPropKeys.PortI4).ToString());
+                usedPorts.Add(serverConfiguration.GetProp(MmsDependServerPropKeys.PortI4).ToString());
                 if (serverConfiguration.GetServerArch() != MinecraftServerArch.Java) {
-                    usedPorts.Add(serverConfiguration.GetProp(BmsDependServerPropKeys.PortI6).ToString());
+                    usedPorts.Add(serverConfiguration.GetProp(MmsDependServerPropKeys.PortI6).ToString());
                 }
             }
             foreach (string port in usedPorts) {
@@ -94,13 +94,13 @@ namespace BedrockService.Client.Forms {
                 if (SelectedPropModel.ServicePropList.First(prop => prop.KeyName == ServerPropertyStrings[ServerPropertyKeys.MinecraftType]).StringValue == "Java") {
                     SelectedPropModel.ServicePropList.First(prop => prop.KeyName == ServerPropertyStrings[ServerPropertyKeys.ServerName]).StringValue = srvNameBox.Text;
                 } else {
-                    SelectedPropModel.ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.ServerName]).StringValue = srvNameBox.Text;
+                    SelectedPropModel.ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[MmsDependServerPropKeys.ServerName]).StringValue = srvNameBox.Text;
                 }
             }
             if (ipV4Box.TextLength > 0)
-                SelectedPropModel.ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.PortI4]).StringValue = ipV4Box.Text;
+                SelectedPropModel.ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[MmsDependServerPropKeys.PortI4]).StringValue = ipV4Box.Text;
             if (ipV6Box.Enabled && ipV6Box.TextLength > 0)
-                SelectedPropModel.ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.PortI6]).StringValue = ipV6Box.Text;
+                SelectedPropModel.ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[MmsDependServerPropKeys.PortI6]).StringValue = ipV6Box.Text;
 
             SelectedPropModel.ServicePropList.First(prop => prop.KeyName == ServerPropertyStrings[ServerPropertyKeys.ServerVersion]).StringValue = ((SimpleVersionModel)VersionSelectComboBox.SelectedItem).Version;
             DialogResult = DialogResult.OK;

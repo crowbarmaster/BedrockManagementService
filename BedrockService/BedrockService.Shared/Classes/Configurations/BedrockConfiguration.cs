@@ -109,28 +109,28 @@ namespace BedrockService.Shared.Classes.Configurations {
                 }
             }
             PlayerManager.LoadPlayerDatabase();
-            if (File.Exists(GetServerFilePath(BdsFileNameKeys.DeployedINI, this)) && GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()) {
-                SetSettingsProp(ServerPropertyKeys.ServerVersion, File.ReadAllText(GetServerFilePath(BdsFileNameKeys.DeployedINI, this)));
+            if (File.Exists(GetServerFilePath(ServerFileNameKeys.DeployedINI, this)) && GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()) {
+                SetSettingsProp(ServerPropertyKeys.ServerVersion, File.ReadAllText(GetServerFilePath(ServerFileNameKeys.DeployedINI, this)));
             }
         }
 
         public void ProcessNewServerConfiguration() {
-            Property srvNameProp = ServerPropList.FirstOrDefault(prop => prop != null && prop.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.ServerName]);
+            Property srvNameProp = ServerPropList.FirstOrDefault(prop => prop != null && prop.KeyName == BmsDependServerPropStrings[MmsDependServerPropKeys.ServerName]);
             GetSettingsProp(ServerPropertyKeys.ServerPath).SetValue($@"{ServersPath}\{srvNameProp.StringValue}");
             GetSettingsProp(ServerPropertyKeys.ServerExeName).SetValue($"BedrockService.{srvNameProp.StringValue}.exe");
             GetSettingsProp(ServerPropertyKeys.FileName).SetValue($@"{srvNameProp.StringValue}.conf");
         }
 
         public bool IsPrimaryServer() {
-            return GetProp(BmsDependServerPropKeys.PortI4).StringValue == "19132" ||
-            GetProp(BmsDependServerPropKeys.PortI4).StringValue == "19133" ||
-            GetProp(BmsDependServerPropKeys.PortI6).StringValue == "19132" ||
-            GetProp(BmsDependServerPropKeys.PortI6).StringValue == "19133";
+            return GetProp(MmsDependServerPropKeys.PortI4).StringValue == "19132" ||
+            GetProp(MmsDependServerPropKeys.PortI4).StringValue == "19133" ||
+            GetProp(MmsDependServerPropKeys.PortI6).StringValue == "19132" ||
+            GetProp(MmsDependServerPropKeys.PortI6).StringValue == "19133";
         }
 
         public void UpdateServerProps(string version) {
             DefaultPropList.Clear();
-            DefaultPropList = MinecraftFileUtilities.GetDefaultPropListFromFile(GetServiceFilePath(BmsFileNameKeys.BedrockStockProps_Ver, version));
+            DefaultPropList = MinecraftFileUtilities.GetDefaultPropListFromFile(GetServiceFilePath(MmsFileNameKeys.BedrockStockProps_Ver, version));
             List<Property> newList = new List<Property>();
             ServerPropList.ForEach(prop => {
                 if (DefaultPropList.Where(x => x.KeyName == prop.KeyName).Count() > 0) {
@@ -173,7 +173,7 @@ namespace BedrockService.Shared.Classes.Configurations {
             }
         }
 
-        public void SetProp(BmsDependServerPropKeys key, string newValue) {
+        public void SetProp(MmsDependServerPropKeys key, string newValue) {
             try {
                 Property serverProp = ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[key]);
                 ServerPropList[ServerPropList.IndexOf(serverProp)].SetValue(newValue);
@@ -204,7 +204,7 @@ namespace BedrockService.Shared.Classes.Configurations {
 
         }
 
-        public Property GetProp(BmsDependServerPropKeys key) {
+        public Property GetProp(MmsDependServerPropKeys key) {
             try {
                 Property foundProp = ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[key]);
                 return foundProp;
@@ -301,7 +301,7 @@ namespace BedrockService.Shared.Classes.Configurations {
 
         public string GetDeployedVersion() {
             try {
-                return File.ReadAllText(GetServerFilePath(BdsFileNameKeys.DeployedINI, this));
+                return File.ReadAllText(GetServerFilePath(ServerFileNameKeys.DeployedINI, this));
 
             } catch {
                 return "None";
@@ -309,7 +309,7 @@ namespace BedrockService.Shared.Classes.Configurations {
         }
 
         public void SetDeployedVersion(string version) {
-            File.WriteAllText(GetServerFilePath(BdsFileNameKeys.DeployedINI, this), version);
+            File.WriteAllText(GetServerFilePath(ServerFileNameKeys.DeployedINI, this), version);
         }
 
         public IUpdater GetUpdater() => _updater;

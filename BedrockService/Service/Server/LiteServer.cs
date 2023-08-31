@@ -308,7 +308,7 @@ namespace BedrockService.Service.Server {
                 MinecraftFileUtilities.WriteServerPropsFile(_serverConfiguration);
 
                 try {
-                    if (File.Exists(GetServerFilePath(BdsFileNameKeys.BmsServer_Name, _serverConfiguration, _serverConfiguration.GetServerName()))) {
+                    if (File.Exists(GetServerFilePath(ServerFileNameKeys.BmsServer_Name, _serverConfiguration, _serverConfiguration.GetServerName()))) {
                         if (ProcessUtilities.MonitoredAppExists(appName)) {
                             ProcessUtilities.KillProcessList(Process.GetProcessesByName(appName));
                         }

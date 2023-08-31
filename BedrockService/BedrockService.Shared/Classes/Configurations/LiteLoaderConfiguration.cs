@@ -100,22 +100,22 @@ namespace BedrockService.Shared.Classes.Configurations {
                 }
             }
             PlayerManager.LoadPlayerDatabase();
-            if (File.Exists(GetServerFilePath(BdsFileNameKeys.DeployedINI, this)) && GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()) {
-                SetSettingsProp(ServerPropertyKeys.ServerVersion, File.ReadAllText(GetServerFilePath(BdsFileNameKeys.DeployedINI, this)));
+            if (File.Exists(GetServerFilePath(ServerFileNameKeys.DeployedINI, this)) && GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()) {
+                SetSettingsProp(ServerPropertyKeys.ServerVersion, File.ReadAllText(GetServerFilePath(ServerFileNameKeys.DeployedINI, this)));
             }
         }
 
         public bool IsPrimaryServer() {
-            return GetProp(BmsDependServerPropKeys.PortI4).StringValue == "19132" ||
-            GetProp(BmsDependServerPropKeys.PortI4).StringValue == "19133" ||
-            GetProp(BmsDependServerPropKeys.PortI6).StringValue == "19132" ||
-            GetProp(BmsDependServerPropKeys.PortI6).StringValue == "19133";
+            return GetProp(MmsDependServerPropKeys.PortI4).StringValue == "19132" ||
+            GetProp(MmsDependServerPropKeys.PortI4).StringValue == "19133" ||
+            GetProp(MmsDependServerPropKeys.PortI6).StringValue == "19132" ||
+            GetProp(MmsDependServerPropKeys.PortI6).StringValue == "19133";
         }
 
         public void UpdateServerProps(string version) {
             DefaultPropList.Clear();
             try {
-                File.ReadAllLines(GetServiceFilePath(BmsFileNameKeys.BedrockStockProps_Ver, _updater.GetBaseVersion(version))).ToList().ForEach(entry => {
+                File.ReadAllLines(GetServiceFilePath(MmsFileNameKeys.BedrockStockProps_Ver, _updater.GetBaseVersion(version))).ToList().ForEach(entry => {
                     string[] splitEntry = entry.Split('=');
                     Property propToSet = new Property(splitEntry[0], splitEntry[1]);
                     Property existingProp = ServerPropList.FirstOrDefault(x => x.KeyName == propToSet.KeyName);
@@ -166,7 +166,7 @@ namespace BedrockService.Shared.Classes.Configurations {
             }
         }
 
-        public void SetProp(BmsDependServerPropKeys key, string newValue) {
+        public void SetProp(MmsDependServerPropKeys key, string newValue) {
             try {
                 Property serverProp = ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[key]);
                 ServerPropList[ServerPropList.IndexOf(serverProp)].SetValue(newValue);
@@ -186,7 +186,7 @@ namespace BedrockService.Shared.Classes.Configurations {
         }
 
         public void ProcessNewServerConfiguration() {
-            Property srvNameProp = ServerPropList.FirstOrDefault(prop => prop != null && prop.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.ServerName]);
+            Property srvNameProp = ServerPropList.FirstOrDefault(prop => prop != null && prop.KeyName == BmsDependServerPropStrings[MmsDependServerPropKeys.ServerName]);
             GetSettingsProp(ServerPropertyKeys.ServerPath).SetValue($@"{ServersPath}\{srvNameProp.StringValue}");
             GetSettingsProp(ServerPropertyKeys.ServerExeName).SetValue($"BedrockService.{srvNameProp.StringValue}.exe");
             GetSettingsProp(ServerPropertyKeys.FileName).SetValue($@"{srvNameProp.StringValue}.conf");
@@ -204,7 +204,7 @@ namespace BedrockService.Shared.Classes.Configurations {
 
         }
 
-        public Property GetProp(BmsDependServerPropKeys key) {
+        public Property GetProp(MmsDependServerPropKeys key) {
             try {
                 Property foundProp = ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[key]);
                 return foundProp;
@@ -303,7 +303,7 @@ namespace BedrockService.Shared.Classes.Configurations {
 
         public string GetDeployedVersion() {
             try {
-                return File.ReadAllText(GetServerFilePath(BdsFileNameKeys.DeployedINI, this));
+                return File.ReadAllText(GetServerFilePath(ServerFileNameKeys.DeployedINI, this));
 
             } catch {
                 return "None";

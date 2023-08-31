@@ -334,7 +334,7 @@ namespace BedrockService.Service.Server {
                 MinecraftFileUtilities.WriteServerPropsFile(_serverConfiguration);
 
                 try {
-                    if (File.Exists(GetServerFilePath(BdsFileNameKeys.JavaServer_Name, _serverConfiguration, _serverConfiguration.GetServerName()))) {
+                    if (File.Exists(GetServerFilePath(ServerFileNameKeys.JavaServer_Name, _serverConfiguration, GetServerName()))) {
                         ProcessUtilities.KillJarProcess(GetServerName());
                         CreateProcess();
                     } else {
@@ -354,7 +354,7 @@ namespace BedrockService.Service.Server {
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true,
-                FileName = GetServiceFilePath(BmsFileNameKeys.Jdk17JavaMmsExe),
+                FileName = GetServiceFilePath(MmsFileNameKeys.Jdk17JavaMmsExe),
                 WorkingDirectory = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath).StringValue,
                 Arguments = $"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.JavaArgs)} -\"DMinecraftService_{_serverConfiguration.GetServerName()}\" -jar {fileName} nogui",
             };

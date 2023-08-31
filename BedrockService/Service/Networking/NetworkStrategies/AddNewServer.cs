@@ -35,11 +35,11 @@ namespace BedrockService.Service.Networking.NetworkStrategies
             if(archProp.StringValue == "Java") { 
                 serverNameProp = servicePropList?.First(p => p.KeyName == ServerPropertyStrings[ServerPropertyKeys.ServerName]);
             } else {
-                serverNameProp = propList?.First(p => p.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.ServerName]);
+                serverNameProp = propList?.First(p => p.KeyName == BmsDependServerPropStrings[MmsDependServerPropKeys.ServerName]);
             }
-            Property? ipV4Prop = propList?.First(p => p.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.PortI4]);
+            Property? ipV4Prop = propList?.First(p => p.KeyName == BmsDependServerPropStrings[MmsDependServerPropKeys.PortI4]);
             if(archProp.StringValue != "Java") {
-                ipV6Prop = propList?.First(p => p.KeyName == BmsDependServerPropStrings[BmsDependServerPropKeys.PortI6]);
+                ipV6Prop = propList?.First(p => p.KeyName == BmsDependServerPropStrings[MmsDependServerPropKeys.PortI6]);
             }
             Property? versionProp = servicePropList?.First(p => p.KeyName == ServerPropertyStrings[ServerPropertyKeys.ServerVersion]);
             EnumTypeLookup typeLookup = new(_logger, _serviceConfiguration);

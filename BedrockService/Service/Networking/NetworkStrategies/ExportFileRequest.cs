@@ -37,7 +37,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
                 exportData = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(exportFileInfo));
             }
             if (exportFileInfo.FileType == FileTypeFlags.ServicePackage) {
-                packageFile.CreateEntryFromFile(GetServiceFilePath(BmsFileNameKeys.ServiceConfig), GetServiceFilePath(BmsFileNameKeys.ServiceConfig));
+                packageFile.CreateEntryFromFile(GetServiceFilePath(MmsFileNameKeys.ServiceConfig), GetServiceFilePath(MmsFileNameKeys.ServiceConfig));
             }
             return (exportData, 0, NetworkMessageTypes.ExportFile);
         }
@@ -45,7 +45,7 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
 
         private void PrepareServerFiles(byte serverIndex, ExportImportFileModel exportFileInfo, IServerConfiguration server, ZipArchive packageFile) {
             if (exportFileInfo.PackageFlags >= PackageFlags.ConfigFile) {
-                packageFile.CreateEntryFromFile(GetServiceFilePath(BmsFileNameKeys.ServerConfig_Name, server.GetServerName()), GetServiceFileName(BmsFileNameKeys.ServerConfig_Name, server.GetServerName()));
+                packageFile.CreateEntryFromFile(GetServiceFilePath(MmsFileNameKeys.ServerConfig_Name, server.GetServerName()), GetServiceFileName(MmsFileNameKeys.ServerConfig_Name, server.GetServerName()));
             }
             if (exportFileInfo.PackageFlags >= PackageFlags.LastBackup) {
                 BackupInfoModel lastBackup = _configurator.EnumerateBackupsForServer(serverIndex).Result.FirstOrDefault();
@@ -54,14 +54,14 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
                 }
             }
             if (exportFileInfo.PackageFlags >= PackageFlags.WorldPacks) {
-                FileUtilities.CreatePackBackupFiles(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString(), server.GetProp(BmsDependServerPropKeys.LevelName).ToString(), packageFile);
+                FileUtilities.CreatePackBackupFiles(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString(), server.GetProp(MmsDependServerPropKeys.LevelName).ToString(), packageFile);
             }
             if (exportFileInfo.PackageFlags >= PackageFlags.PlayerDatabase) {
-                if (File.Exists(GetServiceFilePath(BmsFileNameKeys.ServerPlayerTelem_Name, server.GetServerName()))) {
-                    packageFile.CreateEntryFromFile(GetServiceFilePath(BmsFileNameKeys.ServerPlayerTelem_Name, server.GetServerName()), GetServiceFileName(BmsFileNameKeys.ServerPlayerTelem_Name, server.GetServerName()));
+                if (File.Exists(GetServiceFilePath(MmsFileNameKeys.ServerPlayerTelem_Name, server.GetServerName()))) {
+                    packageFile.CreateEntryFromFile(GetServiceFilePath(MmsFileNameKeys.ServerPlayerTelem_Name, server.GetServerName()), GetServiceFileName(MmsFileNameKeys.ServerPlayerTelem_Name, server.GetServerName()));
                 }
-                if (File.Exists(GetServiceFilePath(BmsFileNameKeys.ServerPlayerRegistry_Name, server.GetServerName()))) {
-                    packageFile.CreateEntryFromFile(GetServiceFilePath(BmsFileNameKeys.ServerPlayerRegistry_Name, server.GetServerName()), GetServiceFileName(BmsFileNameKeys.ServerPlayerRegistry_Name, server.GetServerName()));
+                if (File.Exists(GetServiceFilePath(MmsFileNameKeys.ServerPlayerRegistry_Name, server.GetServerName()))) {
+                    packageFile.CreateEntryFromFile(GetServiceFilePath(MmsFileNameKeys.ServerPlayerRegistry_Name, server.GetServerName()), GetServiceFileName(MmsFileNameKeys.ServerPlayerRegistry_Name, server.GetServerName()));
                 }
             }
         }

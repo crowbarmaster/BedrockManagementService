@@ -68,23 +68,23 @@ namespace BedrockService.Shared.Utilities {
         public static void AppendServerPacksToArchive(string serverPath, ZipArchive backupZip, DirectoryInfo levelDirInfo) {
             string levelName = levelDirInfo.Name;
             CreatePackBackupFiles(serverPath, levelName, backupZip);
-            if (Directory.Exists(GetServerDirectory(BdsDirectoryKeys.ResourcePacksDir, serverPath))) {
+            if (Directory.Exists(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath))) {
                 ClearTempDir().Wait();
-                ZipFile.CreateFromDirectory(string.Format(GetServerDirectory(BdsDirectoryKeys.ResourcePacksDir, serverPath), levelName), $@"{Path.GetTempPath()}\BMSTemp\resource_packs.zip");
+                ZipFile.CreateFromDirectory(string.Format(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath), levelName), $@"{Path.GetTempPath()}\BMSTemp\resource_packs.zip");
                 backupZip.CreateEntryFromFile($@"{Path.GetTempPath()}\BMSTemp\resource_packs.zip", "resource_packs.zip");
             }
-            if (Directory.Exists(GetServerDirectory(BdsDirectoryKeys.BehaviorPacksDir, serverPath))) {
+            if (Directory.Exists(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath))) {
                 ClearTempDir().Wait();
-                ZipFile.CreateFromDirectory(string.Format(GetServerDirectory(BdsDirectoryKeys.BehaviorPacksDir, serverPath), levelName), $@"{Path.GetTempPath()}\BMSTemp\behavior_packs.zip");
+                ZipFile.CreateFromDirectory(string.Format(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath), levelName), $@"{Path.GetTempPath()}\BMSTemp\behavior_packs.zip");
                 backupZip.CreateEntryFromFile($@"{Path.GetTempPath()}\BMSTemp\behavior_packs.zip", "behavior_packs.zip");
             }
         }
 
         public static void CreatePackBackupFiles(string serverPath, string levelName, ZipArchive destinationArchive) {
-            string resouceFolderPath = GetServerDirectory(BdsDirectoryKeys.ResourcePacksDir, serverPath);
-            string behaviorFolderPath = GetServerDirectory(BdsDirectoryKeys.BehaviorPacksDir, serverPath);
-            string behaviorFilePath = GetServerFilePath(BdsFileNameKeys.WorldBehaviorPacks, serverPath);
-            string resoruceFilePath = GetServerFilePath(BdsFileNameKeys.WorldResourcePacks, serverPath);
+            string resouceFolderPath = GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath);
+            string behaviorFolderPath = GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath);
+            string behaviorFilePath = GetServerFilePath(ServerFileNameKeys.WorldBehaviorPacks, serverPath);
+            string resoruceFilePath = GetServerFilePath(ServerFileNameKeys.WorldResourcePacks, serverPath);
             MinecraftPackParser packParser = new();
             packParser.ParseDirectory(resouceFolderPath);
             packParser.ParseDirectory(behaviorFolderPath);

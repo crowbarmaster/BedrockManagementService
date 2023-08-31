@@ -20,8 +20,8 @@ namespace BedrockService.Shared.Classes {
                 throw new ArgumentNullException(nameof(serverConfiguration));
             }
             _serverConfiguration = serverConfiguration;
-            _knownDatabasePath = GetServiceFilePath(BmsFileNameKeys.ServerPlayerTelem_Name, _serverConfiguration.GetServerName());
-            _registeredDatabasePath = GetServiceFilePath(BmsFileNameKeys.ServerPlayerRegistry_Name, _serverConfiguration.GetServerName());
+            _knownDatabasePath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerTelem_Name, _serverConfiguration.GetServerName());
+            _registeredDatabasePath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerRegistry_Name, _serverConfiguration.GetServerName());
         }
 
         [JsonConstructor]
@@ -83,8 +83,8 @@ namespace BedrockService.Shared.Classes {
 
         public void LoadPlayerDatabase() {
             string serverName = _serverConfiguration.GetServerName();
-            string dbPath = GetServiceFilePath(BmsFileNameKeys.ServerPlayerTelem_Name, serverName);
-            string regPath = GetServiceFilePath(BmsFileNameKeys.ServerPlayerRegistry_Name, serverName);
+            string dbPath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerTelem_Name, serverName);
+            string regPath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerRegistry_Name, serverName);
             List<string[]> playerDbEntries = FilterLinesFromFile(dbPath);
             List<string[]> playerRegEntries = FilterLinesFromFile(regPath);
             playerDbEntries.ForEach(x => {

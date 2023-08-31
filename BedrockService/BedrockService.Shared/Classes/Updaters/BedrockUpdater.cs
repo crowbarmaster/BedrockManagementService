@@ -31,9 +31,9 @@ namespace BedrockService.Shared.Classes.Updaters {
         }
 
         public void Initialize() {
-            if (!File.Exists(GetServiceFilePath(BmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[_serverArch]))) {
+            if (!File.Exists(GetServiceFilePath(MmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[_serverArch]))) {
                 _logger.AppendLine("Version ini file missing, creating...");
-                File.Create(GetServiceFilePath(BmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[_serverArch])).Close();
+                File.Create(GetServiceFilePath(MmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[_serverArch])).Close();
                 CheckLatestVersion().Wait();
                 return;
             }
@@ -45,7 +45,7 @@ namespace BedrockService.Shared.Classes.Updaters {
         public virtual Task CheckLatestVersion() {
             return Task.Run(() => {
                 _logger.AppendLine("Checking latest BDS Version...");
-                string content = HTTPHandler.FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.BdsVersionJson]).Result;
+                string content = HTTPHandler.FetchHTTPContent(BmsUrlStrings[MmsUrlKeys.BdsVersionJson]).Result;
                 if (content == null)
                     return;
                 List<BedrockVersionHistoryJson> versionList = JsonSerializer.Deserialize<List<BedrockVersionHistoryJson>>(content);
@@ -55,20 +55,20 @@ namespace BedrockService.Shared.Classes.Updaters {
                 string fetchedVersion = latest.Version;
 
                 _logger.AppendLine($"Latest version found: \"{fetchedVersion}\"");
-                if (!File.Exists(GetServiceFilePath(BmsFileNameKeys.BdsUpdatePackage_Ver, fetchedVersion))) {
+                if (!File.Exists(GetServiceFilePath(MmsFileNameKeys.BdsUpdatePackage_Ver, fetchedVersion))) {
                     FetchBuild(fetchedVersion).Wait();
                     ProcessBdsPackage(fetchedVersion).Wait();
                 }
-                File.WriteAllText(GetServiceFilePath(BmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[_serverArch]), fetchedVersion);
+                File.WriteAllText(GetServiceFilePath(MmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[_serverArch]), fetchedVersion);
                 _serviceConfiguration.SetLatestVersion(_serverArch, fetchedVersion);
 
-                _serviceConfiguration.SetServerDefaultPropList(_serverArch, MinecraftFileUtilities.GetDefaultPropListFromFile(GetServiceFilePath(BmsFileNameKeys.BedrockStockProps_Ver, fetchedVersion)));
+                _serviceConfiguration.SetServerDefaultPropList(_serverArch, MinecraftFileUtilities.GetDefaultPropListFromFile(GetServiceFilePath(MmsFileNameKeys.BedrockStockProps_Ver, fetchedVersion)));
             });
         }
 
         private Task ProcessBdsPackage(string version) {
             return Task.Run(() => {
-                string propFile = GetServiceFilePath(BmsFileNameKeys.BedrockStockProps_Ver, version);
+                string propFile = GetServiceFilePath(MmsFileNameKeys.BedrockStockProps_Ver, version);
                 if (!File.Exists(propFile)) {
                     FileInfo file = new(propFile);
                     BedrockUpdatePackageProcessor packageProcessor = new(version, file.Directory.FullName);
@@ -82,8 +82,8 @@ namespace BedrockService.Shared.Classes.Updaters {
         public virtual Task<bool> FetchBuild(string version) {
             return Task.Run(() => {
                 _logger.AppendLine($"Now downloading version {version}, please wait...");
-                string fetchUrl = string.Format(BmsUrlStrings[BmsUrlKeys.BdsPackage_Ver], version);
-                string zipPath = GetServiceFilePath(BmsFileNameKeys.BdsUpdatePackage_Ver, version);
+                string fetchUrl = string.Format(BmsUrlStrings[MmsUrlKeys.BdsPackage_Ver], version);
+                string zipPath = GetServiceFilePath(MmsFileNameKeys.BdsUpdatePackage_Ver, version);
                 new FileInfo(zipPath).Directory.Create();
                 if (HTTPHandler.RetrieveFileFromUrl(fetchUrl, zipPath).Result) {
                     ProcessBdsPackage(version).Wait();
@@ -101,7 +101,7 @@ namespace BedrockService.Shared.Classes.Updaters {
                 string exeName = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName).StringValue;
                 ProcessUtilities.KillProcessList(Process.GetProcessesByName(exeName.Substring(0, exeName.Length - 4)));
                 string version = versionOverride == "" ? _serverConfiguration.GetServerVersion() : versionOverride;
-                FileInfo originalExeInfo = new(GetServerFilePath(BdsFileNameKeys.VanillaBedrock, _serverConfiguration));
+                FileInfo originalExeInfo = new(GetServerFilePath(ServerFileNameKeys.VanillaBedrock, _serverConfiguration));
                 FileInfo bmsExeInfo = new($@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName)}");
                 try {
                     if (!bmsExeInfo.Directory.Exists) {
@@ -110,7 +110,7 @@ namespace BedrockService.Shared.Classes.Updaters {
                     MinecraftFileUtilities.CleanBedrockDirectory(_serverConfiguration);
                     if (!Directory.Exists(_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString()))
                         Directory.CreateDirectory(_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString());
-                    string filePath = GetServiceFilePath(BmsFileNameKeys.BdsUpdatePackage_Ver, version);
+                    string filePath = GetServiceFilePath(MmsFileNameKeys.BdsUpdatePackage_Ver, version);
                     if (!File.Exists(filePath)) {
                         if (!FetchBuild(version).Result) {
                             throw new FileNotFoundException($"Service could not locate file \"Update_{version}.zip\" and version was not found in BDS manifest!");
@@ -121,7 +121,7 @@ namespace BedrockService.Shared.Classes.Updaters {
                     });
                     FileUtilities.ExtractZipToDirectory(filePath, _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString(), progress).Wait();
 
-                    File.WriteAllText(GetServerFilePath(BdsFileNameKeys.DeployedINI, _serverConfiguration), version);
+                    File.WriteAllText(GetServerFilePath(ServerFileNameKeys.DeployedINI, _serverConfiguration), version);
                     if (_serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()) {
                         _serverConfiguration.SetServerVersion(version);
                     }
@@ -139,7 +139,7 @@ namespace BedrockService.Shared.Classes.Updaters {
 
         public List<SimpleVersionModel> GetVersionList() {
             List<SimpleVersionModel> result = new List<SimpleVersionModel>();
-            string content = HTTPHandler.FetchHTTPContent(BmsUrlStrings[BmsUrlKeys.BdsVersionJson]).Result;
+            string content = HTTPHandler.FetchHTTPContent(BmsUrlStrings[MmsUrlKeys.BdsVersionJson]).Result;
             if (content == null)
                 return new List<SimpleVersionModel>();
             List<BedrockVersionHistoryJson> versionList = JsonSerializer.Deserialize<List<BedrockVersionHistoryJson>>(content);

@@ -22,9 +22,6 @@ namespace BedrockService.Client.Management {
             Logger.AppendLine($"Bedrock Client version {Application.ProductVersion} has started.");
             Logger.AppendLine($"Working directory: {processInfo.GetDirectory()}");
             SharedStringBase.SetWorkingDirectory(processInfo);
-            if (UpgradeAssistant_26RC2.IsClientUpgradeRequired(processInfo.GetDirectory())) {
-                UpgradeAssistant_26RC2.PerformClientUpgrade(processInfo.GetDirectory());
-            }
         }
 
         public static MainWindow MainWindow {

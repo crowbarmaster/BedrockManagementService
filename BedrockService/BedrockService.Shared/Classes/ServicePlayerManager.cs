@@ -17,8 +17,8 @@ namespace BedrockService.Shared.Classes {
 
         public ServicePlayerManager(IServiceConfiguration? serviceConfiguration) {
             _serviceConfiguration = serviceConfiguration;
-            _knownDatabasePath = GetServiceFilePath(BmsFileNameKeys.ServerPlayerTelem_Name, "Service");
-            _registeredDatabasePath = GetServiceFilePath(BmsFileNameKeys.ServerPlayerRegistry_Name, "Service");
+            _knownDatabasePath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerTelem_Name, "Service");
+            _registeredDatabasePath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerRegistry_Name, "Service");
         }
 
         [JsonConstructor]
@@ -70,8 +70,8 @@ namespace BedrockService.Shared.Classes {
         }
         
         public void LoadPlayerDatabase() {
-            string dbPath = GetServiceFilePath(BmsFileNameKeys.ServerPlayerTelem_Name, "Service");
-            string regPath = GetServiceFilePath(BmsFileNameKeys.ServerPlayerRegistry_Name, "Service");
+            string dbPath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerTelem_Name, "Service");
+            string regPath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerRegistry_Name, "Service");
             List<string[]> playerDbEntries = FilterLinesFromFile(dbPath);
             List<string[]> playerRegEntries = FilterLinesFromFile(regPath);
             playerDbEntries.ForEach(x => {

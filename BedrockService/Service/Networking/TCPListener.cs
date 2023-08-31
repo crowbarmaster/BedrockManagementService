@@ -57,7 +57,7 @@ namespace BedrockService.Service.Networking {
                     try {
                         if (_inListener != null && _inListener.Pending() && _serviceStarted) {
                             if (_canClientConnect) {
-                                _logger.AppendLine("BMS Client has connected to service.");
+                                _logger.AppendLine("MMS Client has connected to service.");
                                 _canClientConnect = false;
                                 _cancelTokenSource = new CancellationTokenSource();
                                 _client = _inListener.AcceptTcpClient();

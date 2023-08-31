@@ -32,8 +32,8 @@ namespace BedrockService.Service.Core {
         public Task<bool> Initialize() {
             return Task.Run(() => {
                 string? startedVersion = Process.GetCurrentProcess().MainModule?.FileVersionInfo.ProductVersion;
-                foreach (BmsDirectoryKeys key in BmsDirectoryStrings.Keys) {
-                    if (key != BmsDirectoryKeys.WorkingDirectory && !Directory.Exists(GetServiceDirectory(key))) {
+                foreach (ServiceDirectoryKeys key in BmsDirectoryStrings.Keys) {
+                    if (key != ServiceDirectoryKeys.WorkingDirectory && !Directory.Exists(GetServiceDirectory(key))) {
                         Directory.CreateDirectory(GetServiceDirectory(key));
                     }
                 }
@@ -52,11 +52,11 @@ namespace BedrockService.Service.Core {
                         if (answer != null && answer == "Yes") {
                             _serviceConfiguration.GetProp(ServicePropertyKeys.AcceptedMojangLic).SetValue("True");
                         } else {
-                            _logger.AppendLine("You have not accepted Mojang's EULA.\n Read terms at: https://minecraft.net/terms \n BedrockService will now terminate.");
+                            _logger.AppendLine("You have not accepted Mojang's EULA.\n Read terms at: https://minecraft.net/terms \n MinecraftService will now terminate.");
                             return false;
                         }
                     } else {
-                        _logger.AppendLine("You have not accepted Mojang's EULA.\n Read terms at: https://minecraft.net/terms \n BedrockService will now terminate.");
+                        _logger.AppendLine("You have not accepted Mojang's EULA.\n Read terms at: https://minecraft.net/terms \n MinecraftService will now terminate.");
                         return false;
                     }
                 }
@@ -93,7 +93,7 @@ namespace BedrockService.Service.Core {
 
         public bool Start(HostControl? hostControl) {
             if (!Initialize().Result) {
-                _logger.AppendLine("BedrockService did not initialize correctly.");
+                _logger.AppendLine("MinecraftService did not initialize correctly.");
                 Task.Delay(3000).Wait();
                 Environment.Exit(1);
             }
@@ -153,7 +153,7 @@ namespace BedrockService.Service.Core {
                 _CurrentServiceStatus = ServiceStatus.Stopped;
                 return true;
             } catch (Exception e) {
-                _logger.AppendLine($"Error Stopping BedrockServiceWrapper {e.StackTrace}");
+                _logger.AppendLine($"Error Stopping MinecraftService {e.StackTrace}");
                 return false;
             }
         }
@@ -169,7 +169,7 @@ namespace BedrockService.Service.Core {
                     Task.Delay(1000).Wait();
                     Start(null);
                 } catch (Exception e) {
-                    _logger.AppendLine($"Error Stopping BedrockServiceWrapper {e.Message} StackTrace: {e.StackTrace}");
+                    _logger.AppendLine($"Error Stopping MinecraftServiceWrapper {e.Message} StackTrace: {e.StackTrace}");
                 }
             });
         }
@@ -228,7 +228,7 @@ namespace BedrockService.Service.Core {
                     .Select(x => x.GetAllProps()
                         .GroupBy(z => z.StringValue)
                         .SelectMany(z => z
-                            .Where(y => y.KeyName.StartsWith(BmsDependServerPropStrings[BmsDependServerPropKeys.PortI4]))))
+                            .Where(y => y.KeyName.StartsWith(BmsDependServerPropStrings[MmsDependServerPropKeys.PortI4]))))
                     .GroupBy(z => z.Select(x => x.StringValue))
                     .SelectMany(x => x.Key)
                     .GroupBy(x => x)

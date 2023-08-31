@@ -17,20 +17,20 @@ namespace BedrockService.Service.Networking.NetworkStrategies {
             MinecraftPackParser archiveParser = new(data);
             foreach (MinecraftPackContainer container in archiveParser.FoundPacks) {
                 string serverPath = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp(ServerPropertyKeys.ServerPath).ToString();
-                string levelName = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp(BmsDependServerPropKeys.LevelName).ToString();
-                string knownPacksFile = GetServerFilePath(BdsFileNameKeys.ValidKnownPacks, serverPath);
+                string levelName = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp(MmsDependServerPropKeys.LevelName).ToString();
+                string knownPacksFile = GetServerFilePath(ServerFileNameKeys.ValidKnownPacks, serverPath);
                 string filePath;
                 if (container.ManifestType == MinecraftPackTypeStrings[MinecraftPackTypes.WorldPack]) {
-                    FileUtilities.CopyFolderTree(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo(GetServerDirectory(BdsDirectoryKeys.ServerWorldDir_LevelName, serverPath, container.FolderName)));
+                    FileUtilities.CopyFolderTree(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo(GetServerDirectory(ServerDirectoryKeys.ServerWorldDir_LevelName, serverPath, container.FolderName)));
                 }
                 if (container.ManifestType == MinecraftPackTypeStrings[MinecraftPackTypes.Behavior]) {
-                    filePath = GetServerFilePath(BdsFileNameKeys.WorldBehaviorPacks, serverPath);
+                    filePath = GetServerFilePath(ServerFileNameKeys.WorldBehaviorPacks, serverPath);
                     if (MinecraftFileUtilities.UpdateWorldPackFile(filePath, container.JsonManifest) && MinecraftFileUtilities.UpdateKnownPackFile(knownPacksFile, container)) {
                         FileUtilities.CopyFolderTree(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($@"{filePath}\{container.FolderName}"));
                     }
                 }
                 if (container.ManifestType == MinecraftPackTypeStrings[MinecraftPackTypes.Resource]) {
-                    filePath = GetServerFilePath(BdsFileNameKeys.WorldResourcePacks, serverPath);
+                    filePath = GetServerFilePath(ServerFileNameKeys.WorldResourcePacks, serverPath);
                     if (MinecraftFileUtilities.UpdateWorldPackFile(filePath, container.JsonManifest) && MinecraftFileUtilities.UpdateKnownPackFile(knownPacksFile, container)) {
                         FileUtilities.CopyFolderTree(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($@"{filePath}\{container.FolderName}"));
                     }

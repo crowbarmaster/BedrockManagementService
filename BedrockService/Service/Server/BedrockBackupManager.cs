@@ -44,7 +44,7 @@ namespace BedrockService.Service.Server {
             try {
                 string serverPath = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString();
                 string backupPath = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupPath).ToString();
-                string levelName = _serverConfiguration.GetProp(BmsDependServerPropKeys.LevelName).ToString();
+                string levelName = _serverConfiguration.GetProp(MmsDependServerPropKeys.LevelName).ToString();
                 DirectoryInfo worldsDir = new($@"{serverPath}\worlds");
                 DirectoryInfo backupDir = new($@"{backupPath}\{_serverConfiguration.GetServerName()}");
                 Dictionary<string, int> backupFileInfoPairs = new();
@@ -57,7 +57,7 @@ namespace BedrockService.Service.Server {
                 }
                 PruneBackups(backupDir);
                 _logger.AppendLine($"Backing up files for server {_serverConfiguration.GetServerName()}. Please wait!");
-                string levelDir = @$"\{_serverConfiguration.GetProp(BmsDependServerPropKeys.LevelName)}";
+                string levelDir = @$"\{_serverConfiguration.GetProp(MmsDependServerPropKeys.LevelName)}";
                 using FileStream fs = File.Create($@"{backupDir.FullName}\Backup-{DateTime.Now:yyyyMMdd_HHmmssff}.zip");
                 using ZipArchive backupZip = new(fs, ZipArchiveMode.Create);
                 bool result = BackupWorldFilesFromQuery(backupFileInfoPairs, worldsDir.FullName, backupZip).Result;
@@ -65,7 +65,7 @@ namespace BedrockService.Service.Server {
                 List<FileInfo> levelFiles = levelDirInfo.GetFiles("*.json").ToList();
                 levelFiles.AddRange(levelDirInfo.GetFiles("world_icon*"));
                 foreach (FileInfo levelFile in levelFiles) {
-                    backupZip.CreateEntryFromFile(levelFile.FullName, $"{_serverConfiguration.GetProp(BmsDependServerPropKeys.LevelName)}/{levelFile.Name}");
+                    backupZip.CreateEntryFromFile(levelFile.FullName, $"{_serverConfiguration.GetProp(MmsDependServerPropKeys.LevelName)}/{levelFile.Name}");
                 }
                 _server.WriteToStandardIn("save resume");
                 _server.WriteToStandardIn("say Server backup complete.");
@@ -87,7 +87,7 @@ namespace BedrockService.Service.Server {
             try {
                 DirectoryInfo worldsDir = new($@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\worlds");
                 FileInfo backupZipFileInfo = new($@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupPath)}\{_serverConfiguration.GetServerName()}\{zipFilePath}");
-                DirectoryInfo backupPacksDir = new($@"{worldsDir.FullName}\{_serverConfiguration.GetProp(BmsDependServerPropKeys.LevelName)}\InstalledPacks");
+                DirectoryInfo backupPacksDir = new($@"{worldsDir.FullName}\{_serverConfiguration.GetProp(MmsDependServerPropKeys.LevelName)}\InstalledPacks");
                 FileUtilities.DeleteFilesFromDirectory(worldsDir, true).Wait();
                 _logger.AppendLine($"Deleted world folder \"{worldsDir.Name}\"");
                 if (!backupPacksDir.Exists) {
