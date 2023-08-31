@@ -49,11 +49,11 @@ namespace BedrockService.Shared.Utilities {
             }
         }
 
-        public static void KillJarProcess(string jarName) {
+        public static void KillJarProcess(string serverName) {
             try {
                 List<RunningJavaProcessInfo> processList = GetJpsInfo().Result;
                 foreach (RunningJavaProcessInfo process in processList) {
-                    if (process.ProcessName.Contains(jarName)) {
+                    if (process.ProcessName.Contains($"MinecraftService_{serverName}")) {
                         Process jarProc = Process.GetProcessById(process.ProcessId);
                         if (jarProc != null) {
                             jarProc.Kill();
@@ -63,11 +63,11 @@ namespace BedrockService.Shared.Utilities {
             } catch { }
         }
 
-        public static int JarProcessExists(string jarName) {
+        public static int JarProcessExists(string serverName) {
             try {
                 List<RunningJavaProcessInfo> processList = GetJpsInfo().Result;
                 foreach (RunningJavaProcessInfo process in processList) {
-                    if (process.ProcessName.Contains(jarName)) {
+                    if (process.ProcessName.Contains($"MinecraftService_{serverName}")) {
                         return process.ProcessId;
                     }
                 }
@@ -101,7 +101,7 @@ namespace BedrockService.Shared.Utilities {
                 RedirectStandardOutput = true,
                 WorkingDirectory = GetServiceDirectory(BmsDirectoryKeys.Jdk17BinPath),
                 FileName = @"Jps.exe",
-                Arguments = $@"-m"
+                Arguments = $@"-mv"
             };
             Process process = Process.Start(processStartInfo);
             List<RunningJavaProcessInfo> output = new();

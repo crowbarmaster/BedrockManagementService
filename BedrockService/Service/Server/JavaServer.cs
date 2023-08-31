@@ -64,10 +64,8 @@ namespace BedrockService.Service.Server {
 
         public Task ServerStart() {
             return Task.Run(() => {
-                string exeName = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName).ToString();
-                string appName = exeName.Substring(0, exeName.Length - 4);
-                if (ProcessUtilities.JarProcessExists(appName) != 0) {
-                    ProcessUtilities.KillJarProcess(appName);
+                if (ProcessUtilities.JarProcessExists(GetServerName()) != 0) {
+                    ProcessUtilities.KillJarProcess(GetServerName());
                     Task.Delay(500).Wait();
                 }
                 _serverConfiguration.ValidateDeployedServer();
@@ -332,14 +330,12 @@ namespace BedrockService.Service.Server {
 
         private Task RunServer() {
             return new Task(() => {
-                string exeName = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName).ToString();
-                string appName = exeName.Substring(0, exeName.Length - 4);
                 _configurator.WriteJSONFiles(_serverConfiguration);
                 MinecraftFileUtilities.WriteServerPropsFile(_serverConfiguration);
 
                 try {
                     if (File.Exists(GetServerFilePath(BdsFileNameKeys.JavaServer_Name, _serverConfiguration, _serverConfiguration.GetServerName()))) {
-                        ProcessUtilities.KillJarProcess(appName);
+                        ProcessUtilities.KillJarProcess(GetServerName());
                         CreateProcess();
                     } else {
                         _logger.AppendLine($"The Java Server is not accessible at {$@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName)}"}\r\nCheck if the file is at that location and that permissions are correct.");
@@ -360,7 +356,7 @@ namespace BedrockService.Service.Server {
                 CreateNoWindow = true,
                 FileName = GetServiceFilePath(BmsFileNameKeys.Jdk17JavaMmsExe),
                 WorkingDirectory = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath).StringValue,
-                Arguments = $@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.JavaArgs)} -jar {fileName} nogui",
+                Arguments = $"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.JavaArgs)} -\"DMinecraftService_{_serverConfiguration.GetServerName()}\" -jar {fileName} nogui",
             };
             _serverProcess = Process.Start(processStartInfo);
             if (_serverProcess != null) {

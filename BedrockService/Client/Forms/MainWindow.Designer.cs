@@ -1,4 +1,7 @@
-﻿namespace BedrockService.Client.Forms {
+﻿
+using System.Windows.Forms;
+
+namespace BedrockService.Client.Forms {
     partial class MainWindow {
         /// <summary>
         /// Required designer variable.
@@ -187,7 +190,7 @@
             this.EditCfg.Name = "EditCfg";
             this.EditCfg.Size = new System.Drawing.Size(198, 26);
             this.EditCfg.TabIndex = 75;
-            this.EditCfg.Text = "Edit BDS/BMS Configs";
+            this.EditCfg.Text = "Edit BDS/MMS Configs";
             this.EditCfg.UseVisualStyleBackColor = true;
             EditCfg.Click += EditCfg_Click;
             // 
@@ -485,14 +488,14 @@
             // 
             this.servicePropMenuItem.Name = "servicePropMenuItem";
             this.servicePropMenuItem.Size = new System.Drawing.Size(222, 22);
-            this.servicePropMenuItem.Text = "Edit BMS server properties";
+            this.servicePropMenuItem.Text = "Edit MMS server properties";
             servicePropMenuItem.Click += servicePropMenuItem_Click;
             // 
             // editCoreServicePropertiesToolStripMenuItem
             // 
             this.editCoreServicePropertiesToolStripMenuItem.Name = "editCoreServicePropertiesToolStripMenuItem";
             this.editCoreServicePropertiesToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
-            this.editCoreServicePropertiesToolStripMenuItem.Text = "Edit BMS Service properties";
+            this.editCoreServicePropertiesToolStripMenuItem.Text = "Edit MMS Service properties";
             editCoreServicePropertiesToolStripMenuItem.Click += editCoreServicePropertiesToolStripMenuItem_Click;
             // 
             // importToolStripMenuItem
@@ -605,7 +608,7 @@
             this.MinimumSize = new System.Drawing.Size(745, 460);
             this.Name = "MainWindow";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Bedrock Service Management";
+            this.Text = $"Minecraft Management Service Client {Application.ProductVersion}";
             this.clientPage.ResumeLayout(false);
             this.clientPage.PerformLayout();
             this.servicePage.ResumeLayout(false);
@@ -646,7 +649,7 @@
         public System.Windows.Forms.TextBox LogBox;
         private System.Windows.Forms.TabControl logPageControl;
         private System.Windows.Forms.ToolTip startStopBtnToolTip;
-        private System.Windows.Forms.TextBox cmdTextBox;
+        private System.Windows.Forms.TextBox cmdTextBox;       
         private System.Windows.Forms.Button SendCmd;
         private System.Windows.Forms.Button ManPacks;
         private System.Windows.Forms.CheckBox scrollLockChkBox;
