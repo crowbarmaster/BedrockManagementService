@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace BedrockService.Shared.JsonModels.LiteLoaderJsonModels {
+namespace MinecraftService.Shared.JsonModels.LiteLoaderJsonModels {
     public class AddonsHelper {
         public string autoInstallPath { get; set; }
         public bool enabled { get; set; }

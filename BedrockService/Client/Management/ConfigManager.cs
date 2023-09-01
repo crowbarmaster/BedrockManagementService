@@ -1,10 +1,10 @@
-﻿using BedrockService.Shared.Classes;
-using BedrockService.Shared.Interfaces;
+﻿using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Interfaces;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace BedrockService.Client.Management {
+namespace MinecraftService.Client.Management {
     public class ConfigManager {
         public string ConfigDir = $@"{Directory.GetCurrentDirectory()}";
         public string ConfigFile;

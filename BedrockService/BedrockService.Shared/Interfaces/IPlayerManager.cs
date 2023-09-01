@@ -1,7 +1,7 @@
 ﻿
 using System.Collections.Generic;
 
-namespace BedrockService.Shared.Interfaces {
+namespace MinecraftService.Shared.Interfaces {
     public interface IPlayerManager {
         IPlayer PlayerConnected(string username, string xuid);
         IPlayer PlayerDisconnected(string username, string xuid);

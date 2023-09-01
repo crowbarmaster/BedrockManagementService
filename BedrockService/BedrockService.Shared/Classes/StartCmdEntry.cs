@@ -1,4 +1,4 @@
-﻿namespace BedrockService.Shared.Classes {
+﻿namespace MinecraftService.Shared.Classes {
     public class StartCmdEntry {
         public string Command = "help 1";
 

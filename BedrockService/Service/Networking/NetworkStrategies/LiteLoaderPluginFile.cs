@@ -1,9 +1,9 @@
-﻿using BedrockService.Service.Networking.Interfaces;
-using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
+﻿using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
 using System.IO.Compression;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class LiteLoaderPluginFile : IMessageParser {
 
         private readonly IServiceConfiguration _serviceConfiguration;

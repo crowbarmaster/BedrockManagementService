@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 
-namespace BedrockService.Shared.JsonModels.LiteLoaderJsonModels {
+namespace MinecraftService.Shared.JsonModels.LiteLoaderJsonModels {
     public class LiteLoaderConfigNodeModel {
         public string Name { get; set; }
         public LiteLoaderConfigNodeModel ParentNode { get; set; }

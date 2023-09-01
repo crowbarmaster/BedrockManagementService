@@ -1,6 +1,6 @@
-﻿using BedrockService.Shared.Interfaces;
+﻿using MinecraftService.Shared.Interfaces;
 
-namespace BedrockService.Shared.Classes {
+namespace MinecraftService.Shared.Classes {
     public class ClientSideServiceConfiguration : IClientSideServiceConfiguration {
         private readonly string _hostName;
         private readonly string _address;

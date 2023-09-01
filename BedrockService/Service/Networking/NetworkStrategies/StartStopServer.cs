@@ -1,8 +1,8 @@
-﻿using BedrockService.Service.Networking.Interfaces;
-using BedrockService.Service.Server.Interfaces;
-using BedrockService.Shared.SerializeModels;
+﻿using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Service.Server.Interfaces;
+using MinecraftService.Shared.SerializeModels;
 
-namespace BedrockService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class StartStopServer : IMessageParser {
         private readonly IBedrockService _service;
 

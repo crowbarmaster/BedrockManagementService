@@ -1,7 +1,7 @@
-﻿using BedrockService.Shared.SerializeModels;
+﻿using MinecraftService.Shared.SerializeModels;
 using Topshelf.Runtime;
 
-namespace BedrockService.Service.Core {
+namespace MinecraftService.Service.Core {
     public class WindowsService : IService {
         private readonly IBedrockService _bedrockService;
         private Topshelf.Host? _host;

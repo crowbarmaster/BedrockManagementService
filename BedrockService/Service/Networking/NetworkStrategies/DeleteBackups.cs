@@ -1,8 +1,8 @@
 ﻿
-using BedrockService.Service.Networking.Interfaces;
+using MinecraftService.Service.Networking.Interfaces;
 using System.Text;
 
-namespace BedrockService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies {
     class DeleteBackups : IMessageParser {
         private readonly IConfigurator _configurator;
 

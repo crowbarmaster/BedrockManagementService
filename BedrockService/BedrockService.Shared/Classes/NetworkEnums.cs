@@ -1,4 +1,4 @@
-﻿namespace BedrockService.Shared.Classes {
+﻿namespace MinecraftService.Shared.Classes {
     public enum NetworkMessageSource {
         Client,
         Server,

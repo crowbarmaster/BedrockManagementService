@@ -1,9 +1,9 @@
-﻿using BedrockService.Service.Networking.Interfaces;
-using BedrockService.Shared.SerializeModels;
+﻿using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Shared.SerializeModels;
 using Newtonsoft.Json;
 using System.Text;
 
-namespace BedrockService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class ServerStatusRequest : IMessageParser {
         private readonly IBedrockService _service;
         private readonly IServiceConfiguration _serviceConfiguration;

@@ -1,13 +1,13 @@
 ﻿
-using BedrockService.Service.Networking.Interfaces;
-using BedrockService.Service.Server;
-using BedrockService.Service.Server.Interfaces;
-using BedrockService.Shared.JsonModels.MinecraftJsonModels;
-using BedrockService.Shared.SerializeModels;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Service.Server;
+using MinecraftService.Service.Server.Interfaces;
+using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
+using MinecraftService.Shared.SerializeModels;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Service.Core {
-    public class BmsService : IBedrockService {
+namespace MinecraftService.Service.Core {
+    public class MmsService : IBedrockService {
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IServerLogger _logger;
         private readonly IProcessInfo _processInfo;
@@ -19,7 +19,7 @@ namespace BedrockService.Service.Core {
         private List<IServerController> _bedrockServers { get; set; } = new();
         private ServiceStatus _CurrentServiceStatus { get; set; }
 
-        public BmsService(IConfigurator configurator, IServerLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ITCPListener tCPListener) {
+        public MmsService(IConfigurator configurator, IServerLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ITCPListener tCPListener) {
             _tCPListener = tCPListener;
             _configurator = configurator;
             _logger = logger;
@@ -32,7 +32,7 @@ namespace BedrockService.Service.Core {
         public Task<bool> Initialize() {
             return Task.Run(() => {
                 string? startedVersion = Process.GetCurrentProcess().MainModule?.FileVersionInfo.ProductVersion;
-                foreach (ServiceDirectoryKeys key in BmsDirectoryStrings.Keys) {
+                foreach (ServiceDirectoryKeys key in MmsDirectoryStrings.Keys) {
                     if (key != ServiceDirectoryKeys.WorkingDirectory && !Directory.Exists(GetServiceDirectory(key))) {
                         Directory.CreateDirectory(GetServiceDirectory(key));
                     }
@@ -228,7 +228,7 @@ namespace BedrockService.Service.Core {
                     .Select(x => x.GetAllProps()
                         .GroupBy(z => z.StringValue)
                         .SelectMany(z => z
-                            .Where(y => y.KeyName.StartsWith(BmsDependServerPropStrings[MmsDependServerPropKeys.PortI4]))))
+                            .Where(y => y.KeyName.StartsWith(MmsDependServerPropStrings[MmsDependServerPropKeys.PortI4]))))
                     .GroupBy(z => z.Select(x => x.StringValue))
                     .SelectMany(x => x.Key)
                     .GroupBy(x => x)

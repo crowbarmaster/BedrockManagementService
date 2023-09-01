@@ -3,12 +3,12 @@
 // This file may need updated according to the specific scenario of the application being upgraded.
 // For more information on ASP.NET Core hosting, see https://docs.microsoft.com/aspnet/core/fundamentals/host/web-host
 
-global using BedrockService.Service.Core.Interfaces;
-global using BedrockService.Service.Management;
-global using BedrockService.Service.Networking;
-global using BedrockService.Shared.Classes;
-global using BedrockService.Shared.Interfaces;
-global using BedrockService.Shared.Utilities;
+global using MinecraftService.Service.Core.Interfaces;
+global using MinecraftService.Service.Management;
+global using MinecraftService.Service.Networking;
+global using MinecraftService.Shared.Classes;
+global using MinecraftService.Shared.Interfaces;
+global using MinecraftService.Shared.Utilities;
 global using Microsoft.AspNetCore.Hosting;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
@@ -21,9 +21,9 @@ global using System.Reflection;
 global using System.Threading;
 global using System.Threading.Tasks;
 global using Topshelf;
-using BedrockService.Service.Networking.Interfaces;
+using MinecraftService.Service.Networking.Interfaces;
 
-namespace BedrockService.Service
+namespace MinecraftService.Service
 {
     public class Program {
         public static bool IsExiting = false;
@@ -50,7 +50,7 @@ namespace BedrockService.Service
                         .AddSingleton<ServiceConfigurator>()
                         .AddSingleton<IServiceConfiguration>(x => x.GetRequiredService<ServiceConfigurator>())
                         .AddSingleton<IBedrockConfiguration>(x => x.GetRequiredService<ServiceConfigurator>())
-                        .AddSingleton<IBedrockService, Core.BmsService>()
+                        .AddSingleton<IBedrockService, Core.MmsService>()
                         .AddSingleton<ITCPListener, TCPListener>()
                         .AddSingleton<IConfigurator, ConfigManager>();
                 });

@@ -1,11 +1,11 @@
-﻿using BedrockService.Client.Management;
-using BedrockService.Shared.Classes;
-using BedrockService.Shared.Interfaces;
+﻿using MinecraftService.Client.Management;
+using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-namespace BedrockService.Client.Forms {
+namespace MinecraftService.Client.Forms {
     public partial class ClientConfigForm : Form {
         private readonly List<IClientSideServiceConfiguration> _clientConfigs;
         private readonly ConfigManager _configManager;

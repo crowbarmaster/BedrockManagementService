@@ -1,15 +1,15 @@
-﻿using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
-using BedrockService.Shared.SerializeModels;
-using BedrockService.Shared.Utilities;
+﻿using MinecraftService.Shared.Interfaces;
+using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
+using MinecraftService.Shared.SerializeModels;
+using MinecraftService.Shared.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Shared.Classes {
+namespace MinecraftService.Shared.Classes {
     public class ServiceConfigurator : ServiceInfo, IServiceConfiguration {
         private readonly IProcessInfo _processInfo;
         public ServiceConfigurator(IProcessInfo processInfo) : base() {
@@ -225,33 +225,33 @@ namespace BedrockService.Shared.Classes {
         public LLServerPluginRegistry GetPluginRegistry() => LLServerPluginRegistry;
 
         public PluginVersionInfo GetServerPluginInfo(int serverIndex, string pluginFilename) {
-            BmsServerPluginDatabase serverBase = LLServerPluginRegistry.ServerPluginList.Where(x => x.BmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).FirstOrDefault();
+            MmsServerPluginDatabase serverBase = LLServerPluginRegistry.ServerPluginList.Where(x => x.MmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).FirstOrDefault();
             if (serverBase == null) {
-                GetPluginRegistry().ServerPluginList.Add(new BmsServerPluginDatabase { BmsServerName = GetServerInfoByIndex(serverIndex).GetServerName(), InstalledPlugins = new() });
+                GetPluginRegistry().ServerPluginList.Add(new MmsServerPluginDatabase { MmsServerName = GetServerInfoByIndex(serverIndex).GetServerName(), InstalledPlugins = new() });
             }
             PluginVersionInfo pluginVersionInfo = GetPluginRegistry().ServerPluginList
-                .Where(x => x.BmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).First().InstalledPlugins
+                .Where(x => x.MmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).First().InstalledPlugins
                 .Where(y => y.PluginFileName == pluginFilename).FirstOrDefault();
             if (pluginVersionInfo == null) {
                 pluginVersionInfo = new PluginVersionInfo() { PluginFileName = pluginFilename };
                 LLServerPluginRegistry.ServerPluginList
-                .Where(x => x.BmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).First().InstalledPlugins
+                .Where(x => x.MmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).First().InstalledPlugins
                 .Add(pluginVersionInfo);
             }
             return pluginVersionInfo;
         }
 
         public void SetServerPluginInfo(int serverIndex, PluginVersionInfo info) {
-            BmsServerPluginDatabase serverBase = LLServerPluginRegistry.ServerPluginList.Where(x => x.BmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).FirstOrDefault();
+            MmsServerPluginDatabase serverBase = LLServerPluginRegistry.ServerPluginList.Where(x => x.MmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).FirstOrDefault();
             if (serverBase == null) {
-                GetPluginRegistry().ServerPluginList.Add(new BmsServerPluginDatabase { BmsServerName = GetServerInfoByIndex(serverIndex).GetServerName(), InstalledPlugins = new() });
+                GetPluginRegistry().ServerPluginList.Add(new MmsServerPluginDatabase { MmsServerName = GetServerInfoByIndex(serverIndex).GetServerName(), InstalledPlugins = new() });
             }
             PluginVersionInfo pluginVersionInfo = GetPluginRegistry().ServerPluginList
-                .Where(x => x.BmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).First().InstalledPlugins
+                .Where(x => x.MmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).First().InstalledPlugins
                 .Where(y => y.PluginFileName == info.PluginFileName).FirstOrDefault();
             if (pluginVersionInfo == null) {
                 LLServerPluginRegistry.ServerPluginList
-                .Where(x => x.BmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).First().InstalledPlugins
+                .Where(x => x.MmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).First().InstalledPlugins
                 .Add(info);
             }
             pluginVersionInfo.LiteLoaderVersion = info.LiteLoaderVersion;
@@ -260,18 +260,18 @@ namespace BedrockService.Shared.Classes {
         }
 
         public void RemoveServerPluginInfo(int serverIndex, string pluginFilename) {
-            BmsServerPluginDatabase serverBase = LLServerPluginRegistry.ServerPluginList.Where(x => x.BmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).FirstOrDefault();
+            MmsServerPluginDatabase serverBase = LLServerPluginRegistry.ServerPluginList.Where(x => x.MmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).FirstOrDefault();
             if (serverBase == null) {
                 return;
             }
             PluginVersionInfo pluginVersionInfo = GetPluginRegistry().ServerPluginList
-                .Where(x => x.BmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).First().InstalledPlugins
+                .Where(x => x.MmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).First().InstalledPlugins
                 .Where(y => y.PluginFileName == pluginFilename).FirstOrDefault();
             if (pluginVersionInfo == null) {
                 return;
             }
             GetPluginRegistry().ServerPluginList
-                .Where(x => x.BmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).First().InstalledPlugins
+                .Where(x => x.MmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).First().InstalledPlugins
                 .Remove(pluginVersionInfo);
         }
 

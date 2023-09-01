@@ -1,6 +1,6 @@
-﻿using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
-using BedrockService.Shared.JsonModels.MinecraftJsonModels;
+﻿using MinecraftService.Shared.Interfaces;
+using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
+using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,11 +8,11 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-using static BedrockService.Shared.Classes.SharedStringBase;
-using BedrockService.Shared.Utilities;
+using static MinecraftService.Shared.Classes.SharedStringBase;
+using MinecraftService.Shared.Utilities;
 using System.Diagnostics;
 
-namespace BedrockService.Shared.Classes.Updaters {
+namespace MinecraftService.Shared.Classes.Updaters {
     public class BedrockUpdater : IUpdater {
         private IServerLogger _logger;
         private readonly IServiceConfiguration _serviceConfiguration;
@@ -45,7 +45,7 @@ namespace BedrockService.Shared.Classes.Updaters {
         public virtual Task CheckLatestVersion() {
             return Task.Run(() => {
                 _logger.AppendLine("Checking latest BDS Version...");
-                string content = HTTPHandler.FetchHTTPContent(BmsUrlStrings[MmsUrlKeys.BdsVersionJson]).Result;
+                string content = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.BdsVersionJson]).Result;
                 if (content == null)
                     return;
                 List<BedrockVersionHistoryJson> versionList = JsonSerializer.Deserialize<List<BedrockVersionHistoryJson>>(content);
@@ -82,7 +82,7 @@ namespace BedrockService.Shared.Classes.Updaters {
         public virtual Task<bool> FetchBuild(string version) {
             return Task.Run(() => {
                 _logger.AppendLine($"Now downloading version {version}, please wait...");
-                string fetchUrl = string.Format(BmsUrlStrings[MmsUrlKeys.BdsPackage_Ver], version);
+                string fetchUrl = string.Format(MmsUrlStrings[MmsUrlKeys.BdsPackage_Ver], version);
                 string zipPath = GetServiceFilePath(MmsFileNameKeys.BdsUpdatePackage_Ver, version);
                 new FileInfo(zipPath).Directory.Create();
                 if (HTTPHandler.RetrieveFileFromUrl(fetchUrl, zipPath).Result) {
@@ -102,10 +102,10 @@ namespace BedrockService.Shared.Classes.Updaters {
                 ProcessUtilities.KillProcessList(Process.GetProcessesByName(exeName.Substring(0, exeName.Length - 4)));
                 string version = versionOverride == "" ? _serverConfiguration.GetServerVersion() : versionOverride;
                 FileInfo originalExeInfo = new(GetServerFilePath(ServerFileNameKeys.VanillaBedrock, _serverConfiguration));
-                FileInfo bmsExeInfo = new($@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName)}");
+                FileInfo mmsExeInfo = new($@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName)}");
                 try {
-                    if (!bmsExeInfo.Directory.Exists) {
-                        bmsExeInfo.Directory.Create();
+                    if (!mmsExeInfo.Directory.Exists) {
+                        mmsExeInfo.Directory.Create();
                     }
                     MinecraftFileUtilities.CleanBedrockDirectory(_serverConfiguration);
                     if (!Directory.Exists(_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString()))
@@ -125,7 +125,7 @@ namespace BedrockService.Shared.Classes.Updaters {
                     if (_serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()) {
                         _serverConfiguration.SetServerVersion(version);
                     }
-                    File.Copy(originalExeInfo.FullName, bmsExeInfo.FullName, true);
+                    File.Copy(originalExeInfo.FullName, mmsExeInfo.FullName, true);
 
                 } catch (InvalidDataException) {
                     throw new FileNotFoundException($"Build file \"Update_{version}.zip\" found corrupt. Service cannot proceed!!");
@@ -139,7 +139,7 @@ namespace BedrockService.Shared.Classes.Updaters {
 
         public List<SimpleVersionModel> GetVersionList() {
             List<SimpleVersionModel> result = new List<SimpleVersionModel>();
-            string content = HTTPHandler.FetchHTTPContent(BmsUrlStrings[MmsUrlKeys.BdsVersionJson]).Result;
+            string content = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.BdsVersionJson]).Result;
             if (content == null)
                 return new List<SimpleVersionModel>();
             List<BedrockVersionHistoryJson> versionList = JsonSerializer.Deserialize<List<BedrockVersionHistoryJson>>(content);

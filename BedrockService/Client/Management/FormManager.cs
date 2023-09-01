@@ -1,13 +1,13 @@
-﻿using BedrockService.Client.Forms;
-using BedrockService.Client.Networking;
-using BedrockService.Shared.Classes;
-using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.Utilities;
+﻿using MinecraftService.Client.Forms;
+using MinecraftService.Client.Networking;
+using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Interfaces;
+using MinecraftService.Shared.Utilities;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
 
-namespace BedrockService.Client.Management {
+namespace MinecraftService.Client.Management {
     public sealed class FormManager {
         public static readonly IProcessInfo processInfo = new ServiceProcessInfo("Client", Path.GetDirectoryName(Application.ExecutablePath), Process.GetCurrentProcess().Id, false, true);
         public static readonly IServiceConfiguration ClientLogContainer;

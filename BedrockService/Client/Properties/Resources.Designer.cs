@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace BedrockService.Client.Properties {
+namespace MinecraftService.Client.Properties {
     using System;
     
     

@@ -1,8 +1,8 @@
-﻿using BedrockService.Shared.Classes;
+﻿using MinecraftService.Shared.Classes;
 using System;
 using System.Windows.Forms;
 
-namespace BedrockService.Client.Forms {
+namespace MinecraftService.Client.Forms {
     public partial class RemoveServerControl : Form {
         public NetworkMessageFlags SelectedFlag;
         public RemoveServerControl() {

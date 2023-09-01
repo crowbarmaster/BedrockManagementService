@@ -1,8 +1,8 @@
-﻿   using BedrockService.Shared.Interfaces;
+﻿   using MinecraftService.Shared.Interfaces;
 using Newtonsoft.Json;
 using System;
 
-namespace BedrockService.Shared.Classes {
+namespace MinecraftService.Shared.Classes {
     public class Player : IPlayer {
         [JsonProperty]
         private string Username { get; set; }

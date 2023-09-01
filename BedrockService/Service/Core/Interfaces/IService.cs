@@ -1,4 +1,4 @@
-﻿namespace BedrockService.Service.Core.Interfaces {
+﻿namespace MinecraftService.Service.Core.Interfaces {
     public interface IService : IHostedService {
         Task InitializeHost();
     }

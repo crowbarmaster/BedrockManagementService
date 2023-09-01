@@ -1,4 +1,4 @@
-﻿namespace BedrockService.Client.Forms {
+﻿namespace MinecraftService.Client.Forms {
     partial class RemoveServerControl {
         /// <summary>
         /// Required designer variable.

@@ -1,6 +1,6 @@
-﻿using BedrockService.Shared.Interfaces;
+﻿using MinecraftService.Shared.Interfaces;
 
-namespace BedrockService.Shared.Classes {
+namespace MinecraftService.Shared.Classes {
     public class ServiceProcessInfo : IProcessInfo {
         private readonly string _declaredType;
         private readonly string _serviceDirectory;

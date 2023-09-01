@@ -1,14 +1,14 @@
-﻿using BedrockService.Shared.Classes.Configurations;
-using BedrockService.Shared.Classes.Updaters;
-using BedrockService.Shared.Interfaces;
+﻿using MinecraftService.Shared.Classes.Configurations;
+using MinecraftService.Shared.Classes.Updaters;
+using MinecraftService.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Shared.Classes {
+namespace MinecraftService.Shared.Classes {
     public class EnumTypeLookup {
         private readonly IServerLogger _logger;
         private readonly IServiceConfiguration _service;

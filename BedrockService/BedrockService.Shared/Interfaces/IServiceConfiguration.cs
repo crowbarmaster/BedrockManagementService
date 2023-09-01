@@ -1,10 +1,10 @@
-﻿using BedrockService.Shared.Classes;
-using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
+﻿using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Shared.Interfaces {
+namespace MinecraftService.Shared.Interfaces {
     public interface IServiceConfiguration : IBedrockConfiguration {
         IServerConfiguration GetServerInfoByName(string serverName);
         IServerConfiguration GetServerInfoByIndex(int index);

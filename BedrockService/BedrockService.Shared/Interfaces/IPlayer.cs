@@ -1,4 +1,4 @@
-﻿namespace BedrockService.Shared.Interfaces {
+﻿namespace MinecraftService.Shared.Interfaces {
     public interface IPlayer {
         IPlayer Initialize(string xuid, string username);
         string SearchForProperty(string input);

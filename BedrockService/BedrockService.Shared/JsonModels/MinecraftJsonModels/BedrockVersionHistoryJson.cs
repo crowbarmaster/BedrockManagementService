@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace BedrockService.Shared.JsonModels.MinecraftJsonModels {
+namespace MinecraftService.Shared.JsonModels.MinecraftJsonModels {
     public class BedrockVersionHistoryJson {
         [JsonPropertyName("version")]
         public string Version { get; set; }

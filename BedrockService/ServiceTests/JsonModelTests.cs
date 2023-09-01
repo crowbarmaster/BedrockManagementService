@@ -1,5 +1,5 @@
-﻿using BedrockService.Shared.FileModels.MinecraftFileModels;
-using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
+﻿using MinecraftService.Shared.FileModels.MinecraftFileModels;
+using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
 using System.IO;
 using Xunit;
 
@@ -31,7 +31,7 @@ namespace ServiceTests {
         public void Can_Create_LiteLoader_Plugin_Json() {
             LLServerPluginRegistry reg = new();
             reg.ServerPluginList = new() {
-                new() { BmsServerName = "TestServer" }
+                new() { MmsServerName = "TestServer" }
             };
             reg.ServerPluginList[0].InstalledPlugins = new() {
                 new() { BedrockVersion = "1.19.41.01", LiteLoaderVersion = "2.8.1", PluginFileName = "TestPlugin.dll" }

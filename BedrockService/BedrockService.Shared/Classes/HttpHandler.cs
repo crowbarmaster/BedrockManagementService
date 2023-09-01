@@ -4,7 +4,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace BedrockService.Shared.Classes {
+namespace MinecraftService.Shared.Classes {
     public class HTTPHandler {
         public static MinecraftServerLogger Logger = new MinecraftServerLogger();
 

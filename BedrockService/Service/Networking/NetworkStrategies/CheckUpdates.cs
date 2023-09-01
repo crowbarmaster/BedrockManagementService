@@ -1,6 +1,6 @@
-﻿using BedrockService.Service.Networking.Interfaces;
+﻿using MinecraftService.Service.Networking.Interfaces;
 
-namespace BedrockService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class CheckUpdates : IMessageParser {
 
         private readonly IBedrockService _service;

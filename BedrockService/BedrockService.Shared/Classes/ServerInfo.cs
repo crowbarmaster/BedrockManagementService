@@ -1,10 +1,10 @@
-﻿using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
-using BedrockService.Shared.SerializeModels;
+﻿using MinecraftService.Shared.Interfaces;
+using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
+using MinecraftService.Shared.SerializeModels;
 using System.Collections.Generic;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Shared.Classes {
+namespace MinecraftService.Shared.Classes {
     public class ServerInfo {
         public MinecraftServerArch ServerArch { get; set; }
         public int ProcessID { get; set; }

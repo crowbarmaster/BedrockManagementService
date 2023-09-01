@@ -1,6 +1,6 @@
-﻿using BedrockService.Shared.JsonModels.MinecraftJsonModels;
+﻿using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
 
-namespace BedrockService.Shared.PackParser {
+namespace MinecraftService.Shared.PackParser {
     public class MinecraftPackContainer {
         public PackManifestJsonModel JsonManifest;
         public string PackContentLocation;

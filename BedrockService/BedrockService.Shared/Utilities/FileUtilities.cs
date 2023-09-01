@@ -1,6 +1,6 @@
-﻿using BedrockService.Shared.FileModels.MinecraftFileModels;
-using BedrockService.Shared.JsonModels.MinecraftJsonModels;
-using BedrockService.Shared.PackParser;
+﻿using MinecraftService.Shared.FileModels.MinecraftFileModels;
+using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
+using MinecraftService.Shared.PackParser;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,9 +8,9 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Shared.Utilities {
+namespace MinecraftService.Shared.Utilities {
     public class FileUtilities {
         public static void CreateInexistantFile(string filePath) {
             FileInfo fileInfo = new FileInfo(filePath);
@@ -70,13 +70,13 @@ namespace BedrockService.Shared.Utilities {
             CreatePackBackupFiles(serverPath, levelName, backupZip);
             if (Directory.Exists(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath))) {
                 ClearTempDir().Wait();
-                ZipFile.CreateFromDirectory(string.Format(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath), levelName), $@"{Path.GetTempPath()}\BMSTemp\resource_packs.zip");
-                backupZip.CreateEntryFromFile($@"{Path.GetTempPath()}\BMSTemp\resource_packs.zip", "resource_packs.zip");
+                ZipFile.CreateFromDirectory(string.Format(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath), levelName), $@"{Path.GetTempPath()}\MMSTemp\resource_packs.zip");
+                backupZip.CreateEntryFromFile($@"{Path.GetTempPath()}\MMSTemp\resource_packs.zip", "resource_packs.zip");
             }
             if (Directory.Exists(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath))) {
                 ClearTempDir().Wait();
-                ZipFile.CreateFromDirectory(string.Format(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath), levelName), $@"{Path.GetTempPath()}\BMSTemp\behavior_packs.zip");
-                backupZip.CreateEntryFromFile($@"{Path.GetTempPath()}\BMSTemp\behavior_packs.zip", "behavior_packs.zip");
+                ZipFile.CreateFromDirectory(string.Format(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath), levelName), $@"{Path.GetTempPath()}\MMSTemp\behavior_packs.zip");
+                backupZip.CreateEntryFromFile($@"{Path.GetTempPath()}\MMSTemp\behavior_packs.zip", "behavior_packs.zip");
             }
         }
 
@@ -91,7 +91,7 @@ namespace BedrockService.Shared.Utilities {
             WorldPackFileModel worldPacks = new(resoruceFilePath);
             worldPacks.Contents.AddRange(new WorldPackFileModel(behaviorFilePath).Contents);
             ClearTempDir().Wait();
-            string packBackupFolderPath = $@"{Path.GetTempPath()}\BMSTemp\InstalledPacks";
+            string packBackupFolderPath = $@"{Path.GetTempPath()}\MMSTemp\InstalledPacks";
             Directory.CreateDirectory(packBackupFolderPath);
             if (worldPacks.Contents.Count > 0) {
                 foreach (WorldPackEntryJsonModel model in worldPacks.Contents) {
@@ -110,7 +110,7 @@ namespace BedrockService.Shared.Utilities {
 
         public static Task ClearTempDir() {
             return Task.Run(() => {
-                DirectoryInfo tempDirectory = new($"{Path.GetTempPath()}\\BMSTemp");
+                DirectoryInfo tempDirectory = new($"{Path.GetTempPath()}\\MMSTemp");
                 if (!tempDirectory.Exists)
                     tempDirectory.Create();
                 DeleteFilesFromDirectory(tempDirectory, false).Wait();

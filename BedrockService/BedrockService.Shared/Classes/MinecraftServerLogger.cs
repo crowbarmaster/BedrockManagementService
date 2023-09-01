@@ -1,5 +1,5 @@
-﻿using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.SerializeModels;
+﻿using MinecraftService.Shared.Interfaces;
+using MinecraftService.Shared.SerializeModels;
 using Newtonsoft.Json;
 using NLog;
 using System;
@@ -8,9 +8,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Shared.Classes {
+namespace MinecraftService.Shared.Classes {
     public class MinecraftServerLogger : IServerLogger {
         private readonly IBedrockConfiguration _serviceConfiguration;
         private readonly IProcessInfo _processInfo;
@@ -26,7 +26,7 @@ namespace BedrockService.Shared.Classes {
             _serviceConfiguration = serviceConfiguration;
             _serverConfiguration = serverConfiguration;
             _processInfo = processInfo;
-            _nLogger = NLogManager.Instance.GetLogger("BMSLogger");
+            _nLogger = NLogManager.Instance.GetLogger("MMSLogger");
         }
 
         [JsonConstructor]

@@ -1,7 +1,7 @@
-﻿using BedrockService.Shared.Classes;
+﻿using MinecraftService.Shared.Classes;
 using System.Collections.Generic;
 
-namespace BedrockService.Shared.SerializeModels {
+namespace MinecraftService.Shared.SerializeModels {
     public class ServerCombinedPropModel {
         public List<Property> ServerPropList { get; set; }
         public List<Property> ServicePropList { get; set; }

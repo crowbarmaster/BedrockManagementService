@@ -1,8 +1,8 @@
-﻿using BedrockService.Service.Networking.Interfaces;
-using BedrockService.Shared.PackParser;
-using static BedrockService.Shared.Classes.SharedStringBase;
+﻿using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Shared.PackParser;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class PackFile : IMessageParser {
 
         private readonly IServiceConfiguration _serviceConfiguration;

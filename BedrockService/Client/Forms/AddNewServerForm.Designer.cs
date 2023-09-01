@@ -1,5 +1,5 @@
 ﻿
-namespace BedrockService.Client.Forms
+namespace MinecraftService.Client.Forms
 {
     partial class AddNewServerForm
     {

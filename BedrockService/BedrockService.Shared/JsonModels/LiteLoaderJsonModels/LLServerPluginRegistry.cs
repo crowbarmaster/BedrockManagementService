@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 
-namespace BedrockService.Shared.JsonModels.LiteLoaderJsonModels {
+namespace MinecraftService.Shared.JsonModels.LiteLoaderJsonModels {
     public class LLServerPluginRegistry {
-        public List<BmsServerPluginDatabase> ServerPluginList { get; set; } = new();
+        public List<MmsServerPluginDatabase> ServerPluginList { get; set; } = new();
     }
 
-    public class BmsServerPluginDatabase {
-        public string BmsServerName { get; set; }
+    public class MmsServerPluginDatabase {
+        public string MmsServerName { get; set; }
         public List<PluginVersionInfo> InstalledPlugins { get; set; } = new();
     }
 

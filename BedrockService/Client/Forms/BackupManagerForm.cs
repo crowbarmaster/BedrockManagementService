@@ -1,7 +1,7 @@
-﻿using BedrockService.Client.Management;
-using BedrockService.Shared.Classes;
-using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.SerializeModels;
+﻿using MinecraftService.Client.Management;
+using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Interfaces;
+using MinecraftService.Shared.SerializeModels;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace BedrockService.Client.Forms {
+namespace MinecraftService.Client.Forms {
     public partial class BackupManagerForm : Form {
         IServiceConfiguration _serviceConfig;
         BackupInfoModel _defaultEntry;

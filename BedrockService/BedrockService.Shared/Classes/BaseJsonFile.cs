@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.IO;
 
-namespace BedrockService.Shared.Classes {
+namespace MinecraftService.Shared.Classes {
     public abstract class BaseJsonFile {
         private readonly JsonSerializerSettings defaultJsonSettings = new() { DefaultValueHandling = DefaultValueHandling.Ignore };
         public string FilePath { get; set; }

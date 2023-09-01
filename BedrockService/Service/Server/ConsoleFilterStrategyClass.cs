@@ -1,12 +1,12 @@
-﻿using BedrockService.Service.Server.ConsoleFilters;
-using BedrockService.Service.Server.Interfaces;
+﻿using MinecraftService.Service.Server.ConsoleFilters;
+using MinecraftService.Service.Server.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BedrockService.Service.Server {
+namespace MinecraftService.Service.Server {
     public class ConsoleFilterStrategyClass {
         IServerConfiguration _serverConfiguration;
         public Dictionary<string, IConsoleFilter> FilterList;

@@ -1,13 +1,13 @@
-﻿using BedrockService.Service.Server.Interfaces;
-using BedrockService.Shared.Interfaces;
+﻿using MinecraftService.Service.Server.Interfaces;
+using MinecraftService.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Service.Server {
+namespace MinecraftService.Service.Server {
     public static class ServerTypeLookup {
         public static IServerController GetServerControllerByArch(MinecraftServerArch serverArch, IServerConfiguration server, IConfigurator configurator, IServerLogger logger, IServiceConfiguration service, IProcessInfo processInfo, IPlayerManager playerManager) {
             switch(serverArch) {

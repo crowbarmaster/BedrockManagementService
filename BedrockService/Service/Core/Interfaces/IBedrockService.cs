@@ -1,7 +1,7 @@
-﻿using BedrockService.Service.Server.Interfaces;
-using BedrockService.Shared.SerializeModels;
+﻿using MinecraftService.Service.Server.Interfaces;
+using MinecraftService.Shared.SerializeModels;
 
-namespace BedrockService.Service.Core.Interfaces {
+namespace MinecraftService.Service.Core.Interfaces {
     public interface IBedrockService : ServiceControl {
         Task<bool> Initialize();
         void RemoveBedrockServerByIndex(int serverIndex);

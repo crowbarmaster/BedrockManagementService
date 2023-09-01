@@ -1,14 +1,14 @@
-﻿using BedrockService.Service.Server.Interfaces;
-using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.SerializeModels;
+﻿using MinecraftService.Service.Server.Interfaces;
+using MinecraftService.Shared.Interfaces;
+using MinecraftService.Shared.SerializeModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Service.Server.ConsoleFilters {
+namespace MinecraftService.Service.Server.ConsoleFilters {
     public class StartupFlagFilter : IConsoleFilter {
         IServerConfiguration _serverConfiguration;
         IServerLogger _logger;

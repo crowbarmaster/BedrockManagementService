@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace BedrockService.Shared.JsonModels.LiteLoaderJsonModels {
+namespace MinecraftService.Shared.JsonModels.LiteLoaderJsonModels {
 
     public class LLPluginRepoJsonModel {
         public List<PluginEntry> PluginRepo { get; set; } = new();

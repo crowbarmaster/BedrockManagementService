@@ -1,11 +1,11 @@
-﻿using BedrockService.Service.Networking.Interfaces;
-using BedrockService.Shared.JsonModels.MinecraftJsonModels;
-using BedrockService.Shared.PackParser;
+﻿using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
+using MinecraftService.Shared.PackParser;
 using Newtonsoft.Json;
 using System.Text;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class PackList : IMessageParser {
 
         private readonly IServiceConfiguration _serviceConfiguration;

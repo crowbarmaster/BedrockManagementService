@@ -1,19 +1,19 @@
-﻿using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
-using BedrockService.Shared.JsonModels.MinecraftJsonModels;
+﻿using MinecraftService.Shared.Interfaces;
+using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
+using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using static BedrockService.Shared.Classes.SharedStringBase;
-using BedrockService.Shared.Utilities;
+using static MinecraftService.Shared.Classes.SharedStringBase;
+using MinecraftService.Shared.Utilities;
 using System.Diagnostics;
-using JavaVersionManifest = BedrockService.Shared.JsonModels.MinecraftJsonModels.Version;
+using JavaVersionManifest = MinecraftService.Shared.JsonModels.MinecraftJsonModels.Version;
 using Newtonsoft.Json;
 
-namespace BedrockService.Shared.Classes.Updaters {
+namespace MinecraftService.Shared.Classes.Updaters {
     public class JavaUpdater : IUpdater {
         private IServerLogger _logger;
         private readonly IServiceConfiguration _serviceConfiguration;
@@ -33,7 +33,7 @@ namespace BedrockService.Shared.Classes.Updaters {
 
         public void Initialize() {
             if (!File.Exists(GetServiceFilePath(MmsFileNameKeys.Jdk17JavaVanillaExe))) {
-                if (HTTPHandler.RetrieveFileFromUrl(BmsUrlStrings[MmsUrlKeys.Jdk17DownloadLink], "Jdk.zip").Result) {
+                if (HTTPHandler.RetrieveFileFromUrl(MmsUrlStrings[MmsUrlKeys.Jdk17DownloadLink], "Jdk.zip").Result) {
                     Progress<double> progress = new(percent => {
                         _logger.AppendLine($"Extracting JDK 17 for Java support, {percent}% completed...");
                     });
@@ -57,7 +57,7 @@ namespace BedrockService.Shared.Classes.Updaters {
         public virtual Task CheckLatestVersion() {
             return Task.Run(() => {
                 _logger.AppendLine("Checking latest Java Release version...");
-                string content = HTTPHandler.FetchHTTPContent(BmsUrlStrings[MmsUrlKeys.JdsVersionJson]).Result;
+                string content = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.JdsVersionJson]).Result;
                 if (content == null)
                     return;
                 JavaVersionHistoryModel versionList = JsonConvert.DeserializeObject<JavaVersionHistoryModel>(content);
@@ -110,7 +110,7 @@ namespace BedrockService.Shared.Classes.Updaters {
         }
 
         private JavaVersionDetailsModel GetJavaVersionModel(string version) {
-            string content = HTTPHandler.FetchHTTPContent(BmsUrlStrings[MmsUrlKeys.JdsVersionJson]).Result;
+            string content = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.JdsVersionJson]).Result;
             if (content == null)
                 return null;
             JavaVersionHistoryModel versionList = JsonConvert.DeserializeObject<JavaVersionHistoryModel>(content);
@@ -156,10 +156,10 @@ namespace BedrockService.Shared.Classes.Updaters {
                 ProcessUtilities.KillJarProcess(exeName);
                 string version = versionOverride == "" ? _serverConfiguration.GetServerVersion() : versionOverride;
                 FileInfo originalExeInfo = new(GetServerFilePath(ServerFileNameKeys.VanillaJava, _serverConfiguration));
-                FileInfo bmsExeInfo = new($@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName)}");
+                FileInfo mmsExeInfo = new($@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName)}");
                 try {
-                    if (!bmsExeInfo.Directory.Exists) {
-                        bmsExeInfo.Directory.Create();
+                    if (!mmsExeInfo.Directory.Exists) {
+                        mmsExeInfo.Directory.Create();
                     }
                     MinecraftFileUtilities.CleanJavaServerDirectory(_serverConfiguration);
                     string filePath = GetServiceFilePath(MmsFileNameKeys.JdsUpdatePackage_Ver, version);
@@ -171,7 +171,7 @@ namespace BedrockService.Shared.Classes.Updaters {
                     Progress<double> progress = new(percent => {
                         _logger.AppendLine($"Extracting Java files for server {_serverConfiguration.GetServerName()}, {percent}% completed...");
                     });
-                    File.Copy(filePath, bmsExeInfo.FullName, true);
+                    File.Copy(filePath, mmsExeInfo.FullName, true);
                     MinecraftFileUtilities.WriteJavaEulaFile(_serverConfiguration);
 
                     File.WriteAllText(GetServerFilePath(ServerFileNameKeys.DeployedINI, _serverConfiguration), version);
@@ -191,7 +191,7 @@ namespace BedrockService.Shared.Classes.Updaters {
 
         public List<SimpleVersionModel> GetVersionList() {
             List<SimpleVersionModel> result = new List<SimpleVersionModel>();
-            string content = HTTPHandler.FetchHTTPContent(BmsUrlStrings[MmsUrlKeys.JdsVersionJson]).Result;
+            string content = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.JdsVersionJson]).Result;
             if (content == null)
                 return new List<SimpleVersionModel>();
             JavaVersionHistoryModel versionList = JsonConvert.DeserializeObject<JavaVersionHistoryModel>(content);

@@ -1,6 +1,6 @@
 ﻿using NLog;
 
-namespace BedrockService.Shared.Interfaces {
+namespace MinecraftService.Shared.Interfaces {
     public interface IServerLogger {
         void Initialize();
         void AppendLine(string incomingText);

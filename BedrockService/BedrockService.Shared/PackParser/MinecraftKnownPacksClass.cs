@@ -1,12 +1,12 @@
-﻿using BedrockService.Shared.FileModels.MinecraftFileModels;
-using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.JsonModels.MinecraftJsonModels;
+﻿using MinecraftService.Shared.FileModels.MinecraftFileModels;
+using MinecraftService.Shared.Interfaces;
+using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Shared.PackParser {
+namespace MinecraftService.Shared.PackParser {
     public class MinecraftKnownPacksClass {
         public WorldPackFileModel InstalledResourcePacks;
         public WorldPackFileModel InstalledBehaviorPacks;

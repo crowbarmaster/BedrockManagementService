@@ -1,12 +1,12 @@
-using BedrockService.Shared.Classes;
-using BedrockService.Shared.JsonModels.MinecraftJsonModels;
-using BedrockService.Shared.Utilities;
+using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
+using MinecraftService.Shared.Utilities;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 
-namespace BedrockService.Shared.PackParser {
+namespace MinecraftService.Shared.PackParser {
     public class MinecraftPackParser {
         public string PackExtractDirectory;
         public List<MinecraftPackContainer> FoundPacks = new();
@@ -16,7 +16,7 @@ namespace BedrockService.Shared.PackParser {
         }
 
         public MinecraftPackParser(byte[] fileContents) {
-            PackExtractDirectory = $"{Path.GetTempPath()}\\BMSTemp";
+            PackExtractDirectory = $"{Path.GetTempPath()}\\MMSTemp";
             FileUtilities.ClearTempDir().Wait();
             using (MemoryStream fileStream = new(fileContents, 5, fileContents.Length - 5)) {
                 using ZipArchive zipArchive = new(fileStream, ZipArchiveMode.Read);

@@ -1,8 +1,8 @@
-﻿using BedrockService.Client.Management;
-using BedrockService.Shared.Classes;
-using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
-using BedrockService.Shared.PackParser;
+﻿using MinecraftService.Client.Management;
+using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Interfaces;
+using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
+using MinecraftService.Shared.PackParser;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ using System.IO.Compression;
 using System.Text;
 using System.Windows.Forms;
 
-namespace BedrockService.Client.Forms {
+namespace MinecraftService.Client.Forms {
     public partial class ManagePacksForms : Form {
         private readonly byte _serverIndex;
         private readonly IServerLogger _logger;
@@ -20,7 +20,7 @@ namespace BedrockService.Client.Forms {
         private readonly DirectoryInfo _packExtractDir;
         public ManagePacksForms(byte serverIndex, IServerLogger logger, IProcessInfo processInfo) {
             _logger = logger;
-            _packExtractDir = new DirectoryInfo($"{Path.GetTempPath()}\\BMSTemp");
+            _packExtractDir = new DirectoryInfo($"{Path.GetTempPath()}\\MMSTemp");
             _processInfo = processInfo;
             _serverIndex = serverIndex;
             InitializeComponent();
@@ -31,7 +31,7 @@ namespace BedrockService.Client.Forms {
                 serverListBox.Items.Add(container);
             }
             if (pluginReg != null) {
-                BmsServerPluginDatabase db = pluginReg.ServerPluginList[_serverIndex];
+                MmsServerPluginDatabase db = pluginReg.ServerPluginList[_serverIndex];
                 foreach (PluginVersionInfo info in db.InstalledPlugins) {
 
                 }

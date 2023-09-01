@@ -1,4 +1,4 @@
-﻿namespace BedrockService.Service.Server {
+﻿namespace MinecraftService.Service.Server {
     public interface IBackupManager {
         bool BackupRunning();
         void InitializeBackup();

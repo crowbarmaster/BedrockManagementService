@@ -1,9 +1,9 @@
-﻿using BedrockService.Shared.Interfaces;
+﻿using MinecraftService.Shared.Interfaces;
 using System.IO;
 using System.Runtime.InteropServices;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Shared.Classes {
+namespace MinecraftService.Shared.Classes {
     public static class LiteLoaderPECore {
         [DllImport("LLPeProviderService.dll", EntryPoint = "?ProcessFunctionList@LLPE@@YA_NPEBD0@Z")]
         static extern bool ProcessFunctionList(string workingDir, string pdbFile);

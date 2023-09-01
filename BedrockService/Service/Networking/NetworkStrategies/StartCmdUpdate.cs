@@ -1,9 +1,9 @@
 ﻿
-using BedrockService.Service.Networking.Interfaces;
+using MinecraftService.Service.Networking.Interfaces;
 using Newtonsoft.Json;
 using System.Text;
 
-namespace BedrockService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class StartCmdUpdate : IMessageParser {
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IConfigurator _configurator;

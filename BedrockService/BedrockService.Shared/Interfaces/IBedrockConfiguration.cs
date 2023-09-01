@@ -1,9 +1,9 @@
-﻿using BedrockService.Shared.Classes;
-using BedrockService.Shared.SerializeModels;
+﻿using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.SerializeModels;
 using System.Collections.Generic;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Shared.Interfaces {
+namespace MinecraftService.Shared.Interfaces {
     public interface IBedrockConfiguration {
         bool InitializeDefaults();
         void ProcessUserConfiguration(string[] configEntries);

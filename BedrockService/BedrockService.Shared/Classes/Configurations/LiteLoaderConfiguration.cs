@@ -1,15 +1,15 @@
-﻿using BedrockService.Shared.Classes.Updaters;
-using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
-using BedrockService.Shared.SerializeModels;
-using BedrockService.Shared.Utilities;
+﻿using MinecraftService.Shared.Classes.Updaters;
+using MinecraftService.Shared.Interfaces;
+using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
+using MinecraftService.Shared.SerializeModels;
+using MinecraftService.Shared.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Shared.Classes.Configurations {
+namespace MinecraftService.Shared.Classes.Configurations {
     public class LiteLoaderConfiguration : ServerInfo, IServerConfiguration {
         private string _servicePath;
         private readonly MinecraftServerArch _serverArch = MinecraftServerArch.LiteLoader;
@@ -168,7 +168,7 @@ namespace BedrockService.Shared.Classes.Configurations {
 
         public void SetProp(MmsDependServerPropKeys key, string newValue) {
             try {
-                Property serverProp = ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[key]);
+                Property serverProp = ServerPropList.First(prop => prop.KeyName == MmsDependServerPropStrings[key]);
                 ServerPropList[ServerPropList.IndexOf(serverProp)].SetValue(newValue);
             } catch (Exception e) {
                 throw new FormatException($"Could not find key {key} in server property list!", e);
@@ -186,7 +186,7 @@ namespace BedrockService.Shared.Classes.Configurations {
         }
 
         public void ProcessNewServerConfiguration() {
-            Property srvNameProp = ServerPropList.FirstOrDefault(prop => prop != null && prop.KeyName == BmsDependServerPropStrings[MmsDependServerPropKeys.ServerName]);
+            Property srvNameProp = ServerPropList.FirstOrDefault(prop => prop != null && prop.KeyName == MmsDependServerPropStrings[MmsDependServerPropKeys.ServerName]);
             GetSettingsProp(ServerPropertyKeys.ServerPath).SetValue($@"{ServersPath}\{srvNameProp.StringValue}");
             GetSettingsProp(ServerPropertyKeys.ServerExeName).SetValue($"BedrockService.{srvNameProp.StringValue}.exe");
             GetSettingsProp(ServerPropertyKeys.FileName).SetValue($@"{srvNameProp.StringValue}.conf");
@@ -206,7 +206,7 @@ namespace BedrockService.Shared.Classes.Configurations {
 
         public Property GetProp(MmsDependServerPropKeys key) {
             try {
-                Property foundProp = ServerPropList.First(prop => prop.KeyName == BmsDependServerPropStrings[key]);
+                Property foundProp = ServerPropList.First(prop => prop.KeyName == MmsDependServerPropStrings[key]);
                 return foundProp;
             } catch (Exception e) {
                 throw new FormatException($"Could not find key {key} in server property list!", e);

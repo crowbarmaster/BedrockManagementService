@@ -1,11 +1,11 @@
-﻿using BedrockService.Service.Networking.Interfaces;
-using BedrockService.Shared.Classes.Configurations;
-using BedrockService.Shared.SerializeModels;
+﻿using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Shared.Classes.Configurations;
+using MinecraftService.Shared.SerializeModels;
 using Newtonsoft.Json;
 using System.Text;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Service.Networking.NetworkStrategies
+namespace MinecraftService.Service.Networking.NetworkStrategies
 {
     public class AddNewServer : IMessageParser {
         private readonly IProcessInfo _processInfo;
@@ -35,11 +35,11 @@ namespace BedrockService.Service.Networking.NetworkStrategies
             if(archProp.StringValue == "Java") { 
                 serverNameProp = servicePropList?.First(p => p.KeyName == ServerPropertyStrings[ServerPropertyKeys.ServerName]);
             } else {
-                serverNameProp = propList?.First(p => p.KeyName == BmsDependServerPropStrings[MmsDependServerPropKeys.ServerName]);
+                serverNameProp = propList?.First(p => p.KeyName == MmsDependServerPropStrings[MmsDependServerPropKeys.ServerName]);
             }
-            Property? ipV4Prop = propList?.First(p => p.KeyName == BmsDependServerPropStrings[MmsDependServerPropKeys.PortI4]);
+            Property? ipV4Prop = propList?.First(p => p.KeyName == MmsDependServerPropStrings[MmsDependServerPropKeys.PortI4]);
             if(archProp.StringValue != "Java") {
-                ipV6Prop = propList?.First(p => p.KeyName == BmsDependServerPropStrings[MmsDependServerPropKeys.PortI6]);
+                ipV6Prop = propList?.First(p => p.KeyName == MmsDependServerPropStrings[MmsDependServerPropKeys.PortI6]);
             }
             Property? versionProp = servicePropList?.First(p => p.KeyName == ServerPropertyStrings[ServerPropertyKeys.ServerVersion]);
             EnumTypeLookup typeLookup = new(_logger, _serviceConfiguration);

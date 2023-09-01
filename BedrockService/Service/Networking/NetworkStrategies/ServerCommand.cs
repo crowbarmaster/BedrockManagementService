@@ -1,7 +1,7 @@
-﻿using BedrockService.Service.Networking.Interfaces;
+﻿using MinecraftService.Service.Networking.Interfaces;
 using System.Text;
 
-namespace BedrockService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class ServerCommand : IMessageParser {
         private readonly IBedrockService _service;
         private readonly IServerLogger _logger;

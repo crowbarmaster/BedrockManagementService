@@ -1,8 +1,8 @@
-﻿using BedrockService.Shared.PackParser;
+﻿using MinecraftService.Shared.PackParser;
 using System;
 using System.Collections.Generic;
 
-namespace BedrockService.Shared.JsonModels.MinecraftJsonModels {
+namespace MinecraftService.Shared.JsonModels.MinecraftJsonModels {
     public class KnownPacksJsonModel {
         public int file_version { get; set; }
         public string file_system { get; set; }

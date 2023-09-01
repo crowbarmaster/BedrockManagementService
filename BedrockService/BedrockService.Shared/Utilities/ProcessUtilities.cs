@@ -1,5 +1,5 @@
-﻿using BedrockService.Shared.Classes;
-using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
+﻿using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,9 +7,9 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Shared.Utilities {
+namespace MinecraftService.Shared.Utilities {
     public static class ProcessUtilities {
         public static bool MonitoredAppExists(string monitoredAppName) {
             try {

@@ -1,8 +1,8 @@
-﻿using BedrockService.Service.Networking.Interfaces;
+﻿using MinecraftService.Service.Networking.Interfaces;
 using Newtonsoft.Json;
 using System.Text;
 
-namespace BedrockService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class Connect : IMessageParser {
         private readonly IServiceConfiguration _serviceConfiguration;
 

@@ -1,13 +1,13 @@
-﻿using BedrockService.Client.Management;
-using BedrockService.Shared.Classes;
-using BedrockService.Shared.Interfaces;
+﻿using MinecraftService.Client.Management;
+using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Interfaces;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
 
-namespace BedrockService.Client.Forms {
+namespace MinecraftService.Client.Forms {
     public partial class PlayerManagerForm : Form {
         private readonly IServerConfiguration _server;
         private List<IPlayer> playersFound = new();

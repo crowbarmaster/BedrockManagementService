@@ -1,9 +1,9 @@
-﻿using BedrockService.Shared.Interfaces;
+﻿using MinecraftService.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 
 
-namespace BedrockService.Shared.SerializeModels {
+namespace MinecraftService.Shared.SerializeModels {
     public enum ServiceStatus {
         Stopped,
         Starting,

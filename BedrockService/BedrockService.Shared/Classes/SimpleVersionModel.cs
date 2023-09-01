@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BedrockService.Shared.Classes {
+namespace MinecraftService.Shared.Classes {
     public class SimpleVersionModel {
         public string Version { get; set; }
         public bool IsBeta { get; set; }

@@ -1,7 +1,7 @@
-﻿using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
-using BedrockService.Shared.JsonModels.MinecraftJsonModels;
-using BedrockService.Shared.Utilities;
+﻿using MinecraftService.Shared.Interfaces;
+using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
+using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
+using MinecraftService.Shared.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,9 +10,9 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Shared.Classes.Updaters {
+namespace MinecraftService.Shared.Classes.Updaters {
     public class LiteUpdater : BedrockUpdater, IUpdater {
         private IServerLogger _logger;
         private readonly IServiceConfiguration _serviceConfiguration;
@@ -43,7 +43,7 @@ namespace BedrockService.Shared.Classes.Updaters {
         }
 
         public override Task CheckLatestVersion() => Task.Run(() => {
-            string result = HTTPHandler.FetchHTTPContent(BmsUrlStrings[MmsUrlKeys.LLReleasesJson]).Result;
+            string result = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.LLReleasesJson]).Result;
             if (result != null) {
                 List<LiteLoaderVersionManifest> manifestList = JsonSerializer.Deserialize<List<LiteLoaderVersionManifest>>(result);
                 manifestList.Reverse();
@@ -74,9 +74,9 @@ namespace BedrockService.Shared.Classes.Updaters {
             Task.Run(() => {
                 _logger.AppendLine($"Now downloading LiteLoader version {version}, please wait...");
                 (bool hasModule, MmsUrlKeys targetUrlPattern) verDetails = GetLiteLoaderVersionDetails(version);
-                string llFetchUrl = string.Format(BmsUrlStrings[verDetails.targetUrlPattern], version);
+                string llFetchUrl = string.Format(MmsUrlStrings[verDetails.targetUrlPattern], version);
                 string llZipPath = GetServiceFilePath(MmsFileNameKeys.LLUpdatePackage_Ver, version);
-                string llModFetchUrl = string.Format(BmsUrlStrings[MmsUrlKeys.LLModPackage_Ver], version);
+                string llModFetchUrl = string.Format(MmsUrlStrings[MmsUrlKeys.LLModPackage_Ver], version);
                 string llModZipPath = GetServiceFilePath(MmsFileNameKeys.LLModUpdatePackage_Ver, version);
                 new FileInfo(llZipPath).Directory.Create();
                 new FileInfo(llModZipPath).Directory.Create();
@@ -120,7 +120,7 @@ namespace BedrockService.Shared.Classes.Updaters {
 
         public static Task<LiteLoaderVersionManifest> GetLiteLoaderVersionManifest(string version) {
             return Task.Run(() => {
-                string result = HTTPHandler.FetchHTTPContent(BmsUrlStrings[MmsUrlKeys.LLReleasesJson]).Result;
+                string result = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.LLReleasesJson]).Result;
                 if (result != null) {
                     List<LiteLoaderVersionManifest> manifestList = JsonSerializer.Deserialize<List<LiteLoaderVersionManifest>>(result);
                     return manifestList.Where(x => x.Version == version).FirstOrDefault();
@@ -137,9 +137,9 @@ namespace BedrockService.Shared.Classes.Updaters {
             await Task.Run(() => {
                 string version = versionOverride == "" ? _serverConfiguration.GetServerVersion() : versionOverride;
                 FileInfo originalExeInfo = new(GetServerFilePath(ServerFileNameKeys.VanillaBedrock, _serverConfiguration));
-                FileInfo bmsExeInfo = new($@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName)}");
-                if (!bmsExeInfo.Directory.Exists) {
-                    bmsExeInfo.Directory.Create();
+                FileInfo mmsExeInfo = new($@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName)}");
+                if (!mmsExeInfo.Directory.Exists) {
+                    mmsExeInfo.Directory.Create();
                 }
                 LiteLoaderVersionManifest selectedVersion = GetLiteLoaderVersionManifest(version).Result;
                 if (selectedVersion == null) {
@@ -172,8 +172,8 @@ namespace BedrockService.Shared.Classes.Updaters {
                     File.WriteAllText(GetServerFilePath(ServerFileNameKeys.DeployedINI, _serverConfiguration), liteVersion);
                 } catch (IOException e) {
                     if (e.Message.Contains("because it is being used by another process.")) {
-                        ProcessUtilities.KillProcessList(Process.GetProcessesByName(bmsExeInfo.Name[..^bmsExeInfo.Extension.Length]));
-                        File.Copy(GetServerFilePath(ServerFileNameKeys.VanillaBedrock, _serverConfiguration), GetServerFilePath(ServerFileNameKeys.BmsServer_Name, _serverConfiguration, _serverConfiguration.GetServerName()), true);
+                        ProcessUtilities.KillProcessList(Process.GetProcessesByName(mmsExeInfo.Name[..^mmsExeInfo.Extension.Length]));
+                        File.Copy(GetServerFilePath(ServerFileNameKeys.VanillaBedrock, _serverConfiguration), GetServerFilePath(ServerFileNameKeys.MmsServer_Name, _serverConfiguration, _serverConfiguration.GetServerName()), true);
                     }
                 }
                 _logger.AppendLine($"Extraction of files for {_serverConfiguration.GetServerName()} completed.");
@@ -181,7 +181,7 @@ namespace BedrockService.Shared.Classes.Updaters {
         }
         public List<SimpleVersionModel> GetVersionList() {
             List<SimpleVersionModel> result = new List<SimpleVersionModel>();
-            string content = HTTPHandler.FetchHTTPContent(BmsUrlStrings[MmsUrlKeys.LLReleasesJson]).Result;
+            string content = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.LLReleasesJson]).Result;
             List<LiteLoaderVersionManifest> versionList = JsonSerializer.Deserialize<List<LiteLoaderVersionManifest>>(content);
             versionList.Reverse();
             if (content == null)

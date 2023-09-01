@@ -1,8 +1,8 @@
 ﻿
-using BedrockService.Service.Networking.Interfaces;
-using BedrockService.Service.Networking.NetworkStrategies;
+using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Service.Networking.NetworkStrategies;
 
-namespace BedrockService.Service.Networking {
+namespace MinecraftService.Service.Networking {
     public class NetworkStrategyLookup {
         private readonly Dictionary<NetworkMessageTypes, IMessageParser> _standardMessageLookup;
         private readonly Dictionary<NetworkMessageTypes, IFlaggedMessageParser> _flaggedMessageLookup;

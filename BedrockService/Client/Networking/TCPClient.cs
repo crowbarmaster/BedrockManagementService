@@ -1,8 +1,8 @@
-﻿using BedrockService.Client.Management;
-using BedrockService.Shared.Classes;
-using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.PackParser;
-using BedrockService.Shared.SerializeModels;
+﻿using MinecraftService.Client.Management;
+using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Interfaces;
+using MinecraftService.Shared.PackParser;
+using MinecraftService.Shared.SerializeModels;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -14,7 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace BedrockService.Client.Networking {
+namespace MinecraftService.Client.Networking {
     public class TCPClient {
         public TcpClient OpenedTcpClient;
         public string ClientName;

@@ -1,16 +1,16 @@
-﻿using BedrockService.Shared.Classes;
-using BedrockService.Shared.Classes.Configurations;
-using BedrockService.Shared.Classes.Updaters;
-using BedrockService.Shared.FileModels.MinecraftFileModels;
-using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
-using BedrockService.Shared.JsonModels.MinecraftJsonModels;
-using BedrockService.Shared.SerializeModels;
+﻿using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Classes.Configurations;
+using MinecraftService.Shared.Classes.Updaters;
+using MinecraftService.Shared.FileModels.MinecraftFileModels;
+using MinecraftService.Shared.Interfaces;
+using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
+using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
+using MinecraftService.Shared.SerializeModels;
 using System.Globalization;
 using System.Xml.Linq;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Service.Management {
+namespace MinecraftService.Service.Management {
     public class ConfigManager : IConfigurator {
         private static readonly object _fileLock = new();
         private readonly IServiceConfiguration _serviceConfiguration;

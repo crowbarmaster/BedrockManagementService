@@ -1,6 +1,6 @@
-﻿using BedrockService.Shared.Classes;
+﻿using MinecraftService.Shared.Classes;
 
-namespace BedrockService.Shared.SerializeModels {
+namespace MinecraftService.Shared.SerializeModels {
     public class ExportImportFileModel {
         public FileTypeFlags FileType;
         public string Filename;

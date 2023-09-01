@@ -1,13 +1,13 @@
-﻿using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.Utilities;
+﻿using MinecraftService.Shared.Interfaces;
+using MinecraftService.Shared.Utilities;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Shared.Classes {
+namespace MinecraftService.Shared.Classes {
     public class ServicePlayerManager : IPlayerManager {
         public List<IPlayer> PlayerList = new();
 

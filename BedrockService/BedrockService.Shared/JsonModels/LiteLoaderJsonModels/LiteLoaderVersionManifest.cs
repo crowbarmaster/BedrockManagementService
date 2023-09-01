@@ -1,4 +1,4 @@
-﻿namespace BedrockService.Shared.JsonModels.LiteLoaderJsonModels {
+﻿namespace MinecraftService.Shared.JsonModels.LiteLoaderJsonModels {
     public class LiteLoaderVersionManifest {
         public string Version { get; set; }
         public string BDSVersion { get; set; }

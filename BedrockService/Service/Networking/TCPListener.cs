@@ -1,9 +1,9 @@
-﻿using BedrockService.Service.Networking.Interfaces;
+﻿using MinecraftService.Service.Networking.Interfaces;
 using System.Net;
 using System.Net.Sockets;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Service.Networking {
+namespace MinecraftService.Service.Networking {
     public class TCPListener : ITCPListener {
         private TcpClient? _client;
         private TcpListener? _inListener;

@@ -1,14 +1,14 @@
-﻿using BedrockService.Service.Server.Interfaces;
-using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
-using BedrockService.Shared.PackParser;
-using BedrockService.Shared.SerializeModels;
-using BedrockService.Shared.Utilities;
+﻿using MinecraftService.Service.Server.Interfaces;
+using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
+using MinecraftService.Shared.PackParser;
+using MinecraftService.Shared.SerializeModels;
+using MinecraftService.Shared.Utilities;
 using NCrontab;
 using System.IO.Compression;
 using System.Timers;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Service.Server {
+namespace MinecraftService.Service.Server {
     public class JavaServer : IServerController {
         private Task? _serverTask;
         private Task? _watchdogTask;

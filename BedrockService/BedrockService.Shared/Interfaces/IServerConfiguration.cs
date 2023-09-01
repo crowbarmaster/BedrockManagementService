@@ -1,11 +1,11 @@
-﻿using BedrockService.Shared.Classes;
-using BedrockService.Shared.JsonModels.LiteLoaderJsonModels;
-using BedrockService.Shared.SerializeModels;
+﻿using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
+using MinecraftService.Shared.SerializeModels;
 using System;
 using System.Collections.Generic;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Shared.Interfaces {
+namespace MinecraftService.Shared.Interfaces {
     public interface IServerConfiguration : IBedrockConfiguration {
         int GetRunningPid();
         void SetRunningPid(int runningPid);

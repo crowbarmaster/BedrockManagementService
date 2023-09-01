@@ -1,10 +1,10 @@
-﻿using BedrockService.Service.Networking.Interfaces;
-using BedrockService.Shared.Classes;
+﻿using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Shared.Classes;
 using Newtonsoft.Json;
 using System.Text;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class VersionListRequest : IMessageParser {
 
         private readonly IServiceConfiguration _serviceConfiguration;

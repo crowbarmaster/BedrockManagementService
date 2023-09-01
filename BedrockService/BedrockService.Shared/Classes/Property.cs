@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 
-namespace BedrockService.Shared.Classes {
+namespace MinecraftService.Shared.Classes {
     public class Property {
         public string KeyName { get; set; } = string.Empty;
         public string StringValue { get; set; } = string.Empty;

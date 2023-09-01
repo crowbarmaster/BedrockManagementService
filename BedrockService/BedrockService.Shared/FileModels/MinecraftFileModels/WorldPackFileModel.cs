@@ -1,8 +1,8 @@
-﻿using BedrockService.Shared.Classes;
-using BedrockService.Shared.JsonModels.MinecraftJsonModels;
+﻿using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
 using System.Collections.Generic;
 
-namespace BedrockService.Shared.FileModels.MinecraftFileModels {
+namespace MinecraftService.Shared.FileModels.MinecraftFileModels {
     public class WorldPackFileModel : BaseJsonFile {
         public List<WorldPackEntryJsonModel> Contents { get; set; } = new();
 

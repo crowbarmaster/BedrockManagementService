@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BedrockService.Shared.Classes {
+namespace MinecraftService.Shared.Classes {
     public class RunningJavaProcessInfo {
         public int ProcessId { get; set; }
         public string ProcessName { get; set; }

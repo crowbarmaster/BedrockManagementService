@@ -1,4 +1,4 @@
-﻿namespace BedrockService.Shared.Interfaces {
+﻿namespace MinecraftService.Shared.Interfaces {
     public interface IProcessInfo {
         string DeclaredType();
 

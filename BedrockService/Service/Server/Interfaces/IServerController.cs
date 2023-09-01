@@ -1,6 +1,6 @@
-﻿using BedrockService.Shared.SerializeModels;
+﻿using MinecraftService.Shared.SerializeModels;
 
-namespace BedrockService.Service.Server.Interfaces {
+namespace MinecraftService.Service.Server.Interfaces {
     public interface IServerController {
         void Initialize();
         void StartWatchdog();

@@ -1,10 +1,10 @@
-﻿using BedrockService.Shared.Interfaces;
+﻿using MinecraftService.Shared.Interfaces;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 #nullable enable
 
-namespace BedrockService.Shared.Classes {
+namespace MinecraftService.Shared.Classes {
     public static class SharedStringBase {
 
         public static JsonSerializerSettings GlobalJsonSerialierSettings = new() { TypeNameHandling = TypeNameHandling.All, ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
@@ -66,7 +66,7 @@ namespace BedrockService.Shared.Classes {
             ServiceConfig,
             ClientConfig,
             ServerConfig_Name,
-            BmsVersionIni,
+            MmsVersionIni,
             LatestVerIni_Name,
             BdsUpdatePackage_Ver,
             JdsUpdatePackage_Ver,
@@ -85,8 +85,8 @@ namespace BedrockService.Shared.Classes {
         public enum ServiceDirectoryKeys {
             WorkingDirectory,
             Root,
-            BmsLogs,
-            BmsConfig,
+            MmsLogs,
+            MmsConfig,
             ServerConfigs,
             ServerPlayerPath,
             GlobalPlayerPath,
@@ -102,7 +102,7 @@ namespace BedrockService.Shared.Classes {
         }
 
         public enum ServerFileNameKeys {
-            BmsServer_Name,
+            MmsServer_Name,
             JavaServer_Name,
             DeployedINI,
             ValidKnownPacks,
@@ -144,12 +144,12 @@ namespace BedrockService.Shared.Classes {
             Jdk17DownloadLink
         }
 
-        public static Dictionary<MmsFileNameKeys, ServiceDirectoryKeys> BmsFileParentDirectories = new() {
+        public static Dictionary<MmsFileNameKeys, ServiceDirectoryKeys> MmsFileParentDirectories = new() {
             { MmsFileNameKeys.ServiceConfig, ServiceDirectoryKeys.Root },
             { MmsFileNameKeys.ClientConfig, ServiceDirectoryKeys.Root },
             { MmsFileNameKeys.ServerConfig_Name, ServiceDirectoryKeys.ServerConfigs },
-            { MmsFileNameKeys.BmsVersionIni, ServiceDirectoryKeys.Root },
-            { MmsFileNameKeys.LatestVerIni_Name, ServiceDirectoryKeys.BmsConfig },
+            { MmsFileNameKeys.MmsVersionIni, ServiceDirectoryKeys.Root },
+            { MmsFileNameKeys.LatestVerIni_Name, ServiceDirectoryKeys.MmsConfig },
             { MmsFileNameKeys.BdsUpdatePackage_Ver, ServiceDirectoryKeys.BuildArchives },
             { MmsFileNameKeys.JdsUpdatePackage_Ver, ServiceDirectoryKeys.JavaCoreFiles_Ver },
             { MmsFileNameKeys.LLUpdatePackage_Ver, ServiceDirectoryKeys.LLBuilds },
@@ -165,7 +165,7 @@ namespace BedrockService.Shared.Classes {
         };
 
         public static Dictionary<ServerFileNameKeys, ServerDirectoryKeys> BdsFileParentDirectories = new() {
-            { ServerFileNameKeys.BmsServer_Name, ServerDirectoryKeys.ServerRoot },
+            { ServerFileNameKeys.MmsServer_Name, ServerDirectoryKeys.ServerRoot },
             { ServerFileNameKeys.JavaServer_Name, ServerDirectoryKeys.ServerRoot },
             { ServerFileNameKeys.VanillaBedrock, ServerDirectoryKeys.ServerRoot },
             { ServerFileNameKeys.VanillaJava, ServerDirectoryKeys.ServerRoot },
@@ -210,7 +210,7 @@ namespace BedrockService.Shared.Classes {
             { ServerDirectoryKeys.LLConfigDir, "plugins\\LiteLoader" }
         };
 
-        public static Dictionary<MmsUrlKeys, string> BmsUrlStrings = new() {
+        public static Dictionary<MmsUrlKeys, string> MmsUrlStrings = new() {
             { MmsUrlKeys.BdsDownloadPage, "https://www.minecraft.net/en-us/download/server/bedrock" },
             { MmsUrlKeys.BdsPackage_Ver, "https://minecraft.azureedge.net/bin-win/bedrock-server-{0}.zip" },
             { MmsUrlKeys.BdsVersionRegx, @"(https://minecraft.azureedge.net/bin-win/bedrock-server-)(.*)(\.zip)" },
@@ -224,28 +224,28 @@ namespace BedrockService.Shared.Classes {
             { MmsUrlKeys.Jdk17DownloadLink, "https://download.oracle.com/java/17/latest/jdk-17_windows-x64_bin.zip"}
         };
 
-        public static Dictionary<ServiceDirectoryKeys, string> BmsDirectoryStrings = new() {
+        public static Dictionary<ServiceDirectoryKeys, string> MmsDirectoryStrings = new() {
             { ServiceDirectoryKeys.Root, "" },
-            { ServiceDirectoryKeys.BmsConfig, "BmsConfig" },
-            { ServiceDirectoryKeys.ServerConfigs, "BmsConfig\\ServerConfigs" },
-            { ServiceDirectoryKeys.ServerPlayerPath, "BmsConfig\\ServerConfigs\\PlayerRecords" },
-            { ServiceDirectoryKeys.GlobalPlayerPath, "BmsConfig\\ServerConfigs\\GlobalPlayers" },
-            { ServiceDirectoryKeys.LLBuilds, "BmsConfig\\LLBuilds" },
-            { ServiceDirectoryKeys.JavaBuilds, "BmsConfig\\JavaBuilds" },
-            { ServiceDirectoryKeys.BdsBuilds, "BmsConfig\\BDSBuilds" },
-            { ServiceDirectoryKeys.BuildArchives, "BmsConfig\\BDSBuilds\\BuildArchives" },
-            { ServiceDirectoryKeys.JavaCoreFiles_Ver, "BmsConfig\\JavaBuilds\\Build_{0}" },
-            { ServiceDirectoryKeys.BedrockCoreFiles_Ver, "BmsConfig\\BDSBuilds\\CoreFiles\\Build_{0}" },
+            { ServiceDirectoryKeys.MmsConfig, "MmsConfig" },
+            { ServiceDirectoryKeys.ServerConfigs, "MmsConfig\\ServerConfigs" },
+            { ServiceDirectoryKeys.ServerPlayerPath, "MmsConfig\\ServerConfigs\\PlayerRecords" },
+            { ServiceDirectoryKeys.GlobalPlayerPath, "MmsConfig\\ServerConfigs\\GlobalPlayers" },
+            { ServiceDirectoryKeys.LLBuilds, "MmsConfig\\LLBuilds" },
+            { ServiceDirectoryKeys.JavaBuilds, "MmsConfig\\JavaBuilds" },
+            { ServiceDirectoryKeys.BdsBuilds, "MmsConfig\\BDSBuilds" },
+            { ServiceDirectoryKeys.BuildArchives, "MmsConfig\\BDSBuilds\\BuildArchives" },
+            { ServiceDirectoryKeys.JavaCoreFiles_Ver, "MmsConfig\\JavaBuilds\\Build_{0}" },
+            { ServiceDirectoryKeys.BedrockCoreFiles_Ver, "MmsConfig\\BDSBuilds\\CoreFiles\\Build_{0}" },
             { ServiceDirectoryKeys.Jdk17Path, "Jdk17" },
             { ServiceDirectoryKeys.Jdk17BinPath, "Jdk17\\bin" }
         };
 
-        public static Dictionary<MmsFileNameKeys, string> BmsFileNameStrings = new() {
+        public static Dictionary<MmsFileNameKeys, string> MmsFileNameStrings = new() {
             { MmsFileNameKeys.ServiceConfig, "Service.conf" },
             { MmsFileNameKeys.ClientConfig, "Client.conf" },
             { MmsFileNameKeys.ServerConfig_Name, "{0}.conf" },
             { MmsFileNameKeys.LatestVerIni_Name, "LatestVer-{0}.ini" },
-            { MmsFileNameKeys.BmsVersionIni, "ServiceVersion.ini" },
+            { MmsFileNameKeys.MmsVersionIni, "ServiceVersion.ini" },
             { MmsFileNameKeys.BedrockStockProps_Ver, "stock_props.conf" },
             { MmsFileNameKeys.JavaStockProps_Ver, "server.properties" },
             { MmsFileNameKeys.GlobalPlayerRegistry, "Service.preg" },
@@ -261,7 +261,7 @@ namespace BedrockService.Shared.Classes {
         };
 
         public static Dictionary<ServerFileNameKeys, string> BdsFileNameStrings = new() {
-            { ServerFileNameKeys.BmsServer_Name, "BedrockService.{0}.exe" },
+            { ServerFileNameKeys.MmsServer_Name, "BedrockService.{0}.exe" },
             { ServerFileNameKeys.JavaServer_Name, "BedrockService.{0}.jar" },
             { ServerFileNameKeys.VanillaBedrock, "bedrock_server.exe" },
             { ServerFileNameKeys.VanillaJava, "server.jar" },
@@ -310,7 +310,7 @@ namespace BedrockService.Shared.Classes {
             { ServerPropertyKeys.JavaArgs, "JavaArgs" }
         };
 
-        public static Dictionary<MmsDependServerPropKeys, string> BmsDependServerPropStrings = new() {
+        public static Dictionary<MmsDependServerPropKeys, string> MmsDependServerPropStrings = new() {
             { MmsDependServerPropKeys.ServerName, "server-name" },
             { MmsDependServerPropKeys.PortI4, "server-port" },
             { MmsDependServerPropKeys.PortI6, "server-portv6" },
@@ -325,76 +325,76 @@ namespace BedrockService.Shared.Classes {
         };
 
         public static void SetWorkingDirectory(IProcessInfo processInfo) {
-            if (!BmsDirectoryStrings.ContainsKey(ServiceDirectoryKeys.WorkingDirectory)) {
-                BmsDirectoryStrings.Add(ServiceDirectoryKeys.WorkingDirectory, processInfo.GetDirectory());
+            if (!MmsDirectoryStrings.ContainsKey(ServiceDirectoryKeys.WorkingDirectory)) {
+                MmsDirectoryStrings.Add(ServiceDirectoryKeys.WorkingDirectory, processInfo.GetDirectory());
             } else {
-                BmsDirectoryStrings[ServiceDirectoryKeys.WorkingDirectory] = processInfo.GetDirectory();
+                MmsDirectoryStrings[ServiceDirectoryKeys.WorkingDirectory] = processInfo.GetDirectory();
             }
         }
 
         public static string GetServiceDirectory(ServiceDirectoryKeys key) {
-            if (!BmsDirectoryStrings.ContainsKey(key)) {
+            if (!MmsDirectoryStrings.ContainsKey(key)) {
                 throw new KeyNotFoundException($"Key {key} was not a does not have a directory associated.");
             }
-            return BmsDirectoryStrings[key] != string.Empty ?
-    $@"{BmsDirectoryStrings[ServiceDirectoryKeys.WorkingDirectory]}\{BmsDirectoryStrings[key]}" :
-    $@"{BmsDirectoryStrings[ServiceDirectoryKeys.WorkingDirectory]}";
+            return MmsDirectoryStrings[key] != string.Empty ?
+    $@"{MmsDirectoryStrings[ServiceDirectoryKeys.WorkingDirectory]}\{MmsDirectoryStrings[key]}" :
+    $@"{MmsDirectoryStrings[ServiceDirectoryKeys.WorkingDirectory]}";
         }
 
         public static string GetServiceDirectory(ServiceDirectoryKeys key, object var0) {
-            if (!BmsDirectoryStrings.ContainsKey(key)) {
+            if (!MmsDirectoryStrings.ContainsKey(key)) {
                 throw new KeyNotFoundException($"Key {key} was not a does not have a directory associated.");
             }
-            string compile = BmsDirectoryStrings[key] != string.Empty ?
-    $@"{BmsDirectoryStrings[ServiceDirectoryKeys.WorkingDirectory]}\{BmsDirectoryStrings[key]}" :
-    $@"{BmsDirectoryStrings[ServiceDirectoryKeys.WorkingDirectory]}";
+            string compile = MmsDirectoryStrings[key] != string.Empty ?
+    $@"{MmsDirectoryStrings[ServiceDirectoryKeys.WorkingDirectory]}\{MmsDirectoryStrings[key]}" :
+    $@"{MmsDirectoryStrings[ServiceDirectoryKeys.WorkingDirectory]}";
             return string.Format(compile, var0);
         }
 
         public static string GetServiceFileName(MmsFileNameKeys key) {
-            if (!BmsFileNameStrings.ContainsKey(key)) {
+            if (!MmsFileNameStrings.ContainsKey(key)) {
                 throw new KeyNotFoundException($"Key {key} was not a does not have a file name associated.");
             }
-            if (!BmsFileParentDirectories.ContainsKey(key)) {
+            if (!MmsFileParentDirectories.ContainsKey(key)) {
                 throw new KeyNotFoundException($"File {key} does not have a parent directory associated.");
             }
-            if (!BmsDirectoryStrings.ContainsKey(BmsFileParentDirectories[key])) {
-                throw new KeyNotFoundException($"File {BmsFileParentDirectories[key]} does not have a directory associated.");
+            if (!MmsDirectoryStrings.ContainsKey(MmsFileParentDirectories[key])) {
+                throw new KeyNotFoundException($"File {MmsFileParentDirectories[key]} does not have a directory associated.");
             }
-            return BmsFileNameStrings[key];
+            return MmsFileNameStrings[key];
         }
 
         public static string GetServiceFileName(MmsFileNameKeys key, object var0) {
-            if (!BmsFileNameStrings.ContainsKey(key)) {
+            if (!MmsFileNameStrings.ContainsKey(key)) {
                 throw new KeyNotFoundException($"Key {key} was not a does not have a file name associated.");
             }
-            if (!BmsFileParentDirectories.ContainsKey(key)) {
+            if (!MmsFileParentDirectories.ContainsKey(key)) {
                 throw new KeyNotFoundException($"File {key} does not have a parent directory associated.");
             }
-            if (!BmsDirectoryStrings.ContainsKey(BmsFileParentDirectories[key])) {
-                throw new KeyNotFoundException($"File {BmsFileParentDirectories[key]} does not have a directory associated.");
+            if (!MmsDirectoryStrings.ContainsKey(MmsFileParentDirectories[key])) {
+                throw new KeyNotFoundException($"File {MmsFileParentDirectories[key]} does not have a directory associated.");
             }
-            return string.Format(BmsFileNameStrings[key], var0);
+            return string.Format(MmsFileNameStrings[key], var0);
         }
 
         public static string GetServiceFilePath(MmsFileNameKeys key) {
-            if (!BmsFileNameStrings.ContainsKey(key)) {
+            if (!MmsFileNameStrings.ContainsKey(key)) {
                 throw new KeyNotFoundException($"Key {key} was not a does not have a directory associated.");
             }
-            if (!BmsFileParentDirectories.ContainsKey(key)) {
+            if (!MmsFileParentDirectories.ContainsKey(key)) {
                 throw new KeyNotFoundException($"File {key} does not have a parent directory associated.");
             }
-            if (!BmsDirectoryStrings.ContainsKey(BmsFileParentDirectories[key])) {
-                throw new KeyNotFoundException($"File {BmsFileParentDirectories[key]} does not have a directory associated.");
+            if (!MmsDirectoryStrings.ContainsKey(MmsFileParentDirectories[key])) {
+                throw new KeyNotFoundException($"File {MmsFileParentDirectories[key]} does not have a directory associated.");
             }
-            return $"{GetServiceDirectory(BmsFileParentDirectories[key])}\\{BmsFileNameStrings[key]}";
+            return $"{GetServiceDirectory(MmsFileParentDirectories[key])}\\{MmsFileNameStrings[key]}";
         }
 
         public static string GetServiceFilePath(MmsFileNameKeys key, object? var0) {
-            if (!BmsFileNameStrings.ContainsKey(key)) {
+            if (!MmsFileNameStrings.ContainsKey(key)) {
                 throw new KeyNotFoundException();
             }
-            string output = $"{GetServiceDirectory(BmsFileParentDirectories[key])}\\{BmsFileNameStrings[key]}";
+            string output = $"{GetServiceDirectory(MmsFileParentDirectories[key])}\\{MmsFileNameStrings[key]}";
             return string.Format(output, var0);
         }
 

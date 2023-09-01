@@ -1,7 +1,7 @@
-﻿using BedrockService.Service.Networking.Interfaces;
-using BedrockService.Service.Server.Interfaces;
+﻿using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Service.Server.Interfaces;
 
-namespace BedrockService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies {
     class ServerBackupAll : IMessageParser {
 
         private readonly IBedrockService _service;

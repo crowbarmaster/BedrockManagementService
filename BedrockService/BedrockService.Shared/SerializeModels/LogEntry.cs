@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BedrockService.Shared.SerializeModels {
+namespace MinecraftService.Shared.SerializeModels {
     public class LogEntry {
         public DateTime TimeStamp { get; set; }
         public string Text { get; set; }

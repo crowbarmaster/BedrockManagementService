@@ -1,10 +1,10 @@
-﻿using BedrockService.Service.Server.Interfaces;
-using BedrockService.Shared.PackParser;
-using BedrockService.Shared.SerializeModels;
+﻿using MinecraftService.Service.Server.Interfaces;
+using MinecraftService.Shared.PackParser;
+using MinecraftService.Shared.SerializeModels;
 using System.IO.Compression;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Service.Server {
+namespace MinecraftService.Service.Server {
     public class BedrockBackupManager : IBackupManager {
         private readonly IServerLogger _logger;
         private readonly IServerController _server;
@@ -98,9 +98,9 @@ namespace BedrockService.Service.Server {
                 MinecraftPackParser parser = new();
                 foreach (FileInfo file in backupPacksDir.GetFiles()) {
                     FileUtilities.ClearTempDir().Wait();
-                    ZipFile.ExtractToDirectory(file.FullName, $@"{Path.GetTempPath()}\BMSTemp\PackTemp", true);
+                    ZipFile.ExtractToDirectory(file.FullName, $@"{Path.GetTempPath()}\MMSTemp\PackTemp", true);
                     parser.FoundPacks.Clear();
-                    parser.ParseDirectory($@"{Path.GetTempPath()}\BMSTemp\PackTemp");
+                    parser.ParseDirectory($@"{Path.GetTempPath()}\MMSTemp\PackTemp");
                     if (parser.FoundPacks[0].ManifestType == "data") {
                         string folderPath = $@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\development_behavior_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
                         Task.Run(() => FileUtilities.DeleteFilesFromDirectory(folderPath, false)).Wait();

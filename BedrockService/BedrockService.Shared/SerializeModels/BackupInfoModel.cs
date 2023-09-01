@@ -3,7 +3,7 @@ using System;
 using System.Globalization;
 using System.IO;
 
-namespace BedrockService.Shared.SerializeModels {
+namespace MinecraftService.Shared.SerializeModels {
     public class BackupInfoModel {
         public DateTime Timestamp { get; set; }
         public string Filename { get; set; }

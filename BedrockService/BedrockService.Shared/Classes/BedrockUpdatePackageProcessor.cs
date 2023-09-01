@@ -1,13 +1,13 @@
-﻿using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.Utilities;
+﻿using MinecraftService.Shared.Interfaces;
+using MinecraftService.Shared.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Shared.Classes {
+namespace MinecraftService.Shared.Classes {
     public class BedrockUpdatePackageProcessor {
         private readonly string _packageVersion;
         private readonly string _fileTargetDirectory;
@@ -19,7 +19,7 @@ namespace BedrockService.Shared.Classes {
         public BedrockUpdatePackageProcessor(IServerLogger logger, string packageVersion, string fileTargetDirectory) {
             _packageVersion = packageVersion;
             _fileTargetDirectory = fileTargetDirectory;
-            _workingDirectory = $@"{Path.GetTempPath()}\BMSTemp\ServerFileTemp";
+            _workingDirectory = $@"{Path.GetTempPath()}\MMSTemp\ServerFileTemp";
             Directory.CreateDirectory(_workingDirectory);
             _logger = logger;
         }
@@ -27,7 +27,7 @@ namespace BedrockService.Shared.Classes {
         public BedrockUpdatePackageProcessor(string packageVersion, string fileTargetDirectory) {
             _packageVersion = packageVersion;
             _fileTargetDirectory = fileTargetDirectory;
-            _workingDirectory = $@"{Path.GetTempPath()}\BMSTemp\ServerFileTemp";
+            _workingDirectory = $@"{Path.GetTempPath()}\MMSTemp\ServerFileTemp";
             _loggingEnabled = false;
         }
 

@@ -1,5 +1,5 @@
-﻿using BedrockService.Shared.Classes;
-using BedrockService.Shared.Interfaces;
+﻿using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Interfaces;
 using System.IO;
 using Xunit;
 

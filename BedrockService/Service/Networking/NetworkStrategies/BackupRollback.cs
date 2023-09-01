@@ -1,7 +1,7 @@
-﻿using BedrockService.Service.Networking.Interfaces;
+﻿using MinecraftService.Service.Networking.Interfaces;
 using System.Text;
 
-namespace BedrockService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class BackupRollback : IMessageParser {
 
         private readonly IBedrockService _service;

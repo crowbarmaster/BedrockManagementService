@@ -1,7 +1,7 @@
 ﻿
 using System.Windows.Forms;
 
-namespace BedrockService.Client.Forms {
+namespace MinecraftService.Client.Forms {
     partial class MainWindow {
         /// <summary>
         /// Required designer variable.

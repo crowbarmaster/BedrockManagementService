@@ -1,9 +1,9 @@
-﻿using BedrockService.Client.Management;
-using BedrockService.Shared.Classes;
-using BedrockService.Shared.Classes.Configurations;
-using BedrockService.Shared.Interfaces;
-using BedrockService.Shared.SerializeModels;
-using BedrockService.Shared.Utilities;
+﻿using MinecraftService.Client.Management;
+using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Classes.Configurations;
+using MinecraftService.Shared.Interfaces;
+using MinecraftService.Shared.SerializeModels;
+using MinecraftService.Shared.Utilities;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -17,9 +17,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
-using static BedrockService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Client.Forms
+namespace MinecraftService.Client.Forms
 {
     public partial class MainWindow : Form {
         public IServiceConfiguration connectedHost;
@@ -204,7 +204,7 @@ namespace BedrockService.Client.Forms
             if (file.FileType == FileTypeFlags.ServicePackage) {
                 SaveFileDialog saveFileDialog = new() {
                     Filter = "Zip file|*.zip",
-                    FileName = $"BMS_{file.FileType}-{DateTime.Now:yyyyMMdd_hhmmssff}.zip",
+                    FileName = $"MMS_{file.FileType}-{DateTime.Now:yyyyMMdd_hhmmssff}.zip",
                     RestoreDirectory = true,
                     Title = "Save exported file..."
                 };

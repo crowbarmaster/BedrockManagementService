@@ -1,11 +1,11 @@
 ﻿
-using BedrockService.Service.Networking.Interfaces;
-using BedrockService.Shared.SerializeModels;
+using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Shared.SerializeModels;
 using Newtonsoft.Json;
 using System.IO.Compression;
 using System.Text;
 
-namespace BedrockService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class ImportFileRequest : IMessageParser {
         private readonly IServiceConfiguration _configuration;
         private readonly IProcessInfo _processInfo;

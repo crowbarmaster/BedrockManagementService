@@ -1,9 +1,9 @@
-﻿using BedrockService.Shared.Classes;
+﻿using MinecraftService.Shared.Classes;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-namespace BedrockService.Client.Forms {
+namespace MinecraftService.Client.Forms {
     public partial class PropEditorForm : Form {
         readonly DataGridView dataGrid;
         public List<Property> workingProps;

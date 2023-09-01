@@ -1,7 +1,7 @@
-﻿using BedrockService.Service.Networking.Interfaces;
-using static BedrockService.Shared.Classes.SharedStringBase;
+﻿using MinecraftService.Service.Networking.Interfaces;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace BedrockService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class LevelEditFile : IMessageParser {
         private readonly IServiceConfiguration _serviceConfiguration;
         private readonly IBedrockService _bedrockService;

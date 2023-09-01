@@ -1,4 +1,4 @@
-﻿namespace BedrockService.Service.Networking.Interfaces {
+﻿namespace MinecraftService.Service.Networking.Interfaces {
     public interface ITCPListener {
         void Initialize();
         Task StartListening();

@@ -1,8 +1,8 @@
-﻿using BedrockService.Shared.Classes;
+﻿using MinecraftService.Shared.Classes;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace BedrockService.Shared.Interfaces {
+namespace MinecraftService.Shared.Interfaces {
     public interface IUpdater {
         void Initialize();
         void SetNewLogger(IServerLogger logger);
