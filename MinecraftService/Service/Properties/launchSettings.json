@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MineraftService.Service": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
