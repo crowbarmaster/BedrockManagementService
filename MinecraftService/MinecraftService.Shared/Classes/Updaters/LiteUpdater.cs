@@ -43,9 +43,18 @@ namespace MinecraftService.Shared.Classes.Updaters {
         }
 
         public override Task CheckLatestVersion() => Task.Run(() => {
-            string result = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.LLReleasesJson]).Result;
-            if (result != null) {
-                List<LiteLoaderVersionManifest> manifestList = JsonSerializer.Deserialize<List<LiteLoaderVersionManifest>>(result);
+            int retryCount = 0;
+            string content = string.Empty;
+            while (retryCount < 4 && content == string.Empty) {
+            content = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.LLReleasesJson]).Result;
+                retryCount++;
+            }
+            if (retryCount > 3) {
+                _logger.AppendLine("Error fetching content from URL. Check connection and try again!");
+                return;
+            }
+            if (content != null) {
+                List<LiteLoaderVersionManifest> manifestList = JsonSerializer.Deserialize<List<LiteLoaderVersionManifest>>(content);
                 manifestList.Reverse();
                 LiteLoaderVersionManifest latestLLVersion = manifestList.FirstOrDefault();
                 if (latestLLVersion == null) {

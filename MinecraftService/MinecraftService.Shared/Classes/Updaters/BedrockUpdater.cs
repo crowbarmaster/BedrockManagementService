@@ -45,24 +45,35 @@ namespace MinecraftService.Shared.Classes.Updaters {
         public virtual Task CheckLatestVersion() {
             return Task.Run(() => {
                 _logger.AppendLine("Checking latest BDS Version...");
-                string content = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.BdsVersionJson]).Result;
-                if (content == null)
-                    return;
-                List<BedrockVersionHistoryJson> versionList = JsonSerializer.Deserialize<List<BedrockVersionHistoryJson>>(content);
-                BedrockVersionHistoryJson latest = versionList.Last();
-
-                string downloadPath = latest.WindowsBinUrl;
-                string fetchedVersion = latest.Version;
-
-                _logger.AppendLine($"Latest version found: \"{fetchedVersion}\"");
-                if (!File.Exists(GetServiceFilePath(MmsFileNameKeys.BdsUpdatePackage_Ver, fetchedVersion))) {
-                    FetchBuild(fetchedVersion).Wait();
-                    ProcessBdsPackage(fetchedVersion).Wait();
+                int retryCount = 0;
+                string content = string.Empty;
+                while (retryCount < 4 && content == string.Empty) {
+                    content = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.BdsVersionJson]).Result;
+                    retryCount++;
                 }
-                File.WriteAllText(GetServiceFilePath(MmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[_serverArch]), fetchedVersion);
-                _serviceConfiguration.SetLatestVersion(_serverArch, fetchedVersion);
+                if (retryCount > 3) {
+                    _logger.AppendLine("Error fetching content from URL. Check connection and try again!");
+                    return;
+                }
+                try {
+                    List<BedrockVersionHistoryJson> versionList = JsonSerializer.Deserialize<List<BedrockVersionHistoryJson>>(content);
+                    BedrockVersionHistoryJson latest = versionList.Last();
 
-                _serviceConfiguration.SetServerDefaultPropList(_serverArch, MinecraftFileUtilities.GetDefaultPropListFromFile(GetServiceFilePath(MmsFileNameKeys.BedrockStockProps_Ver, fetchedVersion)));
+                    string downloadPath = latest.WindowsBinUrl;
+                    string fetchedVersion = latest.Version;
+
+                    _logger.AppendLine($"Latest version found: \"{fetchedVersion}\"");
+                    if (!File.Exists(GetServiceFilePath(MmsFileNameKeys.BdsUpdatePackage_Ver, fetchedVersion))) {
+                        FetchBuild(fetchedVersion).Wait();
+                        ProcessBdsPackage(fetchedVersion).Wait();
+                    }
+                    File.WriteAllText(GetServiceFilePath(MmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[_serverArch]), fetchedVersion);
+                    _serviceConfiguration.SetLatestVersion(_serverArch, fetchedVersion);
+
+                    _serviceConfiguration.SetServerDefaultPropList(_serverArch, MinecraftFileUtilities.GetDefaultPropListFromFile(GetServiceFilePath(MmsFileNameKeys.BedrockStockProps_Ver, fetchedVersion)));
+                } catch (Exception ex) {
+                    _logger.AppendLine($"Error checking lastest Bedrock version. Check URL status and your network, and try again!\r\nStacktrace: {ex.Message}");
+                }
             });
         }
 

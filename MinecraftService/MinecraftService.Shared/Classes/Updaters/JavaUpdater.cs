@@ -57,9 +57,16 @@ namespace MinecraftService.Shared.Classes.Updaters {
         public virtual Task CheckLatestVersion() {
             return Task.Run(() => {
                 _logger.AppendLine("Checking latest Java Release version...");
-                string content = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.JdsVersionJson]).Result;
-                if (content == null)
+                int retryCount = 0;
+                string content = string.Empty;
+                while (retryCount < 4 && content == string.Empty) {
+                    content = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.JdsVersionJson]).Result;
+                    retryCount++;
+                }
+                if(retryCount > 3) {
+                    _logger.AppendLine("Error fetching content from URL. Check connection and try again!");
                     return;
+                }
                 JavaVersionHistoryModel versionList = JsonConvert.DeserializeObject<JavaVersionHistoryModel>(content);
                 JavaVersionDetailsModel releaseDetails = new JavaVersionDetailsModel();
                 JavaVersionDetailsModel betaDetails = new JavaVersionDetailsModel();
