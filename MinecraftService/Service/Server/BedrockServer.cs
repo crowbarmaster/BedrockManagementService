@@ -24,10 +24,7 @@ namespace MinecraftService.Service.Server {
         private readonly IProcessInfo _processInfo;
         private readonly IPlayerManager _playerManager;
         private readonly IBackupManager _backupManager;
-        private System.Timers.Timer? _backupTimer { get; set; }
-        private CrontabSchedule? _backupCron { get; set; }
-        private CrontabSchedule? _updaterCron { get; set; }
-        private System.Timers.Timer? _updaterTimer { get; set; }
+        private TimerService _timerService;
         private IServerLogger _serverLogger;
         private List<IPlayer> _connectedPlayers = new();
         private DateTime _startTime;
@@ -43,13 +40,14 @@ namespace MinecraftService.Service.Server {
             _playerManager = serviceConfiguration.GetProp(ServicePropertyKeys.GlobalizedPlayerDatabase).GetBoolValue() || processInfo.DeclaredType() == "Client" ? servicePlayerManager : serverConfiguration.GetPlayerManager();
             _configurator = configurator;
             _logger = logger;
+            _serverLogger = new MinecraftServerLogger(_processInfo, _serviceConfiguration, _serverConfiguration);
             _backupManager = new BedrockBackupManager(_logger, this, serverConfiguration, serviceConfiguration);
         }
 
         public void Initialize() {
-            _serverLogger = new MinecraftServerLogger(_processInfo, _serviceConfiguration, _serverConfiguration);
             _serverLogger.Initialize();
             _serverConfiguration.GetUpdater().SetNewLogger(_serverLogger);
+            _timerService = new TimerService(this, _serverConfiguration, _serviceConfiguration);
         }
 
         public void CheckUpdates() {
@@ -73,10 +71,11 @@ namespace MinecraftService.Service.Server {
                 }
                 _serverConfiguration.ValidateDeployedServer();
                 StartServerTask();
-                InitializeBackupTimer();
-                InitializeUpdateTimer();
                 while (_currentServerStatus != ServerStatus.Started) {
                     Task.Delay(10).Wait();
+                }
+                for (int i = 0; i < Enum.GetNames(typeof(MmsTimerTypes)).Length; i++) {
+                    _timerService.StartTimer((MmsTimerTypes)i);
                 }
                 _startTime = DateTime.Now;
             });
@@ -90,14 +89,7 @@ namespace MinecraftService.Service.Server {
                 if (stopWatchdog) {
                     StopWatchdog().Wait();
                 }
-                if (_backupTimer != null) {
-                    _backupTimer.Stop();
-                    _backupTimer = null;
-                }
-                if (_updaterTimer != null) {
-                    _updaterTimer.Stop();
-                    _updaterTimer = null;
-                }
+
                 if (_currentServerStatus != ServerStatus.Started) {
                     if (_serverProcess != null) {
                         _serverProcess.Kill();
@@ -134,89 +126,6 @@ namespace MinecraftService.Service.Server {
         public void WriteToStandardIn(string command) {
             if (_stdInStream != null) {
                 _stdInStream.WriteLine(command);
-            }
-        }
-
-        private void InitializeBackupTimer() {
-            _backupCron = CrontabSchedule.TryParse(_serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupCron).ToString());
-            if (_serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupEnabled).GetBoolValue() && _backupCron != null) {
-                double interval = (_backupCron.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds;
-                if (interval >= 0) {
-                    if (_backupTimer != null) {
-                        _backupTimer.Stop();
-                        _backupTimer = null;
-                    }
-                    _backupTimer = new System.Timers.Timer(interval);
-                    _serverLogger.AppendLine($"Automatic backups for server {GetServerName()} enabled, next backup at: {_backupCron.GetNextOccurrence(DateTime.Now):G}.");
-                    _backupTimer.Elapsed += BackupTimer_Elapsed;
-                    _backupTimer.AutoReset = false;
-                    _backupTimer.Start();
-                }
-            }
-            if (!_serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupEnabled).GetBoolValue()) {
-                if (_backupTimer != null) {
-                    _backupTimer.Stop();
-                    _backupTimer = null;
-                }
-            }
-        }
-
-        private void BackupTimer_Elapsed(object sender, ElapsedEventArgs e) {
-            try {
-                bool shouldBackup = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.IgnoreInactiveBackups).GetBoolValue();
-                if ((shouldBackup && _serverModifiedFlag) || !shouldBackup) {
-                    _backupManager.InitializeBackup();
-                } else {
-                    _serverLogger.AppendLine($"Backup for server {GetServerName()} was skipped due to inactivity.");
-                }
-                ((System.Timers.Timer)sender).Stop();
-                InitializeBackupTimer();
-            } catch (Exception ex) {
-                ((System.Timers.Timer)sender).Stop();
-                _logger.AppendLine($"Error in BackupTimer_Elapsed {ex}");
-                InitializeBackupTimer();
-            }
-        }
-
-        private void InitializeUpdateTimer() {
-            _updaterCron = CrontabSchedule.TryParse(_serverConfiguration.GetSettingsProp(ServerPropertyKeys.UpdateCron).ToString());
-            if (_serverConfiguration.GetSettingsProp(ServerPropertyKeys.CheckUpdates).GetBoolValue() && _updaterCron != null) {
-                double interval = (_updaterCron.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds;
-                if (_updaterTimer != null) {
-                    _updaterTimer.Stop();
-                    _updaterTimer = null;
-                }
-                if (interval >= 0) {
-                    if(_updaterTimer != null) {
-                        _updaterTimer.Stop();
-                        _updaterTimer = null;
-                    }
-                    _updaterTimer = new System.Timers.Timer(interval);
-                    _updaterTimer.Elapsed += UpdateTimer_Elapsed;
-                    _serverLogger.AppendLine($"Automatic updates Enabled, will be checked at: {_updaterCron.GetNextOccurrence(DateTime.Now):G}.");
-                    _updaterTimer.Start();
-                }
-            }
-            if (!_serverConfiguration.GetSettingsProp(ServerPropertyKeys.CheckUpdates).GetBoolValue()) {
-                if (_updaterTimer != null) {
-                    _updaterTimer.Stop();
-                    _updaterTimer = null;
-                }
-            }
-        }
-
-        private void UpdateTimer_Elapsed(object sender, ElapsedEventArgs e) {
-            try {
-                if (_serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue() && _serverConfiguration.GetDeployedVersion() != _serviceConfiguration.GetLatestVersion(MinecraftServerArch.Bedrock)) {
-                    _logger.AppendLine("Version change detected! Restarting server(s) to apply update...");
-                    PerformOfflineServerTask(new Action(() => _serverConfiguration.GetUpdater().ReplaceServerBuild(_serviceConfiguration.GetLatestVersion(MinecraftServerArch.Bedrock)).Wait()));
-                }
-                ((System.Timers.Timer)sender).Stop();
-                InitializeUpdateTimer();
-            } catch (Exception ex) {
-                ((System.Timers.Timer)sender).Stop();
-                _logger.AppendLine($"Error in UpdateTimer_Elapsed {ex}");
-                InitializeUpdateTimer();
             }
         }
 

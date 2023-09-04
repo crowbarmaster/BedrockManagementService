@@ -15,6 +15,12 @@ namespace MinecraftService.Shared.Classes {
             Java
         }
 
+        public enum MmsTimerTypes {
+            Update,
+            Backup,
+            Restart
+        }
+
         public enum ServicePropertyKeys {
             ServersPath,
             AcceptedMojangLic,
@@ -34,15 +40,17 @@ namespace MinecraftService.Shared.Classes {
             ServerPath,
             ServerExeName,
             ServerAutostartEnabled,
-            BackupEnabled,
+            AutoBackupEnabled,
+            AutoRestartEnabled,
+            CheckUpdatesEnabled,
             BackupPath,
             BackupCron,
+            RestartCron,
+            UpdateCron,
             MaxBackupCount,
             AutoBackupsContainPacks,
             IgnoreInactiveBackups,
-            CheckUpdates,
             AutoDeployUpdates,
-            UpdateCron,
             ServerVersion,
             UseBetaVersions,
             JavaArgs
@@ -296,15 +304,17 @@ namespace MinecraftService.Shared.Classes {
             { ServerPropertyKeys.ServerPath, "ServerPath" },
             { ServerPropertyKeys.ServerExeName, "ServerExeName" },
             { ServerPropertyKeys.ServerAutostartEnabled, "ServerAutostartEnabled" },
-            { ServerPropertyKeys.BackupEnabled, "BackupEnabled" },
+            { ServerPropertyKeys.AutoBackupEnabled, "BackupEnabled" },
             { ServerPropertyKeys.BackupPath, "BackupPath" },
             { ServerPropertyKeys.BackupCron, "BackupCron" },
             { ServerPropertyKeys.MaxBackupCount, "MaxBackupCount" },
             { ServerPropertyKeys.AutoBackupsContainPacks, "AutoBackupsContainPacks" },
             { ServerPropertyKeys.IgnoreInactiveBackups, "IgnoreInactiveBackups" },
-            { ServerPropertyKeys.CheckUpdates, "CheckUpdates" },
+            { ServerPropertyKeys.CheckUpdatesEnabled, "CheckUpdates" },
+            { ServerPropertyKeys.AutoRestartEnabled, "AutoRestartEnabled" },
             { ServerPropertyKeys.AutoDeployUpdates, "AutoDeployUpdates" },
             { ServerPropertyKeys.UpdateCron, "UpdateCron" },
+            { ServerPropertyKeys.RestartCron, "RestartCron" },
             { ServerPropertyKeys.ServerVersion, "ServerVersion" },
             { ServerPropertyKeys.UseBetaVersions, "UseBetaVersions" },
             { ServerPropertyKeys.JavaArgs, "JavaArgs" }
