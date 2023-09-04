@@ -46,9 +46,10 @@ namespace MinecraftService.Service.Server.ConsoleFilters {
             if (_serverConfiguration.GetServerVersion() != versionString) {
                 if (_serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()) {
                     _logger.AppendLine($"Server {_serverConfiguration.GetServerName()} decected incorrect or out of date version! Replacing build...");
-                    _bedrockServer.ServerStop(false).Wait();
-                    _serverConfiguration.GetUpdater().ReplaceServerBuild().Wait();
-                    _bedrockServer.ServerStart();
+                    _bedrockServer.PerformOfflineServerTask(() => {
+                        _bedrockServer.ForceKillServer();
+                        _serverConfiguration.GetUpdater().ReplaceServerBuild().Wait();
+                    });
                 } else {
                     _logger.AppendLine($"Server {_serverConfiguration.GetServerName()} is out of date, Enable AutoDeployUpdates option to update to latest!");
                 }

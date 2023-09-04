@@ -18,10 +18,10 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
             Buffer.BlockCopy(data, 5, stripHeaderFromBuffer, 0, stripHeaderFromBuffer.Length);
             IServerConfiguration server = _serviceConfiguration.GetServerInfoByIndex(serverIndex);
             string pathToLevelDat = $@"{_serviceConfiguration.GetProp(ServicePropertyKeys.ServersPath)}\{server.GetProp(MmsDependServerPropKeys.ServerName)}\worlds\{server.GetProp(MmsDependServerPropKeys.LevelName)}\level.dat";
-            _mineraftService.GetServerByIndex(serverIndex).ServerStop(false).Wait();
-            File.WriteAllBytes(pathToLevelDat, stripHeaderFromBuffer);
-            _logger.AppendLine($"level.dat writen to server {server.GetServerName()}");
-            _mineraftService.GetServerByIndex(serverIndex).ServerStart().Wait();
+            _mineraftService.GetServerByIndex(serverIndex).PerformOfflineServerTask(() => {
+                File.WriteAllBytes(pathToLevelDat, stripHeaderFromBuffer);
+                _logger.AppendLine($"level.dat writen to server {server.GetServerName()}");
+            });
             return (Array.Empty<byte>(), 0, 0);
         }
     }

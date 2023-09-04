@@ -24,9 +24,9 @@ namespace MinecraftService.Service.Server.ConsoleFilters {
         }
 
         public void Filter(string input) {
-            _bedrockServer.ServerStop(false);
-            _serverConfiguration.GetUpdater().ReplaceServerBuild().Wait();
-            _bedrockServer.ServerStart().Wait();
+            _bedrockServer.PerformOfflineServerTask(() => {
+                _serverConfiguration.GetUpdater().ReplaceServerBuild().Wait();
+            });
         }
     }
 }
