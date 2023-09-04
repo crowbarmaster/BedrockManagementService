@@ -1,6 +1,7 @@
 ﻿using MinecraftService.Shared.Classes.Updaters;
 using MinecraftService.Shared.Interfaces;
 using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
+using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
 using MinecraftService.Shared.SerializeModels;
 using MinecraftService.Shared.Utilities;
 using System;
@@ -31,23 +32,13 @@ namespace MinecraftService.Shared.Classes.Configurations {
             ServerPropList = MinecraftFileUtilities.CopyPropList(DefaultPropList);
             ServersPath = new Property(ServicePropertyStrings[ServicePropertyKeys.ServersPath], _serviceConfiguration.GetProp(ServicePropertyKeys.ServersPath).StringValue);
             ServicePropList.Clear();
+            ServicePropList.AddRange(MinecraftFileUtilities.CopyPropList(CommonConfigDefaults.PropList));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerName], "Dedicated Server"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.FileName], "Dedicated Server.conf"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerPath], $@"{ServersPath}\Dedicated Server"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerExeName], $"MineraftService.Dedicated Server.exe"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.MinecraftType], "Bedrock"));
-            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerAutostartEnabled], "true"));
-            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.BackupEnabled], "false"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.BackupPath], $@"{_servicePath}\ServerBackups"));
-            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.BackupCron], "0 1 * * *"));
-            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.MaxBackupCount], "25"));
-            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.AutoBackupsContainPacks], "false"));
-            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.IgnoreInactiveBackups], "true"));
-            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.CheckUpdates], "true"));
-            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.AutoDeployUpdates], "true"));
-            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.UpdateCron], "0 2 * * *"));
-            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerVersion], "None"));
-            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.UseBetaVersions], "false"));
             PlayerManager = new BedrockPlayerManager(this);
             return true;
         }
