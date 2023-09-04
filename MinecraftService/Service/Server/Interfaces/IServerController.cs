@@ -22,6 +22,7 @@ namespace MinecraftService.Service.Server.Interfaces {
         void RunStartupCommands();
         bool IsPrimaryServer();
         bool IsServerStarted();
+        bool IsServerStopped();
         void CheckUpdates();
         IBackupManager GetBackupManager();
         void PerformOfflineServerTask(Action methodToRun);

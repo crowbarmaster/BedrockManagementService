@@ -269,5 +269,7 @@ namespace MinecraftService.Service.Server {
         public void SetStartupStatus(ServerStatus status) => _currentServerStatus = status;
 
         public bool IsServerStarted() => _currentServerStatus == ServerStatus.Started;
+
+        public bool IsServerStopped() => _currentServerStatus == ServerStatus.Stopped;
     }
 }

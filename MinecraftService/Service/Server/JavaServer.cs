@@ -28,7 +28,6 @@ namespace MinecraftService.Service.Server {
         private IServerLogger _serverLogger;
         private List<IPlayer> _connectedPlayers = new();
         private DateTime _startTime;
-        private bool _AwaitingStopSignal = true;
         private bool _serverModifiedFlag = true;
         private const string _startupMessage = "INFO] Server started.";
 
@@ -176,6 +175,8 @@ namespace MinecraftService.Service.Server {
 
         public bool IsServerStarted() => _currentServerStatus == ServerStatus.Started;
 
+        public bool IsServerStopped() => _currentServerStatus == ServerStatus.Stopped;
+
         private Task StopWatchdog() {
             return Task.Run(() => {
                 _watchdogCanceler.Cancel();
@@ -208,7 +209,6 @@ namespace MinecraftService.Service.Server {
                 if (e.Data != null) {
                     if (input.Contains("All dimensions are saved") && !_backupManager.BackupRunning()) {
                         _serviceLogger.AppendLine($"Server {GetServerName()} received quit signal.");
-                        _AwaitingStopSignal = false;
                         _currentServerStatus = ServerStatus.Stopped;
                     }
                     if (input.Contains("Automatic saving is now enabled")) {

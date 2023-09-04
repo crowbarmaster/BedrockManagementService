@@ -29,7 +29,6 @@ namespace MinecraftService.Service.Server {
         private List<IPlayer> _connectedPlayers = new();
         private DateTime _startTime;
         private const string _startupMessage = "INFO] Server started.";
-        private bool _AwaitingStopSignal = true;
         private bool _serverModifiedFlag = true;
         private bool _LiteLoadedServer = false;
 
@@ -197,7 +196,6 @@ namespace MinecraftService.Service.Server {
                 if (e.Data != null) {
                     if (input.Equals("Quit correctly")) {
                         _logger.AppendLine($"Server {GetServerName()} received quit signal.");
-                        _AwaitingStopSignal = false;
                         _currentServerStatus = ServerStatus.Stopped;
                     }
                     if (input.Contains("[PreLoader]")) {
@@ -289,5 +287,7 @@ namespace MinecraftService.Service.Server {
         public void SetStartupStatus(ServerStatus status) => _currentServerStatus = status;
 
         public bool IsServerStarted() => _currentServerStatus == ServerStatus.Started;
+
+        public bool IsServerStopped() => _currentServerStatus == ServerStatus.Stopped;
     }
 }

@@ -151,7 +151,7 @@ namespace MinecraftService.Service.Core {
                 foreach (var brs in _loadedServers) {
                     brs.ServerStop(true);
                 }
-                while (HasRunningServer()) {
+                while (!AllServersStopped()) {
                     Task.Delay(200).Wait();
                 }
                 _CurrentServiceStatus = ServiceStatus.Stopped;
@@ -202,13 +202,13 @@ namespace MinecraftService.Service.Core {
             minecraftServer.StartWatchdog();
         }
 
-        private bool HasRunningServer() {
-            foreach(IServerController server in _loadedServers) {
-                if (server.IsServerStarted()) {
-                    return true;
+        private bool AllServersStopped() {
+            foreach (IServerController server in _loadedServers) {
+                if (!server.IsServerStopped()) {
+                    return false;
                 }
             }
-            return false;
+            return true;
         }
 
         private void InstanciateServers() {
