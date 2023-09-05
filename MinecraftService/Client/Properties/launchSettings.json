@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "MineraftService.Client": {
+      "commandName": "Project"
+    }
+  }
+}
