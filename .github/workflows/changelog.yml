@@ -28,7 +28,7 @@ jobs:
           token: ${{ github.token }}
           tag: ${{ inputs.FromTag }}
           includeInvalidCommits: true
-          writeToFile: true
+          excludeTypes: build
       - name: Upload changelog artifact
         uses: actions/upload-artifact@v3
         with:
