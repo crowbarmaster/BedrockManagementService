@@ -19,14 +19,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Changelog
-        uses: scottbrenner/generate-changelog-action@master
-        id: Changelog
+      - name: Update CHANGELOG
+        id: changelog
+        uses: requarks/changelog-action@v1
         with:
-          allow-unknown: true
-          type: build
+          token: ${{ github.token }}
+          fromTag: ${{ inputs.FromTag }}
+          toTag: ${{ inputs.ToTag }}
       - name: Upload changelog artifact
         uses: actions/upload-artifact@v3
         with:
           name: changelog-output
-          path: changelog.md
+          path: ChangeLog.md
