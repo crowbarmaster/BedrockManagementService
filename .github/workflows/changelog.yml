@@ -1,0 +1,36 @@
+name: Create changelog
+
+on:
+  workflow_dispatch:
+     inputs:
+      FromTag:
+        description: 'Starting tag'
+        required: false
+        type: string
+      ToTag:
+        description: 'Ending tag'
+        required: false
+        type: string
+        
+  pull_request:
+    types: [closed]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Changelog
+        uses: scottbrenner/generate-changelog-action@master
+        id: Changelog
+        with:
+          package-dir: 'package.json'
+          from-tag: $FromTag
+          to-tag: $ToTag
+      - name: Upload changelog artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: changelog-output
+          path: changelog.md
