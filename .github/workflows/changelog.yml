@@ -30,4 +30,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: changelog-output
-          path: ChangeLog.md
+          path: ./CHANGELOG.md
