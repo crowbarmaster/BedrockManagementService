@@ -26,9 +26,9 @@ jobs:
         uses: scottbrenner/generate-changelog-action@master
         id: Changelog
         with:
-          package-dir: 'package.json'
           from-tag: $FromTag
           to-tag: $ToTag
+          allow-unknown: true
       - name: Upload changelog artifact
         uses: actions/upload-artifact@v3
         with:
