@@ -26,8 +26,8 @@ jobs:
         uses: scottbrenner/generate-changelog-action@master
         id: Changelog
         with:
-          from-tag: $FromTag
-          to-tag: $ToTag
+          from-tag: ${{ inputs.FromTag }}
+          to-tag: ${{ inputs.ToTag }}
           allow-unknown: true
       - name: Upload changelog artifact
         uses: actions/upload-artifact@v3
