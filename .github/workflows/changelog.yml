@@ -29,6 +29,7 @@ jobs:
           tag: ${{ inputs.FromTag }}
           includeInvalidCommits: true
           excludeTypes: build
+          reverseOrder: true
       - name: Upload changelog artifact
         uses: actions/upload-artifact@v3
         with:
