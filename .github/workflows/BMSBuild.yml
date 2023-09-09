@@ -50,6 +50,6 @@ jobs:
         automatic_release_tag: "${{ env.PROJ_VER }}"
         prerelease: true
         title: "Development Build: Version ${{ env.PROJ_VER }}"
-        body: "${{ env.ChangeLogContent }}"
+        body: ${{ env.ChangeLogContent }}
         files: |
           BMS_*.zip
