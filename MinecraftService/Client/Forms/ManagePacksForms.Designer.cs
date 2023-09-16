@@ -44,6 +44,7 @@ namespace MinecraftService.Client.Forms
             this.parsedPacksListBox = new System.Windows.Forms.ListBox();
             this.serverListBox = new System.Windows.Forms.ListBox();
             this._pluginsTab = new System.Windows.Forms.TabPage();
+            this.textBox2 = new System.Windows.Forms.TextBox();
             this._pluginReportBtn = new System.Windows.Forms.Button();
             this._pluginDisableBtn = new System.Windows.Forms.Button();
             this._pluginFromFileBtn = new System.Windows.Forms.Button();
@@ -55,7 +56,6 @@ namespace MinecraftService.Client.Forms
             this.pluginTargetProtocol = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.pluginSource = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.pluginInstalled = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.textBox2 = new System.Windows.Forms.TextBox();
             this.pluginTabControl.SuspendLayout();
             this.addonTab.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.selectedPackIcon)).BeginInit();
@@ -143,6 +143,7 @@ namespace MinecraftService.Client.Forms
             this.openFileBtn.TabIndex = 20;
             this.openFileBtn.Text = "Open pack file(s)";
             this.openFileBtn.UseVisualStyleBackColor = true;
+            this.openFileBtn.Click += new System.EventHandler(this.openFileBtn_Click);
             // 
             // selectedPackIcon
             // 
@@ -175,6 +176,7 @@ namespace MinecraftService.Client.Forms
             this.removeAllPacksBtn.TabIndex = 17;
             this.removeAllPacksBtn.Text = "Remove all packs";
             this.removeAllPacksBtn.UseVisualStyleBackColor = true;
+            this.removeAllPacksBtn.Click += new System.EventHandler(this.removeAllPacksBtn_Click);
             // 
             // removePackBtn
             // 
@@ -185,6 +187,7 @@ namespace MinecraftService.Client.Forms
             this.removePackBtn.TabIndex = 16;
             this.removePackBtn.Text = "Remove pack";
             this.removePackBtn.UseVisualStyleBackColor = true;
+            this.removePackBtn.Click += new System.EventHandler(this.removePackBtn_Click);
             // 
             // sendAllBtn
             // 
@@ -196,6 +199,7 @@ namespace MinecraftService.Client.Forms
             this.sendAllBtn.TabIndex = 15;
             this.sendAllBtn.Text = "Send all packs";
             this.sendAllBtn.UseVisualStyleBackColor = true;
+            this.sendAllBtn.Click += new System.EventHandler(this.sendAllBtn_Click);
             // 
             // sendPacksBtn
             // 
@@ -207,6 +211,7 @@ namespace MinecraftService.Client.Forms
             this.sendPacksBtn.TabIndex = 14;
             this.sendPacksBtn.Text = "Send selected packs";
             this.sendPacksBtn.UseVisualStyleBackColor = true;
+            this.sendPacksBtn.Click += new System.EventHandler(this.sendPacksBtn_Click);
             // 
             // parsedPacksListBox
             // 
@@ -220,6 +225,7 @@ namespace MinecraftService.Client.Forms
             this.parsedPacksListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
             this.parsedPacksListBox.Size = new System.Drawing.Size(220, 289);
             this.parsedPacksListBox.TabIndex = 13;
+            this.parsedPacksListBox.Click += new System.EventHandler(this.ListBox_SelectedIndexChanged);
             // 
             // serverListBox
             // 
@@ -230,7 +236,8 @@ namespace MinecraftService.Client.Forms
             this.serverListBox.Name = "serverListBox";
             this.serverListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
             this.serverListBox.Size = new System.Drawing.Size(220, 289);
-            this.serverListBox.TabIndex = 12;
+            this.serverListBox.TabIndex = 12; 
+            this.serverListBox.Click += new System.EventHandler(this.ListBox_SelectedIndexChanged);
             // 
             // _pluginsTab
             // 
@@ -247,6 +254,16 @@ namespace MinecraftService.Client.Forms
             this._pluginsTab.Size = new System.Drawing.Size(968, 416);
             this._pluginsTab.TabIndex = 1;
             this._pluginsTab.Text = "LL Plugin Manager";
+            // 
+            // textBox2
+            // 
+            this.textBox2.Location = new System.Drawing.Point(473, 269);
+            this.textBox2.Margin = new System.Windows.Forms.Padding(50, 30, 3, 3);
+            this.textBox2.Multiline = true;
+            this.textBox2.Name = "textBox2";
+            this.textBox2.ReadOnly = true;
+            this.textBox2.Size = new System.Drawing.Size(489, 141);
+            this.textBox2.TabIndex = 5;
             // 
             // _pluginReportBtn
             // 
@@ -358,16 +375,6 @@ namespace MinecraftService.Client.Forms
             this.pluginInstalled.Name = "pluginInstalled";
             this.pluginInstalled.ReadOnly = true;
             this.pluginInstalled.Width = 80;
-            // 
-            // textBox2
-            // 
-            this.textBox2.Location = new System.Drawing.Point(473, 269);
-            this.textBox2.Margin = new System.Windows.Forms.Padding(50, 30, 3, 3);
-            this.textBox2.Multiline = true;
-            this.textBox2.Name = "textBox2";
-            this.textBox2.ReadOnly = true;
-            this.textBox2.Size = new System.Drawing.Size(489, 141);
-            this.textBox2.TabIndex = 5;
             // 
             // ManagePacksForms
             // 
