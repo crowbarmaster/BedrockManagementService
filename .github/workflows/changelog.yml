@@ -1,0 +1,32 @@
+name: Create changelog
+
+on:
+  workflow_dispatch:
+     inputs:
+      FromTag:
+        description: 'Starting tag'
+        required: false
+        type: string
+      ToTag:
+        description: 'Ending tag'
+        required: false
+        type: string
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Update CHANGELOG
+        id: changelog
+        uses: requarks/changelog-action@v1
+        with:
+          token: ${{ github.token }}
+          tag: ${{ inputs.FromTag }}
+      - name: Upload changelog artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: changelog-output
+          path: ChangeLog.md
