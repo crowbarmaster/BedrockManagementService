@@ -36,16 +36,13 @@ jobs:
         title: "Development Build: Version ${{ env.PROJ_VER }}"
     - name: Update CHANGELOG
       uses: requarks/changelog-action@v1
+      id: changelog
       with:
         token: ${{ github.token }}
         tag: ${{ env.PROJ_VER }}
         includeInvalidCommits: true
         excludeTypes: build
         reverseOrder: true
-    - name: Store changelog to variable
-      run: |
-        $changeLogString = Get-Content '.\CHANGELOG.md';
-        echo "ChangeLogContent=$changeLogString" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
     - name: Compress published files
       run: |
         Remove-item MinecraftService\bin\Published\Launcher.exe;
@@ -57,6 +54,6 @@ jobs:
         automatic_release_tag: "${{ env.PROJ_VER }}"
         prerelease: true
         title: "Development Build: Version ${{ env.PROJ_VER }}"
-        body: ${{ env.ChangeLogContent }}
+        body: ${{ steps.changelog.outputs.changes }}
         files: |
           BMS_*.zip
