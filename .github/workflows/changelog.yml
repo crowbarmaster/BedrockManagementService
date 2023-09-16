@@ -15,18 +15,23 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-2022
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      - name: Remove old changelog
+        run: rm CHANGELOG.md
       - name: Update CHANGELOG
         id: changelog
         uses: requarks/changelog-action@v1
         with:
           token: ${{ github.token }}
           tag: ${{ inputs.FromTag }}
+          includeInvalidCommits: true
+          excludeTypes: build
+          reverseOrder: true
       - name: Upload changelog artifact
         uses: actions/upload-artifact@v3
         with:
           name: changelog-output
-          path: ChangeLog.md
+          path: ./CHANGELOG.md
