@@ -36,8 +36,9 @@ namespace MinecraftService.Service.Server.ConsoleFilters {
             int usernameEnd = input.IndexOf(',', usernameStart);
             int usernameLength = usernameEnd - usernameStart;
             int xuidStart = input.IndexOf(':', usernameEnd) + 2;
-            return (input.Substring(usernameStart, usernameLength), input.Substring(xuidStart, input.Length - xuidStart));
+            int xuidEnd = input.IndexOf(',', xuidStart);
+            int xuidLength = xuidEnd - xuidStart;
+            return (input.Substring(usernameStart, usernameLength), input.Substring(xuidStart, xuidLength));
         }
-
     }
 }
