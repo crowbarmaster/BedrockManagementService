@@ -269,8 +269,8 @@ namespace MinecraftService.Shared.Classes {
         };
 
         public static Dictionary<ServerFileNameKeys, string> BdsFileNameStrings = new() {
-            { ServerFileNameKeys.MmsServer_Name, "MineraftService.{0}.exe" },
-            { ServerFileNameKeys.JavaServer_Name, "MineraftService.{0}.jar" },
+            { ServerFileNameKeys.MmsServer_Name, "MinecraftService.{0}.exe" },
+            { ServerFileNameKeys.JavaServer_Name, "MinecraftService.{0}.jar" },
             { ServerFileNameKeys.VanillaBedrock, "bedrock_server.exe" },
             { ServerFileNameKeys.VanillaJava, "server.jar" },
             { ServerFileNameKeys.ValidKnownPacks, "valid_known_packs.json" },

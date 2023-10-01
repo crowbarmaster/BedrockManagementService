@@ -36,7 +36,7 @@ namespace MinecraftService.Shared.Classes.Configurations {
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerName], "LiteLoader Server"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.FileName], "LL Server.conf"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerPath], $@"{ServersPath}\LL Server"));
-            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerExeName], $"MineraftService.LLServer.exe"));
+            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerExeName], $"MinecraftService.LLServer.exe"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.MinecraftType], "LiteLoader"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.BackupPath], $@"{_servicePath}\ServerBackups"));
             PlayerManager = new BedrockPlayerManager(this);
@@ -73,7 +73,7 @@ namespace MinecraftService.Shared.Classes.Configurations {
                         case "server-name":
                             GetSettingsProp(ServerPropertyKeys.ServerName).SetValue(split[1]);
                             GetSettingsProp(ServerPropertyKeys.ServerPath).SetValue($@"{ServersPath}\{split[1]}");
-                            GetSettingsProp(ServerPropertyKeys.ServerExeName).SetValue($"MineraftService.{split[1]}.exe");
+                            GetSettingsProp(ServerPropertyKeys.ServerExeName).SetValue($"MinecraftService.{split[1]}.exe");
                             GetSettingsProp(ServerPropertyKeys.FileName).SetValue($@"{split[1]}.conf");
                             break;
 
@@ -178,7 +178,7 @@ namespace MinecraftService.Shared.Classes.Configurations {
         public void ProcessNewServerConfiguration() {
             Property srvNameProp = ServerPropList.FirstOrDefault(prop => prop != null && prop.KeyName == MmsDependServerPropStrings[MmsDependServerPropKeys.ServerName]);
             GetSettingsProp(ServerPropertyKeys.ServerPath).SetValue($@"{ServersPath}\{srvNameProp.StringValue}");
-            GetSettingsProp(ServerPropertyKeys.ServerExeName).SetValue($"MineraftService.{srvNameProp.StringValue}.exe");
+            GetSettingsProp(ServerPropertyKeys.ServerExeName).SetValue($"MinecraftService.{srvNameProp.StringValue}.exe");
             GetSettingsProp(ServerPropertyKeys.FileName).SetValue($@"{srvNameProp.StringValue}.conf");
         }
 

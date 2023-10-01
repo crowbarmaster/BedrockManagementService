@@ -35,7 +35,7 @@ namespace MinecraftService.Shared.Classes.Configurations {
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerName], "Java Server"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.FileName], "Java Server.conf"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerPath], $@"{ServersPath}\Java Server"));
-            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerExeName], $"MineraftService.Java Server.jar"));
+            ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerExeName], $"MinecraftService.Java Server.jar"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.MinecraftType], "Java"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.BackupPath], $@"{_servicePath}\ServerBackups"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.JavaArgs], "-Xmx1024M -Xms1024M -XX:+UnlockExperimentalVMOptions -XX:+AlwaysPreTouch -XX:+UseStringDeduplication -Dfml.ignorePatchDiscrepancies=true -Dfml.ignoreInvalidMinecraftCertificates=true -XX:-OmitStackTraceInFastThrow -XX:+OptimizeStringConcat -Dfml.readTimeout=180 -XX:+UseLargePages"));
@@ -84,7 +84,7 @@ namespace MinecraftService.Shared.Classes.Configurations {
                         case "ServerName":
                             GetSettingsProp(ServerPropertyKeys.ServerName).SetValue(split[1]);
                             GetSettingsProp(ServerPropertyKeys.ServerPath).SetValue($@"{ServersPath}\{split[1]}");
-                            GetSettingsProp(ServerPropertyKeys.ServerExeName).SetValue($"MineraftService.{split[1]}.jar");
+                            GetSettingsProp(ServerPropertyKeys.ServerExeName).SetValue($"MinecraftService.{split[1]}.jar");
                             GetSettingsProp(ServerPropertyKeys.FileName).SetValue($@"{split[1]}.conf");
                             break;
 
@@ -108,7 +108,7 @@ namespace MinecraftService.Shared.Classes.Configurations {
         public void ProcessNewServerConfiguration() {
             Property srvNameProp = ServicePropList.FirstOrDefault(prop => prop != null && prop.KeyName == ServerPropertyStrings[ServerPropertyKeys.ServerName]);
             GetSettingsProp(ServerPropertyKeys.ServerPath).SetValue($@"{ServersPath}\{srvNameProp.StringValue}");
-            GetSettingsProp(ServerPropertyKeys.ServerExeName).SetValue($"MineraftService.{srvNameProp.StringValue}.jar");
+            GetSettingsProp(ServerPropertyKeys.ServerExeName).SetValue($"MinecraftService.{srvNameProp.StringValue}.jar");
             GetSettingsProp(ServerPropertyKeys.FileName).SetValue($@"{srvNameProp.StringValue}.conf");
         }
 

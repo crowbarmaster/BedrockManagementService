@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "MineraftService.Service": {
+    "MinecraftService.Service": {
       "commandName": "Project",
       "nativeDebugging": true
     }

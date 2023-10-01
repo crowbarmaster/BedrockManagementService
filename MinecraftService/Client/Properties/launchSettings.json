@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "MineraftService.Client": {
+    "MinecraftService.Client": {
       "commandName": "Project"
     }
   }

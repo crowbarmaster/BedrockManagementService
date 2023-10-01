@@ -51,7 +51,7 @@
     <ManifestCertificateThumbprint>EE2403F7477A35F08B98B0A8FB2404C95BE04FEB</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>MineraftService_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>MinecraftService_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>

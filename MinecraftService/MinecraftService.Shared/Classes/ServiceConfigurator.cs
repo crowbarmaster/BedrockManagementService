@@ -21,7 +21,7 @@ namespace MinecraftService.Shared.Classes {
 
         public bool InitializeDefaults() {
             globals.Clear();
-            globals.Add(new Property(ServicePropertyStrings[ServicePropertyKeys.ServersPath], @"C:\MineraftService"));
+            globals.Add(new Property(ServicePropertyStrings[ServicePropertyKeys.ServersPath], @"C:\MinecraftService"));
             globals.Add(new Property(ServicePropertyStrings[ServicePropertyKeys.AcceptedMojangLic], "false"));
             globals.Add(new Property(ServicePropertyStrings[ServicePropertyKeys.ClientPort], "19134"));
             globals.Add(new Property(ServicePropertyStrings[ServicePropertyKeys.LogServerOutput], "true"));
