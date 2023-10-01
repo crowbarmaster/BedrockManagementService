@@ -55,7 +55,7 @@ jobs:
     - name: Compress published files
       run: |
         Remove-item MinecraftService\bin\Published\Launcher.exe;
-        Compress-Archive -path MinecraftService\bin\Published\*.exe* ".\BMS_${{ env.PROJ_VER }}.zip" -Force;
+        Compress-Archive -path MinecraftService\bin\Published\*.exe* ".\MMS_${{ env.PROJ_VER }}.zip" -Force;
 
     - name: Push Automatic Release
       uses: crowbarmaster/GH-Automatic-Releases@latest
@@ -66,4 +66,4 @@ jobs:
         title: "Development Build: Version ${{ env.PROJ_VER }}"
         body: ${{ steps.changelog.outputs.changes }}
         files: |
-          BMS_*.zip
+          MMS_*.zip
