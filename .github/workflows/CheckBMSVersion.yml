@@ -48,7 +48,7 @@ jobs:
                 [string]$LLUrl;
                 [string]$ModuleUrl;
             }
-            $LLreply = Invoke-WebRequest -UseBasicParsing -Uri "https://api.github.com/repos/LiteLDev/LiteLoaderBDS/releases";
+            $LLreply = Invoke-WebRequest -UseBasicParsing -Uri "https://api.github.com/repos/LiteLDev/LiteLoaderBDSv2/releases";
             $LLjson = $LLreply | ConvertFrom-Json;
             [Array]::Reverse($LLjson);
             $LLCollect = @();
