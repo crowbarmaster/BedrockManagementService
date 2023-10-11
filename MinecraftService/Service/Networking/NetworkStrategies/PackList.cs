@@ -2,6 +2,7 @@
 using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
 using MinecraftService.Shared.PackParser;
 using Newtonsoft.Json;
+using NLog.LayoutRenderers;
 using System.Text;
 using static MinecraftService.Shared.Classes.SharedStringBase;
 
@@ -19,20 +20,20 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
         }
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
-            string knownPackFileLocation = $@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp(ServerPropertyKeys.ServerPath)}\valid_known_packs.json";
-            string pathToWorldFolder = $@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp(ServerPropertyKeys.ServerPath)}\worlds\{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetProp(MmsDependServerPropKeys.LevelName)}";
-            MinecraftKnownPacksClass knownPacks = new(knownPackFileLocation, pathToWorldFolder);
-            List<MinecraftPackContainer> list = new();
-            foreach (KnownPacksJsonModel pack in knownPacks.InstalledPacks.Contents) {
-                MinecraftPackParser currentParser = new();
-                if (_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetServerArch() == MinecraftServerArch.LiteLoader) {
-                    pack.path = pack.path.Insert(0, "development_");
-                }
-                string packDir = $@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp(ServerPropertyKeys.ServerPath)}\{pack.path.Replace(@"/", @"\")}";
-                currentParser.ParseDirectory(packDir);
-                list.AddRange(currentParser.FoundPacks);
-            }
-            string arrayString = JsonConvert.SerializeObject(list);
+            IServerConfiguration server = _serviceConfiguration.GetServerInfoByIndex(serverIndex);
+            string serverPath = server.GetSettingsProp(ServerPropertyKeys.ServerPath).StringValue;
+            string levelName = server.GetProp(MmsDependServerPropKeys.LevelName).StringValue;
+            string pathToWorldFolder = $@"{serverPath}\worlds\{levelName}";
+            List<MinecraftPackContainer> combinedList = new List<MinecraftPackContainer>();
+            MinecraftPackParser resourceParser = new(_logger);
+            MinecraftPackParser behaviorParser = new(_logger);
+            resourceParser.ParseDirectory(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName));
+            behaviorParser.ParseDirectory(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName));
+            MinecraftFileUtilities.ValidateFixWorldPackFiles(serverPath, levelName).Wait();
+            combinedList.AddRange(resourceParser.FoundPacks);
+            combinedList.AddRange(behaviorParser.FoundPacks);
+
+            string arrayString = JsonConvert.SerializeObject(combinedList);
             return (Encoding.UTF8.GetBytes(arrayString), 0, NetworkMessageTypes.PackList);
         }
     }

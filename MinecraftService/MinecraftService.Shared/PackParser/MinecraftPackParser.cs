@@ -1,7 +1,9 @@
 using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Interfaces;
 using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
 using MinecraftService.Shared.Utilities;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -10,13 +12,22 @@ namespace MinecraftService.Shared.PackParser {
     public class MinecraftPackParser {
         public string PackExtractDirectory;
         public List<MinecraftPackContainer> FoundPacks = new();
+        private readonly IServerLogger _serverLogger;
 
         [JsonConstructor]
         public MinecraftPackParser() {
         }
 
-        public MinecraftPackParser(byte[] fileContents) {
-            PackExtractDirectory = $"{Path.GetTempPath()}\\MMSTemp";
+        public MinecraftPackParser(IServerLogger logger) {
+            PackExtractDirectory = $"{Path.GetTempPath()}\\MMSTemp\\PackExtract";
+            _serverLogger = logger;
+        }
+
+
+
+        public MinecraftPackParser(byte[] fileContents, IServerLogger logger) {
+            _serverLogger = logger;
+            PackExtractDirectory = $"{Path.GetTempPath()}\\MMSTemp\\PackExtract";
             FileUtilities.ClearTempDir().Wait();
             using (MemoryStream fileStream = new(fileContents, 5, fileContents.Length - 5)) {
                 using ZipArchive zipArchive = new(fileStream, ZipArchiveMode.Read);
@@ -25,7 +36,8 @@ namespace MinecraftService.Shared.PackParser {
             ParseDirectory(PackExtractDirectory);
         }
 
-        public MinecraftPackParser(string[] files, string extractDir) {
+        public MinecraftPackParser(string[] files, string extractDir, IServerLogger logger) {
+            _serverLogger = logger;
             PackExtractDirectory = extractDir;
             FileUtilities.ClearTempDir().Wait();
             if (Directory.Exists($@"{PackExtractDirectory}\ZipTemp")) {
@@ -67,7 +79,7 @@ namespace MinecraftService.Shared.PackParser {
                             FolderName = file.Directory.Name,
                             IconBytes = iconBytes
                         });
-                        return;
+                        continue;
                     }
                     if (file.Name == "manifest.json") {
                         byte[] iconBytes = File.Exists($@"{file.Directory.FullName}\pack_icon.jpeg") ?
@@ -75,9 +87,12 @@ namespace MinecraftService.Shared.PackParser {
                             File.Exists($@"{file.Directory.FullName}\pack_icon.png") ?
                             File.ReadAllBytes($@"{file.Directory.FullName}\pack_icon.png") :
                             null;
-                        if (File.ReadAllText(file.FullName).Contains("-beta")) {
-                            break;
-                        }
+                        System.EventHandler<Newtonsoft.Json.Serialization.ErrorEventArgs> JsonError = delegate (object sender, Newtonsoft.Json.Serialization.ErrorEventArgs args) {
+                            if(_serverLogger != null) { 
+                                _serverLogger.AppendLine($"Error parsing packs: {args.ErrorContext.Error.Message}.\r\nPack object: {args.CurrentObject.ToString()}");
+                            }
+                            args.ErrorContext.Handled = true;
+                        };
                         MinecraftPackContainer container = new() {
                             JsonManifest = new(),
                             PackContentLocation = file.Directory.FullName,
@@ -85,10 +100,17 @@ namespace MinecraftService.Shared.PackParser {
                             FolderName = file.Directory.Name,
                             IconBytes = iconBytes
                         };
-                        container.JsonManifest = System.Text.Json.JsonSerializer.Deserialize<PackManifestJsonModel>(File.ReadAllText(file.FullName));
-                        container.JsonManifest = JsonConvert.DeserializeObject<PackManifestJsonModel>(File.ReadAllText(file.FullName), SharedStringBase.GlobalJsonSerialierSettings);
-                        container.ManifestType = container.JsonManifest.modules[0].type;
-                        FoundPacks.Add(container);
+                        try {
+                            container.JsonManifest = JsonConvert.DeserializeObject<PackManifestJsonModel>(File.ReadAllText(file.FullName), new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate, Error = JsonError });
+                            container.ManifestType = container.JsonManifest.modules[0].type ?? "unknown";
+                            FoundPacks.Add(container);
+                        } catch (Exception e) {
+                            if (_serverLogger != null) { 
+                                string plugin = container != null && container.FolderName != null ? container.FolderName : "null";
+                                _serverLogger.AppendLine($"Error parsing pack {plugin}! Error: {e.Message}");
+                            }
+                            continue;
+                        }
                     }
                 }
             }

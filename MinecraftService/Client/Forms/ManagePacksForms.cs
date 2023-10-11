@@ -3,9 +3,11 @@ using MinecraftService.Shared.Classes;
 using MinecraftService.Shared.Interfaces;
 using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
 using MinecraftService.Shared.PackParser;
+using MinecraftService.Shared.Utilities;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.DirectoryServices.ActiveDirectory;
 using System.Drawing;
 using System.IO;
 using System.IO.Compression;
@@ -20,7 +22,7 @@ namespace MinecraftService.Client.Forms {
         private readonly DirectoryInfo _packExtractDir;
         public ManagePacksForms(byte serverIndex, IServerLogger logger, IProcessInfo processInfo) {
             _logger = logger;
-            _packExtractDir = new DirectoryInfo($"{Path.GetTempPath()}\\MMSTemp");
+            _packExtractDir = new DirectoryInfo($"{Path.GetTempPath()}\\MMSTemp\\ExaminePacks");
             _processInfo = processInfo;
             _serverIndex = serverIndex;
             InitializeComponent();
@@ -58,11 +60,11 @@ namespace MinecraftService.Client.Forms {
             }
         }
 
-        private void removePackBtn_Click(object sender, EventArgs e) {
-            if (serverListBox.SelectedIndex != -1) {
+        private void removePacksBtn_Click(object sender, EventArgs e) {
+            if (serverListBox.CheckedItems.Count > 0) {
                 List<MinecraftPackContainer> temp = new();
-                object[] items = new object[serverListBox.SelectedItems.Count];
-                serverListBox.SelectedItems.CopyTo(items, 0);
+                object[] items = new object[serverListBox.CheckedItems.Count];
+                serverListBox.CheckedItems.CopyTo(items, 0);
                 foreach (object item in items) {
                     temp.Add((MinecraftPackContainer)item);
                     serverListBox.Items.Remove(item);
@@ -73,31 +75,12 @@ namespace MinecraftService.Client.Forms {
             DialogResult = DialogResult.OK;
         }
 
-        private void removeAllPacksBtn_Click(object sender, EventArgs e) {
-            List<MinecraftPackContainer> temp = new();
-            foreach (object item in serverListBox.Items) {
-                temp.Add((MinecraftPackContainer)item);
-            }
-            JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
-            FormManager.TCPClient.SendData(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(temp, Formatting.Indented, settings)), _serverIndex, NetworkMessageTypes.RemovePack);
-            DialogResult = DialogResult.OK;
-        }
-
         private void sendPacksBtn_Click(object sender, EventArgs e) {
-            if (parsedPacksListBox.SelectedIndex != -1) {
-                object[] items = new object[parsedPacksListBox.SelectedItems.Count];
-                parsedPacksListBox.SelectedItems.CopyTo(items, 0);
+            if (parsedPacksListBox.CheckedItems.Count > 0) {
+                object[] items = new object[parsedPacksListBox.CheckedItems.Count];
+                parsedPacksListBox.CheckedItems.CopyTo(items, 0);
                 SendPacks(items);
             }
-        }
-
-        private void sendAllBtn_Click(object sender, EventArgs e) {
-            if (parsedPacksListBox.Items.Count < 1) {
-                return;
-            }
-            object[] items = new object[parsedPacksListBox.Items.Count];
-            parsedPacksListBox.Items.CopyTo(items, 0);
-            SendPacks(items);
         }
 
         private void openFileBtn_Click(object sender, EventArgs e) {
@@ -107,7 +90,7 @@ namespace MinecraftService.Client.Forms {
             openFileDialog.Title = "Select pack file(s)";
             openFileDialog.Multiselect = true;
             if (openFileDialog.ShowDialog() == DialogResult.OK) {
-                MinecraftPackParser parser = new(openFileDialog.FileNames, _packExtractDir.FullName);
+                MinecraftPackParser parser = new(openFileDialog.FileNames, _packExtractDir.FullName, _logger);
                 parsedPacksListBox.Items.Clear();
                 foreach (MinecraftPackContainer container in parser.FoundPacks)
                     parsedPacksListBox.Items.Add(container);
@@ -115,15 +98,44 @@ namespace MinecraftService.Client.Forms {
         }
 
         private void SendPacks(object[] packList) {
+            FileUtilities.CreateInexistantDirectory($@"{_packExtractDir.FullName}\BuildZip");
             foreach (MinecraftPackContainer container in packList) {
-                Directory.CreateDirectory($@"{_packExtractDir.FullName}\ZipTemp");
-                DirectoryInfo directoryInfo = new(container.PackContentLocation);
-                directoryInfo.MoveTo($@"{_packExtractDir.FullName}\ZipTemp\{directoryInfo.Name}");
-                container.PackContentLocation = $@"{_packExtractDir.FullName}\ZipTemp\{directoryInfo.Name}";
+                try {
+                    DirectoryInfo directoryInfo = new(container.PackContentLocation);
+                    string packDir = $@"{_packExtractDir.FullName}\BuildZip\{directoryInfo.Name}";
+                    directoryInfo.MoveTo(packDir);
+                    container.PackContentLocation = packDir;
+                } catch (Exception ex) {
+                    _logger.AppendLine($"Error adding {container.FolderName} to pack zip.\r\nError message: {ex.Message}");
+                }
             }
-            ZipFile.CreateFromDirectory($@"{_packExtractDir.FullName}\ZipTemp", $@"{_packExtractDir.FullName}\SendZip.zip");
+            ZipFile.CreateFromDirectory($@"{_packExtractDir.FullName}\BuildZip", $@"{_packExtractDir.FullName}\SendZip.zip");
             FormManager.TCPClient.SendData(File.ReadAllBytes($@"{_packExtractDir.FullName}\SendZip.zip"), _serverIndex, NetworkMessageTypes.PackFile);
             DialogResult = DialogResult.OK;
+        }
+
+        private void checkAllServerButton_Click(object sender, EventArgs e) {
+            for (int i = 0; i < serverListBox.Items.Count; i++) {
+                serverListBox.SetItemChecked(i, true);
+            }
+        }
+
+        private void checkAllLocalButton_Click(object sender, EventArgs e) {
+            for (int i = 0; i < parsedPacksListBox.Items.Count; i++) {
+                parsedPacksListBox.SetItemChecked(i, true);
+            }
+        }
+       
+        private void uncheckAllServerButton_Click(object sender, EventArgs e) {
+            for (int i = 0; i < serverListBox.Items.Count; i++) {
+                serverListBox.SetItemChecked(i, false);
+            }
+        }
+
+        private void uncheckAllLocalButton_Click(object sender, EventArgs e) {
+            for (int i = 0; i < parsedPacksListBox.Items.Count; i++) {
+                parsedPacksListBox.SetItemChecked(i, false);
+            }
         }
     }
 }

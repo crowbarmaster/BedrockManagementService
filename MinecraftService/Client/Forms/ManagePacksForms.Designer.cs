@@ -31,18 +31,19 @@ namespace MinecraftService.Client.Forms
         {
             this.pluginTabControl = new System.Windows.Forms.TabControl();
             this.addonTab = new System.Windows.Forms.TabPage();
+            this.uncheckAllServerButton = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.openFileBtn = new System.Windows.Forms.Button();
             this.selectedPackIcon = new System.Windows.Forms.PictureBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
-            this.removeAllPacksBtn = new System.Windows.Forms.Button();
+            this.checkAllServerButton = new System.Windows.Forms.Button();
             this.removePackBtn = new System.Windows.Forms.Button();
-            this.sendAllBtn = new System.Windows.Forms.Button();
+            this.uncheckAllLocalButton = new System.Windows.Forms.Button();
             this.sendPacksBtn = new System.Windows.Forms.Button();
-            this.parsedPacksListBox = new System.Windows.Forms.ListBox();
-            this.serverListBox = new System.Windows.Forms.ListBox();
+            this.parsedPacksListBox = new System.Windows.Forms.CheckedListBox();
+            this.serverListBox = new System.Windows.Forms.CheckedListBox();
             this._pluginsTab = new System.Windows.Forms.TabPage();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this._pluginReportBtn = new System.Windows.Forms.Button();
@@ -56,6 +57,7 @@ namespace MinecraftService.Client.Forms
             this.pluginTargetProtocol = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.pluginSource = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.pluginInstalled = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.checkAllLocalButton = new System.Windows.Forms.Button();
             this.pluginTabControl.SuspendLayout();
             this.addonTab.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.selectedPackIcon)).BeginInit();
@@ -80,15 +82,17 @@ namespace MinecraftService.Client.Forms
             // addonTab
             // 
             this.addonTab.BackColor = System.Drawing.SystemColors.Menu;
+            this.addonTab.Controls.Add(this.checkAllLocalButton);
+            this.addonTab.Controls.Add(this.uncheckAllServerButton);
             this.addonTab.Controls.Add(this.label3);
             this.addonTab.Controls.Add(this.label2);
             this.addonTab.Controls.Add(this.label1);
             this.addonTab.Controls.Add(this.openFileBtn);
             this.addonTab.Controls.Add(this.selectedPackIcon);
             this.addonTab.Controls.Add(this.textBox1);
-            this.addonTab.Controls.Add(this.removeAllPacksBtn);
+            this.addonTab.Controls.Add(this.checkAllServerButton);
             this.addonTab.Controls.Add(this.removePackBtn);
-            this.addonTab.Controls.Add(this.sendAllBtn);
+            this.addonTab.Controls.Add(this.uncheckAllLocalButton);
             this.addonTab.Controls.Add(this.sendPacksBtn);
             this.addonTab.Controls.Add(this.parsedPacksListBox);
             this.addonTab.Controls.Add(this.serverListBox);
@@ -98,6 +102,18 @@ namespace MinecraftService.Client.Forms
             this.addonTab.Size = new System.Drawing.Size(968, 416);
             this.addonTab.TabIndex = 0;
             this.addonTab.Text = "MC Addons";
+            // 
+            // uncheckAllServerButton
+            // 
+            this.uncheckAllServerButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.uncheckAllServerButton.Location = new System.Drawing.Point(264, 152);
+            this.uncheckAllServerButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.uncheckAllServerButton.Name = "uncheckAllServerButton";
+            this.uncheckAllServerButton.Size = new System.Drawing.Size(133, 27);
+            this.uncheckAllServerButton.TabIndex = 25;
+            this.uncheckAllServerButton.Text = "Uncheck all boxes";
+            this.uncheckAllServerButton.UseVisualStyleBackColor = true;
+            this.uncheckAllServerButton.Click += new System.EventHandler(this.uncheckAllServerButton_Click);
             // 
             // label3
             // 
@@ -151,7 +167,7 @@ namespace MinecraftService.Client.Forms
             this.selectedPackIcon.Location = new System.Drawing.Point(405, 98);
             this.selectedPackIcon.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.selectedPackIcon.Name = "selectedPackIcon";
-            this.selectedPackIcon.Size = new System.Drawing.Size(152, 150);
+            this.selectedPackIcon.Size = new System.Drawing.Size(158, 150);
             this.selectedPackIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.selectedPackIcon.TabIndex = 19;
             this.selectedPackIcon.TabStop = false;
@@ -167,44 +183,44 @@ namespace MinecraftService.Client.Forms
             this.textBox1.Size = new System.Drawing.Size(255, 140);
             this.textBox1.TabIndex = 18;
             // 
-            // removeAllPacksBtn
+            // checkAllServerButton
             // 
-            this.removeAllPacksBtn.Location = new System.Drawing.Point(263, 139);
-            this.removeAllPacksBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.removeAllPacksBtn.Name = "removeAllPacksBtn";
-            this.removeAllPacksBtn.Size = new System.Drawing.Size(139, 27);
-            this.removeAllPacksBtn.TabIndex = 17;
-            this.removeAllPacksBtn.Text = "Remove all packs";
-            this.removeAllPacksBtn.UseVisualStyleBackColor = true;
-            this.removeAllPacksBtn.Click += new System.EventHandler(this.removeAllPacksBtn_Click);
+            this.checkAllServerButton.Location = new System.Drawing.Point(264, 119);
+            this.checkAllServerButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.checkAllServerButton.Name = "checkAllServerButton";
+            this.checkAllServerButton.Size = new System.Drawing.Size(133, 27);
+            this.checkAllServerButton.TabIndex = 17;
+            this.checkAllServerButton.Text = "Check all boxes";
+            this.checkAllServerButton.UseVisualStyleBackColor = true;
+            this.checkAllServerButton.Click += new System.EventHandler(this.checkAllServerButton_Click);
             // 
             // removePackBtn
             // 
-            this.removePackBtn.Location = new System.Drawing.Point(263, 106);
+            this.removePackBtn.Location = new System.Drawing.Point(66, 386);
             this.removePackBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.removePackBtn.Name = "removePackBtn";
             this.removePackBtn.Size = new System.Drawing.Size(139, 27);
             this.removePackBtn.TabIndex = 16;
-            this.removePackBtn.Text = "Remove pack";
+            this.removePackBtn.Text = "Remove selected packs";
             this.removePackBtn.UseVisualStyleBackColor = true;
-            this.removePackBtn.Click += new System.EventHandler(this.removePackBtn_Click);
+            this.removePackBtn.Click += new System.EventHandler(this.removePacksBtn_Click);
             // 
-            // sendAllBtn
+            // uncheckAllLocalButton
             // 
-            this.sendAllBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.sendAllBtn.Location = new System.Drawing.Point(559, 139);
-            this.sendAllBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.sendAllBtn.Name = "sendAllBtn";
-            this.sendAllBtn.Size = new System.Drawing.Size(146, 27);
-            this.sendAllBtn.TabIndex = 15;
-            this.sendAllBtn.Text = "Send all packs";
-            this.sendAllBtn.UseVisualStyleBackColor = true;
-            this.sendAllBtn.Click += new System.EventHandler(this.sendAllBtn_Click);
+            this.uncheckAllLocalButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.uncheckAllLocalButton.Location = new System.Drawing.Point(571, 152);
+            this.uncheckAllLocalButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.uncheckAllLocalButton.Name = "uncheckAllLocalButton";
+            this.uncheckAllLocalButton.Size = new System.Drawing.Size(133, 27);
+            this.uncheckAllLocalButton.TabIndex = 15;
+            this.uncheckAllLocalButton.Text = "Uncheck all boxes";
+            this.uncheckAllLocalButton.UseVisualStyleBackColor = true;
+            this.uncheckAllLocalButton.Click += new System.EventHandler(this.uncheckAllLocalButton_Click);
             // 
             // sendPacksBtn
             // 
             this.sendPacksBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.sendPacksBtn.Location = new System.Drawing.Point(559, 106);
+            this.sendPacksBtn.Location = new System.Drawing.Point(751, 386);
             this.sendPacksBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.sendPacksBtn.Name = "sendPacksBtn";
             this.sendPacksBtn.Size = new System.Drawing.Size(146, 27);
@@ -218,25 +234,21 @@ namespace MinecraftService.Client.Forms
             this.parsedPacksListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.parsedPacksListBox.FormattingEnabled = true;
-            this.parsedPacksListBox.ItemHeight = 15;
             this.parsedPacksListBox.Location = new System.Drawing.Point(712, 106);
             this.parsedPacksListBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.parsedPacksListBox.Name = "parsedPacksListBox";
-            this.parsedPacksListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
-            this.parsedPacksListBox.Size = new System.Drawing.Size(220, 289);
+            this.parsedPacksListBox.Size = new System.Drawing.Size(220, 274);
             this.parsedPacksListBox.TabIndex = 13;
             this.parsedPacksListBox.Click += new System.EventHandler(this.ListBox_SelectedIndexChanged);
             // 
             // serverListBox
             // 
             this.serverListBox.FormattingEnabled = true;
-            this.serverListBox.ItemHeight = 15;
             this.serverListBox.Location = new System.Drawing.Point(36, 106);
             this.serverListBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.serverListBox.Name = "serverListBox";
-            this.serverListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
-            this.serverListBox.Size = new System.Drawing.Size(220, 289);
-            this.serverListBox.TabIndex = 12; 
+            this.serverListBox.Size = new System.Drawing.Size(220, 274);
+            this.serverListBox.TabIndex = 12;
             this.serverListBox.Click += new System.EventHandler(this.ListBox_SelectedIndexChanged);
             // 
             // _pluginsTab
@@ -376,6 +388,18 @@ namespace MinecraftService.Client.Forms
             this.pluginInstalled.ReadOnly = true;
             this.pluginInstalled.Width = 80;
             // 
+            // checkAllLocalButton
+            // 
+            this.checkAllLocalButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkAllLocalButton.Location = new System.Drawing.Point(571, 119);
+            this.checkAllLocalButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.checkAllLocalButton.Name = "checkAllLocalButton";
+            this.checkAllLocalButton.Size = new System.Drawing.Size(133, 27);
+            this.checkAllLocalButton.TabIndex = 26;
+            this.checkAllLocalButton.Text = "Check all boxes";
+            this.checkAllLocalButton.UseVisualStyleBackColor = true;
+            this.checkAllLocalButton.Click += new System.EventHandler(this.checkAllLocalButton_Click);
+            // 
             // ManagePacksForms
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -408,12 +432,12 @@ namespace MinecraftService.Client.Forms
         private System.Windows.Forms.Button openFileBtn;
         private System.Windows.Forms.PictureBox selectedPackIcon;
         private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.Button removeAllPacksBtn;
+        private System.Windows.Forms.Button checkAllServerButton;
         private System.Windows.Forms.Button removePackBtn;
-        private System.Windows.Forms.Button sendAllBtn;
+        private System.Windows.Forms.Button uncheckAllLocalButton;
         private System.Windows.Forms.Button sendPacksBtn;
-        private System.Windows.Forms.ListBox parsedPacksListBox;
-        private System.Windows.Forms.ListBox serverListBox;
+        private System.Windows.Forms.CheckedListBox parsedPacksListBox;
+        private System.Windows.Forms.CheckedListBox serverListBox;
         private System.Windows.Forms.TabPage _pluginsTab;
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.Button _pluginInstallBtn;
@@ -427,5 +451,7 @@ namespace MinecraftService.Client.Forms
         private System.Windows.Forms.DataGridViewTextBoxColumn pluginSource;
         private System.Windows.Forms.DataGridViewTextBoxColumn pluginInstalled;
         private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.Button uncheckAllServerButton;
+        private System.Windows.Forms.Button checkAllLocalButton;
     }
 }

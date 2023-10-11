@@ -5,14 +5,15 @@ using MinecraftService.Shared.Interfaces;
 using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
 using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
 using MinecraftService.Shared.PackParser;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using static MinecraftService.Shared.Classes.SharedStringBase;
 
 namespace MinecraftService.Shared.Utilities {
     public class MinecraftFileUtilities {
-
         public static bool UpdateWorldPackFile(string filePath, PackManifestJsonModel manifest) {
             WorldPackFileModel worldPackFile = new(filePath);
             if (worldPackFile.Contents.Where(x => x.pack_id == manifest.header.uuid).Count() > 0) {
@@ -21,6 +22,38 @@ namespace MinecraftService.Shared.Utilities {
             worldPackFile.Contents.Add(new WorldPackEntryJsonModel(manifest.header.uuid, manifest.header.version));
             worldPackFile.SaveFile();
             return true;
+        }
+
+        public static Task RemoveEntryFromWorldPackFile(string filePath, WorldPackEntryJsonModel manifest) {
+            return Task.Run(() => {
+                WorldPackFileModel worldPackFile = new(filePath);
+                if (worldPackFile.Contents.Where(x => x.pack_id == manifest.pack_id).Count() > 0) {
+                }
+                WorldPackEntryJsonModel cannedEntry = worldPackFile.Contents.Where(x => x.pack_id == manifest.pack_id).First();
+                worldPackFile.Contents.Remove(cannedEntry);
+                worldPackFile.SaveFile();
+            });
+        }
+
+        public static Task ValidateFixWorldPackFiles(string serverPath, string levelName) {
+            return Task.Run(() => {
+                MinecraftPackParser resourceParser = new();
+                MinecraftPackParser behaviorParser = new();
+                resourceParser.ParseDirectory(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName));
+                behaviorParser.ParseDirectory(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName));
+                List<WorldPackEntryJsonModel> resourceJsonList = JsonConvert.DeserializeObject<List<WorldPackEntryJsonModel>>(File.ReadAllText(GetServerFilePath(ServerFileNameKeys.WorldResourcePacks, serverPath, levelName)));
+                List<WorldPackEntryJsonModel> behaviorJsonList = JsonConvert.DeserializeObject<List<WorldPackEntryJsonModel>>(File.ReadAllText(GetServerFilePath(ServerFileNameKeys.WorldBehaviorPacks, serverPath, levelName)));
+                foreach (WorldPackEntryJsonModel entry in resourceJsonList) {
+                    if (resourceParser.FoundPacks.Count(x => x.JsonManifest.header.uuid == entry.pack_id) == 0) {
+                        RemoveEntryFromWorldPackFile(GetServerFilePath(ServerFileNameKeys.WorldResourcePacks, serverPath, levelName), entry).Wait();
+                    }
+                }
+                foreach (WorldPackEntryJsonModel entry in behaviorJsonList) {
+                    if (resourceParser.FoundPacks.Count(x => x.JsonManifest.header.uuid == entry.pack_id) == 0) {
+                        RemoveEntryFromWorldPackFile(GetServerFilePath(ServerFileNameKeys.WorldBehaviorPacks, serverPath, levelName), entry).Wait();
+                    }
+                }
+            });
         }
 
         public static bool UpdateKnownPackFile(string filePath, MinecraftPackContainer contentToAdd) {
