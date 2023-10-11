@@ -32,12 +32,12 @@ namespace MinecraftService.Service.Server.ConsoleFilters {
         }
 
         private (string username, string xuid) ExtractPlayerInfoFromString(string input) {
-            int msgStartIndex = input.IndexOf(']') + 2;
-            int usernameStart = input.IndexOf(':', msgStartIndex) + 2;
-            int usernameEnd = input.IndexOf(',', usernameStart);
-            int usernameLength = usernameEnd - usernameStart;
-            int xuidStart = input.IndexOf(':', usernameEnd) + 2;
-            return (input.Substring(usernameStart, usernameLength), input.Substring(xuidStart, input.Length - xuidStart));
+            string playerConnected = "Player Spawned: ";
+            string xuid = "xuid: ";
+            int usernameStart = input.IndexOf(playerConnected);
+            int xuidStart = input.IndexOf(xuid);
+            int usernameLength = (xuidStart - 1) - (usernameStart + playerConnected.Length);
+            return (input.Substring(usernameStart + playerConnected.Length, usernameLength), input.Substring(xuidStart + xuid.Length, 16));
         }
     }
 }

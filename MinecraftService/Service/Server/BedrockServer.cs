@@ -1,4 +1,5 @@
-﻿using MinecraftService.Service.Server.Interfaces;
+﻿using MinecraftService.Service.Server.ConsoleFilters;
+using MinecraftService.Service.Server.Interfaces;
 using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
 using MinecraftService.Shared.PackParser;
 using MinecraftService.Shared.SerializeModels;
