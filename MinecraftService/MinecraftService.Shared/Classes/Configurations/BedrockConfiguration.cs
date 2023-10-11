@@ -107,6 +107,7 @@ namespace MinecraftService.Shared.Classes.Configurations {
 
         public void ProcessNewServerConfiguration() {
             Property srvNameProp = ServerPropList.FirstOrDefault(prop => prop != null && prop.KeyName == MmsDependServerPropStrings[MmsDependServerPropKeys.ServerName]);
+            GetSettingsProp(ServerPropertyKeys.ServerName).SetValue(srvNameProp.StringValue);
             GetSettingsProp(ServerPropertyKeys.ServerPath).SetValue($@"{ServersPath}\{srvNameProp.StringValue}");
             GetSettingsProp(ServerPropertyKeys.ServerExeName).SetValue($"MinecraftService.{srvNameProp.StringValue}.exe");
             GetSettingsProp(ServerPropertyKeys.FileName).SetValue($@"{srvNameProp.StringValue}.conf");
