@@ -122,6 +122,9 @@ namespace MinecraftService.Shared.Classes.Configurations {
 
         public void UpdateServerProps(string version) {
             DefaultPropList.Clear();
+            if(!File.Exists(GetServiceFilePath(MmsFileNameKeys.BedrockStockProps_Ver, version))) {
+                GetUpdater().FetchBuild(version).Wait();
+            }
             DefaultPropList = MinecraftFileUtilities.GetDefaultPropListFromFile(GetServiceFilePath(MmsFileNameKeys.BedrockStockProps_Ver, version));
             List<Property> newList = new List<Property>();
             ServerPropList.ForEach(prop => {
