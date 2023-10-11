@@ -366,13 +366,18 @@ namespace MinecraftService.Client.Forms
         }
 
         private void RemoveSrvBtn_Click(object sender, EventArgs e) {
+            if (ServerSelectBox.Items.Count < 2) {
+                FormManager.Logger.AppendLine("Server removal failed! You must have at least one active server!");
+                MessageBox.Show("Server removal failed! You must have at least one active server!");
+                return; 
+            }
             using (RemoveServerControl form = new()) {
                 if (form.ShowDialog() == DialogResult.OK) {
                     FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.RemoveServer, form.SelectedFlag);
                     form.Close();
+                    connectedHost.RemoveServerInfo(selectedServer);
                 }
             }
-            connectedHost.RemoveServerInfo(selectedServer);
             DisableUI();
         }
 
@@ -562,7 +567,7 @@ namespace MinecraftService.Client.Forms
                     if (e.KeyCode == Keys.Up) {
                         if (_localCommandHistory.Count > _distanceFromLastCommand) {
                             _distanceFromLastCommand++;
-                    }
+                        }
                     } else {
                         _distanceFromLastCommand = _distanceFromLastCommand-- > 0 ? _distanceFromLastCommand : 0;
                     }
