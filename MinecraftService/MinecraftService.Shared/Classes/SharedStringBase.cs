@@ -488,5 +488,18 @@ namespace MinecraftService.Shared.Classes {
             }
             return $@"{GetServerDirectory(BdsFileParentDirectories[key], serverPath)}\{BdsFileNameStrings[key]}";
         }
+
+        public static string GetServerFilePath(ServerFileNameKeys key, string serverPath, object var0) {
+            if (!BdsFileNameStrings.ContainsKey(key)) {
+                throw new KeyNotFoundException($"Key {key} was not a does not have a file name associated.");
+            }
+            if (!BdsFileParentDirectories.ContainsKey(key)) {
+                throw new KeyNotFoundException($"File {key} does not have a parent directory associated.");
+            }
+            if (!BdsDirectoryStrings.ContainsKey(BdsFileParentDirectories[key])) {
+                throw new KeyNotFoundException($"File {BdsFileParentDirectories[key]} does not have a directory associated.");
+            }
+            return string.Format($@"{GetServerDirectory(BdsFileParentDirectories[key], serverPath)}\{BdsFileNameStrings[key]}", var0);
+        }
     }
 }
