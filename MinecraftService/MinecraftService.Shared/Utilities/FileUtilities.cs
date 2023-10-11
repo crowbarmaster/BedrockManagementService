@@ -25,12 +25,12 @@ namespace MinecraftService.Shared.Utilities {
 
         public static void CreateInexistantDirectory(string DirectoryPath) {
             try {
-            if (!Directory.Exists(DirectoryPath)) {
-                Directory.CreateDirectory(DirectoryPath);
-            }
+                if (!Directory.Exists(DirectoryPath)) {
+                    Directory.CreateDirectory(DirectoryPath);
+                }
             } catch {
                 return;
-        }
+            }
         }
 
         public static void CopyFolderTree(DirectoryInfo source, DirectoryInfo target) {
@@ -73,23 +73,23 @@ namespace MinecraftService.Shared.Utilities {
         public static void AppendServerPacksToArchive(string serverPath, ZipArchive backupZip, DirectoryInfo levelDirInfo) {
             string levelName = levelDirInfo.Name;
             CreatePackBackupFiles(serverPath, levelName, backupZip);
-            if (Directory.Exists(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath))) {
+            if (Directory.Exists(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName))) {
                 ClearTempDir().Wait();
-                ZipFile.CreateFromDirectory(string.Format(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath), levelName), $@"{Path.GetTempPath()}\MMSTemp\resource_packs.zip");
-                backupZip.CreateEntryFromFile($@"{Path.GetTempPath()}\MMSTemp\resource_packs.zip", "resource_packs.zip");
+                ZipFile.CreateFromDirectory(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName), $@"{Path.GetTempPath()}\MMSTemp\PackTemp\resource_packs.zip");
+                backupZip.CreateEntryFromFile($@"{Path.GetTempPath()}\MMSTemp\PackTemp\resource_packs.zip", "resource_packs.zip");
             }
-            if (Directory.Exists(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath))) {
+            if (Directory.Exists(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName))) {
                 ClearTempDir().Wait();
-                ZipFile.CreateFromDirectory(string.Format(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath), levelName), $@"{Path.GetTempPath()}\MMSTemp\behavior_packs.zip");
-                backupZip.CreateEntryFromFile($@"{Path.GetTempPath()}\MMSTemp\behavior_packs.zip", "behavior_packs.zip");
+                ZipFile.CreateFromDirectory(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName), $@"{Path.GetTempPath()}\MMSTemp\PackTemp\behavior_packs.zip");
+                backupZip.CreateEntryFromFile($@"{Path.GetTempPath()}\MMSTemp\PackTemp\behavior_packs.zip", "behavior_packs.zip");
             }
         }
 
         public static void CreatePackBackupFiles(string serverPath, string levelName, ZipArchive destinationArchive) {
-            string resouceFolderPath = GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath);
-            string behaviorFolderPath = GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath);
-            string behaviorFilePath = GetServerFilePath(ServerFileNameKeys.WorldBehaviorPacks, serverPath);
-            string resoruceFilePath = GetServerFilePath(ServerFileNameKeys.WorldResourcePacks, serverPath);
+            string resouceFolderPath = GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName);
+            string behaviorFolderPath = GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName);
+            string behaviorFilePath = GetServerFilePath(ServerFileNameKeys.WorldBehaviorPacks, serverPath, levelName);
+            string resoruceFilePath = GetServerFilePath(ServerFileNameKeys.WorldResourcePacks, serverPath, levelName);
             MinecraftPackParser packParser = new();
             packParser.ParseDirectory(resouceFolderPath);
             packParser.ParseDirectory(behaviorFolderPath);
