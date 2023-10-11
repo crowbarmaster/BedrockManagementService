@@ -96,6 +96,10 @@ namespace MinecraftService.Shared.Classes.Updaters {
                 string fetchUrl = string.Format(MmsUrlStrings[MmsUrlKeys.BdsPackage_Ver], version);
                 string zipPath = GetServiceFilePath(MmsFileNameKeys.BdsUpdatePackage_Ver, version);
                 new FileInfo(zipPath).Directory.Create();
+                if (File.Exists(zipPath)) {
+                    ProcessBdsPackage(version).Wait();
+                    return true;
+                }
                 if (HTTPHandler.RetrieveFileFromUrl(fetchUrl, zipPath).Result) {
                     ProcessBdsPackage(version).Wait();
                     return true;
