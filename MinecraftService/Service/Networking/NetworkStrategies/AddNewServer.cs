@@ -26,27 +26,12 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
             string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
             ServerCombinedPropModel propModel = JsonConvert.DeserializeObject<ServerCombinedPropModel>(stringData, GlobalJsonSerialierSettings);
-            string serversPath = _serviceConfiguration.GetProp(ServicePropertyKeys.ServersPath).ToString();
-            List<Property>? propList = propModel?.ServerPropList;
-            List<Property>? servicePropList = propModel?.ServicePropList;
-            Property? serverNameProp = new(string.Empty, string.Empty);
-            Property? ipV6Prop = new(string.Empty, string.Empty);
-            Property? archProp = servicePropList?.First(x => x.KeyName == ServerPropertyStrings[ServerPropertyKeys.MinecraftType]);
-            if(archProp.StringValue == "Java") { 
-                serverNameProp = servicePropList?.First(p => p.KeyName == ServerPropertyStrings[ServerPropertyKeys.ServerName]);
-            } else {
-                serverNameProp = propList?.First(p => p.KeyName == MmsDependServerPropStrings[MmsDependServerPropKeys.ServerName]);
-            }
-            Property? ipV4Prop = propList?.First(p => p.KeyName == MmsDependServerPropStrings[MmsDependServerPropKeys.PortI4]);
-            if(archProp.StringValue != "Java") {
-                ipV6Prop = propList?.First(p => p.KeyName == MmsDependServerPropStrings[MmsDependServerPropKeys.PortI6]);
-            }
-            Property? versionProp = servicePropList?.First(p => p.KeyName == ServerPropertyStrings[ServerPropertyKeys.ServerVersion]);
+            Property? archProp = propModel?.ServicePropList?.First(x => x.KeyName == ServerPropertyStrings[ServerPropertyKeys.MinecraftType]);
             EnumTypeLookup typeLookup = new(_logger, _serviceConfiguration);
             IServerConfiguration newServer = typeLookup.PrepareNewServerByArchName(archProp.StringValue, _processInfo, _logger, _serviceConfiguration);
             newServer.InitializeDefaults();
-            newServer.SetAllSettings(servicePropList);
-            newServer.SetAllProps(propList);
+            newServer.SetAllSettings(propModel?.ServicePropList);
+            newServer.SetAllProps(propModel?.ServerPropList);
             newServer.ProcessNewServerConfiguration();
             _configurator.SaveServerConfiguration(newServer);
             _minecraftService.InitializeNewServer(newServer);
