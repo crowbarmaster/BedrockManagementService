@@ -40,19 +40,19 @@ namespace MinecraftService.Client.Management {
                         StringBuilder sendString = new();
                         foreach (IServerConfiguration server in _connectedHost.GetServerList()) {
                             server.SetLog(server.GetLog() ?? new List<LogEntry>());
-                            sendString.Append($"{server.GetSettingsProp(ServerPropertyKeys.ServerName)};{server.GetLog().Count}|");
+                            sendString.Append($"{server.GetSettingsProp(ServerPropertyKeys.ServerName)}|;|{server.GetLog().Count}|?|");
                         }
-                        sendString.Append($"Service;{_connectedHost.GetLog().Count}");
+                        sendString.Append($"Service|;|{_connectedHost.GetLog().Count}");
                         int serverCount = FormManager.MainWindow.selectedServer == null || FormManager.MainWindow.selectedServer.GetLog() == null ? 0 : FormManager.MainWindow.selectedServer.GetLog().Count;
                         int serviceCount = _connectedHost.GetLog() == null ? 0 : _connectedHost.GetLog().Count;
                         byte[] stringsToBytes = Encoding.UTF8.GetBytes(sendString.ToString());
                         FormManager.TCPClient.SendData(stringsToBytes, NetworkMessageTypes.ConsoleLogUpdate);
+                        FormManager.TCPClient.SendData(FormManager.MainWindow.connectedHost.GetServerIndex(FormManager.MainWindow.selectedServer), NetworkMessageTypes.ServerStatusRequest);
                         Task.Delay(300).Wait();
 
                         if (FormManager.MainWindow.selectedServer == null) {
                             UpdateLogBoxInvoked(FormManager.MainWindow.LogBox, "");
                         } else {
-                            FormManager.TCPClient.SendData(FormManager.MainWindow.connectedHost.GetServerIndex(FormManager.MainWindow.selectedServer), NetworkMessageTypes.ServerStatusRequest);
                             if(FormManager.MainWindow.selectedServer.GetStatus() != null) {
                                 Task.Run(() => {
                                     IServerConfiguration serverConfiguration = FormManager.MainWindow.selectedServer;

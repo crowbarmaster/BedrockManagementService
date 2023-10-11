@@ -18,9 +18,9 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
             string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
             StringBuilder srvString = new();
-            string[] split = stringData.Split('|');
+            string[] split = stringData.Split("|?|");
             for (int i = 0; i < split.Length; i++) {
-                string[] dataSplit = split[i].Split(';');
+                string[] dataSplit = split[i].Split("|;|");
                 string srvName = dataSplit[0];
                 int srvTextLen;
                 int clientCurLen;
@@ -36,7 +36,7 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
                     clientCurLen = int.Parse(dataSplit[1]);
                     loop = clientCurLen;
                     while (loop < srvTextLen) {
-                        srvString.Append($"{srvName};{srvText.FromIndex(loop)};{loop}|");
+                        srvString.Append($"{srvName}|;|{srvText.FromIndex(loop)}|;|{loop}|?|");
                         loop++;
                     }
 
@@ -45,13 +45,13 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
                     clientCurLen = int.Parse(dataSplit[1]);
                     loop = clientCurLen;
                     while (loop < srvTextLen) {
-                        srvString.Append($"{srvName};{_logger.FromIndex(loop)};{loop}|");
+                        srvString.Append($"{srvName}|;|{_logger.FromIndex(loop)}|;|{loop}|?|");
                         loop++;
                     }
                 }
             }
-            if (srvString.Length > 1) {
-                srvString.Remove(srvString.Length - 1, 1);
+            if (srvString.Length > 3) {
+                srvString.Remove(srvString.Length - 3, 3);
                 return (Encoding.UTF8.GetBytes(srvString.ToString()), 0, NetworkMessageTypes.ConsoleLogUpdate);
             }
             return (Array.Empty<byte>(), 0, 0);

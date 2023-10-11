@@ -152,24 +152,28 @@ namespace MinecraftService.Client.Networking {
 
                                 break;
                             case NetworkMessageTypes.ConsoleLogUpdate:
-                                string[] strings = data.Split('|');
-                                for (int i = 0; i < strings.Length; i++) {
-                                    string[] srvSplit = strings[i].Split(';');
-                                    string srvName = srvSplit[0];
-                                    string srvText = srvSplit[1];
-                                    srvCurLen = int.Parse(srvSplit[2]);
-                                    if (srvName != "Service") {
-                                        IServerConfiguration bedrockServer = FormManager.MainWindow.connectedHost.GetServerInfoByName(srvName);
-                                        int curCount = bedrockServer.GetLog().Count;
-                                        if (curCount == srvCurLen) {
-                                            bedrockServer.GetLog().Add(new LogEntry(srvText));
-                                        }
-                                    } else {
-                                        int curCount = FormManager.MainWindow.connectedHost.GetLog().Count;
-                                        if (curCount == srvCurLen) {
-                                            FormManager.MainWindow.connectedHost.GetLog().Add(new LogEntry(srvText));
+                                try {
+                                    string[] strings = data.Split("|?|");
+                                    for (int i = 0; i < strings.Length; i++) {
+                                        string[] srvSplit = strings[i].Split("|;|");
+                                        string srvName = srvSplit[0];
+                                        string srvText = srvSplit[1];
+                                        srvCurLen = int.Parse(srvSplit[2]);
+                                        if (srvName != "Service") {
+                                            IServerConfiguration bedrockServer = FormManager.MainWindow.connectedHost.GetServerInfoByName(srvName);
+                                            int curCount = bedrockServer.GetLog().Count;
+                                            if (curCount == srvCurLen) {
+                                                bedrockServer.GetLog().Add(new LogEntry(srvText));
+                                            }
+                                        } else {
+                                            int curCount = FormManager.MainWindow.connectedHost.GetLog().Count;
+                                            if (curCount == srvCurLen) {
+                                                FormManager.MainWindow.connectedHost.GetLog().Add(new LogEntry(srvText));
+                                            }
                                         }
                                     }
+                                } catch (Exception e) {
+                                    _logger.AppendLine($"Error updating logs: {e.Message}");
                                 }
                                 break;
                             case NetworkMessageTypes.Backup:
