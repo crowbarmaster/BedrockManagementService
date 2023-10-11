@@ -95,7 +95,7 @@ namespace MinecraftService.Service.Server {
                 }
                 ZipFile.ExtractToDirectory(backupZipFileInfo.FullName, worldsDir.FullName);
                 _logger.AppendLine($"Copied files from backup \"{backupZipFileInfo.Name}\" to server worlds directory.");
-                MinecraftPackParser parser = new();
+                MinecraftPackParser parser = new(_logger);
                 foreach (FileInfo file in backupPacksDir.GetFiles()) {
                     FileUtilities.ClearTempDir().Wait();
                     ZipFile.ExtractToDirectory(file.FullName, $@"{Path.GetTempPath()}\MMSTemp\PackTemp", true);
