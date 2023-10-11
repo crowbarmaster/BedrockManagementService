@@ -31,6 +31,7 @@ namespace MinecraftService.Service.Server {
         private const string _startupMessage = "INFO] Server started.";
         private bool _serverModifiedFlag = true;
         private bool _LiteLoadedServer = false;
+        ConsoleGarbageFilter _garbageFilter = new ConsoleGarbageFilter();
 
         public BedrockServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IServerLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, IPlayerManager servicePlayerManager) {
             _serverConfiguration = serverConfiguration;
@@ -182,7 +183,7 @@ namespace MinecraftService.Service.Server {
         }
 
         private void StdOutToLog(object sender, DataReceivedEventArgs e) {
-            if (e.Data != null && !e.Data.Contains("Running AutoCompaction...")) {
+            if (e.Data != null) {
                 ConsoleFilterStrategyClass consoleFilter = new ConsoleFilterStrategyClass(_logger, _configurator, _serverConfiguration, this, _serviceConfiguration);
                 string input = e.Data;
                 string logFileText = "NO LOG FILE! - ";
@@ -191,9 +192,11 @@ namespace MinecraftService.Service.Server {
                     input = input.Substring(logFileText.Length);
                 if (input.StartsWith('[')) {
                     trimIndex = input.IndexOf(']') + 2;
+                    input = input.Substring(trimIndex);
                 }
-                _serverLogger.AppendLine(input.Substring(trimIndex));
-                if (e.Data != null) {
+                input = _garbageFilter.Filter(input);
+                if (!string.IsNullOrEmpty(input)) { 
+                    _serverLogger.AppendLine(input);
                     if (input.Equals("Quit correctly")) {
                         _logger.AppendLine($"Server {GetServerName()} received quit signal.");
                         _currentServerStatus = ServerStatus.Stopped;

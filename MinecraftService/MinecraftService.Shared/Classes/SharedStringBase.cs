@@ -53,7 +53,8 @@ namespace MinecraftService.Shared.Classes {
             AutoDeployUpdates,
             ServerVersion,
             UseBetaVersions,
-            JavaArgs
+            JavaArgs,
+            UseErrorFilter
         }
 
         public enum MinecraftPackTypes {
@@ -88,7 +89,8 @@ namespace MinecraftService.Shared.Classes {
             GlobalPlayerRegistry,
             GlobalPlayerTelem,
             Jdk17JavaVanillaExe,
-            Jdk17JavaMmsExe
+            Jdk17JavaMmsExe,
+            ServerErrorFilter
         }
 
         public enum ServiceDirectoryKeys {
@@ -171,7 +173,8 @@ namespace MinecraftService.Shared.Classes {
             { MmsFileNameKeys.ServerPlayerTelem_Name, ServiceDirectoryKeys.ServerPlayerPath },
             { MmsFileNameKeys.GlobalPlayerTelem, ServiceDirectoryKeys.GlobalPlayerPath },
             { MmsFileNameKeys.Jdk17JavaVanillaExe, ServiceDirectoryKeys.Jdk17BinPath },
-            { MmsFileNameKeys.Jdk17JavaMmsExe, ServiceDirectoryKeys.Jdk17BinPath }
+            { MmsFileNameKeys.Jdk17JavaMmsExe, ServiceDirectoryKeys.Jdk17BinPath },
+            { MmsFileNameKeys.ServerErrorFilter, ServiceDirectoryKeys.MmsConfig }
         };
 
         public static Dictionary<ServerFileNameKeys, ServerDirectoryKeys> BdsFileParentDirectories = new() {
@@ -268,7 +271,8 @@ namespace MinecraftService.Shared.Classes {
             { MmsFileNameKeys.LLUpdatePackage_Ver, "LLUpdate_{0}.zip" },
             { MmsFileNameKeys.LLModUpdatePackage_Ver, "LLModUpdate_{0}.zip" },
             { MmsFileNameKeys.Jdk17JavaVanillaExe, "javaw.exe" },
-            { MmsFileNameKeys.Jdk17JavaMmsExe, "MmsServerInstance.exe" }
+            { MmsFileNameKeys.Jdk17JavaMmsExe, "MmsServerInstance.exe" },
+            { MmsFileNameKeys.ServerErrorFilter, "ServerErrorFilters.txt" }
         };
 
         public static Dictionary<ServerFileNameKeys, string> BdsFileNameStrings = new() {
@@ -320,7 +324,8 @@ namespace MinecraftService.Shared.Classes {
             { ServerPropertyKeys.RestartCron, "RestartCron" },
             { ServerPropertyKeys.ServerVersion, "ServerVersion" },
             { ServerPropertyKeys.UseBetaVersions, "UseBetaVersions" },
-            { ServerPropertyKeys.JavaArgs, "JavaArgs" }
+            { ServerPropertyKeys.JavaArgs, "JavaArgs" },
+            { ServerPropertyKeys.UseErrorFilter, "UseErrorFilter" }
         };
 
         public static Dictionary<MmsDependServerPropKeys, string> MmsDependServerPropStrings = new() {
