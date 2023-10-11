@@ -73,6 +73,7 @@ namespace MinecraftService.Shared.Classes {
         public enum MmsFileNameKeys {
             ServiceConfig,
             ClientConfig,
+            ClientCommandHistory,
             ServerConfig_Name,
             MmsVersionIni,
             LatestVerIni_Name,
@@ -155,6 +156,7 @@ namespace MinecraftService.Shared.Classes {
         public static Dictionary<MmsFileNameKeys, ServiceDirectoryKeys> MmsFileParentDirectories = new() {
             { MmsFileNameKeys.ServiceConfig, ServiceDirectoryKeys.Root },
             { MmsFileNameKeys.ClientConfig, ServiceDirectoryKeys.Root },
+            { MmsFileNameKeys.ClientCommandHistory, ServiceDirectoryKeys.MmsConfig },
             { MmsFileNameKeys.ServerConfig_Name, ServiceDirectoryKeys.ServerConfigs },
             { MmsFileNameKeys.MmsVersionIni, ServiceDirectoryKeys.Root },
             { MmsFileNameKeys.LatestVerIni_Name, ServiceDirectoryKeys.MmsConfig },
@@ -251,6 +253,7 @@ namespace MinecraftService.Shared.Classes {
         public static Dictionary<MmsFileNameKeys, string> MmsFileNameStrings = new() {
             { MmsFileNameKeys.ServiceConfig, "Service.conf" },
             { MmsFileNameKeys.ClientConfig, "Client.conf" },
+            { MmsFileNameKeys.ClientCommandHistory, "ClientCommandHistory.txt" },
             { MmsFileNameKeys.ServerConfig_Name, "{0}.conf" },
             { MmsFileNameKeys.LatestVerIni_Name, "LatestVer-{0}.ini" },
             { MmsFileNameKeys.MmsVersionIni, "ServiceVersion.ini" },
