@@ -52,7 +52,7 @@ namespace MinecraftService.Client.Forms {
             this.LogBox = new System.Windows.Forms.TextBox();
             this.logPageControl = new System.Windows.Forms.TabControl();
             this.startStopBtnToolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.cmdTextBox = new System.Windows.Forms.TextBox();
+            this.cmdTextBox = new System.Windows.Forms.RichTextBox();
             this.SendCmd = new System.Windows.Forms.Button();
             this.ManPacks = new System.Windows.Forms.Button();
             this.scrollLockChkBox = new System.Windows.Forms.CheckBox();
@@ -649,7 +649,7 @@ namespace MinecraftService.Client.Forms {
         public System.Windows.Forms.TextBox LogBox;
         private System.Windows.Forms.TabControl logPageControl;
         private System.Windows.Forms.ToolTip startStopBtnToolTip;
-        private System.Windows.Forms.TextBox cmdTextBox;       
+        private System.Windows.Forms.RichTextBox cmdTextBox;       
         private System.Windows.Forms.Button SendCmd;
         private System.Windows.Forms.Button ManPacks;
         private System.Windows.Forms.CheckBox scrollLockChkBox;
