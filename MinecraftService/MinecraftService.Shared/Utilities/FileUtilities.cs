@@ -12,6 +12,7 @@ using static MinecraftService.Shared.Classes.SharedStringBase;
 
 namespace MinecraftService.Shared.Utilities {
     public class FileUtilities {
+
         public static void CreateInexistantFile(string filePath) {
             FileInfo fileInfo = new FileInfo(filePath);
             if (!Directory.Exists(fileInfo.Directory.FullName)) {
@@ -23,9 +24,13 @@ namespace MinecraftService.Shared.Utilities {
         }
 
         public static void CreateInexistantDirectory(string DirectoryPath) {
+            try {
             if (!Directory.Exists(DirectoryPath)) {
                 Directory.CreateDirectory(DirectoryPath);
             }
+            } catch {
+                return;
+        }
         }
 
         public static void CopyFolderTree(DirectoryInfo source, DirectoryInfo target) {
