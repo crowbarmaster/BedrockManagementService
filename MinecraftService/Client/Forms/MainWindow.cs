@@ -26,9 +26,9 @@ namespace MinecraftService.Client.Forms
         public IServerConfiguration selectedServer;
         public IClientSideServiceConfiguration clientSideServiceConfiguration;
         public ServiceStatusModel ServiceStatus;
+        private List<string> _localCommandHistory = new();
         public bool ServerBusy = false;
-        private int _commandHistoryIndex = 0;
-        private string _commandHistoryPath = "";
+        private int _distanceFromLastCommand = 0;
         public IServerLogger ClientLogger;
         public ConfigManager ConfigManager;
         private int _connectTimeout;
@@ -41,6 +41,7 @@ namespace MinecraftService.Client.Forms
         private readonly IProcessInfo _processInfo;
         private readonly System.Timers.Timer _connectTimer = new(100.0);
         private readonly LogManager _logManager;
+        private int _commandHistoryTabIndex;
 
         public MainWindow(IProcessInfo processInfo, IServerLogger logger) {
             _processInfo = processInfo;
@@ -52,13 +53,13 @@ namespace MinecraftService.Client.Forms
             Text = $"Minecraft Management Service Client {Application.ProductVersion}";
             InitForm();
             _connectTimer.Elapsed += ConnectTimer_Elapsed;
-            _commandHistoryPath = $@"{_processInfo.GetDirectory()}\commandHistory.txt";
             Shown += MainWindow_Shown;
         }
 
         private void MainWindow_Shown(object sender, EventArgs e) {
             _enableLogUpdating = true;
             _logManager.InitLogThread();
+            _localCommandHistory = new(FileUtilities.ReadLines(GetServiceFilePath(MmsFileNameKeys.ClientCommandHistory)));
         }
 
         private void ConnectTimer_Elapsed(object sender, ElapsedEventArgs e) {
@@ -409,23 +410,22 @@ namespace MinecraftService.Client.Forms
 
         private void SendCmd_Click(object sender, EventArgs e) {
             // store the last command in the consoleHistory.txt file
-            List<string> lines = FileUtilities.ReadLines(_commandHistoryPath);
-            if (lines.Count == 0 || (lines.Last() != cmdTextBox.Text && !string.IsNullOrEmpty(cmdTextBox.Text))) {
-                lines.Add(cmdTextBox.Text);
+            if (_localCommandHistory.Count == 0 || (_localCommandHistory.Last() != cmdTextBox.Text && !string.IsNullOrEmpty(cmdTextBox.Text))) {
+                _localCommandHistory.Add(cmdTextBox.Text);
             }
-            if (lines.Count > 500) {
+            if (_localCommandHistory.Count > 500) {
                 // remove all lines that are not the last 500
-                int linesToRemove = lines.Count - 500;
-                lines.RemoveRange(0, linesToRemove);
+                int linesToRemove = _localCommandHistory.Count - 500;
+                _localCommandHistory.RemoveRange(0, linesToRemove);
             }
-            FileUtilities.WriteStringArrayToFile(_commandHistoryPath, lines.ToArray());
+            FileUtilities.WriteStringArrayToFile(GetServiceFilePath(MmsFileNameKeys.ClientCommandHistory), _localCommandHistory.ToArray());
 
             // send the command to the server
             if (cmdTextBox.Text.Length > 0 && connectedHost != null) {
                 byte[] msg = Encoding.UTF8.GetBytes(cmdTextBox.Text);
                 FormManager.TCPClient.SendData(msg, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.Command);
             }
-            _commandHistoryIndex = 0;
+            _distanceFromLastCommand = 0;
             logPageControl.SelectedTab = logPageControl.TabPages[0];
 
             cmdTextBox.Text = "";
@@ -557,27 +557,16 @@ namespace MinecraftService.Client.Forms
 
         private void cmdTextBox_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e) {
             if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down) {
-                List<string> lines = FileUtilities.ReadLines(_commandHistoryPath);
-
-                if (lines.Count > 0) {
-                    _commandHistoryIndex = _commandHistoryIndex < 0 ? 0 : _commandHistoryIndex;
+                if (_localCommandHistory.Count > 0) {
+                    _distanceFromLastCommand = _distanceFromLastCommand < 0 ? 0 : _distanceFromLastCommand;
                     if (e.KeyCode == Keys.Up) {
-                        if (lines.Count > _commandHistoryIndex) {
-                            _commandHistoryIndex++;
-                        }
-                    } else {
-                        _commandHistoryIndex--;
+                        if (_localCommandHistory.Count > _distanceFromLastCommand) {
+                            _distanceFromLastCommand++;
                     }
-                    if (_commandHistoryIndex <= 0) {
-                        cmdTextBox.Text = "";
                     } else {
-                        // get the line at the index
-                        string line = lines.Skip(lines.Count - _commandHistoryIndex).Take(1).First();
-                        // check that line is not null then set as the text value
-                        if (line != null) {
-                            cmdTextBox.Text = line;
-                        }
+                        _distanceFromLastCommand = _distanceFromLastCommand-- > 0 ? _distanceFromLastCommand : 0;
                     }
+                    cmdTextBox.Text = _localCommandHistory.ElementAt(_localCommandHistory.Count - _distanceFromLastCommand);
                 }
             }
         }
