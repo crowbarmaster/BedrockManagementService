@@ -608,7 +608,7 @@ namespace MinecraftService.Client.Forms {
             this.MinimumSize = new System.Drawing.Size(745, 460);
             this.Name = "MainWindow";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = $"Minecraft Management Service Client {Application.ProductVersion}";
+            this.Text = "Minecraft Management Service Client";
             this.clientPage.ResumeLayout(false);
             this.clientPage.PerformLayout();
             this.servicePage.ResumeLayout(false);

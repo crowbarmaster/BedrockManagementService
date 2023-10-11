@@ -49,6 +49,7 @@ namespace MinecraftService.Client.Forms
             _logManager = new LogManager(ClientLogger);
             ConfigManager = new ConfigManager(ClientLogger);
             InitializeComponent();
+            Text = $"Minecraft Management Service Client {Application.ProductVersion}";
             InitForm();
             _connectTimer.Elapsed += ConnectTimer_Elapsed;
             _commandHistoryPath = $@"{_processInfo.GetDirectory()}\commandHistory.txt";
