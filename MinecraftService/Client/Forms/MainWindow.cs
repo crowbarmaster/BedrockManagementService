@@ -328,7 +328,7 @@ namespace MinecraftService.Client.Forms
 
         private void SingBackup_Click(object sender, EventArgs e) {
             FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.Backup);
-            DisableUI();
+            DisableUI("Performing server backup...");
         }
 
         private void EditCfg_Click(object sender, EventArgs e) {
@@ -337,19 +337,19 @@ namespace MinecraftService.Client.Forms
 
         private void RestartSrv_Click(object sender, EventArgs e) {
             FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.Restart);
-            DisableUI();
+            DisableUI("Restarting a server...");
         }
 
         private void GlobBackup_Click(object sender, EventArgs e) {
             FormManager.TCPClient.SendData(NetworkMessageTypes.BackupAll);
-            DisableUI();
+            DisableUI("Performing backups on all servers...");
         }
 
         private void newSrvBtn_Click(object sender, EventArgs e) {
             if (clientSideServiceConfiguration == null) {
                 clientSideServiceConfiguration = ConfigManager.HostConnectList.First(host => host.GetHostName() == HostListBox.Text);
             }
-            DisableUI();
+            DisableUI("Service is perparing a new server...");
             FormManager.TCPClient.SendData(NetworkMessageTypes.VersionListRequest);
         }
 
@@ -378,12 +378,12 @@ namespace MinecraftService.Client.Forms
                     connectedHost.RemoveServerInfo(selectedServer);
                 }
             }
-            DisableUI();
+            DisableUI("Service is removing a server...");
         }
 
         private void PlayerManager_Click(object sender, EventArgs e) {
             FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PlayersRequest);
-            DisableUI();
+            DisableUI("Gathering players registered to server...");
         }
 
         private void Disconn_Click(object sender, EventArgs e) {
@@ -441,7 +441,7 @@ namespace MinecraftService.Client.Forms
 
         private void ChkUpdates_Click(object sender, EventArgs e) {
             FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.CheckUpdates);
-            DisableUI();
+            DisableUI("Service is checking updates for a server...");
         }
 
         public int GetScrollPosition(TextBox targetBox) {
@@ -509,23 +509,27 @@ namespace MinecraftService.Client.Forms
 
         }
 
-        public Task DisableUI() {
+        public void DisableUI(string message) {
             ServerBusy = true;
-            return Task.Run(() => {
-                Invoke((MethodInvoker)delegate { RefreshAllCompenentStates(); });
-                while (ServerBusy) {
-                    Task.Delay(250).Wait();
+            ClientProgressDialog waitDialog = new();
+            System.Timers.Timer waitTimer = new(250);
+            waitTimer.AutoReset = false;
+            int waitCount = 0;
+            waitTimer.Elapsed += (s, e) => {
+                if (!ServerBusy) {
+                    Invoke((MethodInvoker)delegate { RefreshAllCompenentStates(); });
+                    waitDialog.GetDialogProgress().Report(new("Message recieved.", 100));
+                    waitDialog.EndProgress();
+                } else {
+                    waitCount += 5;
+                    waitDialog.GetDialogProgress().Report(new(message, waitCount <= 100 ? waitCount : 100));
+                    waitTimer.Start();
                 }
-                Invoke((MethodInvoker)delegate { RefreshAllCompenentStates(); });
-            });
-        }
-
-        public Task WaitForServerData() {
-            return Task.Run(() => {
-                while (!FormManager.TCPClient.PlayerInfoArrived && FormManager.TCPClient.RecievedPacks == null) {
-                    Task.Delay(250).Wait();
-                }
-            });
+            };
+            waitDialog.Show(this);
+            waitDialog.GetDialogProgress().Report(new(message, waitCount));
+            Invoke((MethodInvoker)delegate { RefreshAllCompenentStates(); });
+            waitTimer.Start();
         }
 
         public class ServerConnectException : Exception {
@@ -601,7 +605,7 @@ namespace MinecraftService.Client.Forms
 
         private void ManPacks_Click(object sender, EventArgs e) {
             FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PackList);
-            DisableUI();
+            DisableUI("Service is gathering current pack information..");
         }
 
         private void nbtStudioBtn_Click(object sender, EventArgs e) {
@@ -617,7 +621,7 @@ namespace MinecraftService.Client.Forms
                 }
             ServerBusy = true;
             FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.LevelEditRequest);
-            DisableUI();
+            DisableUI("Service is gathering level.dat...");
             using (Process nbtStudioProcess = new()) {
                 string tempPath = $@"{Path.GetTempPath()}level.dat";
                 nbtStudioProcess.StartInfo = new ProcessStartInfo(ConfigManager.NBTStudioPath, tempPath);
@@ -648,7 +652,7 @@ namespace MinecraftService.Client.Forms
 
         private void startStopBtn_Click(object sender, EventArgs e) {
             if (!IsPrimaryServer()) {
-                DisableUI();
+                DisableUI("Starting/Stopping a server...");
                 FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.StartStop);
             } else {
                 startStopBtnToolTip.Active = true;
@@ -683,7 +687,7 @@ namespace MinecraftService.Client.Forms
             if (editSrvDialog.ShowDialog() == DialogResult.OK) {
                 JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                 byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(editSrvDialog.startCmds, Formatting.Indented, settings));
-                DisableUI();
+                DisableUI("Getting current server start commands from service...");
                 FormManager.TCPClient.SendData(serializeToBytes, connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.StartCmdUpdate);
                 selectedServer.SetStartCommands(editSrvDialog.startCmds);
                 editSrvDialog.Close();
@@ -716,7 +720,7 @@ namespace MinecraftService.Client.Forms
                     FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageTypes.PropUpdate);
                     connectedHost.SetAllProps(_editDialog.workingProps);
                     ServerBusy = true;
-                    DisableUI();
+                    DisableUI("Gathering current service props...");
                 }
             }
             ServerBusy = false;

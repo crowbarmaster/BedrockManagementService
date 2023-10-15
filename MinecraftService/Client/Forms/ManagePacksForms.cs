@@ -90,10 +90,18 @@ namespace MinecraftService.Client.Forms {
             openFileDialog.Title = "Select pack file(s)";
             openFileDialog.Multiselect = true;
             if (openFileDialog.ShowDialog() == DialogResult.OK) {
-                MinecraftPackParser parser = new(openFileDialog.FileNames, _packExtractDir.FullName, _logger);
-                parsedPacksListBox.Items.Clear();
-                foreach (MinecraftPackContainer container in parser.FoundPacks)
-                    parsedPacksListBox.Items.Add(container);
+                ClientProgressDialog progressDialog = new();
+                progressDialog.Show(this);
+                MinecraftPackParser parser = new(_logger, progressDialog.GetDialogProgress(), _packExtractDir.FullName);
+                parser.ProcessClientFiles(openFileDialog.FileNames, () => {
+                    Invoke(() => {
+                        parsedPacksListBox.Items.Clear();
+                        foreach (MinecraftPackContainer container in parser.FoundPacks) {
+                            parsedPacksListBox.Items.Add(container);
+                        }
+                        progressDialog.EndProgress();
+                    });
+                });
             }
         }
 
