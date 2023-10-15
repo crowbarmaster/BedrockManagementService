@@ -160,6 +160,9 @@ namespace MinecraftService.Shared.Classes {
 
         public void RemoveServerInfo(IServerConfiguration serverConfiguration) {
             ServerList.Remove(serverConfiguration.GetServerInfo());
+            if(_processInfo == null || _processInfo.DeclaredType() == null || _processInfo.DeclaredType() == "Client") {
+                return;
+            }
             File.Delete(GetServiceFilePath(MmsFileNameKeys.ServerConfig_Name, serverConfiguration.GetServerName()));
         }
 
