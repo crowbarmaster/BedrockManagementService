@@ -4,7 +4,7 @@ using MinecraftService.Shared.SerializeModels;
 namespace MinecraftService.Service.Core.Interfaces {
     public interface IMinecraftService : ServiceControl {
         Task<bool> Initialize();
-        void RemoveServerByIndex(int serverIndex);
+        bool RemoveServerInfoByIndex(int serverIndex);
         void InitializeNewServer(IServerConfiguration serverConfiguration);
         Task RestartService();
         ServiceStatusModel GetServiceStatus();

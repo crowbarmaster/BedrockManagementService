@@ -186,8 +186,15 @@ namespace MinecraftService.Service.Core {
             return _loadedServers.FirstOrDefault(brs => brs.GetServerName() == name);
         }
 
-        public void RemoveServerByIndex(int serverIndex) {
-            _loadedServers.RemoveAt(serverIndex);
+        public bool RemoveServerInfoByIndex(int serverIndex) {
+            try {
+                string serverName = GetServerByIndex(serverIndex).GetServerName();
+                _loadedServers.RemoveAt(serverIndex);
+                _logger.AppendLine($"Removed server info for server {serverName}");
+                return true;
+            } catch {
+                return false;
+            }
         }
 
         public List<IServerController> GetAllServers() => _loadedServers;
