@@ -19,8 +19,8 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex, NetworkMessageFlags flag) {
             _mineraftService.GetServerByIndex(serverIndex).ServerStop(true).Wait();
-            _configurator.RemoveServerConfigs(_serviceConfiguration.GetServerInfoByIndex(serverIndex), flag);
-            _mineraftService.RemoveServerByIndex(serverIndex);
+            _configurator.RemoveServerConfigs(_serviceConfiguration.GetServerInfoByIndex(serverIndex), flag).Wait();
+            _mineraftService.RemoveServerInfoByIndex(serverIndex);
             byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_serviceConfiguration, Formatting.Indented, SharedStringBase.GlobalJsonSerialierSettings));
             return (serializeToBytes, 0, NetworkMessageTypes.Connect);
 
