@@ -20,7 +20,8 @@ namespace MinecraftService.Shared.Classes.Configurations {
             new Property(ServerPropertyStrings[ServerPropertyKeys.UpdateCron], "0 2 * * *"),
             new Property(ServerPropertyStrings[ServerPropertyKeys.RestartCron], "0 2 * * *"),
             new Property(ServerPropertyStrings[ServerPropertyKeys.ServerVersion], "None"),
-            new Property(ServerPropertyStrings[ServerPropertyKeys.UseBetaVersions], "false")
+            new Property(ServerPropertyStrings[ServerPropertyKeys.UseBetaVersions], "false"),
+            new Property(ServerPropertyStrings[ServerPropertyKeys.UseErrorFilter], "true")
         };
     }
 }
