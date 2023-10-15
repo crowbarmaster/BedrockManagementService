@@ -1,4 +1,5 @@
 ﻿using MinecraftService.Service.Server.Interfaces;
+using MinecraftService.Shared.Classes;
 using MinecraftService.Shared.PackParser;
 using MinecraftService.Shared.SerializeModels;
 using System.IO.Compression;
@@ -64,13 +65,20 @@ namespace MinecraftService.Service.Server {
                 DirectoryInfo levelDirInfo = new(worldsDir.FullName + levelDir);
                 List<FileInfo> levelFiles = levelDirInfo.GetFiles("*.json").ToList();
                 levelFiles.AddRange(levelDirInfo.GetFiles("world_icon*"));
+                int progressCallCount = levelFiles.Count / 6;
+                int currentFileCount = 0;
                 foreach (FileInfo levelFile in levelFiles) {
+                    currentFileCount++;
+                    if(currentFileCount % progressCallCount == 0) {
+                        _logger.AppendLine($"Adding files to archive. {currentFileCount / 6}% complete...");
+                    }
                     backupZip.CreateEntryFromFile(levelFile.FullName, $"{_serverConfiguration.GetProp(MmsDependServerPropKeys.LevelName)}/{levelFile.Name}");
                 }
                 _server.WriteToStandardIn("save resume");
                 _server.WriteToStandardIn("say Server backup complete.");
                 if (_autoBackupsContainPacks) {
-                    FileUtilities.AppendServerPacksToArchive(serverPath, backupZip, levelDirInfo);
+                    Progress<ProgressModel> progress = new Progress<ProgressModel>((p) => _logger.AppendLine($"Adding packs to archive. {p.Progress}% complete..."));
+                    FileUtilities.AppendServerPacksToArchive(serverPath, backupZip, levelDirInfo, progress);
                 }
                 _serviceConfiguration.CalculateTotalBackupsAllServers().Wait();
                 return result;
@@ -88,28 +96,36 @@ namespace MinecraftService.Service.Server {
                 DirectoryInfo worldsDir = new($@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\worlds");
                 FileInfo backupZipFileInfo = new($@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupPath)}\{_serverConfiguration.GetServerName()}\{zipFilePath}");
                 DirectoryInfo backupPacksDir = new($@"{worldsDir.FullName}\{_serverConfiguration.GetProp(MmsDependServerPropKeys.LevelName)}\InstalledPacks");
-                FileUtilities.DeleteFilesFromDirectory(worldsDir, true).Wait();
+                string currentMessage = $"Deleting server files for server {_server.GetServerName()}.";
+                Progress<ProgressModel> progress = new Progress<ProgressModel>((p) => {
+                    _logger.AppendLine($"{currentMessage} {p.Progress}%");
+                });
+                FileUtilities.DeleteFilesFromDirectory(worldsDir, true, progress).Wait();
                 _logger.AppendLine($"Deleted world folder \"{worldsDir.Name}\"");
                 if (!backupPacksDir.Exists) {
                     backupPacksDir.Create();
                 }
+                currentMessage = $"Extracting backup files to server path.";
                 ZipFile.ExtractToDirectory(backupZipFileInfo.FullName, worldsDir.FullName);
                 _logger.AppendLine($"Copied files from backup \"{backupZipFileInfo.Name}\" to server worlds directory.");
-                MinecraftPackParser parser = new(_logger);
+                MinecraftPackParser parser = new(_logger, progress);
                 foreach (FileInfo file in backupPacksDir.GetFiles()) {
-                    FileUtilities.ClearTempDir().Wait();
-                    ZipFile.ExtractToDirectory(file.FullName, $@"{Path.GetTempPath()}\MMSTemp\PackTemp", true);
+                    currentMessage = $"Clearing temp files.";
+                    FileUtilities.ClearTempDir(progress).Wait();
+                    ZipUtilities.ExtractToDirectory(file.FullName, $@"{Path.GetTempPath()}\MMSTemp\PackTemp", progress);
                     parser.FoundPacks.Clear();
-                    parser.ParseDirectory($@"{Path.GetTempPath()}\MMSTemp\PackTemp");
+                    parser.ParseDirectory($@"{Path.GetTempPath()}\MMSTemp\PackTemp", 0);
                     if (parser.FoundPacks[0].ManifestType == "data") {
+                        currentMessage = $"Clearing and extracting BP {parser.FoundPacks[0].FolderName}";
                         string folderPath = $@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\development_behavior_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
-                        Task.Run(() => FileUtilities.DeleteFilesFromDirectory(folderPath, false)).Wait();
-                        ZipFile.ExtractToDirectory(file.FullName, folderPath, true);
+                        Task.Run(() => FileUtilities.DeleteFilesFromDirectory(folderPath, false, progress)).Wait();
+                        ZipUtilities.ExtractToDirectory(file.FullName, folderPath, progress);
                     }
                     if (parser.FoundPacks[0].ManifestType == "resources") {
+                        currentMessage = $"Clearing and extracting RP {parser.FoundPacks[0].FolderName}";
                         string folderPath = $@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\development_resource_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
-                        Task.Run(() => FileUtilities.DeleteFilesFromDirectory(folderPath, false)).Wait();
-                        ZipFile.ExtractToDirectory(file.FullName, folderPath, true);
+                        Task.Run(() => FileUtilities.DeleteFilesFromDirectory(folderPath, false, progress)).Wait();
+                        ZipUtilities.ExtractToDirectory(file.FullName, folderPath, progress);
                     }
                 }
             } catch (Exception ex) {

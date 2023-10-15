@@ -6,6 +6,7 @@ using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
 using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
 using MinecraftService.Shared.PackParser;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -40,7 +41,8 @@ namespace MinecraftService.Shared.Utilities {
                 MinecraftPackParser resourceParser = new();
                 MinecraftPackParser behaviorParser = new();
                 resourceParser.ParseDirectory(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName));
-                behaviorParser.ParseDirectory(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName));
+                    resourceParser.ParseDirectory(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName), 0);
+                    behaviorParser.ParseDirectory(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName), 0);
                 List<WorldPackEntryJsonModel> resourceJsonList = JsonConvert.DeserializeObject<List<WorldPackEntryJsonModel>>(File.ReadAllText(GetServerFilePath(ServerFileNameKeys.WorldResourcePacks, serverPath, levelName)));
                 List<WorldPackEntryJsonModel> behaviorJsonList = JsonConvert.DeserializeObject<List<WorldPackEntryJsonModel>>(File.ReadAllText(GetServerFilePath(ServerFileNameKeys.WorldBehaviorPacks, serverPath, levelName)));
                 foreach (WorldPackEntryJsonModel entry in resourceJsonList) {
@@ -216,8 +218,9 @@ namespace MinecraftService.Shared.Utilities {
 
         public static void CleanBedrockDirectory(IServerConfiguration server) {
             DirectoryInfo bedrockDir = new DirectoryInfo(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString());
-            FileUtilities.DeleteFilesFromDirectory($@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\resource_packs", true);
-            FileUtilities.DeleteFilesFromDirectory($@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\behavior_packs", true);
+            Progress<ProgressModel> nullProgress = new();
+            FileUtilities.DeleteFilesFromDirectory($@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\resource_packs", true, nullProgress);
+            FileUtilities.DeleteFilesFromDirectory($@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\behavior_packs", true, nullProgress);
             foreach (FileInfo file in bedrockDir.EnumerateFiles()) {
                 if (file.Extension.Equals(".exe") || file.Extension.Equals(".dll")) {
                     File.Delete(file.FullName);
@@ -229,10 +232,11 @@ namespace MinecraftService.Shared.Utilities {
         }
 
         public static void CleanJavaServerDirectory(IServerConfiguration server) {
+            Progress<ProgressModel> nullProgress = new();
             DirectoryInfo workingDir = new DirectoryInfo(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString());
             foreach (DirectoryInfo dir in workingDir.EnumerateDirectories()) {
                 if (dir.Name != "worlds") {
-                    FileUtilities.DeleteFilesFromDirectory(dir.FullName, true);
+                    FileUtilities.DeleteFilesFromDirectory(dir.FullName, true, nullProgress);
                 }
             }
             foreach (FileInfo file in workingDir.EnumerateFiles()) {

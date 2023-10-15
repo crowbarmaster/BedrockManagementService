@@ -33,7 +33,11 @@ namespace MinecraftService.Shared.Classes {
 
         public bool ExtractCoreFiles() {
             try {
-                FileUtilities.ClearTempDir().Wait();
+                FileUtilities.ClearTempDir(new Progress<ProgressModel>((p) => {
+                    if (_loggingEnabled) {
+                        _logger.AppendLine($"Cleaning temp directory. {p.Progress}% completed...");
+                    }
+                }));
                 Directory.CreateDirectory(_workingDirectory);
                 string zipPath = GetServiceFilePath(MmsFileNameKeys.BdsUpdatePackage_Ver, _packageVersion);
                 if (!File.Exists(zipPath)) {

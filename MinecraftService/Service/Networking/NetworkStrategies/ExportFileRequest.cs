@@ -10,9 +10,11 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class ExportFileRequest : IMessageParser {
         private readonly IServiceConfiguration _configuration;
         private readonly IConfigurator _configurator;
-        public ExportFileRequest(IConfigurator configurator, IServiceConfiguration configuration) {
+        private readonly IServerLogger _logger;
+        public ExportFileRequest(IConfigurator configurator, IServiceConfiguration configuration, IServerLogger logger) {
             _configuration = configuration;
             _configurator = configurator;
+            _logger = logger;
         }
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
@@ -54,7 +56,8 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
                 }
             }
             if (exportFileInfo.PackageFlags >= PackageFlags.WorldPacks) {
-                FileUtilities.CreatePackBackupFiles(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString(), server.GetProp(MmsDependServerPropKeys.LevelName).ToString(), packageFile);
+                Progress<ProgressModel> progress = new Progress<ProgressModel>((p) => _logger.AppendLine($"Creating pack archive. {p.Progress}% completed..."));
+                FileUtilities.CreatePackBackupFiles(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString(), server.GetProp(MmsDependServerPropKeys.LevelName).ToString(), packageFile, progress);
             }
             if (exportFileInfo.PackageFlags >= PackageFlags.PlayerDatabase) {
                 if (File.Exists(GetServiceFilePath(MmsFileNameKeys.ServerPlayerTelem_Name, server.GetServerName()))) {

@@ -54,9 +54,6 @@ namespace MinecraftService.Service.Server {
                 using ZipArchive backupZip = new(fs, ZipArchiveMode.Create);
                 AppendBackupToArchive(serverPath, levelDir, backupZip).Wait();
                 _server.WriteToStandardIn("save-on");
-                if (_autoBackupsContainPacks) {
-                    FileUtilities.AppendServerPacksToArchive(serverPath, backupZip, levelDir);
-                }
                 _serviceConfiguration.CalculateTotalBackupsAllServers().Wait();
                 return true;
 
@@ -69,10 +66,12 @@ namespace MinecraftService.Service.Server {
         }
 
         public override void PerformRollback(string zipFilePath) {
+            string currentMessage = "Removing server files.";
+            Progress<ProgressModel> progress = new Progress<ProgressModel>((p) => _logger.AppendLine($"{currentMessage} {string.Format("{0:N2}", p.Progress)}% completed."));
             string serverPath = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString();
             DirectoryInfo worldsDir = new($@"{serverPath}\{_serverConfiguration.GetProp(MmsDependServerPropKeys.LevelName)}");
             FileInfo backupZipFileInfo = new($@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.BackupPath)}\{_serverConfiguration.GetServerName()}\{zipFilePath}");
-            FileUtilities.DeleteFilesFromDirectory(worldsDir, true).Wait();
+            FileUtilities.DeleteFilesFromDirectory(worldsDir, true, progress).Wait();
             _logger.AppendLine($"Deleted world folder \"{worldsDir.Name}\"");
             ZipFile.ExtractToDirectory(backupZipFileInfo.FullName, serverPath);
             _logger.AppendLine($"Copied files from backup \"{backupZipFileInfo.Name}\" to server worlds directory.");

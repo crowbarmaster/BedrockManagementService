@@ -25,10 +25,14 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
             string levelName = server.GetProp(MmsDependServerPropKeys.LevelName).StringValue;
             string pathToWorldFolder = $@"{serverPath}\worlds\{levelName}";
             List<MinecraftPackContainer> combinedList = new List<MinecraftPackContainer>();
-            MinecraftPackParser resourceParser = new(_logger);
-            MinecraftPackParser behaviorParser = new(_logger);
-            resourceParser.ParseDirectory(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName));
-            behaviorParser.ParseDirectory(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName));
+            IProgress<ProgressModel> progress = new Progress<ProgressModel>((progress) => {
+                string percent = string.Format("{0:N2}", progress.Progress);
+                _logger.AppendLine($"{progress.Message} {percent}%");
+            });
+            MinecraftPackParser resourceParser = new(_logger, progress);
+            MinecraftPackParser behaviorParser = new(_logger, progress);
+            resourceParser.ParseDirectory(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName), 0);
+            behaviorParser.ParseDirectory(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName), 0);
             MinecraftFileUtilities.ValidateFixWorldPackFiles(serverPath, levelName).Wait();
             combinedList.AddRange(resourceParser.FoundPacks);
             combinedList.AddRange(behaviorParser.FoundPacks);

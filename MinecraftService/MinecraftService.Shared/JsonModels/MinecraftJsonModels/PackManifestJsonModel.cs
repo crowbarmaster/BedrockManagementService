@@ -42,7 +42,8 @@ namespace MinecraftService.Shared.JsonModels.MinecraftJsonModels {
 
         public class Dependency {
             public string uuid { get; set; }
-            public List<int> version { get; set; }
+            public object version { get; set; }
+            public string module_name { get; set; }
         }
     }
 }

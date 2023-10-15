@@ -1,4 +1,5 @@
-﻿using MinecraftService.Shared.FileModels.MinecraftFileModels;
+﻿using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.FileModels.MinecraftFileModels;
 using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
 using MinecraftService.Shared.PackParser;
 using System;
@@ -6,7 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static MinecraftService.Shared.Classes.SharedStringBase;
 
@@ -52,14 +52,23 @@ namespace MinecraftService.Shared.Utilities {
                 .ForEach(x => x.CopyTo(Path.Combine(target, x.Name), true));
         }
 
-        public static Task DeleteFilesFromDirectory(DirectoryInfo source, bool removeSourceFolder) {
+        public static Task DeleteFilesFromDirectory(DirectoryInfo source, bool removeSourceFolder, IProgress<ProgressModel> progress) {
             return Task.Run(() => {
                 if(!source.Exists) {
                     return;
                 }
+                int curFileCount = 0;
+                double prog = 0.0;
                 var files = source.EnumerateFiles("*", SearchOption.AllDirectories)
                     .ToList();
-                files.ForEach(x => x.Delete());
+                int reportAt = files.Count() / 6;
+                files.ForEach(x => {
+                    curFileCount++;
+                    if (curFileCount % reportAt == 0) {
+                        progress.Report(new("Deleting files...", Math.Round(prog += 100.0 / 6.0)));
+                    }
+                    x.Delete();
+                });
                 var dirs = source.EnumerateDirectories("*", SearchOption.AllDirectories)
                     .Reverse()
                     .ToList();
@@ -69,33 +78,32 @@ namespace MinecraftService.Shared.Utilities {
             });
         }
 
-
-        public static void AppendServerPacksToArchive(string serverPath, ZipArchive backupZip, DirectoryInfo levelDirInfo) {
+        public static void AppendServerPacksToArchive(string serverPath, ZipArchive backupZip, DirectoryInfo levelDirInfo, IProgress<ProgressModel> progress) {
             string levelName = levelDirInfo.Name;
-            CreatePackBackupFiles(serverPath, levelName, backupZip);
+            CreatePackBackupFiles(serverPath, levelName, backupZip, progress);
             if (Directory.Exists(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName))) {
-                ClearTempDir().Wait();
-                ZipFile.CreateFromDirectory(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName), $@"{Path.GetTempPath()}\MMSTemp\PackTemp\resource_packs.zip");
+                ClearTempDir(progress).Wait();
+                ZipUtilities.CreateFromDirectory(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName), $@"{Path.GetTempPath()}\MMSTemp\PackTemp\resource_packs.zip", progress);
                 backupZip.CreateEntryFromFile($@"{Path.GetTempPath()}\MMSTemp\PackTemp\resource_packs.zip", "resource_packs.zip");
             }
             if (Directory.Exists(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName))) {
-                ClearTempDir().Wait();
-                ZipFile.CreateFromDirectory(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName), $@"{Path.GetTempPath()}\MMSTemp\PackTemp\behavior_packs.zip");
+                ClearTempDir(progress).Wait();
+                ZipUtilities.CreateFromDirectory(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName), $@"{Path.GetTempPath()}\MMSTemp\PackTemp\behavior_packs.zip", progress);
                 backupZip.CreateEntryFromFile($@"{Path.GetTempPath()}\MMSTemp\PackTemp\behavior_packs.zip", "behavior_packs.zip");
             }
         }
 
-        public static void CreatePackBackupFiles(string serverPath, string levelName, ZipArchive destinationArchive) {
+        public static void CreatePackBackupFiles(string serverPath, string levelName, ZipArchive destinationArchive, IProgress<ProgressModel> progress) {
             string resouceFolderPath = GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName);
             string behaviorFolderPath = GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName);
             string behaviorFilePath = GetServerFilePath(ServerFileNameKeys.WorldBehaviorPacks, serverPath, levelName);
             string resoruceFilePath = GetServerFilePath(ServerFileNameKeys.WorldResourcePacks, serverPath, levelName);
             MinecraftPackParser packParser = new();
-            packParser.ParseDirectory(resouceFolderPath);
-            packParser.ParseDirectory(behaviorFolderPath);
+            packParser.ParseDirectory(resouceFolderPath, 0);
+            packParser.ParseDirectory(behaviorFolderPath, 0);
             WorldPackFileModel worldPacks = new(resoruceFilePath);
             worldPacks.Contents.AddRange(new WorldPackFileModel(behaviorFilePath).Contents);
-            ClearTempDir().Wait();
+            ClearTempDir(progress).Wait();
             string packBackupFolderPath = $@"{Path.GetTempPath()}\MMSTemp\InstalledPacks";
             Directory.CreateDirectory(packBackupFolderPath);
             if (worldPacks.Contents.Count > 0) {
@@ -111,14 +119,13 @@ namespace MinecraftService.Shared.Utilities {
             }
         }
 
-        public static void DeleteFilesFromDirectory(string source, bool removeSourceFolder) => DeleteFilesFromDirectory(new DirectoryInfo(source), removeSourceFolder);
+        public static void DeleteFilesFromDirectory(string source, bool removeSourceFolder, IProgress<ProgressModel> progress) => DeleteFilesFromDirectory(new DirectoryInfo(source), removeSourceFolder, progress);
 
-        public static Task ClearTempDir() {
+        public static Task ClearTempDir(IProgress<ProgressModel> progress) {
             return Task.Run(() => {
                 DirectoryInfo tempDirectory = new($"{Path.GetTempPath()}\\MMSTemp");
-                if (!tempDirectory.Exists)
-                    tempDirectory.Create();
-                DeleteFilesFromDirectory(tempDirectory, false).Wait();
+                CreateInexistantDirectory(tempDirectory.FullName);
+                DeleteFilesFromDirectory(tempDirectory, false, progress).Wait();
             });
         }
 
