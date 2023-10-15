@@ -38,6 +38,8 @@ namespace MinecraftService.Shared.JsonModels.MinecraftJsonModels {
             public string type { get; set; }
             public string uuid { get; set; }
             public List<int> version { get; set; }
+            public string language { get; set; }
+            public string entry { get; set; }
         }
 
         public class Dependency {
