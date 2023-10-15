@@ -242,7 +242,7 @@ namespace MinecraftService.Service.Management {
             });
         }
 
-        public void RemoveServerConfigs(IServerConfiguration serverInfo, NetworkMessageFlags flag) {
+        public Task RemoveServerConfigs(IServerConfiguration serverInfo, NetworkMessageFlags flag) => Task.Run(() => {
             try {
                 _logger.AppendLine("Beginning removal of selected options. Please wait!");
                 Task.Delay(3000).Wait();
@@ -290,7 +290,7 @@ namespace MinecraftService.Service.Management {
                 }
                 _serviceConfiguration.RemoveServerInfo(serverInfo);
             } catch { }
-        }
+        });
 
         public void DeleteBackupForServer(byte serverIndex, string backupName) {
             string serverName = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetServerName();
@@ -353,7 +353,10 @@ namespace MinecraftService.Service.Management {
             try {
                 string serverPath = serverInfo.GetSettingsProp(ServerPropertyKeys.ServerPath).StringValue;
                 DirectoryInfo serverDirInfo = new DirectoryInfo(serverPath);
-                FileUtilities.DeleteFilesFromDirectory(serverDirInfo, true).Wait();
+                Progress<ProgressModel> progress = new Progress<ProgressModel>((p) => {
+                    _logger.AppendLine($"Deleting server files for server {serverInfo.GetServerName()}. {p.Progress}%");
+                });
+                FileUtilities.DeleteFilesFromDirectory(serverDirInfo, true, progress).Wait();
                 return true;
             } catch (Exception e) {
                 _logger.AppendLine($"Error deleting server files: {e.Message}");

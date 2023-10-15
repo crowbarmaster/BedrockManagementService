@@ -12,7 +12,7 @@ namespace MinecraftService.Shared.Interfaces {
         void SaveServerConfiguration(IServerConfiguration server);
         void WriteJSONFiles(IServerConfiguration server);
         Task<List<BackupInfoModel>> EnumerateBackupsForServer(byte serverIndex);
-        void RemoveServerConfigs(IServerConfiguration serverInfo, NetworkMessageFlags flag);
+        Task RemoveServerConfigs(IServerConfiguration serverInfo, NetworkMessageFlags flag);
         void DeleteBackupForServer(byte serverIndex, string backupName);
     }
 }
