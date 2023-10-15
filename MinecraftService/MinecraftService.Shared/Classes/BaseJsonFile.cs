@@ -12,7 +12,7 @@ namespace MinecraftService.Shared.Classes {
 
         public T LoadJsonFile<T>() {
             if (!File.Exists(FilePath)) {
-                return default(T);
+                return default;
             }
             return JsonConvert.DeserializeObject<T>(File.ReadAllText(FilePath));
         }
