@@ -40,21 +40,22 @@ namespace MinecraftService.Shared.Utilities {
             return Task.Run(() => {
                 MinecraftPackParser resourceParser = new();
                 MinecraftPackParser behaviorParser = new();
-                resourceParser.ParseDirectory(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName));
+                try {
                     resourceParser.ParseDirectory(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName), 0);
                     behaviorParser.ParseDirectory(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName), 0);
-                List<WorldPackEntryJsonModel> resourceJsonList = JsonConvert.DeserializeObject<List<WorldPackEntryJsonModel>>(File.ReadAllText(GetServerFilePath(ServerFileNameKeys.WorldResourcePacks, serverPath, levelName)));
-                List<WorldPackEntryJsonModel> behaviorJsonList = JsonConvert.DeserializeObject<List<WorldPackEntryJsonModel>>(File.ReadAllText(GetServerFilePath(ServerFileNameKeys.WorldBehaviorPacks, serverPath, levelName)));
-                foreach (WorldPackEntryJsonModel entry in resourceJsonList) {
-                    if (resourceParser.FoundPacks.Count(x => x.JsonManifest.header.uuid == entry.pack_id) == 0) {
-                        RemoveEntryFromWorldPackFile(GetServerFilePath(ServerFileNameKeys.WorldResourcePacks, serverPath, levelName), entry).Wait();
+                    List<WorldPackEntryJsonModel> resourceJsonList = JsonConvert.DeserializeObject<List<WorldPackEntryJsonModel>>(File.ReadAllText(GetServerFilePath(ServerFileNameKeys.WorldResourcePacks, serverPath, levelName)));
+                    List<WorldPackEntryJsonModel> behaviorJsonList = JsonConvert.DeserializeObject<List<WorldPackEntryJsonModel>>(File.ReadAllText(GetServerFilePath(ServerFileNameKeys.WorldBehaviorPacks, serverPath, levelName)));
+                    foreach (WorldPackEntryJsonModel entry in resourceJsonList) {
+                        if (resourceParser.FoundPacks.Count(x => x.JsonManifest.header.uuid == entry.pack_id) == 0) {
+                            RemoveEntryFromWorldPackFile(GetServerFilePath(ServerFileNameKeys.WorldResourcePacks, serverPath, levelName), entry).Wait();
+                        }
                     }
-                }
-                foreach (WorldPackEntryJsonModel entry in behaviorJsonList) {
-                    if (resourceParser.FoundPacks.Count(x => x.JsonManifest.header.uuid == entry.pack_id) == 0) {
-                        RemoveEntryFromWorldPackFile(GetServerFilePath(ServerFileNameKeys.WorldBehaviorPacks, serverPath, levelName), entry).Wait();
+                    foreach (WorldPackEntryJsonModel entry in behaviorJsonList) {
+                        if (resourceParser.FoundPacks.Count(x => x.JsonManifest.header.uuid == entry.pack_id) == 0) {
+                            RemoveEntryFromWorldPackFile(GetServerFilePath(ServerFileNameKeys.WorldBehaviorPacks, serverPath, levelName), entry).Wait();
+                        }
                     }
-                }
+                } catch { }
             });
         }
 
