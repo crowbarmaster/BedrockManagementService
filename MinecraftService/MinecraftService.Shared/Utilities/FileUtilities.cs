@@ -146,67 +146,10 @@ namespace MinecraftService.Shared.Utilities {
 
         public static void WriteStringArrayToFile(string path, string[] content) => File.WriteAllLines(path, content);
 
-        private static int RoundOff(int i) {
-            return ((int)Math.Round(i / 10.0)) * 10;
-        }
-
         public static List<string> ReadLines(string path)
         {
             CreateInexistantFile(path);
             return File.ReadLines(path).ToList();
-        }
-      
-        public static Task ExtractZipToDirectory(string zipPath, string directory, IProgress<double> progress) => Task.Run(() => {
-            FileInfo fileInfo = new(zipPath);
-            using ZipArchive archive = ZipFile.OpenRead(zipPath);
-            Regex jdkName = new(@"jdk-17\.[0-9]+\.[0-9]+/?(.*)");
-            int fileCount = archive.Entries.Count;
-            for (int i = 0; i < fileCount; i++) {
-                string fixedEntry = archive.Entries[i].FullName;
-                if (fixedEntry.StartsWith("LiteLoaderBDS/")) {
-                    fixedEntry = fixedEntry[14..];
-                }
-                if (jdkName.IsMatch(fixedEntry)) {
-                    Match match = jdkName.Match(fixedEntry);
-                    fixedEntry = match.Groups[1].Value;
-                }
-                if(string.IsNullOrEmpty(fixedEntry)) {
-                    continue;
-                }
-                string fixedPath = $@"{directory}\{fixedEntry.Replace('/', '\\')}";
-                if (i % (RoundOff(fileCount) / 6) == 0) {
-                    progress.Report(Math.Round(i / (double)fileCount, 2) * 100);
-                }
-                if (fixedPath.EndsWith("\\")) {
-                    if (!Directory.Exists(fixedPath)) {
-                        Directory.CreateDirectory(fixedPath);
-                    }
-                } else {
-                    Task.Run(() => {
-                        archive.Entries[i].ExtractToFile(fixedPath, true);
-                    }).Wait();
-                }
-            }
-        });
-
-        public static Task AppendFileToArchive(string targetFile, string entryName, ZipArchive zipArchive) {
-            return Task.Run(() => {
-                if (string.IsNullOrEmpty(targetFile)) {
-                    return;
-                }
-                if(!File.Exists(targetFile)) {
-                    return;
-                }
-                if(zipArchive == null) {
-                    return;
-                }
-                using (FileStream fs = File.Open(targetFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
-                    ZipArchiveEntry newZippedFile = zipArchive.CreateEntry(entryName, CompressionLevel.Optimal);
-                    using Stream zipStream = newZippedFile.Open();
-                    fs.CopyTo(zipStream);
-                    zipStream.Close();
-                }
-            });
         }
     }
 }
