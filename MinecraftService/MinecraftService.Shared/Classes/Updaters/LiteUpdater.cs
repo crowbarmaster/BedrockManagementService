@@ -43,15 +43,25 @@ namespace MinecraftService.Shared.Classes.Updaters {
         }
 
         public override Task CheckLatestVersion() => Task.Run(() => {
-            int retryCount = 0;
-            string content = string.Empty;
-            while (retryCount < 4 && content == string.Empty) {
+            int retryCount = 1;
+            string content = string.Empty; 
+            string versionManifestPath = GetServiceFilePath(MmsFileNameKeys.VersionManifest_Name, _serverArch.ToString());
+            while (content == string.Empty) {
+                try {
             content = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.LLReleasesJson]).Result;
-                retryCount++;
-            }
-            if (retryCount > 3) {
-                _logger.AppendLine("Error fetching content from URL. Check connection and try again!");
-                return;
+                } catch {
+                    if (retryCount > 2) {
+                        if (File.Exists(versionManifestPath)) {
+                            _logger.AppendLine($"Attempt to fetch {_serverArch} version manifest failed. Using previously stored copy!");
+                            content = File.ReadAllText(versionManifestPath);
+                            break;
+                        }
+                        _logger.AppendLine("Error fetching content from URL. Check connection and try again!");
+                        return;
+                    }
+                    _logger.AppendLine($"Attempt to fetch {_serverArch} version manifest failed... retry {retryCount} of 2");
+                    retryCount++;
+                }
             }
             if (content != null) {
                 List<LiteLoaderVersionManifest> manifestList = JsonSerializer.Deserialize<List<LiteLoaderVersionManifest>>(content);
@@ -74,6 +84,7 @@ namespace MinecraftService.Shared.Classes.Updaters {
                 if (verDetails.hasModule && !File.Exists(GetServiceFilePath(MmsFileNameKeys.LLModUpdatePackage_Ver, latestLLVersion.Version))) {
                     FetchBuild(latestLLVersion.Version).Wait();
                 }
+                File.WriteAllText(versionManifestPath, content);
                 _serviceConfiguration.SetLatestVersion(_serverArch, latestLLVersion.Version);
                 _serviceConfiguration.SetServerDefaultPropList(_serverArch, MinecraftFileUtilities.GetDefaultPropListFromFile(GetServiceFilePath(MmsFileNameKeys.BedrockStockProps_Ver, latestLLVersion.BDSVersion)));
             }
@@ -129,7 +140,23 @@ namespace MinecraftService.Shared.Classes.Updaters {
 
         public static Task<LiteLoaderVersionManifest> GetLiteLoaderVersionManifest(string version) {
             return Task.Run(() => {
-                string result = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.LLReleasesJson]).Result;
+                int retryCount = 1;
+                string result = string.Empty;
+                string versionManifestPath = GetServiceFilePath(MmsFileNameKeys.VersionManifest_Name, "LiteLoader");
+                while (result == string.Empty) {
+                    try {
+                        result = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.LLReleasesJson]).Result;
+                    } catch {
+                        if (retryCount > 2) {
+                            if (File.Exists(versionManifestPath)) {
+                                result = File.ReadAllText(versionManifestPath);
+                                break;
+                            }
+                            return null;
+                        }
+                        retryCount++;
+                    }
+                }
                 if (result != null) {
                     List<LiteLoaderVersionManifest> manifestList = JsonSerializer.Deserialize<List<LiteLoaderVersionManifest>>(result);
                     return manifestList.Where(x => x.Version == version).FirstOrDefault();
@@ -163,15 +190,15 @@ namespace MinecraftService.Shared.Classes.Updaters {
                             throw new FileNotFoundException($"Service could not locate file \"Update_{version}.zip\" and version was not found in LiteLoader manifest!");
                         }
                     }
-                    Progress<double> progress = new(percent => {
-                        _logger.AppendLine($"Extracting LiteLoader files for server {_serverConfiguration.GetServerName()}, {(int)percent}% completed...");
+                    Progress<ProgressModel> progress = new(percent => {
+                        _logger.AppendLine($"Extracting LiteLoader files for server {_serverConfiguration.GetServerName()}, {(int)percent.Progress}% completed...");
                     });
-                    FileUtilities.ExtractZipToDirectory(GetServiceFilePath(MmsFileNameKeys.LLUpdatePackage_Ver, liteVersion), GetServerDirectory(ServerDirectoryKeys.ServerRoot, _serverConfiguration), progress).Wait();
+                    ZipUtilities.ExtractToDirectory(GetServiceFilePath(MmsFileNameKeys.LLUpdatePackage_Ver, liteVersion), GetServerDirectory(ServerDirectoryKeys.ServerRoot, _serverConfiguration), progress).Wait();
                     if (File.Exists(GetServiceFilePath(MmsFileNameKeys.LLModUpdatePackage_Ver, liteVersion))) {
                         progress = new(percent => {
-                            _logger.AppendLine($"Extracting LiteLoader Module files for server {_serverConfiguration.GetServerName()}, {(int)percent}% completed...");
+                            _logger.AppendLine($"Extracting LiteLoader Module files for server {_serverConfiguration.GetServerName()}, {(int)percent.Progress}% completed...");
                         });
-                        FileUtilities.ExtractZipToDirectory(GetServiceFilePath(MmsFileNameKeys.LLModUpdatePackage_Ver, liteVersion), GetServerDirectory(ServerDirectoryKeys.ServerRoot, _serverConfiguration) + "\\plugins", progress).Wait();
+                        ZipUtilities.ExtractToDirectory(GetServiceFilePath(MmsFileNameKeys.LLModUpdatePackage_Ver, liteVersion), GetServerDirectory(ServerDirectoryKeys.ServerRoot, _serverConfiguration) + "\\plugins", progress).Wait();
                     }
                     LiteLoaderPECore.BuildLLExe(_serverConfiguration);
                     MinecraftFileUtilities.CreateDefaultLoaderConfigFile(_serverConfiguration);

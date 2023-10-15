@@ -45,15 +45,25 @@ namespace MinecraftService.Shared.Classes.Updaters {
         public virtual Task CheckLatestVersion() {
             return Task.Run(() => {
                 _logger.AppendLine("Checking latest BDS Version...");
-                int retryCount = 0;
+                int retryCount = 1;
+                string versionManifestPath = GetServiceFilePath(MmsFileNameKeys.VersionManifest_Name, _serverArch.ToString());
                 string content = string.Empty;
-                while (retryCount < 4 && content == string.Empty) {
-                    content = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.BdsVersionJson]).Result;
-                    retryCount++;
-                }
-                if (retryCount > 3) {
-                    _logger.AppendLine("Error fetching content from URL. Check connection and try again!");
-                    return;
+                while (content == string.Empty) {
+                    try { 
+                        content = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.BdsVersionJson]).Result;
+                    } catch {
+                        if (retryCount > 2) {
+                            if(File.Exists(versionManifestPath)) {
+                                _logger.AppendLine($"Attempt to fetch {_serverArch} version manifest failed. Using previously stored copy!");
+                                content = File.ReadAllText(versionManifestPath);
+                                break;
+                            }
+                            _logger.AppendLine("Error fetching content from URL. Check connection and try again!");
+                            return;
+                        }
+                        _logger.AppendLine($"Attempt to fetch {_serverArch} version manifest failed... retry {retryCount} of 2");
+                        retryCount++;
+                    }
                 }
                 try {
                     List<BedrockVersionHistoryJson> versionList = JsonSerializer.Deserialize<List<BedrockVersionHistoryJson>>(content);
@@ -67,6 +77,7 @@ namespace MinecraftService.Shared.Classes.Updaters {
                         FetchBuild(fetchedVersion).Wait();
                         ProcessBdsPackage(fetchedVersion).Wait();
                     }
+                    File.WriteAllText(GetServiceFilePath(MmsFileNameKeys.VersionManifest_Name, _serverArch.ToString()), content);
                     File.WriteAllText(GetServiceFilePath(MmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[_serverArch]), fetchedVersion);
                     _serviceConfiguration.SetLatestVersion(_serverArch, fetchedVersion);
 
@@ -131,10 +142,10 @@ namespace MinecraftService.Shared.Classes.Updaters {
                             throw new FileNotFoundException($"Service could not locate file \"Update_{version}.zip\" and version was not found in BDS manifest!");
                         }
                     }
-                    Progress<double> progress = new(percent => {
-                        _logger.AppendLine($"Extracting Bedrock files for server {_serverConfiguration.GetServerName()}, {percent}% completed...");
+                    Progress<ProgressModel> progress = new(percent => {
+                        _logger.AppendLine($"Extracting Bedrock files for server {_serverConfiguration.GetServerName()}, {percent.Progress}% completed...");
                     });
-                    FileUtilities.ExtractZipToDirectory(filePath, _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString(), progress).Wait();
+                    ZipUtilities.ExtractToDirectory(filePath, _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString(), progress).Wait();
 
                     File.WriteAllText(GetServerFilePath(ServerFileNameKeys.DeployedINI, _serverConfiguration), version);
                     if (_serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()) {

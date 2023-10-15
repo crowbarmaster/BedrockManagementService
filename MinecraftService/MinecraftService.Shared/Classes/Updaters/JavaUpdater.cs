@@ -34,10 +34,10 @@ namespace MinecraftService.Shared.Classes.Updaters {
         public void Initialize() {
             if (!File.Exists(GetServiceFilePath(MmsFileNameKeys.Jdk17JavaVanillaExe))) {
                 if (HTTPHandler.RetrieveFileFromUrl(MmsUrlStrings[MmsUrlKeys.Jdk17DownloadLink], "Jdk.zip").Result) {
-                    Progress<double> progress = new(percent => {
-                        _logger.AppendLine($"Extracting JDK 17 for Java support, {percent}% completed...");
+                    Progress<ProgressModel> progress = new(percent => {
+                        _logger.AppendLine($"Extracting JDK 17 for Java support, {percent.Progress}% completed...");
                     });
-                    FileUtilities.ExtractZipToDirectory("Jdk.zip", GetServiceDirectory(ServiceDirectoryKeys.Jdk17Path), progress).Wait();
+                    ZipUtilities.ExtractToDirectory("Jdk.zip", GetServiceDirectory(ServiceDirectoryKeys.Jdk17Path), progress).Wait();
                     File.Copy(GetServiceFilePath(MmsFileNameKeys.Jdk17JavaVanillaExe), GetServiceFilePath(MmsFileNameKeys.Jdk17JavaMmsExe));
                     File.Delete("Jdk.zip");
                 }
@@ -57,28 +57,81 @@ namespace MinecraftService.Shared.Classes.Updaters {
         public virtual Task CheckLatestVersion() {
             return Task.Run(() => {
                 _logger.AppendLine("Checking latest Java Release version...");
-                int retryCount = 0;
+                int retryCount = 1;
                 string content = string.Empty;
-                while (retryCount < 4 && content == string.Empty) {
-                    content = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.JdsVersionJson]).Result;
-                    retryCount++;
-                }
-                if(retryCount > 3) {
-                    _logger.AppendLine("Error fetching content from URL. Check connection and try again!");
-                    return;
+                string versionManifestPath = GetServiceFilePath(MmsFileNameKeys.VersionManifest_Name, _serverArch.ToString());
+                string javaReleaseManifestPath = GetServiceFilePath(MmsFileNameKeys.JavaLatestReleaseManifest, _serverArch.ToString());
+                string javaBetaManifestPath = GetServiceFilePath(MmsFileNameKeys.JavaLatestBetaManifest, _serverArch.ToString());
+                while (content == string.Empty) {
+                    try {
+                        content = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.JdsVersionJson]).Result;
+                        File.WriteAllText(GetServiceFilePath(MmsFileNameKeys.VersionManifest_Name, _serverArch.ToString()), content);
+                    } catch {
+                        if (retryCount > 2) {
+                            if (File.Exists(versionManifestPath)) {
+                                _logger.AppendLine($"Attempt to fetch {_serverArch} version manifest failed. Using previously stored copy!");
+                                content = File.ReadAllText(versionManifestPath);
+                                break;
+                            }
+                            _logger.AppendLine("Error fetching content from URL. Check connection and try again!");
+                            return;
+                        }
+                        _logger.AppendLine($"Attempt to fetch {_serverArch} version manifest failed... retry {retryCount} of 2");
+                        retryCount++;
+                    }
                 }
                 JavaVersionHistoryModel versionList = JsonConvert.DeserializeObject<JavaVersionHistoryModel>(content);
                 JavaVersionDetailsModel releaseDetails = new JavaVersionDetailsModel();
                 JavaVersionDetailsModel betaDetails = new JavaVersionDetailsModel();
                 JavaVersionManifest latestRelease = versionList.Versions.FirstOrDefault(x => x.Id == versionList.Latest.Release);
                 JavaVersionManifest latestBeta = versionList.Versions.FirstOrDefault(x => x.Id == versionList.Latest.Snapshot);
+                content = string.Empty;
+                retryCount = 1;
                 if (latestRelease != null) {
-                    content = HTTPHandler.FetchHTTPContent(latestRelease.Url).Result;
+                    while (content == string.Empty) {
+                        try {
+                            content = HTTPHandler.FetchHTTPContent(latestRelease.Url).Result;
+                            File.WriteAllText(javaReleaseManifestPath, content);
+                        } catch {
+                            if (retryCount > 2) {
+                                if (File.Exists(javaReleaseManifestPath)) {
+                                    _logger.AppendLine($"Attempt to fetch {_serverArch} java release manifest failed. Using previously stored copy!");
+                                    content = File.ReadAllText(javaReleaseManifestPath);
+                                    break;
+                                } else {
+                                    _logger.AppendLine("Error fetching content from URL. Check connection and try again!");
+                                    return;
+                                }
+                            }
+                            _logger.AppendLine($"Attempt to fetch {_serverArch} java release manifest failed... retry {retryCount} of 2");
+                            retryCount++;
+                        }
+                    }
                     releaseDetails = JsonConvert.DeserializeObject<JavaVersionDetailsModel>(content);
                 }
+                content = string.Empty;
+                retryCount = 1;
                 if (latestBeta != null) {
-                    content = HTTPHandler.FetchHTTPContent(latestBeta.Url).Result;
-                    betaDetails = JsonConvert.DeserializeObject<JavaVersionDetailsModel>(content);
+                    while (content == string.Empty) {
+                        try {
+                            content = HTTPHandler.FetchHTTPContent(latestBeta.Url).Result;
+                            File.WriteAllText(javaBetaManifestPath, content);
+                        } catch {
+                            if (retryCount > 2) {
+                                if (File.Exists(javaBetaManifestPath)) {
+                                    _logger.AppendLine($"Attempt to fetch {_serverArch} java beta manifest failed. Using previously stored copy!");
+                                    content = File.ReadAllText(javaBetaManifestPath);
+                                    break;
+                                } else {
+                                    _logger.AppendLine("Error fetching content from URL. Check connection and try again!");
+                                    return;
+                                }
+                            }
+                            _logger.AppendLine($"Attempt to fetch {_serverArch} java beta manifest failed... retry {retryCount} of 2");
+                            retryCount++;
+                        }
+                    }
+                    betaDetails = JsonConvert.DeserializeObject<JavaVersionDetailsModel>(content); 
                 }
                 if (releaseDetails == null) {
                     return;
@@ -96,7 +149,6 @@ namespace MinecraftService.Shared.Classes.Updaters {
                 ProcessJdsPackage(releaseDetails).Wait();
                 File.WriteAllText(GetServiceFilePath(MmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[_serverArch]), fetchedVersion);
                 _serviceConfiguration.SetLatestVersion(_serverArch, fetchedVersion);
-
                 _serviceConfiguration.SetServerDefaultPropList(_serverArch, MinecraftFileUtilities.GetDefaultPropListFromFile(GetServiceFilePath(MmsFileNameKeys.JavaStockProps_Ver, fetchedVersion)));
             });
         }
