@@ -86,7 +86,7 @@ namespace MinecraftService.Service.Server {
                     }
                     if ((fsi.Attributes & FileAttributes.Directory) != FileAttributes.Directory) {
                         string archivePath = fsi.FullName.Substring(serverPath.Length + 1).Replace('\\', '/');
-                        FileUtilities.AppendFileToArchive(fsi.FullName, archivePath, backupZip).Wait();
+                        ZipUtilities.AppendFile(fsi.FullName, archivePath, backupZip).Wait();
                     } else {
                         AppendBackupToArchive(serverPath, (DirectoryInfo)fsi, backupZip).Wait();
                     }
