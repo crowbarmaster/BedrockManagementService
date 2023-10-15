@@ -9,7 +9,7 @@ namespace MinecraftService.Shared.PackParser {
         public byte[] IconBytes;
 
         public override string ToString() {
-            return JsonManifest != null ? JsonManifest.header.name : "WorldPack";
+            return JsonManifest != null ? $"{JsonManifest.header.name} ({JsonManifest.modules[0].type})" : "WorldPack";
         }
 
         public string GetFixedManifestType() {
