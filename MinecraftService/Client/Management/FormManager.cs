@@ -22,6 +22,8 @@ namespace MinecraftService.Client.Management {
             Logger.AppendLine($"Bedrock Client version {Application.ProductVersion} has started.");
             Logger.AppendLine($"Working directory: {processInfo.GetDirectory()}");
             SharedStringBase.SetWorkingDirectory(processInfo);
+            client = new TCPClient(Logger);
+            main = new MainWindow(processInfo, Logger);
         }
 
         public static MainWindow MainWindow {
