@@ -53,7 +53,7 @@ namespace MinecraftService.Service.Management {
                 } else {
                     serverInfo = typeLookup.PrepareNewServerByArchName(archType[1], _processInfo, _logger, _serviceConfiguration);
                 }
-                if (serverInfo.InitializeDefaults()) {
+                 if (serverInfo.InitializeDefaults()) {
                     serverInfo.ProcessUserConfiguration(fileEntries);
                     serverInfo.UpdateServerProps(serverInfo.GetDeployedVersion() == "None" ? _serviceConfiguration.GetLatestVersion(serverInfo.GetServerArch()) : serverInfo.GetServerVersion());
                     _logger.AppendLine($"Loaded config for server {serverInfo.GetServerName()}.");
