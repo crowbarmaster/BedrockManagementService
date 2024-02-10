@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 namespace MinecraftService.Client.Forms {
-    partial class ClientProgressDialog {
+    partial class ProgressDialog {
         /// <summary>
         /// Required designer variable.
         /// </summary>

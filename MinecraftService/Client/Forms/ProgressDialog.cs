@@ -11,21 +11,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using MinecraftService.Client.Management;
 using MinecraftService.Shared.Classes;
 
 namespace MinecraftService.Client.Forms {
-    public partial class ClientProgressDialog : Form {
+    public partial class ProgressDialog : Form {
         private readonly IProgress<ProgressModel> _progress;
+        private Task _onCompletion;
         private System.Timers.Timer _closeTimer = new System.Timers.Timer(1500);
 
-        public ClientProgressDialog() {
+        public ProgressDialog(Task callbackAction) {
             InitializeComponent();
+            _onCompletion = callbackAction;
             progressBar.Minimum = 0;
             progressBar.Maximum = 100;
             _closeTimer.AutoReset = false;
-            _closeTimer.Elapsed += (s, e) => {
-                Invoke(Close);
-            };
             _progress = new Progress<ProgressModel>((currentProgress) => {
                 progressBar.Value = (int)currentProgress.Progress;
                 progressLabel.Text = $"{currentProgress.Message}";
@@ -41,8 +41,20 @@ namespace MinecraftService.Client.Forms {
             return _progress;
         }
 
-        public void EndProgress() {
+        public void EndProgress(Task closingActions) {
+            _closeTimer.Elapsed += (s, e) => {
+                if(closingActions != null && closingActions.Status == TaskStatus.Created) {
+                    closingActions.Start();
+                }
+                if (_onCompletion != null && _onCompletion.Status == TaskStatus.Created) {
+                   _onCompletion.Start();
+                }
+            };
             _closeTimer.Start();
+        }
+
+        public void SetCallback(Task action) {
+            _onCompletion = action;
         }
     }
 }
