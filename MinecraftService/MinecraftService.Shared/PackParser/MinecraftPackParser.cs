@@ -25,11 +25,10 @@ namespace MinecraftService.Shared.PackParser {
         public MinecraftPackParser(IServerLogger logger, IProgress<ProgressModel> progress, string extractDir = "") {
             _progress = progress;
             _serverLogger = logger;
-            PackExtractDirectory = extractDir != string.Empty ? extractDir : $"{Path.GetTempPath()}\\MMSTemp\\PackExtract";
+            PackExtractDirectory = extractDir != string.Empty ? extractDir : $"{Path.GetTempPath()}{FileUtilities.GetRandomPrefix()}MMSTemp\\PackExtract";
         }
 
         public Task ProcessServerData(byte[] fileContents, Action onCompletion) => Task.Run(() => {
-            FileUtilities.ClearTempDir(_progress).Wait();
             using (MemoryStream fileStream = new(fileContents, 5, fileContents.Length - 5)) {
                 ZipUtilities.ExtractToDirectory(fileStream, PackExtractDirectory, _progress).Wait();
             }
@@ -39,8 +38,6 @@ namespace MinecraftService.Shared.PackParser {
         
         public Task ProcessClientFiles(string[] files, Action onCompletion) => Task.Run(() => {
             isClient = true;
-            _progress.Report(new("Clean temp directory and extract packs...", 0));
-            FileUtilities.ClearTempDir(_progress).Wait();
             if (Directory.Exists($@"{PackExtractDirectory}\ZipTemp")) {
                 Directory.CreateDirectory($@"{PackExtractDirectory}\ZipTemp");
             }
