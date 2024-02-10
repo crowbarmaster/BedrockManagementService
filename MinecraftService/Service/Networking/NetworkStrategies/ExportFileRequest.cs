@@ -1,5 +1,6 @@
 ﻿
 using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
 using MinecraftService.Shared.SerializeModels;
 using Newtonsoft.Json;
 using System.IO.Compression;
@@ -20,30 +21,40 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
             string jsonString = Encoding.UTF8.GetString(data, 5, data.Length - 5);
             ExportImportFileModel exportFileInfo = JsonConvert.DeserializeObject<ExportImportFileModel>(jsonString);
+            if(exportFileInfo == null) {
+                return (null, 0, 0);
+            }
             using MemoryStream ms = new();
             using ZipArchive packageFile = new(ms, ZipArchiveMode.Create);
             byte[]? exportData = null;
-            if (serverIndex != 255 && exportFileInfo != null) {
+            if (serverIndex != 255) {
+                IServerConfiguration server = _configuration.GetServerInfoByIndex(serverIndex);
+                exportFileInfo.Filename = $"{exportFileInfo.FileType}-{server.GetServerName()}-{DateTime.Now:yyyyMMdd_hhmmssff}.zip";
                 if (exportFileInfo.FileType == FileTypeFlags.Backup) {
-                    IServerConfiguration server = _configuration.GetServerInfoByIndex(serverIndex);
                     string backupPath = $"{server.GetSettingsProp(ServerPropertyKeys.BackupPath)}\\{server.GetServerName()}\\{exportFileInfo.Filename}";
-                    exportFileInfo.Data = File.ReadAllBytes(backupPath);
+                    packageFile.CreateEntryFromFile(backupPath, exportFileInfo.Filename);
                 }
                 if (exportFileInfo.FileType == FileTypeFlags.ServerPackage) {
-                    IServerConfiguration server = _configuration.GetServerInfoByIndex(serverIndex);
-
                     PrepareServerFiles(serverIndex, exportFileInfo, server, packageFile);
-                    packageFile.Dispose();
-                    exportFileInfo.Data = ms.ToArray();
                 }
-                exportData = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(exportFileInfo));
+            } else {
+                exportFileInfo.Filename = $"{exportFileInfo.FileType}-Service-{DateTime.Now:yyyyMMdd_hhmmssff}.zip";
+                if (exportFileInfo.FileType == FileTypeFlags.ServicePackage) {
+                    packageFile.CreateEntryFromFile(GetServiceFilePath(MmsFileNameKeys.ServiceConfig), GetServiceFilePath(MmsFileNameKeys.ServiceConfig));
+                }
             }
-            if (exportFileInfo.FileType == FileTypeFlags.ServicePackage) {
-                packageFile.CreateEntryFromFile(GetServiceFilePath(MmsFileNameKeys.ServiceConfig), GetServiceFilePath(MmsFileNameKeys.ServiceConfig));
-            }
+            ZipArchiveEntry manifestEntry = packageFile.CreateEntry("manifest.json");
+            using Stream zipStream = manifestEntry.Open();
+            using MemoryStream byteStream = new(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new ExportImportManifestModel(exportFileInfo))));
+            byteStream.CopyTo(zipStream);
+            zipStream.Dispose();
+            packageFile.Dispose();
+            
+            
+            exportFileInfo.Data = ms.ToArray();
+            exportData = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(exportFileInfo));
             return (exportData, 0, NetworkMessageTypes.ExportFile);
         }
-
 
         private void PrepareServerFiles(byte serverIndex, ExportImportFileModel exportFileInfo, IServerConfiguration server, ZipArchive packageFile) {
             if (exportFileInfo.PackageFlags >= PackageFlags.ConfigFile) {
