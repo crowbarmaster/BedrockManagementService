@@ -33,7 +33,7 @@ namespace MinecraftService.Client.Forms {
             foreach (MinecraftPackContainer container in packList) {
                 serverListBox.Items.Add(container);
             }
-                }
+        }
 
         private void ListBox_SelectedIndexChanged(object sender, EventArgs e) {
             ListBox thisBox = (ListBox)sender;
@@ -80,23 +80,25 @@ namespace MinecraftService.Client.Forms {
 
         private void openFileBtn_Click(object sender, EventArgs e) {
             OpenFileDialog openFileDialog = new();
+            ProgressDialog progressDialog = new(null);
             openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             openFileDialog.Filter = "MC pack file (.MCWORLD, .MCPACK, .MCADDON, .Zip)|*.mcworld;*.mcpack;*.mcaddon;*.zip";
             openFileDialog.Title = "Select pack file(s)";
             openFileDialog.Multiselect = true;
             if (openFileDialog.ShowDialog() == DialogResult.OK) {
-                ClientProgressDialog progressDialog = new();
-                progressDialog.Show(this);
-                MinecraftPackParser parser = new(_logger, progressDialog.GetDialogProgress(), _packExtractDir.FullName);
-                parser.ProcessClientFiles(openFileDialog.FileNames, () => {
-                    Invoke(() => {
-                        parsedPacksListBox.Items.Clear();
-                        foreach (MinecraftPackContainer container in parser.FoundPacks) {
-                            parsedPacksListBox.Items.Add(container);
-                        }
-                        progressDialog.EndProgress();
+                progressDialog.SetCallback(Task.Run(() => {
+                    MinecraftPackParser parser = new(_logger, progressDialog.GetDialogProgress(), _packExtractDir.FullName);
+                    parser.ProcessClientFiles(openFileDialog.FileNames, () => {
+                        Invoke(() => {
+                            parsedPacksListBox.Items.Clear();
+                            foreach (MinecraftPackContainer container in parser.FoundPacks) {
+                                parsedPacksListBox.Items.Add(container);
+                            }
+                            progressDialog.EndProgress(null);
+                        });
                     });
-                });
+                }));
+                progressDialog.Show(this);
             }
         }
 
