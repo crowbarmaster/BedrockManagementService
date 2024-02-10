@@ -13,6 +13,12 @@ using static MinecraftService.Shared.Classes.SharedStringBase;
 namespace MinecraftService.Shared.Utilities {
     public class FileUtilities {
 
+        public static string GetRandomPrefix () {
+            Random random = new Random();
+            int rndNumber = random.Next(111111, 9999999);
+            return rndNumber.ToString();
+        }
+
         public static void CreateInexistantFile(string filePath) {
             FileInfo fileInfo = new FileInfo(filePath);
             if (!Directory.Exists(fileInfo.Directory.FullName)) {
@@ -25,9 +31,7 @@ namespace MinecraftService.Shared.Utilities {
 
         public static void CreateInexistantDirectory(string DirectoryPath) {
             try {
-                if (!Directory.Exists(DirectoryPath)) {
-                    Directory.CreateDirectory(DirectoryPath);
-                }
+                Directory.CreateDirectory(DirectoryPath);
             } catch {
                 return;
             }
@@ -61,7 +65,7 @@ namespace MinecraftService.Shared.Utilities {
                 double prog = 0.0;
                 var files = source.EnumerateFiles("*", SearchOption.AllDirectories)
                     .ToList();
-                int reportAt = files.Count() / 6;
+                double reportAt = files.Count() / 6.0;
                 files.ForEach(x => {
                     curFileCount++;
                     if (curFileCount % reportAt == 0) {
@@ -78,22 +82,22 @@ namespace MinecraftService.Shared.Utilities {
             });
         }
 
-        public static void AppendServerPacksToArchive(string serverPath, ZipArchive backupZip, DirectoryInfo levelDirInfo, IProgress<ProgressModel> progress) {
+        public static string AppendServerPacksToArchive(string serverPath, ZipArchive backupZip, DirectoryInfo levelDirInfo, IProgress<ProgressModel> progress) {
             string levelName = levelDirInfo.Name;
             CreatePackBackupFiles(serverPath, levelName, backupZip, progress);
+            string filePath = $@"{Path.GetTempPath()}{GetRandomPrefix()}MMSTemp\PackTemp";
             if (Directory.Exists(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName))) {
-                ClearTempDir(progress).Wait();
-                ZipUtilities.CreateFromDirectory(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName), $@"{Path.GetTempPath()}\MMSTemp\PackTemp\resource_packs.zip", progress);
-                backupZip.CreateEntryFromFile($@"{Path.GetTempPath()}\MMSTemp\PackTemp\resource_packs.zip", "resource_packs.zip");
+                ZipUtilities.CreateFromDirectory(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName), $@"{filePath}\resource_packs.zip", progress);
+                backupZip.CreateEntryFromFile($@"{filePath}\resource_packs.zip", "resource_packs.zip");
             }
             if (Directory.Exists(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName))) {
-                ClearTempDir(progress).Wait();
-                ZipUtilities.CreateFromDirectory(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName), $@"{Path.GetTempPath()}\MMSTemp\PackTemp\behavior_packs.zip", progress);
-                backupZip.CreateEntryFromFile($@"{Path.GetTempPath()}\MMSTemp\PackTemp\behavior_packs.zip", "behavior_packs.zip");
+                ZipUtilities.CreateFromDirectory(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName), $@"{filePath}\behavior_packs.zip", progress);
+                backupZip.CreateEntryFromFile($@"{filePath}\behavior_packs.zip", "behavior_packs.zip");
             }
+            return filePath;
         }
 
-        public static void CreatePackBackupFiles(string serverPath, string levelName, ZipArchive destinationArchive, IProgress<ProgressModel> progress) {
+        public static string CreatePackBackupFiles(string serverPath, string levelName, ZipArchive destinationArchive, IProgress<ProgressModel> progress) {
             string resouceFolderPath = GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName);
             string behaviorFolderPath = GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName);
             string behaviorFilePath = GetServerFilePath(ServerFileNameKeys.WorldBehaviorPacks, serverPath, levelName);
@@ -103,8 +107,7 @@ namespace MinecraftService.Shared.Utilities {
             packParser.ParseDirectory(behaviorFolderPath, 0);
             WorldPackFileModel worldPacks = new(resoruceFilePath);
             worldPacks.Contents.AddRange(new WorldPackFileModel(behaviorFilePath).Contents);
-            ClearTempDir(progress).Wait();
-            string packBackupFolderPath = $@"{Path.GetTempPath()}\MMSTemp\InstalledPacks";
+            string packBackupFolderPath = $@"{Path.GetTempPath()}{GetRandomPrefix()}MMSTemp\InstalledPacks";
             Directory.CreateDirectory(packBackupFolderPath);
             if (worldPacks.Contents.Count > 0) {
                 foreach (WorldPackEntryJsonModel model in worldPacks.Contents) {
@@ -117,17 +120,10 @@ namespace MinecraftService.Shared.Utilities {
                     destinationArchive.CreateEntryFromFile($@"{packBackupFolderPath}\{packLocation[packLocation.LastIndexOf('\\')..]}.zip", $@"InstalledPacks/{packLocation[packLocation.LastIndexOf('\\')..]}.zip");
                 }
             }
+            return packBackupFolderPath;
         }
 
         public static void DeleteFilesFromDirectory(string source, bool removeSourceFolder, IProgress<ProgressModel> progress) => DeleteFilesFromDirectory(new DirectoryInfo(source), removeSourceFolder, progress);
-
-        public static Task ClearTempDir(IProgress<ProgressModel> progress) {
-            return Task.Run(() => {
-                DirectoryInfo tempDirectory = new($"{Path.GetTempPath()}\\MMSTemp");
-                CreateInexistantDirectory(tempDirectory.FullName);
-                DeleteFilesFromDirectory(tempDirectory, false, progress).Wait();
-            });
-        }
 
         public static void DeleteFilelist(string[] fileList, string serverPath) {
             foreach (string file in fileList)
@@ -141,10 +137,6 @@ namespace MinecraftService.Shared.Utilities {
                 if (Directory.EnumerateFiles(dir, "*", SearchOption.AllDirectories).Count() == 0)
                     Directory.Delete(dir, true);
         }
-
-        public static void WriteStringToFile(string path, string content) => File.WriteAllText(path, content);
-
-        public static void WriteStringArrayToFile(string path, string[] content) => File.WriteAllLines(path, content);
 
         public static List<string> ReadLines(string path)
         {
