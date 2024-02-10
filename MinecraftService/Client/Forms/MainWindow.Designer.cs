@@ -435,13 +435,13 @@ namespace MinecraftService.Client.Forms {
             this.scrollLockChkBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.scrollLockChkBox.AutoSize = true;
             this.scrollLockChkBox.Enabled = false;
-            this.scrollLockChkBox.Location = new System.Drawing.Point(594, 391);
+            this.scrollLockChkBox.Location = new System.Drawing.Point(600, 400);
             this.scrollLockChkBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.scrollLockChkBox.Name = "scrollLockChkBox";
-            this.scrollLockChkBox.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.scrollLockChkBox.Size = new System.Drawing.Size(179, 19);
+            this.scrollLockChkBox.MinimumSize = new System.Drawing.Size(180, 22);
+            this.scrollLockChkBox.Size = new System.Drawing.Size(179, 21);
             this.scrollLockChkBox.TabIndex = 84;
-            this.scrollLockChkBox.Text = "Lock textbox scrollbar to end";
+            this.scrollLockChkBox.Text = "Lock textbox scrollbar to end   ";
             this.scrollLockChkBox.UseVisualStyleBackColor = true;
             scrollLockChkBox.CheckedChanged += scrollLockChkBox_CheckedChanged;
             // 

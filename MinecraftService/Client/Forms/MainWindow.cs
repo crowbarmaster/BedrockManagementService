@@ -40,8 +40,12 @@ namespace MinecraftService.Client.Forms
         private const int _connectTimeoutLimit = 3;
         private readonly IProcessInfo _processInfo;
         private readonly System.Timers.Timer _connectTimer = new(100.0);
+        private ProgressDialog _uiWaitDialog;
+        private System.Timers.Timer _uiWaitTimer = new(250);
         private readonly LogManager _logManager;
         private int _commandHistoryTabIndex;
+        private List<Shared.PackParser.MinecraftPackContainer> _incomingPacks;
+        private byte _manPacksServer;
 
         public MainWindow(IProcessInfo processInfo, IServerLogger logger) {
             _processInfo = processInfo;
@@ -54,6 +58,7 @@ namespace MinecraftService.Client.Forms
             InitForm();
             _connectTimer.Elapsed += ConnectTimer_Elapsed;
             Shown += MainWindow_Shown;
+            _uiWaitDialog = new(null);
         }
 
         private void MainWindow_Shown(object sender, EventArgs e) {
@@ -195,7 +200,7 @@ namespace MinecraftService.Client.Forms
             if (file.FileType == FileTypeFlags.ServerPackage) {
                 SaveFileDialog saveFileDialog = new() {
                     Filter = "Zip file|*.zip",
-                    FileName = $"{file.FileType}-{selectedServer.GetServerName()}-{DateTime.Now:yyyyMMdd_hhmmssff}.zip",
+                    FileName = file.Filename,
                     RestoreDirectory = true,
                     Title = "Save exported file..."
                 };
@@ -280,15 +285,6 @@ namespace MinecraftService.Client.Forms
                 ScrollToEnd(targetBox);
         }
 
-        public void RecievePlayerData(byte serverIndex, List<IPlayer> playerList) {
-            connectedHost.GetServerInfoByIndex(serverIndex).SetPlayerList(playerList);
-
-            PlayerManagerForm form = new(selectedServer);
-            if (form.ShowDialog() != DialogResult.OK) {
-                ServerBusy = false;
-            }
-        }
-
         private static void OnExit(object sender, EventArgs e) {
             FormManager.TCPClient.Dispose();
         }
@@ -353,18 +349,6 @@ namespace MinecraftService.Client.Forms
             FormManager.TCPClient.SendData(NetworkMessageTypes.VersionListRequest);
         }
 
-        public void VersionListArrived(Dictionary<SharedStringBase.MinecraftServerArch, SimpleVersionModel[]> verLists) {
-            using (_newServerForm = new(clientSideServiceConfiguration, connectedHost.GetServerList(), verLists)) {
-                if (_newServerForm.ShowDialog() == DialogResult.OK) {
-                    byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_newServerForm.SelectedPropModel, Formatting.Indented, GlobalJsonSerialierSettings));
-                    FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageTypes.AddNewServer);
-                    _newServerForm.Close();
-                    _newServerForm.Dispose();
-                }
-            }
-            ServerBusy = false;
-        }
-
         private void RemoveSrvBtn_Click(object sender, EventArgs e) {
             if (ServerSelectBox.Items.Count < 2) {
                 FormManager.Logger.AppendLine("Server removal failed! You must have at least one active server!");
@@ -412,7 +396,6 @@ namespace MinecraftService.Client.Forms
             } catch (Exception) { }
         }
 
-
         private void SendCmd_Click(object sender, EventArgs e) {
             // store the last command in the consoleHistory.txt file
             if (_localCommandHistory.Count == 0 || (_localCommandHistory.Last() != cmdTextBox.Text && !string.IsNullOrEmpty(cmdTextBox.Text))) {
@@ -423,7 +406,7 @@ namespace MinecraftService.Client.Forms
                 int linesToRemove = _localCommandHistory.Count - 500;
                 _localCommandHistory.RemoveRange(0, linesToRemove);
             }
-            FileUtilities.WriteStringArrayToFile(GetServiceFilePath(MmsFileNameKeys.ClientCommandHistory), _localCommandHistory.ToArray());
+            File.WriteAllLines(GetServiceFilePath(MmsFileNameKeys.ClientCommandHistory), _localCommandHistory.ToArray());
 
             // send the command to the server
             if (cmdTextBox.Text.Length > 0 && connectedHost != null) {
@@ -509,27 +492,36 @@ namespace MinecraftService.Client.Forms
 
         }
 
-        public void DisableUI(string message) {
-            ServerBusy = true;
-            ClientProgressDialog waitDialog = new();
-            System.Timers.Timer waitTimer = new(250);
-            waitTimer.AutoReset = false;
-            int waitCount = 0;
-            waitTimer.Elapsed += (s, e) => {
-                if (!ServerBusy) {
-                    Invoke((MethodInvoker)delegate { RefreshAllCompenentStates(); });
-                    waitDialog.GetDialogProgress().Report(new("Message recieved.", 100));
-                    waitDialog.EndProgress();
-                } else {
-                    waitCount += 5;
-                    waitDialog.GetDialogProgress().Report(new(message, waitCount <= 100 ? waitCount : 100));
-                    waitTimer.Start();
-                }
-            };
-            waitDialog.Show(this);
-            waitDialog.GetDialogProgress().Report(new(message, waitCount));
-            Invoke((MethodInvoker)delegate { RefreshAllCompenentStates(); });
-            waitTimer.Start();
+        public void DisableUI(string message, Task onCompletion = null) {
+            Invoke(() => {
+                _uiWaitDialog = new(null);
+                ServerBusy = true;
+                _uiWaitTimer.AutoReset = false;
+                int waitCount = 0;
+                _uiWaitTimer.Elapsed += (s, e) => {
+                    if (!ServerBusy) {
+                        _uiWaitDialog.GetDialogProgress().Report(new("Message recieved.", 100));
+                        _uiWaitDialog.EndProgress(new(() => {
+                            Invoke((MethodInvoker)delegate { RefreshAllCompenentStates(); });
+                            if (onCompletion != null && !onCompletion.IsCompleted) {
+                                onCompletion.Start();
+                                while (!onCompletion.IsCompleted) {
+                                }
+                            }
+                            Invoke(_uiWaitDialog.Close);
+                            Invoke(_uiWaitDialog.Dispose);
+                        }));
+                    } else {
+                        waitCount += 5;
+                        _uiWaitDialog.GetDialogProgress().Report(new(message, waitCount <= 100 ? waitCount : 100));
+                        _uiWaitTimer.Start();
+                    }
+                };
+                _uiWaitDialog.Show();
+                _uiWaitDialog.GetDialogProgress().Report(new(message, waitCount));
+                Invoke((MethodInvoker)delegate { RefreshAllCompenentStates(); });
+                _uiWaitTimer.Start();
+            });
         }
 
         public class ServerConnectException : Exception {
@@ -546,17 +538,41 @@ namespace MinecraftService.Client.Forms
             }
         }
 
-        public void RecievePackData(byte serverIndex, List<Shared.PackParser.MinecraftPackContainer> incomingPacks) {
-            Invoke((MethodInvoker)delegate {
-                using (ManagePacksForms form = new(serverIndex, ClientLogger, _processInfo)) {
-                    form.PopulateServerData(incomingPacks);
-                    form.ShowDialog();
-                    ServerBusy = false;
+        public void VersionListArrived(Dictionary<MinecraftServerArch, SimpleVersionModel[]> verLists) {
+            ServerBusy = false;
+            _uiWaitDialog.SetCallback(new(new(() => {
+                using (_newServerForm = new(clientSideServiceConfiguration, connectedHost.GetServerList(), verLists)) {
+                    if (_newServerForm.ShowDialog() == DialogResult.OK) {
+                        byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_newServerForm.SelectedPropModel, Formatting.Indented, GlobalJsonSerialierSettings));
+                        FormManager.TCPClient.SendData(serializeToBytes, NetworkMessageTypes.AddNewServer);
+                        _newServerForm.Close();
+                        _newServerForm.Dispose();
+                    }
                 }
-            });
+            })));
         }
 
-        private void scrollLockChkBox_CheckedChanged(object sender, EventArgs e) => _followTail = scrollLockChkBox.Checked;
+        public void RecievePackData(byte serverIndex, List<Shared.PackParser.MinecraftPackContainer> incomingPacks) {
+            _incomingPacks = incomingPacks;
+            _manPacksServer = serverIndex;
+            ServerBusy = false;
+        }
+
+        public void RecievePlayerData(byte serverIndex, List<IPlayer> playerList) {
+            ServerBusy = false;
+            _uiWaitDialog.SetCallback(new(() => { 
+                connectedHost.GetServerInfoByIndex(serverIndex).SetPlayerList(playerList);
+                PlayerManagerForm form = new(selectedServer);
+                form.ShowDialog();
+            }));
+        }
+
+        private void scrollLockChkBox_CheckedChanged(object sender, EventArgs e) {
+            _followTail = scrollLockChkBox.Checked;
+            ScrollToEnd(LogBox);
+            ScrollToEnd(clientLogBox);
+            ScrollToEnd(serviceTextbox);
+        }
 
         private void cmdTextBox_KeyPress(object sender, KeyPressEventArgs e) {
             if (e.KeyChar == (char)Keys.Enter) {
@@ -580,11 +596,9 @@ namespace MinecraftService.Client.Forms
             }
         }
 
-
         private void cmdTextBox_TextUpdate(object sender, KeyPressEventArgs e) {
             // offer suggestions here
         }
-
 
         private void HostListBox_KeyPress(object sender, KeyPressEventArgs e) {
             if (e.KeyChar == (char)Keys.Enter) {
@@ -601,11 +615,15 @@ namespace MinecraftService.Client.Forms
 
         }
 
-        public void UpdateBackupManagerData() => _backupManager?.UpdateBackupManagerData();
+        public void UpdateBackupManagerData(List<BackupInfoModel> backupInfo) => _backupManager?.UpdateBackupManagerData(backupInfo);
 
         private void ManPacks_Click(object sender, EventArgs e) {
             FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.PackList);
-            DisableUI("Service is gathering current pack information..");
+            DisableUI("Service is gathering current pack information...", new(() => {
+                ManagePacksForms form = new(_manPacksServer, ClientLogger, _processInfo);
+                form.PopulateServerData(_incomingPacks);
+                Invoke(() => form.Show(this));
+            }));
         }
 
         private void nbtStudioBtn_Click(object sender, EventArgs e) {
@@ -622,12 +640,14 @@ namespace MinecraftService.Client.Forms
             ServerBusy = true;
             FormManager.TCPClient.SendData(connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.LevelEditRequest);
             DisableUI("Service is gathering level.dat...");
+        }
+
+        public void LevelDatRecieved (string path) {
             using (Process nbtStudioProcess = new()) {
-                string tempPath = $@"{Path.GetTempPath()}level.dat";
-                nbtStudioProcess.StartInfo = new ProcessStartInfo(ConfigManager.NBTStudioPath, tempPath);
+                nbtStudioProcess.StartInfo = new ProcessStartInfo(ConfigManager.NBTStudioPath, path);
                 nbtStudioProcess.Start();
                 nbtStudioProcess.WaitForExit();
-                FormManager.TCPClient.SendData(File.ReadAllBytes(tempPath), connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.LevelEditFile);
+                FormManager.TCPClient.SendData(File.ReadAllBytes(path), connectedHost.GetServerIndex(selectedServer), NetworkMessageTypes.LevelEditFile);
             }
             ServerBusy = false;
         }
