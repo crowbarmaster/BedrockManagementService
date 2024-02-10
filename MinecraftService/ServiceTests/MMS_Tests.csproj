@@ -29,4 +29,8 @@
     <ProjectReference Include="..\Service\MinecraftService.Service.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ClientTests\" />
+  </ItemGroup>
+
 </Project>

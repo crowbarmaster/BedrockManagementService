@@ -8,43 +8,54 @@ using System;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace ServiceTests {
-    public class ServiceTests {
-        public class TestFixture : IDisposable {
+namespace MMS_Tests.ServiceTests
+{
+    public class ServiceTests
+    {
+        public class TestFixture : IDisposable
+        {
 
             public static IHost Host = Program.CreateHostBuilder(new string[] { }).Build();
             public IMinecraftService MinecraftService = Host.Services.GetRequiredService<IMinecraftService>();
             public JsonSerializerSettings SerializerSettings = new() { TypeNameHandling = TypeNameHandling.All };
 
-            public TestFixture() {
+            public TestFixture()
+            {
                 MinecraftService.TestStart();
-                while (MinecraftService.GetServiceStatus().ServiceStatus != ServiceStatus.Started) {
+                while (MinecraftService.GetServiceStatus().ServiceStatus != ServiceStatus.Started)
+                {
                     Task.Delay(100).Wait();
                 }
             }
 
-            public void Dispose() {
+            public void Dispose()
+            {
                 MinecraftService.TestStop();
-                while (MinecraftService != null && MinecraftService.GetServiceStatus().ServiceStatus != ServiceStatus.Stopped) {
+                while (MinecraftService != null && MinecraftService.GetServiceStatus().ServiceStatus != ServiceStatus.Stopped)
+                {
                     Task.Delay(100).Wait();
                 }
             }
         }
 
-        public class RunningServiceTests : IClassFixture<TestFixture> {
+        public class RunningServiceTests : IClassFixture<TestFixture>
+        {
             readonly TestFixture _testFixture;
 
-            public RunningServiceTests(TestFixture testFixture) {
+            public RunningServiceTests(TestFixture testFixture)
+            {
                 _testFixture = testFixture;
             }
 
             [Fact]
-            public void Verify_Service_Startup() {
+            public void Verify_Service_Startup()
+            {
                 Assert.True(_testFixture.MinecraftService.GetServiceStatus().ServiceStatus == ServiceStatus.Started);
             }
 
             [Fact]
-            public void Verify_Service_Stop() {
+            public void Verify_Service_Stop()
+            {
                 _testFixture.Dispose();
                 Assert.True(_testFixture.MinecraftService.GetServiceStatus().ServiceStatus == ServiceStatus.Stopped);
             }

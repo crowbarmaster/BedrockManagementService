@@ -3,11 +3,14 @@ using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
 using System.IO;
 using Xunit;
 
-namespace ServiceTests {
-    public class JsonModelTests {
+namespace MMS_Tests.SharedTests
+{
+    public class JsonModelTests
+    {
 
         [Fact]
-        public void Can_Create_Pack_Manifest_File_Model() {
+        public void Can_Create_Pack_Manifest_File_Model()
+        {
             string sampleJson = "{\"format_version\": 1, \"header\": { \"name\": \"Miniguns and Landmines (behavior)\"," +
                 "\"description\": \"Miniguns and Landmines. Oh ho ho.\", \"uuid\": \"9edcd542-0ce1-4a00-b28d-c6d0be1fa0dc\"," +
                 "\"version\": [2, 6, 31] }, \"modules\": [ { \"description\": \"Mech Suit\", \"type\": \"data\", \"uuid\":" +
@@ -19,16 +22,19 @@ namespace ServiceTests {
         }
 
         [Fact]
-        public void Can_Create_Permission_File_Model() {
+        public void Can_Create_Permission_File_Model()
+        {
             string sampleJson = "[{\"permission\": \"member\",\"xuid\": \"1234567801234567\"}," +
                                 "{\"permission\": \"operator\",\"xuid\": \"1234567890123456\"}," +
                                 "{\"permission\": \"operator\",\"xuid\": \"2098765432112345\"}]";
             File.WriteAllText(".\\sample_permissions_model.json", sampleJson);
             PermissionsFileModel fileModel = new(".\\sample_permissions_model.json");
+            Assert.NotNull(fileModel.Contents);
         }
 
         [Fact]
-        public void Can_Create_LiteLoader_Plugin_Json() {
+        public void Can_Create_LiteLoader_Plugin_Json()
+        {
             LLServerPluginRegistry reg = new();
             reg.ServerPluginList = new() {
                 new() { MmsServerName = "TestServer" }
@@ -40,9 +46,11 @@ namespace ServiceTests {
         }
 
         [Fact]
-        public void Can_Create_Plugin_Repo_Json() {
+        public void Can_Create_Plugin_Repo_Json()
+        {
             LLPluginRepoJsonModel model = new();
-            model.PluginRepo.Add(new() {
+            model.PluginRepo.Add(new()
+            {
                 Name = "CrowbarTools",
                 Description = "A toolbox of commands for LLBDS",
                 PluginVersion = "1.0",
