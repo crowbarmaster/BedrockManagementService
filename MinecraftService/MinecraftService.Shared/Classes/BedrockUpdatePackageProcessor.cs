@@ -19,7 +19,7 @@ namespace MinecraftService.Shared.Classes {
         public BedrockUpdatePackageProcessor(IServerLogger logger, string packageVersion, string fileTargetDirectory) {
             _packageVersion = packageVersion;
             _fileTargetDirectory = fileTargetDirectory;
-            _workingDirectory = $@"{Path.GetTempPath()}\MMSTemp\ServerFileTemp";
+            _workingDirectory = $@"{Path.GetTempPath()}{FileUtilities.GetRandomPrefix()}MMSTemp";
             Directory.CreateDirectory(_workingDirectory);
             _logger = logger;
         }
@@ -27,18 +27,13 @@ namespace MinecraftService.Shared.Classes {
         public BedrockUpdatePackageProcessor(string packageVersion, string fileTargetDirectory) {
             _packageVersion = packageVersion;
             _fileTargetDirectory = fileTargetDirectory;
-            _workingDirectory = $@"{Path.GetTempPath()}\MMSTemp\ServerFileTemp";
+            _workingDirectory = $@"{Path.GetTempPath()}{FileUtilities.GetRandomPrefix()}MMSTemp";
             _loggingEnabled = false;
         }
 
         public bool ExtractCoreFiles() {
             try {
-                FileUtilities.ClearTempDir(new Progress<ProgressModel>((p) => {
-                    if (_loggingEnabled) {
-                        _logger.AppendLine($"Cleaning temp directory. {p.Progress}% completed...");
-                    }
-                }));
-                Directory.CreateDirectory(_workingDirectory);
+                FileUtilities.CreateInexistantDirectory(_workingDirectory);
                 string zipPath = GetServiceFilePath(MmsFileNameKeys.BdsUpdatePackage_Ver, _packageVersion);
                 if (!File.Exists(zipPath)) {
                     if (_loggingEnabled) _logger.AppendLine("Requested build package was not found.");
@@ -62,12 +57,14 @@ namespace MinecraftService.Shared.Classes {
                             FileInfo fileInfo = new(fixedPath);
                             if (fileInfo.Extension == ".properties") {
                                 archive.Entries[i].ExtractToFile(fixedPath);
+                                CreateFiles();
                                 break;
                             }
                         }
                     }
-                    if (_loggingEnabled) _logger.AppendLine($"Extraction completed.");
-                    CreateFiles();
+                    if (_loggingEnabled) {
+                        _logger.AppendLine($"Extraction completed.");
+                    }
                     return true;
                 }
             } catch (Exception e) {
@@ -77,7 +74,9 @@ namespace MinecraftService.Shared.Classes {
         }
 
         private void CreateFiles() {
-            if (_loggingEnabled) _logger.AppendLine($"Now building necessary files");
+            if (_loggingEnabled) {
+                _logger.AppendLine($"Now building necessary files");
+            }
             Directory.CreateDirectory(_fileTargetDirectory);
             string propFile = $@"{_workingDirectory}\{GetServerFileName(ServerFileNameKeys.ServerProps)}";
 
