@@ -32,13 +32,7 @@ namespace MinecraftService.Client.Forms {
             foreach (MinecraftPackContainer container in packList) {
                 serverListBox.Items.Add(container);
             }
-            if (pluginReg != null) {
-                MmsServerPluginDatabase db = pluginReg.ServerPluginList[_serverIndex];
-                foreach (PluginVersionInfo info in db.InstalledPlugins) {
-
                 }
-            }
-        }
 
         private void ListBox_SelectedIndexChanged(object sender, EventArgs e) {
             ListBox thisBox = (ListBox)sender;
