@@ -12,6 +12,7 @@ using System.Drawing;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace MinecraftService.Client.Forms {
@@ -22,7 +23,7 @@ namespace MinecraftService.Client.Forms {
         private readonly DirectoryInfo _packExtractDir;
         public ManagePacksForms(byte serverIndex, IServerLogger logger, IProcessInfo processInfo) {
             _logger = logger;
-            _packExtractDir = new DirectoryInfo($"{Path.GetTempPath()}\\MMSTemp\\ExaminePacks");
+            _packExtractDir = new DirectoryInfo($"{Path.GetTempPath()}{FileUtilities.GetRandomPrefix()}MMSTemp\\ExaminePacks");
             _processInfo = processInfo;
             _serverIndex = serverIndex;
             InitializeComponent();
