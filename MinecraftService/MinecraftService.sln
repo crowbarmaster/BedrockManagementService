@@ -14,7 +14,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MinecraftService.Client", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MinecraftService.Shared", "MinecraftService.Shared\MinecraftService.Shared.csproj", "{F146D5E8-EF1F-4785-9150-182631F059B7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceTests", "ServiceTests\ServiceTests.csproj", "{B20CAE22-52BD-4A49-ADA8-04F7C7007155}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MMS_Tests", "ServiceTests\MMS_Tests.csproj", "{B20CAE22-52BD-4A49-ADA8-04F7C7007155}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
