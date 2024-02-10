@@ -1,4 +1,5 @@
-﻿using MinecraftService.Client.Management;
+﻿using MinecraftService.Client.Forms;
+using MinecraftService.Client.Management;
 using MinecraftService.Shared.Classes;
 using MinecraftService.Shared.Interfaces;
 using MinecraftService.Shared.PackParser;
@@ -7,6 +8,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
@@ -30,10 +32,17 @@ namespace MinecraftService.Client.Networking {
         private CancellationTokenSource? _netCancelSource;
         private int _heartbeatFailTimeout;
         private const int _heartbeatFailTimeoutLimit = 2;
+        private const int _heartbeatFireInterval = 300;
         private readonly IServerLogger _logger;
+        private readonly Dictionary<NetworkMessageTypes, INetworkMessage> _messageLookupContainer;
+        private readonly System.Timers.Timer _heartbeatTimer;
+        ProgressDialog _progressDialog = new(null);
 
         public TCPClient(IServerLogger logger) {
             _logger = logger;
+            _messageLookupContainer = new NetworkMessageLookup(logger, this).MessageLookupContainer;
+            _heartbeatTimer = new System.Timers.Timer(_heartbeatFireInterval);
+            _heartbeatTimer.Elapsed += RecieveEvent;
         }
 
         public void ConnectHost(IClientSideServiceConfiguration host) {
@@ -41,6 +50,10 @@ namespace MinecraftService.Client.Networking {
                 SendData(NetworkMessageTypes.Connect);
                 return;
             }
+        }
+
+        public void Cancel() {
+            _netCancelSource.Cancel();
         }
 
         public bool EstablishConnection(string addr, int port) {
@@ -51,7 +64,8 @@ namespace MinecraftService.Client.Networking {
                 OpenedTcpClient = new TcpClient(addr, port);
                 stream = OpenedTcpClient.GetStream();
                 EstablishedLink = true;
-                ClientReciever = Task.Factory.StartNew(new Action(ReceiveListener), _netCancelSource.Token);
+                _heartbeatTimer.Start();
+               // ClientReciever = Task.Factory.StartNew(new Action(ReceiveListener), _netCancelSource.Token);
             } catch(Exception e) {
                 _logger.AppendLine($"Could not connect to Server: {e.Message}");
                 if (ClientReciever != null)
@@ -61,7 +75,7 @@ namespace MinecraftService.Client.Networking {
             }
             return EstablishedLink;
         }
-
+        
         public void CloseConnection() {
             try {
                 if (stream != null)
@@ -79,166 +93,69 @@ namespace MinecraftService.Client.Networking {
             }
         }
 
-        public void ReceiveListener() {
-            while (!_netCancelSource.IsCancellationRequested) {
-                SendData(NetworkMessageTypes.Heartbeat);
-                NetworkMessageSource source = 0;
-                NetworkMessageDestination destination = 0;
-                byte serverIndex = 0;
-                NetworkMessageTypes msgType = 0;
-                try {
-                    byte[] buffer = new byte[4];
-                    while (OpenedTcpClient.Client.Available > 0) {
-                        int byteCount = stream.Read(buffer, 0, 4);
-                        int expectedLen = BitConverter.ToInt32(buffer, 0);
-                        buffer = new byte[expectedLen];
+        public void RecieveEvent(object sender, System.Timers.ElapsedEventArgs elapsedArgs) {
+            if (_netCancelSource.IsCancellationRequested) {
+                _heartbeatTimer.Stop();
+                return;
+            }
+            SendData(NetworkMessageTypes.Heartbeat);
+            NetworkMessageSource source = 0;
+            NetworkMessageDestination destination = 0;
+            byte serverIndex = 0;
+            NetworkMessageTypes msgType = 0;
+            try {
+                byte[] buffer = new byte[4];
+                while (OpenedTcpClient.Client.Available > 0) {
+                    int byteCount = stream.Read(buffer, 0, 4);
+                    int expectedLen = BitConverter.ToInt32(buffer, 0);
+                    int originalLen = expectedLen;
+                    buffer = new byte[expectedLen];
+                    if (expectedLen > 102400000 && !FormManager.MainWindow.ServerBusy) {
+                        if(_progressDialog == null || _progressDialog.IsDisposed) {
+                            _progressDialog = new(null);
+                        } 
+                        _progressDialog.Show();
+                        _progressDialog.GetDialogProgress().Report(new("Downloading large file from service...", 0.0));
+                        double chunkCount = Math.Round(expectedLen / 1024000.00, 0, MidpointRounding.ToPositiveInfinity);
+                        double currentProgress = 0.0;
+                        do {
+                            int recvCount = expectedLen >= 1024000 ? 1024000 : expectedLen;
+                            byteCount = stream.Read(buffer, originalLen - expectedLen, recvCount);
+                            _progressDialog.GetDialogProgress().Report(new($"Downloading large file from service, {originalLen - expectedLen} bytes recieved.", currentProgress));
+                            expectedLen -= recvCount;
+                        } while (expectedLen > 0);
+                        _progressDialog.EndProgress(new(() => {
+                            _progressDialog.Invoke(_progressDialog.Close);
+                            _progressDialog.Invoke(_progressDialog.Dispose);
+                            _progressDialog = null;
+                        }));
+                    } else {
                         byteCount = stream.Read(buffer, 0, expectedLen);
-                        source = (NetworkMessageSource)buffer[0];
-                        destination = (NetworkMessageDestination)buffer[1];
-                        serverIndex = buffer[2];
-                        msgType = (NetworkMessageTypes)buffer[3];
-                        NetworkMessageFlags msgStatus = (NetworkMessageFlags)buffer[4];
-                        string data = "";
-                        if (msgType != NetworkMessageTypes.PackFile || msgType != NetworkMessageTypes.LevelEditFile)
-                            data = GetOffsetString(buffer);
+                    }
+                    source = (NetworkMessageSource)buffer[0];
+                    destination = (NetworkMessageDestination)buffer[1];
+                    serverIndex = buffer[2];
+                    msgType = (NetworkMessageTypes)buffer[3];
+                    NetworkMessageFlags msgStatus = (NetworkMessageFlags)buffer[4];
+                    string data = "";
+                    if (msgType != NetworkMessageTypes.PackFile || msgType != NetworkMessageTypes.LevelEditFile)
+                        data = GetOffsetString(buffer);
+                    if (FormManager.MainWindow.ConfigManager.DebugNetworkOutput) {
+                        _logger.AppendLine($@"Network msg: {source} * {destination} * {msgType} * {msgStatus} * {serverIndex}");
+                        _logger.AppendLine($@"Data: {data}");
+                    }
+                    if (destination != NetworkMessageDestination.Client) {
+                        continue;
+                    }
+                    if (_messageLookupContainer != null && _messageLookupContainer.ContainsKey(msgType) && _messageLookupContainer[msgType].ProcessMessage(buffer).Result) {
                         if (FormManager.MainWindow.ConfigManager.DebugNetworkOutput) {
-                            _logger.AppendLine($@"Network msg: {source} * {destination} * {msgType} * {msgStatus} * {serverIndex}");
-                            _logger.AppendLine($@"Data: {data}");
-                        }
-                        if (destination != NetworkMessageDestination.Client)
-                            continue;
-                        int srvCurLen = 0;
-                        JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All, ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
-                        switch (msgType) {
-                            case NetworkMessageTypes.Connect:
-                                try {
-                                    if (!string.IsNullOrEmpty(data)) {
-                                        _logger.AppendLine("Connection to Host successful!");
-                                        FormManager.MainWindow.connectedHost = JsonConvert.DeserializeObject<IServiceConfiguration>(data, settings);
-                                        Connected = true;
-                                        FormManager.MainWindow.RefreshServerContents();
-                                        FormManager.MainWindow.ServerBusy = false;
-                                    }
-                                } catch (Exception e) {
-                                    _logger.AppendLine($"Error: ConnectMan reported error: {e.Message}\n{e.StackTrace}");
-                                    CloseConnection();
-                                    _netCancelSource.Cancel();
-                                }
-                                break;
-
-                            case NetworkMessageTypes.EnumBackups:
-
-                                BackupList = JsonConvert.DeserializeObject<List<BackupInfoModel>>(data);
-                                FormManager.MainWindow.Invoke(() => FormManager.MainWindow.UpdateBackupManagerData());
-
-                                break;
-                            case NetworkMessageTypes.CheckUpdates:
-                            case NetworkMessageTypes.UICallback:
-
-                                UnlockUI();
-
-                                break;
-                            case NetworkMessageTypes.BackupCallback:
-
-                                bool rollbackPassed = buffer[5] == 1;
-                                FormManager.MainWindow.BackupRollbackCompleted(rollbackPassed);
-                                UnlockUI();
-
-                                break;
-                            case NetworkMessageTypes.VersionListRequest:
-
-                                Dictionary<SharedStringBase.MinecraftServerArch, SimpleVersionModel[]> versionLists = JsonConvert.DeserializeObject<Dictionary<SharedStringBase.MinecraftServerArch, SimpleVersionModel[]>>(data, SharedStringBase.GlobalJsonSerialierSettings);
-                                FormManager.MainWindow.VersionListArrived(versionLists);
-
-                                break;
-                            case NetworkMessageTypes.ConsoleLogUpdate:
-                                try {
-                                    string[] strings = data.Split("|?|");
-                                    for (int i = 0; i < strings.Length; i++) {
-                                        string[] srvSplit = strings[i].Split("|;|");
-                                        string srvName = srvSplit[0];
-                                        string srvText = srvSplit[1];
-                                        srvCurLen = int.Parse(srvSplit[2]);
-                                        if (srvName != "Service") {
-                                            IServerConfiguration bedrockServer = FormManager.MainWindow.connectedHost.GetServerInfoByName(srvName);
-                                            int curCount = bedrockServer.GetLog().Count;
-                                            if (curCount == srvCurLen) {
-                                                bedrockServer.GetLog().Add(new LogEntry(srvText));
-                                            }
-                                        } else {
-                                            int curCount = FormManager.MainWindow.connectedHost.GetLog().Count;
-                                            if (curCount == srvCurLen) {
-                                                FormManager.MainWindow.connectedHost.GetLog().Add(new LogEntry(srvText));
-                                            }
-                                        }
-                                    }
-                                } catch (Exception e) {
-                                    _logger.AppendLine($"Error updating logs: {e.Message}");
-                                }
-                                break;
-                            case NetworkMessageTypes.Backup:
-
-                                _logger.AppendLine(msgStatus.ToString());
-
-                                break;
-                            case NetworkMessageTypes.PackList:
-
-                                List<MinecraftPackContainer> temp = new();
-                                JArray jArray = JArray.Parse(data);
-                                foreach (JToken token in jArray)
-                                    temp.Add(token.ToObject<MinecraftPackContainer>());
-                                FormManager.MainWindow.RecievePackData(serverIndex, temp);
-
-                                break;
-                            case NetworkMessageTypes.PlayersRequest:
-
-                                List<IPlayer> fetchedPlayers = JsonConvert.DeserializeObject<List<IPlayer>>(data, settings);
-                                FormManager.MainWindow.RecievePlayerData(serverIndex, fetchedPlayers);
-
-                                break;
-                            case NetworkMessageTypes.LevelEditFile:
-
-                                byte[] stripHeaderFromBuffer = new byte[buffer.Length - 5];
-                                Buffer.BlockCopy(buffer, 5, stripHeaderFromBuffer, 0, stripHeaderFromBuffer.Length);
-                                string pathToLevelDat = $@"{Path.GetTempPath()}\level.dat";
-                                File.WriteAllBytes(pathToLevelDat, stripHeaderFromBuffer);
-                                UnlockUI();
-
-                                break;
-                            case NetworkMessageTypes.ServerStatusRequest:
-
-                                StatusUpdateModel status = JsonConvert.DeserializeObject<StatusUpdateModel>(data, settings);
-                                if (status != null && status.ServerStatusModel != null && status.ServerStatusModel.ServerIndex != 255) {
-                                    ServerStatusModel formerServerStatus = FormManager.MainWindow.selectedServer.GetStatus();
-                                    if (!status.ServerStatusModel.Equals(formerServerStatus)) {
-                                        FormManager.MainWindow.connectedHost.GetServerInfoByIndex(status.ServerStatusModel.ServerIndex).SetStatus(status.ServerStatusModel);
-                                        FormManager.MainWindow.Invoke(() => FormManager.MainWindow.RefreshAllCompenentStates());
-                                        FormManager.TCPClient.SendData(serverIndex, NetworkMessageTypes.EnumBackups);
-                                        Task.Delay(1000).Wait();
-                                    }
-                                    FormManager.MainWindow.ServiceStatus = status.ServiceStatusModel;
-                                }
-
-                                break;
-                            case NetworkMessageTypes.ClientReject:
-                                
-                                FormManager.MainWindow.Invoke((MethodInvoker)delegate { FormManager.MainWindow.ServerInfoBox.Text = "Connection attempt rejected by Service!"; });
-                                FormManager.MainWindow.Invoke((MethodInvoker)delegate { FormManager.MainWindow.HostInfoLabel.Text = "Connection attempt rejected by Service!"; });
-
-                                break;
-                            case NetworkMessageTypes.ExportFile:
-
-                                ExportImportFileModel exportModel = JsonConvert.DeserializeObject<ExportImportFileModel>(data, settings);
-                                if (exportModel != null) {
-                                    FormManager.MainWindow.Invoke(() => FormManager.MainWindow.RecieveExportData(exportModel));
-                                }
-                                break;
+                            _logger.AppendLine($@"Network message processed - success.");
                         }
                     }
-                } catch (Exception e) {
-                    _logger.AppendLine($"TCPClient error! MsgSource: {source} ServerIndex: {serverIndex} MsgType: {msgType} Stacktrace: {e.Message}\n{e.StackTrace}");
                 }
-                Thread.Sleep(200);
+            } catch (Exception e) {
+                _logger.AppendLine($"TCPClient error! MsgSource: {source} ServerIndex: {serverIndex} MsgType: {msgType} Stacktrace: {e.Message}\n{e.StackTrace}");
+                _heartbeatTimer.Enabled = true;
             }
         }
 
@@ -301,7 +218,5 @@ namespace MinecraftService.Client.Networking {
         }
 
         private string GetOffsetString(byte[] array) => Encoding.UTF8.GetString(array, 5, array.Length - 5);
-
-        private void UnlockUI() => FormManager.MainWindow.ServerBusy = false;
     }
 }
