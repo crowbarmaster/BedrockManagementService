@@ -24,14 +24,12 @@ namespace MinecraftService.Client.Forms {
             _serviceConfig = FormManager.MainWindow.connectedHost;
         }
 
-        public void UpdateBackupManagerData() {
+        public void UpdateBackupManagerData(List<BackupInfoModel> backupInfo) {
             _defaultEntry = new BackupInfoModel(new System.IO.FileInfo("-----.zip"));
             _serviceConfig = FormManager.MainWindow.connectedHost;
             backupSelectBox.Items.Clear();
-            if (FormManager.TCPClient.BackupList != null && FormManager.TCPClient.BackupList.Count > 0) {
-                foreach (BackupInfoModel model in FormManager.TCPClient.BackupList) {
-                    backupSelectBox.Items.Add(model);
-                }
+            if (backupInfo != null && backupInfo.Count > 0) {
+                backupSelectBox.Items.AddRange(backupInfo.ToArray());
             } else {
                 backupSelectBox.Items.Add(_defaultEntry);
             }
@@ -55,8 +53,6 @@ namespace MinecraftService.Client.Forms {
             FormManager.TCPClient.SendData(backupName, _serviceConfig.GetServerIndex(FormManager.MainWindow.selectedServer), NetworkMessageTypes.DelBackups);
             Task.Delay(500).Wait();
             backupSelectBox.Items.Remove(backupSelectBox.SelectedItem);
-            FormManager.TCPClient.BackupList.Remove((BackupInfoModel)backupSelectBox.SelectedItem);
-            UpdateBackupManagerData();
         }
 
         private void rollbackToThisBackupToolStripMenuItem_Click(object sender, EventArgs e) {
