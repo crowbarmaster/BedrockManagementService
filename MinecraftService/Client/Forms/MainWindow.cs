@@ -524,20 +524,6 @@ namespace MinecraftService.Client.Forms
             });
         }
 
-        public class ServerConnectException : Exception {
-            public ServerConnectException() { }
-
-            public ServerConnectException(string message)
-                : base(message) {
-
-            }
-
-            public ServerConnectException(string message, Exception inner)
-                : base(message, inner) {
-
-            }
-        }
-
         public void VersionListArrived(Dictionary<MinecraftServerArch, SimpleVersionModel[]> verLists) {
             ServerBusy = false;
             _uiWaitDialog.SetCallback(new(new(() => {
