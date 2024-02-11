@@ -69,8 +69,11 @@ namespace MinecraftService.Service.Server {
                 int currentFileCount = 0;
                 foreach (FileInfo levelFile in levelFiles) {
                     currentFileCount++;
-                    if(currentFileCount % progressCallCount == 0) {
-                        _logger.AppendLine($"Adding files to archive. {currentFileCount / 6}% complete...");
+                    try {
+                        if (progressCallCount != 0 && currentFileCount % progressCallCount == 0) {
+                            _logger.AppendLine($"Adding files to archive. {currentFileCount / 6}% complete...");
+                        }
+                    } catch {
                     }
                     backupZip.CreateEntryFromFile(levelFile.FullName, $"{_serverConfiguration.GetProp(MmsDependServerPropKeys.LevelName)}/{levelFile.Name}");
                 }
