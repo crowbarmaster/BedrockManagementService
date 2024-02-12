@@ -1,0 +1,72 @@
+name: Build BMS (Stable)
+
+on:
+  workflow_dispatch:
+    inputs:
+        lastTag:
+            description: 'Beginning of changelog history starts at this tag name.'
+            required: true
+
+jobs:
+  build:
+
+    runs-on: windows-2022
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3.2.0
+      with:
+        dotnet-version: 6.0.x
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.3.1
+
+    - name: Restore NuGet packages
+      run: dotnet restore "MinecraftService\MinecraftService.sln"
+
+    - name: Publish with MSBuild
+      run: msbuild "MinecraftService\MinecraftService.sln" -property:Configuration=Release /t:publish -p:PublishProfile=FolderProfile
+
+    - name: Set version string
+      run: |
+        $TMP = (get-item MinecraftService\bin\Published\MinecraftService.Service.exe).VersionInfo.FileVersion;
+        echo "PROJ_VER=$TMP" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
+        echo "${{ env.PROJ_VER }}"
+
+    - name: Push Automatic Release
+      uses: crowbarmaster/GH-Automatic-Releases@latest
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "${{ env.PROJ_VER }}"
+        prerelease: true
+        title: "Development Build: Version ${{ env.PROJ_VER }}"
+
+    - name: Update CHANGELOG
+      continue-on-error: true
+      uses: requarks/changelog-action@v1
+      id: changelog
+      with:
+        token: ${{ github.token }}
+        fromtag: ${{ env.PROJ_VER }}
+        totag: ${{ inputs.lastTag }}
+        includeInvalidCommits: true
+        excludeTypes: build
+        reverseOrder: true
+
+    - name: Compress published files
+      run: |
+        Remove-item MinecraftService\bin\Published\Launcher.exe;
+        Compress-Archive -path MinecraftService\bin\Published\*.exe* ".\MMS_${{ env.PROJ_VER }}.zip" -Force;
+
+    - name: Push Automatic Release
+      uses: crowbarmaster/GH-Automatic-Releases@latest
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "${{ env.PROJ_VER }}"
+        prerelease: false
+        title: "Stable Build: Version ${{ env.PROJ_VER }}"
+        body: ${{ steps.changelog.outputs.changes }}
+        files: |
+          MMS_*.zip
