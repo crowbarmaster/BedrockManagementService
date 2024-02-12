@@ -31,8 +31,12 @@ namespace MinecraftService.Service.Management {
         public Task LoadGlobals() => Task.Run(() => {
             _serviceConfiguration.InitializeDefaults();
             if (File.Exists(GetServiceFilePath(MmsFileNameKeys.ServiceConfig))) {
-                _serviceConfiguration.ProcessUserConfiguration(File.ReadAllLines(GetServiceFilePath(MmsFileNameKeys.ServiceConfig)));
-                _logger.AppendLine("Loaded Service props.");
+                try {
+                    _serviceConfiguration.ProcessUserConfiguration(File.ReadAllLines(GetServiceFilePath(MmsFileNameKeys.ServiceConfig)));
+                    _logger.AppendLine("Loaded Service props.");
+                } catch(Exception ex) {
+                    _logger.AppendLine($"Error loading Service props: {ex.Message}");
+                }
                 return;
             }
             _logger.AppendLine("Service.conf was not found. Loaded defaults and saved to file.");
@@ -45,21 +49,27 @@ namespace MinecraftService.Service.Management {
             _serviceConfiguration.GetServerList().Clear();
             string[] files = Directory.GetFiles(GetServiceDirectory(ServiceDirectoryKeys.ServerConfigs), "*.conf");
             foreach (string file in files) {
-                FileInfo FInfo = new(file);
-                string[] fileEntries = File.ReadAllLines(file);
-                string[] archType = fileEntries[0].Split('=');
-                if (archType[0] != "MinecraftType") {
-                    serverInfo = new BedrockConfiguration(_processInfo, _logger, _serviceConfiguration);
-                } else {
-                    serverInfo = typeLookup.PrepareNewServerByArchName(archType[1], _processInfo, _logger, _serviceConfiguration);
+                FileInfo fileInfo = new(file);
+                try {
+                    string[] fileEntries = File.ReadAllLines(file);
+                    string[] archType = fileEntries[0].Split('=');
+                    if (archType[0] != "MinecraftType") {
+                        serverInfo = new BedrockConfiguration(_processInfo, _logger, _serviceConfiguration);
+                    } else {
+                        serverInfo = typeLookup.PrepareNewServerByArchName(archType[1], _processInfo, _logger, _serviceConfiguration);
+                    }
+                    if (serverInfo.InitializeDefaults()) {
+                        serverInfo.ProcessUserConfiguration(fileEntries);
+                        serverInfo.ValidateServerPropFile(serverInfo.GetDeployedVersion() == "None" ? _serviceConfiguration.GetLatestVersion(serverInfo.GetServerArch()) : serverInfo.GetServerVersion());
+                        _logger.AppendLine($"Loaded config for server {serverInfo.GetServerName()}.");
+                    }
+                    _serviceConfiguration.AddNewServerInfo(serverInfo);
+                    SaveServerConfiguration(serverInfo);
+                } catch (Exception ex) {
+                    _logger.AppendLine($"Error loading server configuration file: ${fileInfo.Name}");
+                    _logger.AppendLine($"Exception: {ex.Message}");
+                    continue;
                 }
-                 if (serverInfo.InitializeDefaults()) {
-                    serverInfo.ProcessUserConfiguration(fileEntries);
-                    serverInfo.UpdateServerProps(serverInfo.GetDeployedVersion() == "None" ? _serviceConfiguration.GetLatestVersion(serverInfo.GetServerArch()) : serverInfo.GetServerVersion());
-                    _logger.AppendLine($"Loaded config for server {serverInfo.GetServerName()}.");
-                }
-                _serviceConfiguration.AddNewServerInfo(serverInfo);
-                SaveServerConfiguration(serverInfo);
             }
             if (_serviceConfiguration.GetServerList().Count == 0) {
                 serverInfo = new BedrockConfiguration(_processInfo, _logger, _serviceConfiguration);
