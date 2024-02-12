@@ -88,22 +88,6 @@ namespace MinecraftService.Shared.Classes {
             return LatestServerVersion;
         }
 
-        public bool ValidateServerVersion(IServerConfiguration server, string version) {
-            string propFile = GetServiceFilePath(MmsFileNameKeys.BedrockStockProps_Ver, version);
-            if (version != "None" && _processInfo.DeclaredType() != "Client") {
-                if (!File.Exists(propFile)) {
-                    FileInfo file = new(propFile);
-                    BedrockUpdatePackageProcessor packageProcessor = new(version, file.Directory.FullName);
-                    if (!packageProcessor.ExtractCoreFiles()) {
-                        return false;
-                    }
-                }
-                server.UpdateServerProps(version);
-            }
-            return true;
-        }
-
-
         public void ProcessUserConfiguration(string[] fileEntries) {
             foreach (string line in fileEntries) {
                 if (!line.StartsWith("#") && !string.IsNullOrEmpty(line)) {
