@@ -26,10 +26,6 @@ namespace MinecraftService.Service.Core {
                 _host = HostFactory.New(hostConfig => {
                     hostConfig.AddCommandLineSwitch("debug", new Action<bool>((x) => { hostConfig.UseNLog(_logger.GetNLogFactory()); }));
                     hostConfig.Service(settings => _mineraftService, s => {
-                        s.BeforeStartingService(_ => {
-                            _logger.AppendLine($"Minecraft Management Service version {Process.GetCurrentProcess().MainModule.FileVersionInfo.ProductVersion} has started.");
-                            _logger.AppendLine($"Working directory: {_processInfo.GetDirectory()}");
-                        });
                         s.AfterStartingService(_ => _logger.AppendLine("Service started Successfully."));
                         s.BeforeStoppingService(_ => _logger.AppendLine("Stopping service..."));
                         s.AfterStoppingService(_ => _applicationLifetime.StopApplication());

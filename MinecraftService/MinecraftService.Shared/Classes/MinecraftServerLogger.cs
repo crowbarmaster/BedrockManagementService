@@ -52,6 +52,8 @@ namespace MinecraftService.Shared.Classes {
                 if (!Directory.Exists(_logPath))
                     Directory.CreateDirectory(_logPath);
                 _logWriter = new StreamWriter($@"{_logPath}\{_processInfo.DeclaredType()}Log-{DateTime.Now:yyyyMMdd_HHmmssff}.log", true);
+                AppendLine($"MMS Service version {Process.GetCurrentProcess().MainModule.FileVersionInfo.ProductVersion} has started logging services.");
+                AppendLine($"Working directory: {_processInfo.GetDirectory()}");
             }
 
         }
