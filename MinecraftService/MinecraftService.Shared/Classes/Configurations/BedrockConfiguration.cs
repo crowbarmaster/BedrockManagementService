@@ -120,11 +120,23 @@ namespace MinecraftService.Shared.Classes.Configurations {
             GetProp(MmsDependServerPropKeys.PortI6).StringValue == "19133";
         }
 
+        public bool ValidateServerPropFile(string version) {
+            string propFile = GetServiceFilePath(MmsFileNameKeys.BedrockStockProps_Ver, version);
+            FileInfo file = new(propFile);
+            if (version != "None" && _processInfo.DeclaredType() != "Client") {
+                if (!file.Exists || file.Length == 0) {
+                    BedrockUpdatePackageProcessor packageProcessor = new(version, file.Directory.FullName);
+                    if (!packageProcessor.ExtractCoreFiles()) {
+                        GetUpdater().FetchBuild(version).Wait();
+                    }
+                }
+                UpdateServerProps(version);
+            }
+            return true;
+        }
+
         public void UpdateServerProps(string version) {
             DefaultPropList.Clear();
-            if(!File.Exists(GetServiceFilePath(MmsFileNameKeys.BedrockStockProps_Ver, version))) {
-                GetUpdater().FetchBuild(version).Wait();
-            }
             DefaultPropList = MinecraftFileUtilities.GetDefaultPropListFromFile(GetServiceFilePath(MmsFileNameKeys.BedrockStockProps_Ver, version));
             List<Property> newList = new List<Property>();
             ServerPropList.ForEach(prop => {

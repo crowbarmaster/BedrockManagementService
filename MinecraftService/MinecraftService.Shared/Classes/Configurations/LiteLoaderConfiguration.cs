@@ -102,6 +102,21 @@ namespace MinecraftService.Shared.Classes.Configurations {
             GetProp(MmsDependServerPropKeys.PortI6).StringValue == "19133";
         }
 
+        public bool ValidateServerPropFile(string version) {
+            string propFile = GetServiceFilePath(MmsFileNameKeys.BedrockStockProps_Ver, _updater.GetBaseVersion(version));
+            FileInfo file = new(propFile);
+            if (version != "None" && _processInfo.DeclaredType() != "Client") {
+                if (!file.Exists || file.Length == 0) {
+                    BedrockUpdatePackageProcessor packageProcessor = new(version, file.Directory.FullName);
+                    if (!packageProcessor.ExtractCoreFiles()) {
+                        GetUpdater().FetchBuild(version).Wait();
+                    }
+                }
+                UpdateServerProps(version);
+            }
+            return true;
+        }
+
         public void UpdateServerProps(string version) {
             DefaultPropList.Clear();
             try {
@@ -119,8 +134,7 @@ namespace MinecraftService.Shared.Classes.Configurations {
                     DefaultPropList.Add(propToSet);
                 });
             } catch (Exception) {
-                _updater.ReplaceServerBuild(version).Wait();
-                UpdateServerProps(version);
+                _logger.AppendLine($"Error updating LL server prop file for version {version}.");
             }
         }
 

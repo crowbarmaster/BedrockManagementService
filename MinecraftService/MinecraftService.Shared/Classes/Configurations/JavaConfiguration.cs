@@ -116,6 +116,18 @@ namespace MinecraftService.Shared.Classes.Configurations {
             return GetProp(MmsDependServerPropKeys.PortI4).StringValue == "19132";
         }
 
+        public bool ValidateServerPropFile(string version) {
+            string propFile = GetServiceFilePath(MmsFileNameKeys.JavaStockProps_Ver, version);
+            FileInfo file = new(propFile);
+            if (version != "None" && _processInfo.DeclaredType() != "Client") {
+                if (!file.Exists || file.Length == 0) {
+                    JavaUpdater.ProcessJdsPackage(JavaUpdater.GetJavaVersionModel(version)).Wait();
+                }
+                UpdateServerProps(version);
+            }
+            return true;
+        }
+
         public void UpdateServerProps(string version) {
             DefaultPropList.Clear();
             DefaultPropList = MinecraftFileUtilities.GetDefaultPropListFromFile(GetServiceFilePath(MmsFileNameKeys.JavaStockProps_Ver, version));

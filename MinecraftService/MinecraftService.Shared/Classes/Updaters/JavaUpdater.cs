@@ -153,7 +153,7 @@ namespace MinecraftService.Shared.Classes.Updaters {
             });
         }
 
-        private Task ProcessJdsPackage(JavaVersionDetailsModel version) {
+        public static Task ProcessJdsPackage(JavaVersionDetailsModel version) {
             return Task.Run(() => {
                 string propFile = GetServiceFilePath(MmsFileNameKeys.JavaStockProps_Ver, version.Id);
                 FileInfo file = new(propFile);
@@ -168,7 +168,7 @@ namespace MinecraftService.Shared.Classes.Updaters {
             });
         }
 
-        private JavaVersionDetailsModel GetJavaVersionModel(string version) {
+        public static JavaVersionDetailsModel GetJavaVersionModel(string version) {
             string content = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.JdsVersionJson]).Result;
             if (content == null)
                 return null;
@@ -178,8 +178,6 @@ namespace MinecraftService.Shared.Classes.Updaters {
             if (selectedRelease != null) {
                 content = HTTPHandler.FetchHTTPContent(selectedRelease.Url).Result;
                 releaseDetails = JsonConvert.DeserializeObject<JavaVersionDetailsModel>(content);
-            } else {
-                _logger.AppendLine("Selected Java version does not exist! Please check server config.");
             }
             return releaseDetails;
         }
