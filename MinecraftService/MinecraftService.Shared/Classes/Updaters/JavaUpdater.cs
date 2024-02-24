@@ -29,16 +29,6 @@ namespace MinecraftService.Shared.Classes.Updaters {
         }
 
         public void Initialize() {
-            if (!File.Exists(GetServiceFilePath(MmsFileNameKeys.Jdk17JavaVanillaExe))) {
-                if (HTTPHandler.RetrieveFileFromUrl(MmsUrlStrings[MmsUrlKeys.Jdk17DownloadLink], "Jdk.zip").Result) {
-                    Progress<ProgressModel> progress = new(percent => {
-                        _logger.AppendLine($"Extracting JDK 17 for Java support, {percent.Progress}% completed...");
-                    });
-                    ZipUtilities.ExtractToDirectory("Jdk.zip", GetServiceDirectory(ServiceDirectoryKeys.Jdk17Path), progress).Wait();
-                    File.Copy(GetServiceFilePath(MmsFileNameKeys.Jdk17JavaVanillaExe), GetServiceFilePath(MmsFileNameKeys.Jdk17JavaMmsExe));
-                    File.Delete("Jdk.zip");
-                }
-            }
             if (!File.Exists(GetServiceFilePath(MmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[_serverArch]))) {
                 _logger.AppendLine("Version ini file missing, creating...");
                 File.Create(GetServiceFilePath(MmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[_serverArch])).Close();
@@ -206,6 +196,7 @@ namespace MinecraftService.Shared.Classes.Updaters {
                 if (_serverConfiguration == null) {
                     return;
                 }
+                ValidateJavaInstallation().Wait();
                 string exeName = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName).StringValue;
                 ProcessUtilities.KillJarProcess(exeName);
                 string version = versionOverride == "" ? _serverConfiguration.GetServerVersion() : versionOverride;
@@ -258,5 +249,18 @@ namespace MinecraftService.Shared.Classes.Updaters {
         }
 
         public void SetNewLogger(IServerLogger logger) => _logger = logger;
+
+        private Task ValidateJavaInstallation() => Task.Run(() => {
+            if (!File.Exists(GetServiceFilePath(MmsFileNameKeys.Jdk17JavaVanillaExe))) {
+                if (HTTPHandler.RetrieveFileFromUrl(MmsUrlStrings[MmsUrlKeys.Jdk17DownloadLink], "Jdk.zip").Result) {
+                    Progress<ProgressModel> progress = new(percent => {
+                        _logger.AppendLine($"First time java install; Extracting JDK 17. {percent.Progress}% completed...");
+                    });
+                    ZipUtilities.ExtractToDirectory("Jdk.zip", GetServiceDirectory(ServiceDirectoryKeys.Jdk17Path), progress).Wait();
+                    File.Copy(GetServiceFilePath(MmsFileNameKeys.Jdk17JavaVanillaExe), GetServiceFilePath(MmsFileNameKeys.Jdk17JavaMmsExe));
+                    File.Delete("Jdk.zip");
+                }
+            }
+        });
     }
 }
