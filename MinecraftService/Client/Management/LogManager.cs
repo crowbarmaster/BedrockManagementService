@@ -94,7 +94,7 @@ namespace MinecraftService.Client.Management {
                     }
                     Task.Delay(300).Wait();
                 } catch (Exception e) {
-                    _logger.AppendLine($"LogManager Error! Stacetrace: {e.StackTrace}");
+                    _logger.AppendLine($"LogManager Error! {e.Message}\n{e.StackTrace}");
                 }
             }
         }
