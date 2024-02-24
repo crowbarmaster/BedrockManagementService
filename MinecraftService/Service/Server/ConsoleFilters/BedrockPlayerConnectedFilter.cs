@@ -31,6 +31,7 @@ namespace MinecraftService.Service.Server.ConsoleFilters {
             _configurator.SavePlayerDatabase(_serverConfiguration);
         }
 
+        // Player Spawned: Crowbarmast3r xuid: 0123456789012345, pfid: 0a1b2c3d4e5f6g7h
         private (string username, string xuid) ExtractPlayerInfoFromString(string input) {
             string playerConnected = "Player Spawned: ";
             string xuid = "xuid: ";
