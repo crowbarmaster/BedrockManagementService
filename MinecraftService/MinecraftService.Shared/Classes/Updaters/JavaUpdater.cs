@@ -1,15 +1,12 @@
 ﻿using MinecraftService.Shared.Interfaces;
-using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
 using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using static MinecraftService.Shared.Classes.SharedStringBase;
 using MinecraftService.Shared.Utilities;
-using System.Diagnostics;
 using JavaVersionManifest = MinecraftService.Shared.JsonModels.MinecraftJsonModels.Version;
 using Newtonsoft.Json;
 
@@ -225,9 +222,6 @@ namespace MinecraftService.Shared.Classes.Updaters {
                             throw new FileNotFoundException($"Service could not locate file \"Update_{version}.jar\" and version was not found in JDS manifest!");
                         }
                     }
-                    Progress<double> progress = new(percent => {
-                        _logger.AppendLine($"Extracting Java files for server {_serverConfiguration.GetServerName()}, {percent}% completed...");
-                    });
                     File.Copy(filePath, mmsExeInfo.FullName, true);
                     MinecraftFileUtilities.WriteJavaEulaFile(_serverConfiguration);
 
@@ -236,8 +230,12 @@ namespace MinecraftService.Shared.Classes.Updaters {
                         _serverConfiguration.SetServerVersion(version);
                     }
 
-                } catch (InvalidDataException) {
-                    throw new FileNotFoundException($"Build file \"Update_{version}.zip\" found corrupt. Service cannot proceed!!");
+                } catch (Exception e) {
+                    if(e.GetType() == typeof(InvalidDataException)) {
+                        throw new FileNotFoundException($"Build file \"Update_{version}.zip\" found corrupt. Service cannot proceed!!");
+                    } else {
+                        _logger.AppendLine($"ReplaceServerBuild resulted in error: {e.Message}\n{e.StackTrace}");
+                    }
                 }
             });
         }
