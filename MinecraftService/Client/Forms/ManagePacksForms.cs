@@ -94,7 +94,7 @@ namespace MinecraftService.Client.Forms {
                             foreach (MinecraftPackContainer container in parser.FoundPacks) {
                                 parsedPacksListBox.Items.Add(container);
                             }
-                            progressDialog.EndProgress(null);
+                            progressDialog.EndProgress(new(() => { progressDialog.Invoke(progressDialog.Close); }));
                         });
                     });
                 }));

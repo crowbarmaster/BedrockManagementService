@@ -238,8 +238,6 @@ namespace MinecraftService.Client.Forms
 
         #endregion
 
-        private System.Windows.Forms.TabControl pluginTabControl;
-        private System.Windows.Forms.TabPage addonTab;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
@@ -252,19 +250,6 @@ namespace MinecraftService.Client.Forms
         private System.Windows.Forms.Button sendPacksBtn;
         private System.Windows.Forms.CheckedListBox parsedPacksListBox;
         private System.Windows.Forms.CheckedListBox serverListBox;
-        private System.Windows.Forms.TabPage _pluginsTab;
-        private System.Windows.Forms.DataGridView dataGridView1;
-        private System.Windows.Forms.Button _pluginInstallBtn;
-        private System.Windows.Forms.Button _pluginReportBtn;
-        private System.Windows.Forms.Button _pluginDisableBtn;
-        private System.Windows.Forms.Button _pluginFromFileBtn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn pluginName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn pluginDesc;
-        private System.Windows.Forms.DataGridViewTextBoxColumn pluginVersion;
-        private System.Windows.Forms.DataGridViewTextBoxColumn pluginTargetProtocol;
-        private System.Windows.Forms.DataGridViewTextBoxColumn pluginSource;
-        private System.Windows.Forms.DataGridViewTextBoxColumn pluginInstalled;
-        private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.Button uncheckAllServerButton;
         private System.Windows.Forms.Button checkAllLocalButton;
     }
