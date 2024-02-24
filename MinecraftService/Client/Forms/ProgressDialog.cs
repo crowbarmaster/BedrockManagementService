@@ -3,15 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using MinecraftService.Client.Management;
 using MinecraftService.Shared.Classes;
 
 namespace MinecraftService.Client.Forms {
@@ -30,7 +23,7 @@ namespace MinecraftService.Client.Forms {
                 progressBar.Value = (int)currentProgress.Progress;
                 progressLabel.Text = $"{currentProgress.Message}";
                 string formattedPercent = string.Format("{0:N2}", currentProgress.Progress);
-                if(currentProgress.Progress != 0) {
+                if (currentProgress.Progress != 0) {
                     percentLabel.Text = $"{formattedPercent}% completed...";
                 }
                 Refresh();
@@ -43,11 +36,11 @@ namespace MinecraftService.Client.Forms {
 
         public void EndProgress(Task closingActions) {
             _closeTimer.Elapsed += (s, e) => {
-                if(closingActions != null && closingActions.Status == TaskStatus.Created) {
+                if (closingActions != null && closingActions.Status == TaskStatus.Created) {
                     closingActions.Start();
                 }
                 if (_onCompletion != null && _onCompletion.Status == TaskStatus.Created) {
-                   _onCompletion.Start();
+                    _onCompletion.Start();
                 }
             };
             _closeTimer.Start();

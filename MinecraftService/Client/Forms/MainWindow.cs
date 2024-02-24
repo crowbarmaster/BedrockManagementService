@@ -1,13 +1,9 @@
-﻿using MinecraftService.Client.Management;
-using MinecraftService.Shared.Classes;
-using MinecraftService.Shared.Classes.Configurations;
-using MinecraftService.Shared.Interfaces;
-using MinecraftService.Shared.SerializeModels;
-using MinecraftService.Shared.Utilities;
-using Newtonsoft.Json;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -17,10 +13,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
+using MinecraftService.Client.Management;
+using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Interfaces;
+using MinecraftService.Shared.SerializeModels;
+using MinecraftService.Shared.Utilities;
+using Newtonsoft.Json;
 using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace MinecraftService.Client.Forms
-{
+namespace MinecraftService.Client.Forms {
     public partial class MainWindow : Form {
         public IServiceConfiguration connectedHost;
         public IServerConfiguration selectedServer;
@@ -43,7 +44,6 @@ namespace MinecraftService.Client.Forms
         private ProgressDialog _uiWaitDialog;
         private System.Timers.Timer _uiWaitTimer = new(250);
         private readonly LogManager _logManager;
-        private int _commandHistoryTabIndex;
         private List<Shared.PackParser.MinecraftPackContainer> _incomingPacks;
         private byte _manPacksServer;
 
@@ -222,7 +222,7 @@ namespace MinecraftService.Client.Forms
         }
 
         public void BackupRollbackCompleted(bool backupPassed) {
-            if(_backupManager != null) {
+            if (_backupManager != null) {
                 _backupManager.MarkRollbackComplete(backupPassed);
             }
         }
@@ -244,7 +244,7 @@ namespace MinecraftService.Client.Forms
         }
 
         public void ClientLogUpdate() {
-            if(!_enableLogUpdating) { return; }
+            if (!_enableLogUpdating) { return; }
             try {
                 Invoke(() => {
                     UpdateServerLogBox(clientLogBox, ProcessText(FormManager.ClientLogContainer.GetLog()));
@@ -353,7 +353,7 @@ namespace MinecraftService.Client.Forms
             if (ServerSelectBox.Items.Count < 2) {
                 FormManager.Logger.AppendLine("Server removal failed! You must have at least one active server!");
                 MessageBox.Show("Server removal failed! You must have at least one active server!");
-                return; 
+                return;
             }
             using (RemoveServerControl form = new()) {
                 if (form.ShowDialog() == DialogResult.OK) {
@@ -546,7 +546,7 @@ namespace MinecraftService.Client.Forms
 
         public void RecievePlayerData(byte serverIndex, List<IPlayer> playerList) {
             ServerBusy = false;
-            _uiWaitDialog.SetCallback(new(() => { 
+            _uiWaitDialog.SetCallback(new(() => {
                 connectedHost.GetServerInfoByIndex(serverIndex).SetPlayerList(playerList);
                 PlayerManagerForm form = new(selectedServer);
                 form.ShowDialog();
@@ -628,7 +628,7 @@ namespace MinecraftService.Client.Forms
             DisableUI("Service is gathering level.dat...");
         }
 
-        public void LevelDatRecieved (string path) {
+        public void LevelDatRecieved(string path) {
             using (Process nbtStudioProcess = new()) {
                 nbtStudioProcess.StartInfo = new ProcessStartInfo(ConfigManager.NBTStudioPath, path);
                 nbtStudioProcess.Start();

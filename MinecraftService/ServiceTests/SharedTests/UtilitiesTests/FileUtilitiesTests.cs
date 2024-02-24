@@ -1,10 +1,5 @@
 ﻿using MinecraftService.Shared.Utilities;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace MMS_Tests.SharedTests.UtilitiesTests {
@@ -13,7 +8,6 @@ namespace MMS_Tests.SharedTests.UtilitiesTests {
         private readonly string _testCopyDir = @".\CopyDir";
         private readonly string _testFile = @".\TestDir\File.file";
         private readonly string _testCopyFile = @".\CopyDir\File.file";
-        private readonly string _testFileAsJson = @".\TestDir\File.json";
 
         [Fact]
         public void Can_Create_Inexistant_Directory() {
@@ -34,7 +28,7 @@ namespace MMS_Tests.SharedTests.UtilitiesTests {
         }
 
         [Fact]
-        public void CreateInexistantDirectory_Does_Not_Modify_Existing () {
+        public void CreateInexistantDirectory_Does_Not_Modify_Existing() {
             Can_Create_Inexistant_File();
             FileUtilities.CreateInexistantDirectory(_testDir);
             Assert.True(File.Exists(_testFile));

@@ -235,6 +235,6 @@ namespace MinecraftService.Service.Networking {
             }, _cancelTokenSource.Token);
         }
 
-        
+
     }
 }

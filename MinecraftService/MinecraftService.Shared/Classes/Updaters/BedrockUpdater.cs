@@ -1,16 +1,14 @@
 ﻿using MinecraftService.Shared.Interfaces;
-using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
 using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
+using MinecraftService.Shared.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using static MinecraftService.Shared.Classes.SharedStringBase;
-using MinecraftService.Shared.Utilities;
-using System.Diagnostics;
 
 namespace MinecraftService.Shared.Classes.Updaters {
     public class BedrockUpdater : IUpdater {
@@ -49,11 +47,11 @@ namespace MinecraftService.Shared.Classes.Updaters {
                 string versionManifestPath = GetServiceFilePath(MmsFileNameKeys.VersionManifest_Name, _serverArch.ToString());
                 string content = string.Empty;
                 while (content == string.Empty) {
-                    try { 
+                    try {
                         content = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.BdsVersionJson]).Result;
                     } catch {
                         if (retryCount > 2) {
-                            if(File.Exists(versionManifestPath)) {
+                            if (File.Exists(versionManifestPath)) {
                                 _logger.AppendLine($"Attempt to fetch {_serverArch} version manifest failed. Using previously stored copy!");
                                 content = File.ReadAllText(versionManifestPath);
                                 break;

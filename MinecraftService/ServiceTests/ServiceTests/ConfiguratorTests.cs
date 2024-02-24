@@ -1,7 +1,5 @@
-namespace MMS_Tests.ServiceTests
-{
-    public class ConfiguratorTests
-    {
+namespace MMS_Tests.ServiceTests {
+    public class ConfiguratorTests {
 
     }
 }

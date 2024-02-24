@@ -21,7 +21,7 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
 
             PluginVersionInfo versionInfo = new() {
                 BedrockVersion = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp(ServerPropertyKeys.ServerVersion).StringValue,
-               // LiteLoaderVersion = _serviceConfiguration.GetSettingsProp(ServerPropertyKeys.DeployedLiteLoaderVersion).StringValue,
+                // LiteLoaderVersion = _serviceConfiguration.GetSettingsProp(ServerPropertyKeys.DeployedLiteLoaderVersion).StringValue,
                 PluginFileName = zipArchive.Entries[0].Name
             };
             //_serviceConfiguration.SetServerPluginInfo(serverIndex, versionInfo);

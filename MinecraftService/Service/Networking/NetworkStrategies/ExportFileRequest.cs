@@ -21,7 +21,7 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
             string jsonString = Encoding.UTF8.GetString(data, 5, data.Length - 5);
             ExportImportFileModel exportFileInfo = JsonConvert.DeserializeObject<ExportImportFileModel>(jsonString);
-            if(exportFileInfo == null) {
+            if (exportFileInfo == null) {
                 return (null, 0, 0);
             }
             using MemoryStream ms = new();
@@ -49,8 +49,8 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
             byteStream.CopyTo(zipStream);
             zipStream.Dispose();
             packageFile.Dispose();
-            
-            
+
+
             exportFileInfo.Data = ms.ToArray();
             exportData = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(exportFileInfo));
             return (exportData, 0, NetworkMessageTypes.ExportFile);

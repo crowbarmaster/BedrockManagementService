@@ -175,7 +175,7 @@ namespace MinecraftService.Service.Server {
 
         private void StdOutToLog(object sender, DataReceivedEventArgs e) {
             if (e.Data != null && !e.Data.Contains("Running AutoCompaction...")) {
-                ConsoleFilterStrategyClass consoleFilter = new ConsoleFilterStrategyClass(_logger, _configurator, _serverConfiguration, this, _serviceConfiguration); 
+                ConsoleFilterStrategyClass consoleFilter = new ConsoleFilterStrategyClass(_logger, _configurator, _serverConfiguration, this, _serviceConfiguration);
                 if (!string.IsNullOrEmpty(e.Data)) {
                     string text = e.Data;
                     _serverLogger.AppendLine(text.Substring(text.IndexOf('[') == -1 ? 0 : text.IndexOf('[')));

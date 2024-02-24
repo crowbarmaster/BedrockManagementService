@@ -1,12 +1,14 @@
-﻿using MinecraftService.Client.Management;
-using MinecraftService.Shared.Classes;
-using MinecraftService.Shared.Classes.Configurations;
-using MinecraftService.Shared.Interfaces;
-using MinecraftService.Shared.SerializeModels;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using MinecraftService.Client.Management;
+using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Interfaces;
+using MinecraftService.Shared.SerializeModels;
 using static MinecraftService.Shared.Classes.SharedStringBase;
 
 namespace MinecraftService.Client.Forms {
@@ -90,7 +92,7 @@ namespace MinecraftService.Client.Forms {
                     return;
                 }
             }
-            if (srvNameBox.TextLength > 0) { 
+            if (srvNameBox.TextLength > 0) {
                 if (SelectedPropModel.ServicePropList.First(prop => prop.KeyName == ServerPropertyStrings[ServerPropertyKeys.MinecraftType]).StringValue == "Java") {
                     SelectedPropModel.ServicePropList.First(prop => prop.KeyName == ServerPropertyStrings[ServerPropertyKeys.ServerName]).StringValue = srvNameBox.Text;
                 } else {
@@ -118,14 +120,14 @@ namespace MinecraftService.Client.Forms {
         }
 
         private void VersionSelectComboBox_SelectedIndexChanged(object sender, System.EventArgs e) {
-     
+
         }
 
         private void BetaVersionCheckBox_CheckedChanged(object sender, System.EventArgs e) {
             VersionSelectComboBox.SelectedIndex = -1;
             VersionSelectComboBox.Items.Clear();
             VersionSelectComboBox.Items.AddRange(SelectedPropModel.VersionList.Where(x => x.IsBeta == BetaVersionCheckBox.Checked).ToArray());
-            if(VersionSelectComboBox.Items.Count > 0) { 
+            if (VersionSelectComboBox.Items.Count > 0) {
                 VersionSelectComboBox.SelectedIndex = 0;
             }
         }

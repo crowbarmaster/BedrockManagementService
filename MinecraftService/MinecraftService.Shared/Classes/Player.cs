@@ -1,4 +1,4 @@
-﻿   using MinecraftService.Shared.Interfaces;
+﻿using MinecraftService.Shared.Interfaces;
 using Newtonsoft.Json;
 using System;
 

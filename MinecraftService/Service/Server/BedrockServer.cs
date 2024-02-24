@@ -141,7 +141,7 @@ namespace MinecraftService.Service.Server {
         }
 
         private void PerformRollback(string zipFilePath) => _backupManager.PerformRollback(zipFilePath);
-    
+
         public ServerStatusModel GetServerStatus() => new() {
             ServerUptime = _startTime,
             ServerStatus = _currentServerStatus,
@@ -196,7 +196,7 @@ namespace MinecraftService.Service.Server {
                     input = input.Substring(trimIndex);
                 }
                 input = _garbageFilter.Filter(input);
-                if (!string.IsNullOrEmpty(input)) { 
+                if (!string.IsNullOrEmpty(input)) {
                     _serverLogger.AppendLine(input);
                     if (input.Equals("Quit correctly")) {
                         _logger.AppendLine($"Server {GetServerName()} received quit signal.");

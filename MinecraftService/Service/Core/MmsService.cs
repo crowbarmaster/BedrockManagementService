@@ -235,16 +235,16 @@ namespace MinecraftService.Service.Core {
                 if (_serviceConfiguration.GetServerList().Count() < 1) {
                     throw new Exception("No Servers Configured");
                 }
-                  var duplicatePortList = _serviceConfiguration.GetServerList()
-                    .Select(x => x.GetAllProps()
-                        .GroupBy(z => z.StringValue)
-                        .SelectMany(z => z
-                            .Where(y => y.KeyName.StartsWith(MmsDependServerPropStrings[MmsDependServerPropKeys.PortI4]))))
-                    .GroupBy(z => z.Select(x => x.StringValue))
-                    .SelectMany(x => x.Key)
-                    .GroupBy(x => x)
-                    .Where(x => x.Count() > 1)
-                    .ToList();
+                var duplicatePortList = _serviceConfiguration.GetServerList()
+                  .Select(x => x.GetAllProps()
+                      .GroupBy(z => z.StringValue)
+                      .SelectMany(z => z
+                          .Where(y => y.KeyName.StartsWith(MmsDependServerPropStrings[MmsDependServerPropKeys.PortI4]))))
+                  .GroupBy(z => z.Select(x => x.StringValue))
+                  .SelectMany(x => x.Key)
+                  .GroupBy(x => x)
+                  .Where(x => x.Count() > 1)
+                  .ToList();
                 var duplicateNameList = _serviceConfiguration.GetServerList()
                     .GroupBy(x => x.GetServerName())
                     .Where(x => x.Count() > 1)
@@ -275,7 +275,7 @@ namespace MinecraftService.Service.Core {
                             server.GetUpdater().ReplaceServerBuild(_serviceConfiguration.GetLatestVersion(server.GetServerArch())).Wait();
                         }
                     } else {
-                        if(server.GetServerVersion() != server.GetDeployedVersion()) {
+                        if (server.GetServerVersion() != server.GetDeployedVersion()) {
                             server.GetUpdater().ReplaceServerBuild().Wait();
                         }
                     }

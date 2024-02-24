@@ -1,11 +1,7 @@
 ﻿using MinecraftService.Shared.Classes.Configurations;
 using MinecraftService.Shared.Classes.Updaters;
 using MinecraftService.Shared.Interfaces;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static MinecraftService.Shared.Classes.SharedStringBase;
 
 namespace MinecraftService.Shared.Classes {
@@ -24,7 +20,7 @@ namespace MinecraftService.Shared.Classes {
             };
         }
 
-        public IUpdater GetUpdaterByArch (MinecraftServerArch arch) => UpdatersByArch[arch];
+        public IUpdater GetUpdaterByArch(MinecraftServerArch arch) => UpdatersByArch[arch];
 
         public IUpdater GetUpdaterByArchName(string archName) => UpdatersByArch[GetArchFromString(archName)];
 

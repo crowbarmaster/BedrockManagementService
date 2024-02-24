@@ -21,8 +21,8 @@ namespace MinecraftService.Service.Server {
 
         public void StartTimer(MmsTimerTypes timerType) {
             TimerWorker worker;
-            foreach(TimerWorker entry in ActiveTimers) {
-                if(entry.GetTimerType() == timerType) {
+            foreach (TimerWorker entry in ActiveTimers) {
+                if (entry.GetTimerType() == timerType) {
                     return;
                 }
             }
@@ -40,7 +40,7 @@ namespace MinecraftService.Service.Server {
                     removeWorker = worker;
                 }
             }
-            if(removeWorker != null) {
+            if (removeWorker != null) {
                 ActiveTimers.Remove(removeWorker);
             }
         }

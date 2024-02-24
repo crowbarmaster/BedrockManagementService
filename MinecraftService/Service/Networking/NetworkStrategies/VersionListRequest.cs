@@ -18,7 +18,7 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
             Dictionary<MinecraftServerArch, SimpleVersionModel[]> resultDictionary = new();
             EnumTypeLookup lookup = new(_logger, _serviceConfiguration);
-            foreach(KeyValuePair<MinecraftServerArch, IUpdater> updaterKvp in lookup.UpdatersByArch) {
+            foreach (KeyValuePair<MinecraftServerArch, IUpdater> updaterKvp in lookup.UpdatersByArch) {
                 List<SimpleVersionModel> verStrings = updaterKvp.Value.GetVersionList();
                 verStrings.Reverse();
                 resultDictionary.Add(updaterKvp.Key, verStrings.ToArray());

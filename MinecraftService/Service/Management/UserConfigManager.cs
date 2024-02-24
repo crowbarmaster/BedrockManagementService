@@ -34,7 +34,7 @@ namespace MinecraftService.Service.Management {
                 try {
                     _serviceConfiguration.ProcessUserConfiguration(File.ReadAllLines(GetServiceFilePath(MmsFileNameKeys.ServiceConfig)));
                     _logger.AppendLine("Loaded Service props.");
-                } catch(Exception ex) {
+                } catch (Exception ex) {
                     _logger.AppendLine($"Error loading Service props: {ex.Message}");
                 }
                 return;
@@ -353,7 +353,7 @@ namespace MinecraftService.Service.Management {
                     dir.Delete();
                 }
                 return true;
-            } catch (Exception e) { 
+            } catch (Exception e) {
                 _logger.AppendLine($"Error deleting server backups: {e.Message}");
                 return false;
             }
@@ -389,7 +389,7 @@ namespace MinecraftService.Service.Management {
                 return true;
             } catch (Exception e) {
                 _logger.AppendLine($"Error deleting server player files: {e.Message}");
-                return false; 
+                return false;
             }
         }
     }

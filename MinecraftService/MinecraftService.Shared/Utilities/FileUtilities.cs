@@ -13,7 +13,7 @@ using static MinecraftService.Shared.Classes.SharedStringBase;
 namespace MinecraftService.Shared.Utilities {
     public class FileUtilities {
 
-        public static string GetRandomPrefix () {
+        public static string GetRandomPrefix() {
             Random random = new Random();
             int rndNumber = random.Next(111111, 9999999);
             return rndNumber.ToString();
@@ -58,7 +58,7 @@ namespace MinecraftService.Shared.Utilities {
 
         public static Task DeleteFilesFromDirectory(DirectoryInfo source, bool removeSourceFolder, IProgress<ProgressModel> progress) {
             return Task.Run(() => {
-                if(!source.Exists) {
+                if (!source.Exists) {
                     return;
                 }
                 int curFileCount = 0;
@@ -138,8 +138,7 @@ namespace MinecraftService.Shared.Utilities {
                     Directory.Delete(dir, true);
         }
 
-        public static List<string> ReadLines(string path)
-        {
+        public static List<string> ReadLines(string path) {
             CreateInexistantFile(path);
             return File.ReadLines(path).ToList();
         }

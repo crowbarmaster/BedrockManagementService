@@ -35,7 +35,7 @@ namespace MinecraftService.Shared.PackParser {
             ParseDirectory(PackExtractDirectory, 0);
             onCompletion();
         });
-        
+
         public Task ProcessClientFiles(string[] files, Action onCompletion) => Task.Run(() => {
             isClient = true;
             if (Directory.Exists($@"{PackExtractDirectory}\ZipTemp")) {
@@ -66,7 +66,7 @@ namespace MinecraftService.Shared.PackParser {
             ParseDirectory(PackExtractDirectory, currentProgress);
             onCompletion();
         });
-        
+
 
         public void ParseDirectory(string directoryToParse, double startingPercent, IProgress<ProgressModel> progress) {
             _progress = progress;
@@ -85,7 +85,7 @@ namespace MinecraftService.Shared.PackParser {
                 foreach (FileInfo file in dirInfoFiles) {
                     currentFile++;
                     currentProgress += ((100 - currentProgress) / partsPerFile);
-                    if(_progress != null && currentFile % partsPerFile == 0) {
+                    if (_progress != null && currentFile % partsPerFile == 0) {
                         _progress.Report(new("Processing pack manifest files...", currentProgress));
                     }
                     if (file.Name == "levelname.txt") {
@@ -118,7 +118,7 @@ namespace MinecraftService.Shared.PackParser {
                             File.ReadAllBytes($@"{file.Directory.FullName}\pack_icon.png") :
                             null;
                         EventHandler<Newtonsoft.Json.Serialization.ErrorEventArgs> JsonError = delegate (object sender, Newtonsoft.Json.Serialization.ErrorEventArgs args) {
-                            if(_serverLogger != null) { 
+                            if (_serverLogger != null) {
                                 _serverLogger.AppendLine($"Error parsing packs: {args.ErrorContext.Error.Message}");
                             }
                             args.ErrorContext.Handled = true;
@@ -141,7 +141,7 @@ namespace MinecraftService.Shared.PackParser {
                             }
                             FoundPacks.Add(container);
                         } catch (Exception e) {
-                            if (_serverLogger != null) { 
+                            if (_serverLogger != null) {
                                 string plugin = container != null && container.FolderName != null ? container.FolderName : "null";
                                 _serverLogger.AppendLine($"Error parsing pack {plugin}! Error: {e.Message}");
                             }
@@ -150,7 +150,7 @@ namespace MinecraftService.Shared.PackParser {
                     }
                 }
             }
-            if(_progress != null) {
+            if (_progress != null) {
                 _progress.Report(new("Packs have been parsed.", 100));
             }
         }

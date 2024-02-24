@@ -5,8 +5,7 @@ using Newtonsoft.Json;
 using System.Text;
 using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace MinecraftService.Service.Networking.NetworkStrategies
-{
+namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class AddNewServer : IMessageParser {
         private readonly IProcessInfo _processInfo;
 

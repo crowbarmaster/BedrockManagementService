@@ -70,7 +70,7 @@ namespace MinecraftService.Service.Server {
                 while (_currentServerStatus != ServerStatus.Started) {
                     Task.Delay(10).Wait();
                 }
-                for(int i = 0; i < Enum.GetNames(typeof(MmsTimerTypes)).Length; i++) {
+                for (int i = 0; i < Enum.GetNames(typeof(MmsTimerTypes)).Length; i++) {
                     _timerService.StartTimer((MmsTimerTypes)i);
                 }
                 _startTime = DateTime.Now;

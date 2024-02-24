@@ -71,7 +71,7 @@ namespace MinecraftService.Service.Server.ConsoleFilters {
             if (input.Contains("PrintCannedLineStats")) {
                 int totalLinesIgnored = 0;
                 cannedEntries.ForEach(canned => {
-                    if(canned != null) { 
+                    if (canned != null) {
                         totalLinesIgnored += canned.TimesRepeated;
                     }
                 });
@@ -88,7 +88,7 @@ namespace MinecraftService.Service.Server.ConsoleFilters {
                         return null;
                     }
                 }
-            }     
+            }
             return input;
         }
     }

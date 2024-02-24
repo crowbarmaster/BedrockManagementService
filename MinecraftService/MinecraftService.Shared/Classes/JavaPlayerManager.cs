@@ -16,7 +16,7 @@ namespace MinecraftService.Shared.Classes {
         readonly string? _registeredDatabasePath;
 
         public JavaPlayerManager(IServerConfiguration? serverConfiguration) {
-            if(serverConfiguration == null) {
+            if (serverConfiguration == null) {
                 throw new ArgumentNullException(nameof(serverConfiguration));
             }
             _serverConfiguration = serverConfiguration;
@@ -42,12 +42,12 @@ namespace MinecraftService.Shared.Classes {
         public IPlayer GetOrCreatePlayer(string uuid, string username = "") {
             IPlayer foundPlayer = PlayerList.FirstOrDefault(p => p.GetPlayerID() == uuid);
             if (foundPlayer == null) {
-                if(username != "") { 
+                if (username != "") {
                     foundPlayer = PlayerList.FirstOrDefault(ply => ply.GetUsername() == username);
                 }
                 if (foundPlayer == null) {
                     Player player = new();
-                    if(uuid != string.Empty) { 
+                    if (uuid != string.Empty) {
                         player.Initialize(uuid, username);
                         PlayerList.Add(player);
                         return player;

@@ -3,15 +3,15 @@
 // This file may need updated according to the specific scenario of the application being upgraded.
 // For more information on ASP.NET Core hosting, see https://docs.microsoft.com/aspnet/core/fundamentals/host/web-host
 
+global using Microsoft.AspNetCore.Hosting;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Hosting;
 global using MinecraftService.Service.Core.Interfaces;
 global using MinecraftService.Service.Management;
 global using MinecraftService.Service.Networking;
 global using MinecraftService.Shared.Classes;
 global using MinecraftService.Shared.Interfaces;
 global using MinecraftService.Shared.Utilities;
-global using Microsoft.AspNetCore.Hosting;
-global using Microsoft.Extensions.DependencyInjection;
-global using Microsoft.Extensions.Hosting;
 global using System;
 global using System.Collections.Generic;
 global using System.Diagnostics;
@@ -23,8 +23,7 @@ global using System.Threading.Tasks;
 global using Topshelf;
 using MinecraftService.Service.Networking.Interfaces;
 
-namespace MinecraftService.Service
-{
+namespace MinecraftService.Service {
     public class Program {
         public static bool IsExiting = false;
         private static readonly string _declaredType = "Service";

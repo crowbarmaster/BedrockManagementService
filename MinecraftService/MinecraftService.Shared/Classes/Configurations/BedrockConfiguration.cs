@@ -1,7 +1,6 @@
 ﻿using MinecraftService.Shared.Classes.Updaters;
 using MinecraftService.Shared.Interfaces;
 using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
-using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
 using MinecraftService.Shared.SerializeModels;
 using MinecraftService.Shared.Utilities;
 using System;

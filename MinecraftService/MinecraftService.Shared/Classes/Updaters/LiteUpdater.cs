@@ -1,13 +1,11 @@
 ﻿using MinecraftService.Shared.Interfaces;
 using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
-using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
 using MinecraftService.Shared.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using static MinecraftService.Shared.Classes.SharedStringBase;
@@ -44,11 +42,11 @@ namespace MinecraftService.Shared.Classes.Updaters {
 
         public override Task CheckLatestVersion() => Task.Run(() => {
             int retryCount = 1;
-            string content = string.Empty; 
+            string content = string.Empty;
             string versionManifestPath = GetServiceFilePath(MmsFileNameKeys.VersionManifest_Name, _serverArch.ToString());
             while (content == string.Empty) {
                 try {
-            content = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.LLReleasesJson]).Result;
+                    content = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.LLReleasesJson]).Result;
                 } catch {
                     if (retryCount > 2) {
                         if (File.Exists(versionManifestPath)) {
@@ -215,7 +213,7 @@ namespace MinecraftService.Shared.Classes.Updaters {
                 _logger.AppendLine($"Extraction of files for {_serverConfiguration.GetServerName()} completed.");
             });
         }
-        public List<SimpleVersionModel> GetVersionList() {
+        public new List<SimpleVersionModel> GetVersionList() {
             List<SimpleVersionModel> result = new List<SimpleVersionModel>();
             string content = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.LLReleasesJson]).Result;
             List<LiteLoaderVersionManifest> versionList = JsonSerializer.Deserialize<List<LiteLoaderVersionManifest>>(content);
@@ -229,6 +227,6 @@ namespace MinecraftService.Shared.Classes.Updaters {
             return result;
         }
 
-        public void SetNewLogger(IServerLogger logger) => _logger = logger;
+        public new void SetNewLogger(IServerLogger logger) => _logger = logger;
     }
 }

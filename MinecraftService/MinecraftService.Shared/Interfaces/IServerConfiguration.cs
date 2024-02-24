@@ -1,7 +1,6 @@
 ﻿using MinecraftService.Shared.Classes;
 using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
 using MinecraftService.Shared.SerializeModels;
-using System;
 using System.Collections.Generic;
 using static MinecraftService.Shared.Classes.SharedStringBase;
 

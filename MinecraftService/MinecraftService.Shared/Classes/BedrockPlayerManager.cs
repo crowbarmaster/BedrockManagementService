@@ -16,7 +16,7 @@ namespace MinecraftService.Shared.Classes {
         readonly string? _registeredDatabasePath;
 
         public BedrockPlayerManager(IServerConfiguration? serverConfiguration) {
-            if(serverConfiguration == null) {
+            if (serverConfiguration == null) {
                 throw new ArgumentNullException(nameof(serverConfiguration));
             }
             _serverConfiguration = serverConfiguration;

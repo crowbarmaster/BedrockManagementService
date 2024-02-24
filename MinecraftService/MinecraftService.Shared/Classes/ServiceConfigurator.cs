@@ -14,7 +14,7 @@ namespace MinecraftService.Shared.Classes {
         private readonly IProcessInfo _processInfo;
         public ServiceConfigurator(IProcessInfo processInfo) : base() {
             _processInfo = processInfo;
-            if(processInfo != null && processInfo.DeclaredType() != "Client") {
+            if (processInfo != null && processInfo.DeclaredType() != "Client") {
                 PlayerManager = new ServicePlayerManager(this);
             }
         }
@@ -73,7 +73,7 @@ namespace MinecraftService.Shared.Classes {
         public void SetLatestVersion(MinecraftServerArch serverArch, string version) {
             LatestServerVersion = version;
             try {
-            File.WriteAllText(GetServiceFilePath(MmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[serverArch]), version);
+                File.WriteAllText(GetServiceFilePath(MmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[serverArch]), version);
             } catch (Exception) {
 
             }
@@ -144,7 +144,7 @@ namespace MinecraftService.Shared.Classes {
 
         public void RemoveServerInfo(IServerConfiguration serverConfiguration) {
             ServerList.Remove(serverConfiguration.GetServerInfo());
-            if(_processInfo == null || _processInfo.DeclaredType() == null || _processInfo.DeclaredType() == "Client") {
+            if (_processInfo == null || _processInfo.DeclaredType() == null || _processInfo.DeclaredType() == "Client") {
                 return;
             }
             File.Delete(GetServiceFilePath(MmsFileNameKeys.ServerConfig_Name, serverConfiguration.GetServerName()));

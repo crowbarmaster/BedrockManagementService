@@ -4,7 +4,6 @@ namespace MinecraftService.Shared.Classes {
     public class ServiceProcessInfo : IProcessInfo {
         private readonly string _declaredType;
         private readonly string _serviceDirectory;
-        private readonly string _serverName;
         private readonly int _processPid;
         private readonly bool _debugEnabled;
 

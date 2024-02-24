@@ -6,7 +6,7 @@ namespace MinecraftService.Shared.SerializeModels {
         public FileTypeFlags FileType;
         public PackageFlags PackageFlags;
 
-        public ExportImportManifestModel (ExportImportFileModel exportImportFile) {
+        public ExportImportManifestModel(ExportImportFileModel exportImportFile) {
             Filename = exportImportFile.Filename;
             FileType = exportImportFile.FileType;
             PackageFlags = exportImportFile.PackageFlags;

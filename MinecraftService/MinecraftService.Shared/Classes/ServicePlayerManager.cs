@@ -68,7 +68,7 @@ namespace MinecraftService.Shared.Classes {
                     .Select(x => x.Split(','))
                     .ToList();
         }
-        
+
         public void LoadPlayerDatabase() {
             string dbPath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerTelem_Name, "Service");
             string regPath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerRegistry_Name, "Service");

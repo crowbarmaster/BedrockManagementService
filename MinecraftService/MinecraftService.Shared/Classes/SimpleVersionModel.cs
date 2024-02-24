@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MinecraftService.Shared.Classes {
+﻿namespace MinecraftService.Shared.Classes {
     public class SimpleVersionModel {
         public string Version { get; set; }
         public bool IsBeta { get; set; }

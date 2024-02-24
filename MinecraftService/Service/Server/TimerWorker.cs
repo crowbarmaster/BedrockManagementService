@@ -63,7 +63,7 @@ namespace MinecraftService.Service.Server {
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e) {
             try {
-                if(_firedEventLogic == null || _firedEventLogic.Status != TaskStatus.Created) {
+                if (_firedEventLogic == null || _firedEventLogic.Status != TaskStatus.Created) {
                     return;
                 }
                 _firedEventLogic.Start();
@@ -78,7 +78,7 @@ namespace MinecraftService.Service.Server {
         }
 
         private void InitMessagesActions() {
-            if(_timerType == null) {
+            if (_timerType == null) {
                 return;
             }
             switch (_timerType) {

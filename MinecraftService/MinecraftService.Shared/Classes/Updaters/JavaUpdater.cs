@@ -1,14 +1,14 @@
 ﻿using MinecraftService.Shared.Interfaces;
 using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
+using MinecraftService.Shared.Utilities;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using static MinecraftService.Shared.Classes.SharedStringBase;
-using MinecraftService.Shared.Utilities;
 using JavaVersionManifest = MinecraftService.Shared.JsonModels.MinecraftJsonModels.Version;
-using Newtonsoft.Json;
 
 namespace MinecraftService.Shared.Classes.Updaters {
     public class JavaUpdater : IUpdater {
@@ -118,7 +118,7 @@ namespace MinecraftService.Shared.Classes.Updaters {
                             retryCount++;
                         }
                     }
-                    betaDetails = JsonConvert.DeserializeObject<JavaVersionDetailsModel>(content); 
+                    betaDetails = JsonConvert.DeserializeObject<JavaVersionDetailsModel>(content);
                 }
                 if (releaseDetails == null) {
                     return;
@@ -222,7 +222,7 @@ namespace MinecraftService.Shared.Classes.Updaters {
                     }
 
                 } catch (Exception e) {
-                    if(e.GetType() == typeof(InvalidDataException)) {
+                    if (e.GetType() == typeof(InvalidDataException)) {
                         throw new FileNotFoundException($"Build file \"Update_{version}.zip\" found corrupt. Service cannot proceed!!");
                     } else {
                         _logger.AppendLine($"ReplaceServerBuild resulted in error: {e.Message}\n{e.StackTrace}");

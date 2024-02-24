@@ -21,10 +21,10 @@ namespace MinecraftService.Shared.Classes {
         }
 
         public override string ToString() => StringValue;
-        
 
-        public string PropFileFormatString() => $"{KeyName}={StringValue}"; 
-        
+
+        public string PropFileFormatString() => $"{KeyName}={StringValue}";
+
 
         public void SetValue(string newValue) {
             StringValue = newValue;
