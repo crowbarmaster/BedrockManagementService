@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 #nullable enable
 
 namespace MinecraftService.Shared.Classes {
@@ -206,6 +207,8 @@ namespace MinecraftService.Shared.Classes {
             { MinecraftServerArch.LiteLoader, "LiteLoader" },
             { MinecraftServerArch.Java, "Java" }
         };
+
+        public static string GetNewTempDirectory() => $"{Path.GetTempPath()}MMSTemp\\{Guid.NewGuid()}";
 
         public static MinecraftServerArch GetArchFromString(string archName) {
             switch (archName) {

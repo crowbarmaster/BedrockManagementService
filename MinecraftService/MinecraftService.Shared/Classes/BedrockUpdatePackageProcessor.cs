@@ -19,7 +19,7 @@ namespace MinecraftService.Shared.Classes {
         public BedrockUpdatePackageProcessor(IServerLogger logger, string packageVersion, string fileTargetDirectory) {
             _packageVersion = packageVersion;
             _fileTargetDirectory = fileTargetDirectory;
-            _workingDirectory = $@"{Path.GetTempPath()}{FileUtilities.GetRandomPrefix()}MMSTemp";
+            _workingDirectory = GetNewTempDirectory();
             Directory.CreateDirectory(_workingDirectory);
             _logger = logger;
         }
@@ -27,7 +27,7 @@ namespace MinecraftService.Shared.Classes {
         public BedrockUpdatePackageProcessor(string packageVersion, string fileTargetDirectory) {
             _packageVersion = packageVersion;
             _fileTargetDirectory = fileTargetDirectory;
-            _workingDirectory = $@"{Path.GetTempPath()}{FileUtilities.GetRandomPrefix()}MMSTemp";
+            _workingDirectory = GetNewTempDirectory();
             _loggingEnabled = false;
         }
 
