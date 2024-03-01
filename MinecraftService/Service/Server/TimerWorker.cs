@@ -14,7 +14,7 @@ namespace MinecraftService.Service.Server {
         private IServiceConfiguration _serviceConfiguration;
         private IServerController _parentServerController;
         private IServerConfiguration _parentServerConfig;
-        private IServerLogger _serverLogger;
+        private IServerLogger _serviceLogger;
         private MmsTimerTypes _timerType;
         private System.Timers.Timer? _timer;
         private CrontabSchedule? _cron;
@@ -27,11 +27,11 @@ namespace MinecraftService.Service.Server {
             _serviceConfiguration = service;
             _parentServerController = runningServer;
             _parentServerConfig = serverConfiguration;
-            _serverLogger = runningServer.GetLogger();
             _timerType = timerType;
+            _serviceLogger = runningServer.GetServiceLogger();
         }
 
-        public bool Start() {
+        public Task<bool> Start() => Task.Run(() => {
             cancelSource = new();
             InitMessagesActions();
             if (!_enableTest.Invoke()) {
@@ -47,17 +47,17 @@ namespace MinecraftService.Service.Server {
                     _timer = new System.Timers.Timer(interval);
                     _timer.Elapsed += Timer_Elapsed;
                     _timer.Start();
-                    _serverLogger.AppendLine(_initializeMessage);
+                    _serviceLogger.AppendLine(_initializeMessage);
                 }
             }
             return true;
-        }
+        });
 
-        public void Stop() {
+        public Task Stop() => Task.Run(() => {
             cancelSource.Cancel();
             _timer.Stop();
             _timer = null;
-        }
+        });
 
         public MmsTimerTypes GetTimerType() => _timerType;
 
@@ -68,57 +68,82 @@ namespace MinecraftService.Service.Server {
                 }
                 _firedEventLogic.Start();
                 _firedEventLogic.Wait();
-                ((System.Timers.Timer)sender).Stop();
+                Stop().Wait();
                 Start();
             } catch (Exception ex) {
-                ((System.Timers.Timer)sender).Stop();
-                _serverLogger.AppendLine($"Error in UpdateTimer_Elapsed {ex}");
+                Stop().Wait();
+                _serviceLogger.AppendLine($"Error in UpdateTimer_Elapsed {ex}");
                 Start();
             }
         }
 
-        private void InitMessagesActions() {
-            if (_timerType == null) {
+        private void TryParseCron(string value, out CrontabSchedule? result) {
+            try {
+                result = CrontabSchedule.Parse(value);
                 return;
+            } catch (CrontabException ex) {
+                _serviceLogger.AppendLine($"Crontab error occured: {ex.Message}");
+            }
+            result = null;
+        }
+
+        private bool InitMessagesActions() {
+            if (_timerType == null) {
+                return false;
             }
             switch (_timerType) {
                 case MmsTimerTypes.Update:
                     _enableTest = new Func<bool>(() => _parentServerConfig.GetSettingsProp(ServerPropertyKeys.CheckUpdatesEnabled).GetBoolValue());
-                    _cron = CrontabSchedule.TryParse(_parentServerConfig.GetSettingsProp(ServerPropertyKeys.UpdateCron).ToString());
-                    _initializeMessage = $"Automatic updates Enabled, will be checked at: {_cron.GetNextOccurrence(DateTime.Now):G}.";
+                    TryParseCron(_parentServerConfig.GetSettingsProp(ServerPropertyKeys.UpdateCron).ToString(), out _cron);
+                    if (_cron == null) {
+                        _serviceLogger.AppendLine("Timer execution has been halted! Please check server config.");
+                        return false;
+                    }
+                    _initializeMessage = $"Automatic updates for server {_parentServerConfig.GetServerName()} enabled, will be checked at: {_cron.GetNextOccurrence(DateTime.Now):G}.";
                     _firedEventLogic = new Task(() => {
                         _parentServerConfig.GetUpdater().CheckLatestVersion().Wait();
                         if (_parentServerConfig.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue() && _parentServerConfig.GetDeployedVersion() != _serviceConfiguration.GetLatestVersion(_parentServerConfig.GetServerArch())) {
-                            _serverLogger.AppendLine("Version change detected! Restarting server(s) to apply update...");
+                            _serviceLogger.AppendLine("Version change detected! Restarting server(s) to apply update...");
                             _parentServerController.PerformOfflineServerTask(new Action(() => _parentServerConfig.GetUpdater().ReplaceServerBuild(_serviceConfiguration.GetLatestVersion(_parentServerConfig.GetServerArch())).Wait()));
                         }
                     }, cancelSource.Token);
+                    return true;
                     break;
                 case MmsTimerTypes.Backup:
                     _enableTest = new Func<bool>(() => _parentServerConfig.GetSettingsProp(ServerPropertyKeys.AutoBackupEnabled).GetBoolValue());
-                    _cron = CrontabSchedule.TryParse(_parentServerConfig.GetSettingsProp(ServerPropertyKeys.BackupCron).ToString());
-                    _initializeMessage = $"Automatic backups enabled, next backup at: {_cron.GetNextOccurrence(DateTime.Now):G}.";
+                    TryParseCron(_parentServerConfig.GetSettingsProp(ServerPropertyKeys.BackupCron).ToString(), out _cron);
+                    if (_cron == null) {
+                        _serviceLogger.AppendLine("Timer execution has been halted! Please check server config.");
+                        return false;
+                    }
+                    _initializeMessage = $"Automatic backups for server {_parentServerConfig.GetServerName()} enabled, next backup at: {_cron.GetNextOccurrence(DateTime.Now):G}.";
                     _firedEventLogic = new Task(() => {
                         bool shouldBackup = _parentServerConfig.GetSettingsProp(ServerPropertyKeys.IgnoreInactiveBackups).GetBoolValue();
                         if ((shouldBackup && _parentServerController.IsServerModified()) || !shouldBackup) {
                             _parentServerController.GetBackupManager().InitializeBackup();
                         } else {
-                            _serverLogger.AppendLine($"Backup for server {_parentServerConfig.GetServerName()} was skipped due to inactivity.");
+                            _serviceLogger.AppendLine($"Backup for server {_parentServerConfig.GetServerName()} was skipped due to inactivity.");
                         }
 
                     }, cancelSource.Token);
                     break;
                 case MmsTimerTypes.Restart:
                     _enableTest = new Func<bool>(() => _parentServerConfig.GetSettingsProp(ServerPropertyKeys.AutoRestartEnabled).GetBoolValue());
-                    _cron = CrontabSchedule.TryParse(_parentServerConfig.GetSettingsProp(ServerPropertyKeys.RestartCron).ToString());
-                    _initializeMessage = $"Automatic server restarts enabled, next scheduled restart at: {_cron.GetNextOccurrence(DateTime.Now):G}.";
+                    TryParseCron(_parentServerConfig.GetSettingsProp(ServerPropertyKeys.RestartCron).ToString(), out _cron);
+                    if (_cron == null) {
+                        _serviceLogger.AppendLine("Timer execution has been halted! Please check server config.");
+                        return false;
+                    }
+                    _initializeMessage = $"Automatic server restarts for server {_parentServerConfig.GetServerName()} enabled, next scheduled restart at: {_cron.GetNextOccurrence(DateTime.Now):G}.";
                     _firedEventLogic = new Task(() => {
                         _parentServerController.RestartServer();
                     }, cancelSource.Token);
                     break;
                 default:
+                    return false;
                     break;
             }
+            return false;
         }
     }
 }

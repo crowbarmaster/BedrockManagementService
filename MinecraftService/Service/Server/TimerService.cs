@@ -19,15 +19,28 @@ namespace MinecraftService.Service.Server {
             _serviceConfiguration = service;
         }
 
+        public void StartTimerService() {
+            for (int i = 0; i < Enum.GetNames(typeof(MmsTimerTypes)).Length; i++) {
+                StartTimer((MmsTimerTypes)i);
+            }
+        }
+
+        public void StopTimerService() {
+            foreach (TimerWorker worker in ActiveTimers) {
+                worker.Stop().Wait();
+            }
+            ActiveTimers.Clear();
+        }
+
         public void StartTimer(MmsTimerTypes timerType) {
-            TimerWorker worker;
             foreach (TimerWorker entry in ActiveTimers) {
                 if (entry.GetTimerType() == timerType) {
                     return;
                 }
             }
+            TimerWorker worker;
             worker = CreateTimer(timerType);
-            if (worker.Start()) {
+            if (worker.Start().Result) {
                 ActiveTimers.Add(worker);
             }
         }
@@ -36,20 +49,13 @@ namespace MinecraftService.Service.Server {
             TimerWorker removeWorker = null;
             foreach (TimerWorker worker in ActiveTimers) {
                 if (worker.GetTimerType() == timerType) {
-                    worker.Stop();
+                    worker.Stop().Wait();
                     removeWorker = worker;
                 }
             }
             if (removeWorker != null) {
                 ActiveTimers.Remove(removeWorker);
             }
-        }
-
-        public void DisposeAllTimers() {
-            foreach (TimerWorker worker in ActiveTimers) {
-                worker.Stop();
-            }
-            ActiveTimers.Clear();
         }
 
         private TimerWorker CreateTimer(MmsTimerTypes timerType) => new TimerWorker(_runningServer, _parentServerConfig, _serviceConfiguration, timerType);

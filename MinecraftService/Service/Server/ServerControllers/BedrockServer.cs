@@ -1,5 +1,9 @@
-﻿using MinecraftService.Service.Server.ConsoleFilters;
+﻿using MinecraftService;
+using MinecraftService.Service;
+using MinecraftService.Service.Server;
+using MinecraftService.Service.Server.ConsoleFilters;
 using MinecraftService.Service.Server.Interfaces;
+using MinecraftService.Service.Server.ServerControllers;
 using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
 using MinecraftService.Shared.PackParser;
 using MinecraftService.Shared.SerializeModels;
@@ -9,7 +13,7 @@ using System.IO.Compression;
 using System.Timers;
 using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace MinecraftService.Service.Server {
+namespace MinecraftService.Service.Server.ServerControllers {
     public class BedrockServer : IServerController {
         private Task? _serverTask;
         private Task? _watchdogTask;
@@ -75,9 +79,7 @@ namespace MinecraftService.Service.Server {
                 while (_currentServerStatus != ServerStatus.Started) {
                     Task.Delay(10).Wait();
                 }
-                for (int i = 0; i < Enum.GetNames(typeof(MmsTimerTypes)).Length; i++) {
-                    _timerService.StartTimer((MmsTimerTypes)i);
-                }
+
                 _startTime = DateTime.Now;
             });
         }
@@ -90,7 +92,7 @@ namespace MinecraftService.Service.Server {
                 if (stopWatchdog) {
                     StopWatchdog().Wait();
                 }
-
+                _timerService.StopTimerService();
                 if (_currentServerStatus != ServerStatus.Started) {
                     if (_serverProcess != null) {
                         _serverProcess.Kill();
@@ -103,6 +105,7 @@ namespace MinecraftService.Service.Server {
                 }
             });
         }
+
         public Task RestartServer() {
             return Task.Run(() => {
                 ServerStop(false).Wait();
@@ -155,6 +158,8 @@ namespace MinecraftService.Service.Server {
         public List<IPlayer> GetActivePlayerList() => _connectedPlayers;
 
         public IServerLogger GetLogger() => _serverLogger;
+
+        public IServerLogger GetServiceLogger() => _logger;
 
         public bool IsServerModified() => _serverModifiedFlag;
 
