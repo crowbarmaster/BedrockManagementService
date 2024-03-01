@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using MinecraftService.Client.Management;
 using MinecraftService.Shared.Classes;
-using MinecraftService.Shared.Utilities;
 
 namespace MinecraftService.Client.Networking.NetworkStrategies {
     public class LevelEditFile : INetworkMessage {

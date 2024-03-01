@@ -129,7 +129,7 @@ namespace MinecraftService.Client.Forms {
         }
 
         private void VersionSelectComboBox_SelectedIndexChanged(object sender, System.EventArgs e) {
-            if(!_typeChanging && VersionSelectComboBox.Items.Count > 0 && _latestVersionLookup.GetValueOrDefault(GetArchFromString((string)ServerTypeComboBox.SelectedItem)).Version != ((SimpleVersionModel)((ComboBox)sender).SelectedItem).Version) { 
+            if (!_typeChanging && VersionSelectComboBox.Items.Count > 0 && _latestVersionLookup.GetValueOrDefault(GetArchFromString((string)ServerTypeComboBox.SelectedItem)).Version != ((SimpleVersionModel)((ComboBox)sender).SelectedItem).Version) {
                 _customVersionSelected = true;
             }
         }
