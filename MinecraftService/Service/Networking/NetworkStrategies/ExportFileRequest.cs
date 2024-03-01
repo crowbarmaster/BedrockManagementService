@@ -68,7 +68,7 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
             }
             if (exportFileInfo.PackageFlags >= PackageFlags.WorldPacks) {
                 Progress<ProgressModel> progress = new Progress<ProgressModel>((p) => _logger.AppendLine($"Creating pack archive. {p.Progress}% completed..."));
-                FileUtilities.CreatePackBackupFiles(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString(), server.GetProp(MmsDependServerPropKeys.LevelName).ToString(), packageFile, progress);
+                FileUtilities.AppendServerPacksToArchive(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString(), server.GetProp(MmsDependServerPropKeys.LevelName).ToString(), packageFile, progress);
             }
             if (exportFileInfo.PackageFlags >= PackageFlags.PlayerDatabase) {
                 if (File.Exists(GetServiceFilePath(MmsFileNameKeys.ServerPlayerTelem_Name, server.GetServerName()))) {

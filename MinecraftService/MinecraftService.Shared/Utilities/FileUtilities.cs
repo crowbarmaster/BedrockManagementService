@@ -82,22 +82,7 @@ namespace MinecraftService.Shared.Utilities {
             });
         }
 
-        public static string AppendServerPacksToArchive(string serverPath, ZipArchive backupZip, DirectoryInfo levelDirInfo, IProgress<ProgressModel> progress) {
-            string levelName = levelDirInfo.Name;
-            CreatePackBackupFiles(serverPath, levelName, backupZip, progress);
-            string filePath = $@"{Path.GetTempPath()}{GetRandomPrefix()}MMSTemp\PackTemp";
-            if (Directory.Exists(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName))) {
-                ZipUtilities.CreateFromDirectory(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName), $@"{filePath}\resource_packs.zip", progress);
-                backupZip.CreateEntryFromFile($@"{filePath}\resource_packs.zip", "resource_packs.zip");
-            }
-            if (Directory.Exists(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName))) {
-                ZipUtilities.CreateFromDirectory(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName), $@"{filePath}\behavior_packs.zip", progress);
-                backupZip.CreateEntryFromFile($@"{filePath}\behavior_packs.zip", "behavior_packs.zip");
-            }
-            return filePath;
-        }
-
-        public static string CreatePackBackupFiles(string serverPath, string levelName, ZipArchive destinationArchive, IProgress<ProgressModel> progress) {
+        public static void AppendServerPacksToArchive(string serverPath, string levelName, ZipArchive destinationArchive, IProgress<ProgressModel> progress) {
             string resouceFolderPath = GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName);
             string behaviorFolderPath = GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName);
             string behaviorFilePath = GetServerFilePath(ServerFileNameKeys.WorldBehaviorPacks, serverPath, levelName);
@@ -107,7 +92,7 @@ namespace MinecraftService.Shared.Utilities {
             packParser.ParseDirectory(behaviorFolderPath, 0);
             WorldPackFileModel worldPacks = new(resoruceFilePath);
             worldPacks.Contents.AddRange(new WorldPackFileModel(behaviorFilePath).Contents);
-            string packBackupFolderPath = $@"{Path.GetTempPath()}{GetRandomPrefix()}MMSTemp\InstalledPacks";
+            string packBackupFolderPath = $@"{GetNewTempDirectory()}\InstalledPacks";
             Directory.CreateDirectory(packBackupFolderPath);
             if (worldPacks.Contents.Count > 0) {
                 foreach (WorldPackEntryJsonModel model in worldPacks.Contents) {
@@ -120,7 +105,6 @@ namespace MinecraftService.Shared.Utilities {
                     destinationArchive.CreateEntryFromFile($@"{packBackupFolderPath}\{packLocation[packLocation.LastIndexOf('\\')..]}.zip", $@"InstalledPacks/{packLocation[packLocation.LastIndexOf('\\')..]}.zip");
                 }
             }
-            return packBackupFolderPath;
         }
 
         public static void DeleteFilesFromDirectory(string source, bool removeSourceFolder, IProgress<ProgressModel> progress) => DeleteFilesFromDirectory(new DirectoryInfo(source), removeSourceFolder, progress);

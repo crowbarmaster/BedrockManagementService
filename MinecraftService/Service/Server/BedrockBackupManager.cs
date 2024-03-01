@@ -81,7 +81,7 @@ namespace MinecraftService.Service.Server {
                 _server.WriteToStandardIn("say Server backup complete.");
                 if (_autoBackupsContainPacks) {
                     Progress<ProgressModel> progress = new Progress<ProgressModel>((p) => _logger.AppendLine($"Adding packs to archive. {p.Progress}% complete..."));
-                    FileUtilities.AppendServerPacksToArchive(serverPath, backupZip, levelDirInfo, progress);
+                    FileUtilities.AppendServerPacksToArchive(serverPath, levelDirInfo.FullName, backupZip, progress);
                 }
                 _serviceConfiguration.CalculateTotalBackupsAllServers().Wait();
                 return result;
@@ -113,7 +113,7 @@ namespace MinecraftService.Service.Server {
                 _logger.AppendLine($"Copied files from backup \"{backupZipFileInfo.Name}\" to server worlds directory.");
                 MinecraftPackParser parser = new(_logger, progress);
                 foreach (FileInfo file in backupPacksDir.GetFiles()) {
-                    string tempDir = $@"{Path.GetTempPath()}{FileUtilities.GetRandomPrefix()}MMSTemp\PackTemp";
+                    string tempDir = $@"{SharedStringBase.GetNewTempDirectory()}\PackTemp";
                     ZipUtilities.ExtractToDirectory(file.FullName, tempDir, progress);
                     parser.FoundPacks.Clear();
                     parser.ParseDirectory(tempDir, 0);
