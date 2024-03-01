@@ -16,6 +16,9 @@ namespace MinecraftService.Client.Forms {
         public Dictionary<MinecraftServerArch, ServerCombinedPropModel> LoadedConfigs = new Dictionary<MinecraftServerArch, ServerCombinedPropModel>();
         public ServerCombinedPropModel SelectedPropModel = new();
         private Dictionary<MinecraftServerArch, SimpleVersionModel[]> VersionLists;
+        private Dictionary<MinecraftServerArch, SimpleVersionModel> _latestVersionLookup = new();
+        private bool _customVersionSelected = false;
+        private bool _typeChanging = false;
         private readonly List<IServerConfiguration> _serverConfigurations;
         private readonly IClientSideServiceConfiguration _serviceConfiguration;
         private readonly List<string> serviceConfigExcludeList = new()
@@ -42,6 +45,7 @@ namespace MinecraftService.Client.Forms {
                 serverCombinedPropModel.ServerPropList = server.GetAllProps();
                 serverCombinedPropModel.ServicePropList = server.GetSettingsList();
                 serverCombinedPropModel.VersionList = new List<SimpleVersionModel>(VersionLists[kvp.Key]);
+                _latestVersionLookup.Add(kvp.Key, serverCombinedPropModel.VersionList[0]);
                 LoadedConfigs.Add(server.GetServerArch(), serverCombinedPropModel);
             }
             VersionSelectComboBox.Items.Clear();
@@ -105,10 +109,14 @@ namespace MinecraftService.Client.Forms {
                 SelectedPropModel.ServerPropList.First(prop => prop.KeyName == MmsDependServerPropStrings[MmsDependServerPropKeys.PortI6]).StringValue = ipV6Box.Text;
 
             SelectedPropModel.ServicePropList.First(prop => prop.KeyName == ServerPropertyStrings[ServerPropertyKeys.ServerVersion]).StringValue = ((SimpleVersionModel)VersionSelectComboBox.SelectedItem).Version;
+            if (_customVersionSelected) {
+                SelectedPropModel.ServicePropList.First(prop => prop.KeyName == ServerPropertyStrings[ServerPropertyKeys.AutoDeployUpdates]).StringValue = "False";
+            }
             DialogResult = DialogResult.OK;
         }
 
         private void ServerTypeComboBox_SelectedIndexChanged(object sender, System.EventArgs e) {
+            _typeChanging = true;
             SelectedPropModel = LoadedConfigs[GetArchFromString((string)ServerTypeComboBox.SelectedItem)];
             VersionSelectComboBox.SelectedIndex = -1;
             VersionSelectComboBox.Items.Clear();
@@ -117,10 +125,13 @@ namespace MinecraftService.Client.Forms {
             if (VersionSelectComboBox.Items.Count > 0) {
                 VersionSelectComboBox.SelectedIndex = 0;
             }
+            _typeChanging = false;
         }
 
         private void VersionSelectComboBox_SelectedIndexChanged(object sender, System.EventArgs e) {
-
+            if(!_typeChanging && VersionSelectComboBox.Items.Count > 0 && _latestVersionLookup.GetValueOrDefault(GetArchFromString((string)ServerTypeComboBox.SelectedItem)).Version != ((SimpleVersionModel)((ComboBox)sender).SelectedItem).Version) { 
+                _customVersionSelected = true;
+            }
         }
 
         private void BetaVersionCheckBox_CheckedChanged(object sender, System.EventArgs e) {
