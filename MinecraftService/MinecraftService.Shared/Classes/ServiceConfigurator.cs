@@ -161,10 +161,7 @@ namespace MinecraftService.Shared.Classes {
         }
 
         public void AddNewServerInfo(IServerConfiguration serverConfiguration) {
-            if (ServerList.Count == 0) {
-
-            }
-            if (serverConfiguration.GetProp(MmsDependServerPropKeys.PortI4).StringValue == "19132" && serverConfiguration.GetProp(MmsDependServerPropKeys.PortI6).StringValue == "19133") {
+            if (serverConfiguration.GetProp(MmsDependServerPropKeys.PortI4).StringValue == "19132" && (serverConfiguration.GetServerArch() == MinecraftServerArch.Java || serverConfiguration.GetProp(MmsDependServerPropKeys.PortI6).StringValue == "19133")) {
                 ServerList.Insert(0, serverConfiguration);
                 return;
             }
