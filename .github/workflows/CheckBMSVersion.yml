@@ -15,7 +15,7 @@ jobs:
         steps:
         - uses: actions/checkout@v3
         - run: |
-           Set-PSDebug -Trace 0;
+           Set-PSDebug -Trace 1;
            class LegacyBedrockInfo {
                [string]$version;
                [string]$winurl;
