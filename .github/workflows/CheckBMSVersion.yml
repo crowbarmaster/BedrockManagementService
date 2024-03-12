@@ -15,62 +15,90 @@ jobs:
         steps:
         - uses: actions/checkout@v3
         - run: |
-            Set-PSDebug -Trace 1;
-            class BedrockInfo {
-                [string]$version;
-                [string]$winurl;
-                [string]$linurl;
-            }
-            [Net.ServicePointManager]::SecurityProtocol = "tls12", "tls11";
-            $reply = Invoke-WebRequest -UseBasicParsing -Headers @{"Accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/apng,*/*;q=0.8"; "Accept-Language"="en-GB,en;q=0.9,en-US;q=0.8"; "Connection"="keep-alive"; "Cache-Control"="no-cache"; "Pragma"="no-cache"; "User-Agent"="Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)"} -Uri "https://www.minecraft.net/en-us/download/server/bedrock";
-            $existing = get-content 'BMS_Files\\bedrock_version_manifest.json';
-            if ($reply.Content -match 'https://minecraft.azureedge.net/bin-win/bedrock-server-(?<version>.+)\.zip') {
-                $version = $Matches.version;
-                if ( $existing ) {
-                    $json = $existing | ConvertFrom-Json;
-                    $lastEntry = $json | Select-Object -Last 1;
-                    $entryVersion = $lastEntry.version;
-                    if($entryVersion -ne $version) {
-                        $newEnt = [BedrockInfo]@{
-                            version=$version;
-                            winurl='https://minecraft.azureedge.net/bin-win/bedrock-server-'+$version+'.zip';
-                            linurl='https://minecraft.azureedge.net/bin-linux/bedrock-server-'+$version+'.zip' 
-                        };
-                        $json += $newEnt; $json | ConvertTo-Json -depth 100 | Out-File "BMS_Files\\bedrock_version_manifest.json";
-                        'File was updated!';
-                    }
-                }
-            } 
-            class LiteLoaderInfo {
-                [string]$Version; 
-                [string]$BDSVersion;
-                [string]$ProtocolVer;
-                [string]$IsBeta;
-                [string]$LLUrl;
-                [string]$ModuleUrl;
-            }
-            $LLreply = Invoke-WebRequest -UseBasicParsing -Uri "https://api.github.com/repos/LiteLDev/LiteLoaderBDSv2/releases";
-            $LLjson = $LLreply | ConvertFrom-Json;
-            [Array]::Reverse($LLjson);
-            $LLCollect = @();
-            foreach ($item in $LLjson){
-                if($item.body -match '!\[BDS (?<BDSVer>.+?)\]') {
-                    $BDSVer = $Matches.BDSVer;
-                    $item.body -match '!\[Protocol (?<ProVer>.+?)\]';
-                    $ProVer = $Matches.ProVer;
-                    $newLL = [LiteLoaderInfo]@{ 
-                        Version=$item.tag_name; 
-                        BDSVersion=$BDSVer; 
-                        ProtocolVer=$ProVer; 
-                        IsBeta=$item.prerelease?"true":"false";
-                        LLUrl="https://github.com/LiteLDev/LiteLoaderBDS/releases/download/"+$item.tag_name+"/LiteLoaderBDS.zip"; 
-                        ModuleUrl="https://github.com/LiteLDev/LiteLoaderBDS/releases/download/"+$item.tag_name+"/Modules.zip" 
-                    }; 
-                    $LLCollect += $newLL
-                }
-            }
-            $LLCollect | ConvertTo-Json -depth 100 | Out-File "BMS_Files\\liteloader_version_manifest.json"; 
-            'LL file was updated!';
+           Set-PSDebug -Trace 0;
+           class LegacyBedrockInfo {
+               [string]$version;
+               [string]$winurl;
+               [string]$linurl;
+           }
+           
+           class BedrockInfo {
+               [string]$version;
+               [string]$winurl;
+               [string]$linurl;
+           	   [PropInfoEntry[]]$proplist;
+           }
+           
+           class PropInfoEntry {
+           	  [string]$Key;
+           	  [string]$Value;
+           }
+           
+           $ConnectionHeaders = @{"Accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/apng,*/*;q=0.8"; "Accept-Language"="en-GB,en;q=0.9,en-US;q=0.8"; "Connection"="keep-alive"; "Cache-Control"="no-cache"; "Pragma"="no-cache"; "User-Agent"="Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)"};
+           [Net.ServicePointManager]::SecurityProtocol = "tls12", "tls11";
+           $reply = Invoke-WebRequest -UseBasicParsing -Headers $ConnectionHeaders -Uri "https://www.minecraft.net/en-us/download/server/bedrock";
+           $existing = get-content 'BMS_Files\\bedrock_version_manifest.json';
+           $latestVer;
+           if ($reply.Content -match 'https://minecraft.azureedge.net/bin-win/bedrock-server-(?<version>.+)\.zip') {
+               $version = $Matches.version;
+               if ( $existing ) {
+                   $json = $existing | ConvertFrom-Json;
+                   $latestVer = $json | Select-Object -Last 1;
+                   $entryVer = $latestVer.version;
+                   if($entryVer -ne $version) {
+                       $newEnt = [LegacyBedrockInfo]@{
+                           version=$version;
+                           winurl='https://minecraft.azureedge.net/bin-win/bedrock-server-'+$version+'.zip';
+                           linurl='https://minecraft.azureedge.net/bin-linux/bedrock-server-'+$version+'.zip';
+                       };
+                       $json += $newEnt;
+           			$json | ConvertTo-Json -depth 100 | Out-File "BMS_Files\\bedrock_version_manifest.json";
+                       'File was updated!';
+           			mkdir 'BedrockTemp';
+           			$curDir = Get-Location;
+           			$zipPath = $curDir.Path + '\\BedrockTemp\\Server.zip'
+           			Invoke-WebRequest -UseBasicParsing -Headers $ConnectionHeaders -Uri $latestVer.winurl -OutFile $zipPath;
+           			$zipStream = New-Object IO.FileStream $zipPath, 'Open', 'Read', 'Read';
+           			$zipArchive = New-Object IO.Compression.ZipArchive $zipStream, "Read";
+           			$propList = @();
+           			foreach ($file in $zipArchive.Entries) {
+           				if ($file.Name -eq 'server.properties') {
+           					$fileStream = $file.Open();
+           					$reader = New-Object IO.StreamReader $fileStream;
+           					while (($line = $reader.ReadLine()) -ne $null) {
+           						if ($line -ne "" -And !$line.StartsWith('#')) {
+           							$kvp = $line.Split('=');
+           							if ($kvp.Length -lt 2) {
+           								$temp = [string[]];
+           								$temp[0] = $kvp[0];
+           								$temp[1] = "";
+           								$kvp = $temp;
+           							}
+           							$newProp = [PropInfoEntry]@{
+           								Key = $kvp[0];
+           								Value = $kvp[1];
+           							}
+           							$propList += $newProp;
+           						}
+           					}
+           				}
+           			}        
+           			$zipArchive.Dispose();
+           			$zipStream.Close();
+           			
+           			$propMftFile = get-content 'MMS_Files\\bedrock_version_prop_manifest.json';
+           			$propMftJson = $propMftFile | ConvertFrom-Json;
+           			$newListEntry = [BedrockInfo]@{
+           				version=$version;
+           				winurl='https://minecraft.azureedge.net/bin-win/bedrock-server-'+$version+'.zip';
+           				linurl='https://minecraft.azureedge.net/bin-linux/bedrock-server-'+$version+'.zip';
+           				proplist= $propList;
+           			}
+           			$propMftJson += $newListEntry;
+           			$propMftJson | ConvertTo-Json -depth 100 | Out-File "MMS_Files\\bedrock_version_prop_manifest.json";
+           		}
+           	 }			
+           }
         - uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
           with:
             # The arguments for the `git add` command (see the paragraph below for more info)
