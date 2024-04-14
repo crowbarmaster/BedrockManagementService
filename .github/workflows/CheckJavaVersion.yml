@@ -54,8 +54,8 @@ jobs:
              echo "downloadUrl=$downloadUrl" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf-8 -Append;
 
     processVersion:
-        if: "${{ needs.check-version.outputs.javaVer != '0' }}"
         name: process-version
+        if: ${{ needs.check-version.outputs.javaVer != 0 }}
         env:
             javaVer: "${{ needs.check-version.outputs.javaVer }}"
             jdsVer: "${{ needs.check-version.outputs.jdsVer }}"
