@@ -9,16 +9,11 @@ on:
 jobs:
     check-version:
         name: check-version
-        outputs:
-          javaVer: ${{ steps.step1.outputs.javaVer }}
-          jdsVer: ${{ steps.step1.outputs.jdsVer }}
-          downloadUrl: ${{ steps.step1.outputs.downloadUrl }}
-          betaStatus: ${{ steps.step1.outputs.betaStatus }}
+
         runs-on: windows-2022
 
         steps:
-        - id: step1
-          uses: actions/checkout@v3
+        - uses: actions/checkout@v3
         - run: |
             Set-PSDebug -Trace 1;
             class PropInfoEntry {
@@ -36,7 +31,7 @@ jobs:
              $javaManifestJson = $javaManifestcontent | ConvertFrom-Json;
              $latestRelease = $javaManifestJson.versions | Select-Object -First 1;
              $latestLocalRelease = $localJavaManifestJson | Select-Object -Last 1;
-             echo "javaVer=0" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf-8 -Append;
+             echo "javaVer=0" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
              if($localJavaManifestJson) {
              	if($latestRelease.id -eq $latestLocalRelease.Version) {
              		return;
@@ -48,153 +43,144 @@ jobs:
              $javaVer = $javaManifestReleasecontentJson.minimumLauncherVersion;
              $jdsVer = $javaManifestReleasecontentJson.id;
              $downloadUrl = $javaManifestReleasecontentJson.downloads.server.url;
-             echo "javaVer=$javaVer" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf-8 -Append;
-             echo "jdsVer=$jdsVer" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf-8 -Append;
-             echo "betaStatus=$isBetaStatus" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf-8 -Append;
-             echo "downloadUrl=$downloadUrl" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf-8 -Append;
-
-    processVersion:
-        name: process-version
-        if: ${{ needs.check-version.outputs.javaVer != 0 }}
-        env:
-            javaVer: "${{ needs.check-version.outputs.javaVer }}"
-            jdsVer: "${{ needs.check-version.outputs.jdsVer }}"
-            downloadUrl: "${{ needs.check-version.outputs.downloadUrl }}"
-            betaStatus: "${{ needs.check-version.outputs.betaStatus }}"
-        runs-on: windows-2022
-
-        steps:
-           - uses: actions/setup-java@v4
-             with:
-              distribution: 'oracle' # See 'Supported distributions' for available options
-              java-version: "${{ env.javaVer }}"
-           - run: |
-                class PropInfoEntry {
-                   [string]$Key;
-                   [string]$Value;
-                }
-                class JavaVersionHistoryModel {
-                   [string]$Version;
-                   [string]$IsBeta;
-                   [string]$DownloadUrl;
-                   [PropInfoEntry[]] $PropList;
-                }
-                Set-PSDebug -Trace 1;
-                $localJavaManifestJson = Get-Content "MMS_Files\\java_version_prop_manifest.json" | ConvertFrom-Json;
-                $propList = @();
-                mkdir ServerTemp;
-                cd .\\ServerTemp;
-                $curPath = Get-Location;
-                Invoke-WebRequest -Uri "${{ env.downloadUrl }}" -OutFile '.\\Server.jar';
-                $processStartInfo = [Diagnostics.ProcessStartInfo] @{
-                	UseShellExecute = 0
-                	CreateNoWindow = 1
-                	FileName = 'Java'
-                	WorkingDirectory = $curPath.Path
-                	Arguments = '-Xmx1024M -Xms1024M -jar Server.jar nogui'
-                };
-                $proc = [Diagnostics.Process]::Start($processStartInfo);
-                $proc.WaitForExit(10000);
-                $fileStream = [IO.File]::OpenRead($curPath.Path + "\\server.properties");
-                $reader = New-Object IO.StreamReader $fileStream;
-                while (($line = $reader.ReadLine()) -ne $null) {
-                	if ($line -ne "" -And !$line.StartsWith('#')) {
-                		$kvp = $line.Split('=');
-                		if ($kvp.Length -lt 2) {
-                			$temp = [string[]];
-                			$temp[0] = $kvp[0];
-                			$temp[1] = "";
-                			$kvp = $temp;
-                		}
-                		$newProp = [PropInfoEntry]@{
-                			Key = $kvp[0];
-                			Value = $kvp[1];
-                		}
-                		$propList += $newProp;
-                	}
-                }
-                cd ..;
-                $newEntry = [JavaVersionHistoryModel]@{
-                	Version = "${{ env.jdsVer }}";
-                	DownloadUrl = "${{ env.downloadUrl }}";
-                	IsBeta = "${{ env.betaStatus }}";
-                	PropList = $propList;
-                }
-                $localJavaManifestJson += $newEntry;
-                $localJavaManifestJson | ConvertTo-Json -depth 100 | Out-File "MMS_Files\\java_version_prop_manifest.json";
-           - uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
-             with:
-              # The arguments for the `git add` command (see the paragraph below for more info)
-              # Default: '.'
-              add: "['.\\MMS_Files\\java_version_prop_manifest.json']"
-              
-              # The name of the user that will be displayed as the author of the commit.
-              # Default: depends on the default_author input
-              author_name: Crowbarmaster
-              
-              # The email of the user that will be displayed as the author of the commit.
-              # Default: depends on the default_author input
-              author_email: crowbarmasterhl2@gmail.com
-              
-              # Additional arguments for the git commit command. The --message argument is already set by the message input.
-              # Default: ''
-              commit: --signoff
-              
-              # The name of the custom committer you want to use, if different from the author of the commit.
-              # Default: the name of the author (set with either author_name or default_author)
-              committer_name: author_name
-              
-              # The email of the custom committer you want to use, if different from the author of the commit.
-              # Default: the email of the author (set with either author_email or default_author)
-              committer_email: author_email
-              
-              # The local path to the directory where your repository is located. You should use actions/checkout first to set it up.
-              # Default: '.'
-              cwd: '.'
-              
-              # Determines the way the action fills missing author name and email. Three options are available:
-              # - github_actor -> UserName <UserName@users.noreply.github.com>
-              # - user_info -> Your Display Name <your-actual@email.com>
-              # - github_actions -> github-actions <email associated with the github logo>
-              # Default: github_actor
-              default_author: github_actor
-              
-              # Arguments for the git fetch command. If set to false, the action won't fetch the repo.
-              # For more info as to why fetching is usually recommended, please see the "Performance on large repos" FAQ. 
-              # Default: --tags --force
-              fetch: true
-              
-              # The message for the commit.
-              # Default: 'Commit from GitHub Actions (name of the workflow)'
-              message: 'Update java version prop manifest.'
-              
-              # If this input is set, the action will push the commit to a new branch with this name.
-              # Default: ''
-              new_branch: master
-              
-              # The way the action should handle pathspec errors from the add and remove commands. Three options are available:
-              # - ignore -> errors will be logged but the step won't fail
-              # - exitImmediately -> the action will stop right away, and the step will fail
-              # - exitAtEnd -> the action will go on, every pathspec error will be logged at the end, the step will fail.
-              # Default: ignore
-              pathspec_error_handling: ignore
-              
-              # Arguments for the git pull command. By default, the action does not pull.
-              # Default: ''
-              pull: ''
-              
-              # Whether to push the commit and, if any, its tags to the repo. It can also be used to set the git push arguments (see the paragraph below for more info)
-              # Default: true
-              push: true
-              
-              # The arguments for the `git rm` command (see the paragraph below for more info)
-              # Default: ''
-              remove: ''
-              
-              # Arguments for the git tag command (the tag name always needs to be the first word not preceded by an hyphen)
-              # Default: ''
-              tag: ''
-              
-              # Arguments for the git push --tags command (any additional argument will be added after --tags)
-              # Default: ''
-              tag_push: ''
+             echo "javaVer=$javaVer" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
+             echo "jdsVer=$jdsVer" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
+             echo "isBeta=$isBetaStatus" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
+             echo "downloadUrl=$downloadUrl" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
+        - if: ${{ env.Javavar != 0 }}
+          uses: actions/setup-java@v4
+          with:
+            distribution: 'oracle' # See 'Supported distributions' for available options
+            java-version: "${{ env.javaVer }}"
+        - if: ${{ env.Javavar != 0 }}
+          run: |
+             class PropInfoEntry {
+                [string]$Key;
+                [string]$Value;
+             }
+             class JavaVersionHistoryModel {
+                [string]$Version;
+                [string]$IsBeta;
+                [string]$DownloadUrl;
+                [PropInfoEntry[]] $PropList;
+             }
+             Set-PSDebug -Trace 1;
+             $localJavaManifestJson = Get-Content "MMS_Files\\java_version_prop_manifest.json" | ConvertFrom-Json;
+             $propList = @();
+             mkdir ServerTemp;
+             cd .\\ServerTemp;
+             $curPath = Get-Location;
+             Invoke-WebRequest -Uri "${{ env.downloadUrl }}" -OutFile '.\\Server.jar';
+             $processStartInfo = [Diagnostics.ProcessStartInfo] @{
+             	UseShellExecute = 0
+             	CreateNoWindow = 1
+             	FileName = 'Java'
+             	WorkingDirectory = $curPath.Path
+             	Arguments = '-Xmx1024M -Xms1024M -jar Server.jar nogui'
+             };
+             $proc = [Diagnostics.Process]::Start($processStartInfo);
+             $proc.WaitForExit(10000);
+             $fileStream = [IO.File]::OpenRead($curPath.Path + "\\server.properties");
+             $reader = New-Object IO.StreamReader $fileStream;
+             while (($line = $reader.ReadLine()) -ne $null) {
+             	if ($line -ne "" -And !$line.StartsWith('#')) {
+             		$kvp = $line.Split('=');
+             		if ($kvp.Length -lt 2) {
+             			$temp = [string[]];
+             			$temp[0] = $kvp[0];
+             			$temp[1] = "";
+             			$kvp = $temp;
+             		}
+             		$newProp = [PropInfoEntry]@{
+             			Key = $kvp[0];
+             			Value = $kvp[1];
+             		}
+             		$propList += $newProp;
+             	}
+             }
+             cd ..;
+             $newEntry = [JavaVersionHistoryModel]@{
+             	Version = "${{ env.jdsVer }}";
+             	DownloadUrl = "${{ env.downloadUrl }}";
+             	IsBeta = "${{ env.isBetaStatus }}";
+             	PropList = $propList;
+             }
+             $localJavaManifestJson += $newEntry;
+             $localJavaManifestJson | ConvertTo-Json -depth 100 | Out-File "MMS_Files\\java_version_prop_manifest.json";
+        - if: ${{ env.Javavar != 0 }}
+          uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
+          with:
+            # The arguments for the `git add` command (see the paragraph below for more info)
+            # Default: '.'
+            add: "['.\\MMS_Files\\java_version_prop_manifest.json']"
+            
+            # The name of the user that will be displayed as the author of the commit.
+            # Default: depends on the default_author input
+            author_name: Crowbarmaster
+            
+            # The email of the user that will be displayed as the author of the commit.
+            # Default: depends on the default_author input
+            author_email: crowbarmasterhl2@gmail.com
+            
+            # Additional arguments for the git commit command. The --message argument is already set by the message input.
+            # Default: ''
+            commit: --signoff
+            
+            # The name of the custom committer you want to use, if different from the author of the commit.
+            # Default: the name of the author (set with either author_name or default_author)
+            committer_name: author_name
+            
+            # The email of the custom committer you want to use, if different from the author of the commit.
+            # Default: the email of the author (set with either author_email or default_author)
+            committer_email: author_email
+            
+            # The local path to the directory where your repository is located. You should use actions/checkout first to set it up.
+            # Default: '.'
+            cwd: '.'
+            
+            # Determines the way the action fills missing author name and email. Three options are available:
+            # - github_actor -> UserName <UserName@users.noreply.github.com>
+            # - user_info -> Your Display Name <your-actual@email.com>
+            # - github_actions -> github-actions <email associated with the github logo>
+            # Default: github_actor
+            default_author: github_actor
+            
+            # Arguments for the git fetch command. If set to false, the action won't fetch the repo.
+            # For more info as to why fetching is usually recommended, please see the "Performance on large repos" FAQ. 
+            # Default: --tags --force
+            fetch: true
+            
+            # The message for the commit.
+            # Default: 'Commit from GitHub Actions (name of the workflow)'
+            message: 'Update java version prop manifest.'
+            
+            # If this input is set, the action will push the commit to a new branch with this name.
+            # Default: ''
+            new_branch: master
+            
+            # The way the action should handle pathspec errors from the add and remove commands. Three options are available:
+            # - ignore -> errors will be logged but the step won't fail
+            # - exitImmediately -> the action will stop right away, and the step will fail
+            # - exitAtEnd -> the action will go on, every pathspec error will be logged at the end, the step will fail.
+            # Default: ignore
+            pathspec_error_handling: ignore
+            
+            # Arguments for the git pull command. By default, the action does not pull.
+            # Default: ''
+            pull: ''
+            
+            # Whether to push the commit and, if any, its tags to the repo. It can also be used to set the git push arguments (see the paragraph below for more info)
+            # Default: true
+            push: true
+            
+            # The arguments for the `git rm` command (see the paragraph below for more info)
+            # Default: ''
+            remove: ''
+            
+            # Arguments for the git tag command (the tag name always needs to be the first word not preceded by an hyphen)
+            # Default: ''
+            tag: ''
+            
+            # Arguments for the git push --tags command (any additional argument will be added after --tags)
+            # Default: ''
+            tag_push: ''
