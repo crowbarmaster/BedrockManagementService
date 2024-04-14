@@ -79,6 +79,7 @@ namespace MinecraftService.Client.Forms {
                     _connectTimer.Stop();
                     _connectTimer.Close();
                     Invoke((MethodInvoker)delegate { RefreshAllCompenentStates(); });
+                    RefreshServerBoxContents();
                     return;
                 }
                 _connectTimeout++;
@@ -186,6 +187,7 @@ namespace MinecraftService.Client.Forms {
                         FormManager.TCPClient.SendData(FormManager.MainWindow.connectedHost.GetServerIndex(FormManager.MainWindow.SelectedServer), NetworkMessageTypes.ServerStatusRequest);
                     } else {
                         SelectedServer = null;
+                        Invoke(() => UpdateServerLogBox(LogBox, ""));
                     }
                 }
                 return;
@@ -282,9 +284,12 @@ namespace MinecraftService.Client.Forms {
                 curPos = GetScrollPosition(targetBox);
                 targetBox.Text = contents;
                 SetScrollPosition(targetBox, curPos);
+                if (_followTail) {
+                    ScrollToEnd(targetBox);
+                }
+            } else {
+                targetBox.Text = contents;
             }
-            if (_followTail)
-                ScrollToEnd(targetBox);
         }
 
         private static void OnExit(object sender, EventArgs e) {
@@ -388,9 +393,11 @@ namespace MinecraftService.Client.Forms {
                 SelectedServer = null;
                 connectedHost = null;
                 _logManager.SetConnectedHost(null);
-                LogBox.Invoke((MethodInvoker)delegate { LogBox.Text = ""; });
                 FormManager.MainWindow.Invoke((MethodInvoker)delegate {
                     RefreshAllCompenentStates();
+                    _logManager.ResetServerServiceLogCounts();
+                    LogBox.Text = "";
+                    serviceTextbox.Text = "";
                     ServerSelectBox.Items.Clear();
                     ServerSelectBox.SelectedIndex = -1;
                     ServerInfoBox.Text = "";
