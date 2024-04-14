@@ -9,11 +9,16 @@ on:
 jobs:
     check-version:
         name: check-version
-
+        outputs:
+          javaVer: ${{ steps.step1.outputs.javaVer }}
+          jdsVer: ${{ steps.step1.outputs.jdsVer }}
+          downloadUrl: ${{ steps.step1.outputs.downloadUrl }}
+          betaStatus: ${{ steps.step1.outputs.betaStatus }}
         runs-on: windows-2022
 
         steps:
-        - uses: actions/checkout@v3
+        - id: step1
+          uses: actions/checkout@v3
         - run: |
             Set-PSDebug -Trace 1;
             class PropInfoEntry {
@@ -31,7 +36,7 @@ jobs:
              $javaManifestJson = $javaManifestcontent | ConvertFrom-Json;
              $latestRelease = $javaManifestJson.versions | Select-Object -First 1;
              $latestLocalRelease = $localJavaManifestJson | Select-Object -Last 1;
-             $javaVer = 0;
+             echo "javaVer=0" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf-8 -Append;
              if($localJavaManifestJson) {
              	if($latestRelease.id -eq $latestLocalRelease.Version) {
              		return;
@@ -43,15 +48,19 @@ jobs:
              $javaVer = $javaManifestReleasecontentJson.minimumLauncherVersion;
              $jdsVer = $javaManifestReleasecontentJson.id;
              $downloadUrl = $javaManifestReleasecontentJson.downloads.server.url;
-             echo "javaVer=$javaVer" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
-             echo "jdsVer=$jdsVer" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
-             echo "isBeta=$isBetaStatus" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
-             echo "downloadUrl=$downloadUrl" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
+             echo "javaVer=$javaVer" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf-8 -Append;
+             echo "jdsVer=$jdsVer" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf-8 -Append;
+             echo "betaStatus=$isBetaStatus" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf-8 -Append;
+             echo "downloadUrl=$downloadUrl" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf-8 -Append;
 
     processVersion:
-        if: "${{ jobs.check-version.env.javaVer != '0' }}"
+        if: "${{ needs.check-version.outputs.javaVer != '0' }}"
         name: process-version
-        
+        env:
+            javaVer: "${{ needs.check-version.outputs.javaVer }}"
+            jdsVer: "${{ needs.check-version.outputs.jdsVer }}"
+            downloadUrl: "${{ needs.check-version.outputs.downloadUrl }}"
+            betaStatus: "${{ needs.check-version.outputs.betaStatus }}"
         runs-on: windows-2022
 
         steps:
@@ -108,7 +117,7 @@ jobs:
                 $newEntry = [JavaVersionHistoryModel]@{
                 	Version = "${{ env.jdsVer }}";
                 	DownloadUrl = "${{ env.downloadUrl }}";
-                	IsBeta = "${{ env.isBetaStatus }}";
+                	IsBeta = "${{ env.betaStatus }}";
                 	PropList = $propList;
                 }
                 $localJavaManifestJson += $newEntry;
