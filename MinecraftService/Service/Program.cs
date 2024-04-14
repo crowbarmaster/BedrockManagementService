@@ -47,6 +47,7 @@ namespace MinecraftService.Service {
                         .AddTransient<FileUtilities>()
                         .AddSingleton<IServerLogger, MinecraftServerLogger>()
                         .AddSingleton<ServiceConfigurator>()
+                        .AddSingleton<IEnumTypeLookup, EnumTypeLookup>()
                         .AddSingleton<IServiceConfiguration>(x => x.GetRequiredService<ServiceConfigurator>())
                         .AddSingleton<IBaseConfiguration>(x => x.GetRequiredService<ServiceConfigurator>())
                         .AddSingleton<IMinecraftService, Core.MmsService>()

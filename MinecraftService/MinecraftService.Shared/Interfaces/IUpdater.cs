@@ -4,12 +4,16 @@ using System.Threading.Tasks;
 
 namespace MinecraftService.Shared.Interfaces {
     public interface IUpdater {
-        void Initialize();
+        Task Initialize();
         void SetNewLogger(IServerLogger logger);
+        bool IsInitialized();
         Task CheckLatestVersion();
+        List<Property> GetVersionPropList(string version);
+        List<Property> GetDefaultVersionPropList();
         string GetBaseVersion(string version);
+        bool ValidateBuildExists(string version);
         Task<bool> FetchBuild(string version);
-        Task ReplaceServerBuild(string versionOverride = "");
-        List<SimpleVersionModel> GetVersionList();
+        Task ReplaceBuild(IServerConfiguration serverConfiguration, string versionOverride = "");
+        List<SimpleVersionModel> GetSimpleVersionList();
     }
 }

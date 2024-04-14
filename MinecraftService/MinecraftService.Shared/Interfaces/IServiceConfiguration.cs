@@ -21,7 +21,9 @@ namespace MinecraftService.Shared.Interfaces {
         void SetServerDefaultPropList(MinecraftServerArch serverArch, List<Property> newProps);
         Task CalculateTotalBackupsAllServers();
         (int totalBackups, int totalSize) GetServiceBackupInfo();
-        void SetLatestVersion(MinecraftServerArch serverArch, string version);
-        string GetLatestVersion(MinecraftServerArch serverArch);
+        string GetLatestVersion(MinecraftServerArch serverArch, bool isBeta = false);
+        void SetUpdater(MinecraftServerArch serverArch, IUpdater updater);
+        IUpdater GetUpdater(MinecraftServerArch serverArch);
+        Dictionary<MinecraftServerArch, IUpdater> GetUpdaterTable();
     }
 }

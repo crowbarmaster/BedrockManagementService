@@ -25,7 +25,7 @@ namespace MinecraftService.Shared.PackParser {
         public MinecraftPackParser(IServerLogger logger, IProgress<ProgressModel> progress, string extractDir = "") {
             _progress = progress;
             _serverLogger = logger;
-            PackExtractDirectory = extractDir != string.Empty ? extractDir : $"{SharedStringBase.GetNewTempDirectory()}\\PackExtract";
+            PackExtractDirectory = extractDir != string.Empty ? extractDir : SharedStringBase.GetNewTempDirectory("PackExtract");
         }
 
         public Task ProcessServerData(byte[] fileContents, Action onCompletion) => Task.Run(() => {

@@ -15,8 +15,8 @@ namespace MinecraftService.Client.Networking.NetworkStrategies {
         public Task<bool> ProcessMessage(byte[] messageData) => Task.Run(() => {
             string data = Encoding.UTF8.GetString(messageData, 5, messageData.Length - 5);
             StatusUpdateModel status = JsonConvert.DeserializeObject<StatusUpdateModel>(data, SharedStringBase.GlobalJsonSerialierSettings);
-            if (status != null && status.ServerStatusModel != null && status.ServerStatusModel.ServerIndex != 255) {
-                ServerStatusModel formerServerStatus = FormManager.MainWindow.selectedServer.GetStatus();
+            if (status != null && status.ServerStatusModel != null && status.ServerStatusModel.ServerIndex != 255 && FormManager.MainWindow.SelectedServer != null) {
+                ServerStatusModel formerServerStatus = FormManager.MainWindow.SelectedServer.GetStatus();
                 if (!status.ServerStatusModel.Equals(formerServerStatus)) {
                     FormManager.MainWindow.connectedHost.GetServerInfoByIndex(status.ServerStatusModel.ServerIndex).SetStatus(status.ServerStatusModel);
                     FormManager.MainWindow.Invoke(() => FormManager.MainWindow.RefreshAllCompenentStates());

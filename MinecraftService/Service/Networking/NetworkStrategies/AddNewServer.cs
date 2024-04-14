@@ -27,7 +27,9 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
             ServerCombinedPropModel propModel = JsonConvert.DeserializeObject<ServerCombinedPropModel>(stringData, GlobalJsonSerialierSettings);
             Property? archProp = propModel?.ServicePropList?.First(x => x.KeyName == ServerPropertyStrings[ServerPropertyKeys.MinecraftType]);
             EnumTypeLookup typeLookup = new(_logger, _serviceConfiguration);
-            IServerConfiguration newServer = typeLookup.PrepareNewServerByArchName(archProp.StringValue, _processInfo, _logger, _serviceConfiguration);
+            MinecraftServerArch selectedArch = GetArchFromString(archProp.StringValue);
+            _configurator.VerifyServerArchInit(selectedArch);
+            IServerConfiguration newServer = typeLookup.PrepareNewServerByArch(selectedArch, _processInfo, _logger, _serviceConfiguration);
             newServer.InitializeDefaults();
             newServer.SetAllSettings(propModel?.ServicePropList);
             newServer.SetAllProps(propModel?.ServerPropList);

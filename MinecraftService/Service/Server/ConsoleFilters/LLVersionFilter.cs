@@ -38,7 +38,7 @@ namespace MinecraftService.Service.Server.ConsoleFilters {
                 _bedrockServer.ServerStart().Wait();
             }
             if (!input.Contains("LiteLoaderBDS")) {
-                _bedrockServer.PerformOfflineServerTask(() => _serverConfiguration.GetUpdater().ReplaceServerBuild().Wait());
+                _bedrockServer.PerformOfflineServerTask(() => _serverConfiguration.GetUpdater().ReplaceBuild(_serverConfiguration).Wait());
             } else {
                 int llVerIndex = input.IndexOf("LiteLoaderBDS ") + 14;
                 string llVer = input.Substring(llVerIndex);
@@ -46,7 +46,7 @@ namespace MinecraftService.Service.Server.ConsoleFilters {
                     llVer = llVer.Substring(0, llVer.IndexOf('+'));
                 }
                 if (llVer != _serviceConfiguration.GetLatestVersion(MinecraftServerArch.LiteLoader) && _serverConfiguration.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()) {
-                    _bedrockServer.PerformOfflineServerTask(() => _serverConfiguration.GetUpdater().ReplaceServerBuild().Wait());
+                    _bedrockServer.PerformOfflineServerTask(() => _serverConfiguration.GetUpdater().ReplaceBuild(_serverConfiguration).Wait());
                 }
 
             }

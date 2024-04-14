@@ -2,11 +2,13 @@
 using MinecraftService.Shared.SerializeModels;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using static MinecraftService.Shared.Classes.SharedStringBase;
 
 namespace MinecraftService.Shared.Interfaces {
     public interface IConfigurator {
         Task LoadGlobals();
         Task LoadServerConfigurations();
+        void VerifyServerArchInit(MinecraftServerArch serverArch);
         void SaveGlobalFile();
         void SavePlayerDatabase(IServerConfiguration server);
         void SaveServerConfiguration(IServerConfiguration server);

@@ -70,22 +70,11 @@ namespace MinecraftService.Shared.Classes {
 
         public (int totalBackups, int totalSize) GetServiceBackupInfo() => (TotalBackupsServiceWide, TotalBackupSizeServiceWideMegabytes);
 
-        public void SetLatestVersion(MinecraftServerArch serverArch, string version) {
-            LatestServerVersion = version;
-            try {
-                File.WriteAllText(GetServiceFilePath(MmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[serverArch]), version);
-            } catch (Exception) {
-
+        public string GetLatestVersion(MinecraftServerArch serverArch, bool isBeta = false) {
+            if(serverArch == MinecraftServerArch.Bedrock) {
+                return LoadedUpdaters[serverArch].GetSimpleVersionList().Last().Version;
             }
-        }
-
-        public string GetLatestVersion(MinecraftServerArch serverArch) {
-            try {
-                LatestServerVersion = File.ReadAllText(GetServiceFilePath(MmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[serverArch]));
-            } catch (Exception) {
-
-            }
-            return LatestServerVersion;
+            return LoadedUpdaters[serverArch].GetSimpleVersionList().Last(x => x.IsBeta == isBeta).Version;
         }
 
         public void ProcessUserConfiguration(string[] fileEntries) {
@@ -206,59 +195,6 @@ namespace MinecraftService.Shared.Classes {
             throw new NotImplementedException();
         }
 
-        public LLServerPluginRegistry GetPluginRegistry() => LLServerPluginRegistry;
-
-        public PluginVersionInfo GetServerPluginInfo(int serverIndex, string pluginFilename) {
-            MmsServerPluginDatabase serverBase = LLServerPluginRegistry.ServerPluginList.Where(x => x.MmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).FirstOrDefault();
-            if (serverBase == null) {
-                GetPluginRegistry().ServerPluginList.Add(new MmsServerPluginDatabase { MmsServerName = GetServerInfoByIndex(serverIndex).GetServerName(), InstalledPlugins = new() });
-            }
-            PluginVersionInfo pluginVersionInfo = GetPluginRegistry().ServerPluginList
-                .Where(x => x.MmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).First().InstalledPlugins
-                .Where(y => y.PluginFileName == pluginFilename).FirstOrDefault();
-            if (pluginVersionInfo == null) {
-                pluginVersionInfo = new PluginVersionInfo() { PluginFileName = pluginFilename };
-                LLServerPluginRegistry.ServerPluginList
-                .Where(x => x.MmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).First().InstalledPlugins
-                .Add(pluginVersionInfo);
-            }
-            return pluginVersionInfo;
-        }
-
-        public void SetServerPluginInfo(int serverIndex, PluginVersionInfo info) {
-            MmsServerPluginDatabase serverBase = LLServerPluginRegistry.ServerPluginList.Where(x => x.MmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).FirstOrDefault();
-            if (serverBase == null) {
-                GetPluginRegistry().ServerPluginList.Add(new MmsServerPluginDatabase { MmsServerName = GetServerInfoByIndex(serverIndex).GetServerName(), InstalledPlugins = new() });
-            }
-            PluginVersionInfo pluginVersionInfo = GetPluginRegistry().ServerPluginList
-                .Where(x => x.MmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).First().InstalledPlugins
-                .Where(y => y.PluginFileName == info.PluginFileName).FirstOrDefault();
-            if (pluginVersionInfo == null) {
-                LLServerPluginRegistry.ServerPluginList
-                .Where(x => x.MmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).First().InstalledPlugins
-                .Add(info);
-            }
-            pluginVersionInfo.LiteLoaderVersion = info.LiteLoaderVersion;
-            pluginVersionInfo.BedrockVersion = info.BedrockVersion;
-            pluginVersionInfo.PluginFileName = info.PluginFileName;
-        }
-
-        public void RemoveServerPluginInfo(int serverIndex, string pluginFilename) {
-            MmsServerPluginDatabase serverBase = LLServerPluginRegistry.ServerPluginList.Where(x => x.MmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).FirstOrDefault();
-            if (serverBase == null) {
-                return;
-            }
-            PluginVersionInfo pluginVersionInfo = GetPluginRegistry().ServerPluginList
-                .Where(x => x.MmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).First().InstalledPlugins
-                .Where(y => y.PluginFileName == pluginFilename).FirstOrDefault();
-            if (pluginVersionInfo == null) {
-                return;
-            }
-            GetPluginRegistry().ServerPluginList
-                .Where(x => x.MmsServerName == GetServerInfoByIndex(serverIndex).GetServerName()).First().InstalledPlugins
-                .Remove(pluginVersionInfo);
-        }
-
         public Property GetProp(ServerPropertyKeys key) {
             return null;
         }
@@ -269,6 +205,25 @@ namespace MinecraftService.Shared.Classes {
 
         public void SetProp(MmsDependServerPropKeys key, string value) {
             throw new NotImplementedException();
+        }
+
+        public void SetUpdater(MinecraftServerArch serverArch, IUpdater updater) {
+            if(LoadedUpdaters.ContainsKey(serverArch)) {
+                LoadedUpdaters[serverArch] = updater;
+            } else {
+                LoadedUpdaters.Add(serverArch, updater);
+            }
+        }
+
+        public IUpdater GetUpdater(MinecraftServerArch serverArch) {
+            if(!LoadedUpdaters.TryGetValue(serverArch, out IUpdater updater)) { 
+                throw new KeyNotFoundException($"LoadedServers called too early or array did not contain the key {MinecraftArchStrings[serverArch]}.");
+            }
+            return updater;
+        }
+
+        public Dictionary<MinecraftServerArch, IUpdater> GetUpdaterTable() {
+            return LoadedUpdaters;
         }
     }
 }

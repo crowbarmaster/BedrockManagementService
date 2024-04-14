@@ -34,6 +34,21 @@ namespace MinecraftService.Shared.Classes {
             _logToFile = false;
         }
 
+        public MinecraftServerLogger(IProcessInfo processInfo) {
+            _processInfo = processInfo;
+            _logPath = $@"{processInfo.GetDirectory()}\Logs\{_processInfo.DeclaredType()}";
+            _logToFile = true;
+            _logOwner = _processInfo.DeclaredType();
+            if (_logWriter == null) {
+                if (!Directory.Exists(_logPath))
+                    Directory.CreateDirectory(_logPath);
+                _logWriter = new StreamWriter($@"{_logPath}\{_processInfo.DeclaredType()}Log-{DateTime.Now:yyyyMMdd_HHmmssff}.log", true);
+                AppendLine($"MMS {_processInfo.DeclaredType()} version {Process.GetCurrentProcess().MainModule.FileVersionInfo.ProductVersion} has started logging services.");
+                AppendLine($"Working directory: {_processInfo.GetDirectory()}");
+            }
+
+        }
+
         public void Initialize() {
             _logPath = $@"{_processInfo.GetDirectory()}\Logs\{_processInfo.DeclaredType()}";
             _logToFile = _serviceConfiguration.GetProp(ServicePropertyKeys.LogApplicationOutput).GetBoolValue();
@@ -61,7 +76,7 @@ namespace MinecraftService.Shared.Classes {
         public void AppendLine(string text) {
             string newText = $"{_logOwner}: {text}";
             LogEntry entry = new(newText);
-            if (_serviceConfiguration.GetAllProps().Count > 0 && _serviceConfiguration.GetProp(ServicePropertyKeys.TimestampLogEntries).GetBoolValue()) {
+            if (_serviceConfiguration != null && _serviceConfiguration.GetAllProps().Count > 0 && _serviceConfiguration.GetProp(ServicePropertyKeys.TimestampLogEntries).GetBoolValue()) {
                 newText = $"[{entry.TimeStamp:G}] {newText}";
             }
             if (_processInfo.IsDebugEnabled()) {
@@ -72,10 +87,9 @@ namespace MinecraftService.Shared.Classes {
             try {
                 if (_serverConfiguration != null) {
                     _serverConfiguration.GetLog().Add(entry);
-                } else {
-                    if (_serviceConfiguration != null) {
-                        _serviceConfiguration.GetLog().Add(entry);
-                    }
+                } 
+                if (_serviceConfiguration != null) {
+                    _serviceConfiguration.GetLog().Add(entry);
                 }
                 if (_logToFile && _logWriter != null) {
                     _logWriter.WriteLine(newText);

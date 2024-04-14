@@ -88,9 +88,42 @@ namespace MinecraftService.Shared.Utilities {
                     Arguments = $@"-Xmx1024M -Xms1024M -jar {jarInfo.Name} nogui"
                 };
                 Process process = Process.Start(processStartInfo);
-                process.WaitForExit(10000);
+                Stream propFile = null;
+                int failCount = 0;
+                Task.Delay(3000).Wait();
+                while (!TryOpenFile($"{jarInfo.Directory.FullName}\\server.properties", out propFile)) {
+                    Task.Delay(1000).Wait();
+                    failCount++;
+                    if(failCount > 15) {
+                        process.Kill();
+                        process.Dispose();
+                        return;
+                    }
+                }
+                propFile.Close();
+                propFile.Dispose();
+                process.Kill();
+                process.Dispose();
             });
         }
+
+        static bool TryOpenFile(string path, out Stream stream) {
+            try {
+                FileStream fileStream = File.Open(path, FileMode.Open);
+                if(fileStream.Length != 0) {
+                    stream = fileStream;
+                    return true;
+
+                }
+                fileStream.Close();
+                stream = null;
+                return false;
+            } catch {
+                stream = null;
+                return false;
+            }
+        }
+
 
         public static Task<List<RunningJavaProcessInfo>> GetJpsInfo() => Task.Run(() => {
             ProcessStartInfo processStartInfo = new ProcessStartInfo() {

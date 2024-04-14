@@ -16,7 +16,7 @@ namespace MinecraftService.Client.Networking.NetworkStrategies {
             string data = Encoding.UTF8.GetString(messageData, 5, messageData.Length - 5);
             byte[] stripHeaderFromBuffer = new byte[messageData.Length - 5];
             Buffer.BlockCopy(messageData, 5, stripHeaderFromBuffer, 0, stripHeaderFromBuffer.Length);
-            string pathToLevelDat = $@"{SharedStringBase.GetNewTempDirectory()}\level.dat";
+            string pathToLevelDat = $@"{SharedStringBase.GetNewTempDirectory("LevelEdit")}\level.dat";
             File.WriteAllBytes(pathToLevelDat, stripHeaderFromBuffer);
             FormManager.MainWindow.LevelDatRecieved(pathToLevelDat);
             return true;

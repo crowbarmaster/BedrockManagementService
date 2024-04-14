@@ -74,8 +74,9 @@ namespace MinecraftService.Shared.Utilities {
                 if (string.IsNullOrEmpty(targetDirectory)) {
                     return;
                 }
+                FileUtilities.CreateInexistantFile(targetZipPath);
                 using FileStream zipStream = File.Open(targetZipPath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
-                ZipArchive zipArchive = new(zipStream);
+                ZipArchive zipArchive = new(zipStream, ZipArchiveMode.Create);
                 DirectoryInfo dirInfo = new DirectoryInfo(targetDirectory);
                 var filesInDir = dirInfo.EnumerateFiles("*", SearchOption.AllDirectories);
                 int fileCount = filesInDir.Count();
@@ -83,17 +84,24 @@ namespace MinecraftService.Shared.Utilities {
                 int currentFile = 0;
 
                 foreach (FileInfo file in filesInDir) {
-                    using FileStream fileStream = File.Open(targetZipPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    using FileStream fileStream = File.Open(file.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
+                    using MemoryStream memoryStream = new();
+                    fileStream.CopyTo(memoryStream);
+                    memoryStream.Position = 0;
+                    fileStream.Close();
                     string fixedPath = file.FullName.Replace($"{targetDirectory}\\", string.Empty).Replace('\\', '/');
                     ZipArchiveEntry newZippedFile = zipArchive.CreateEntry(fixedPath, CompressionLevel.Optimal);
                     using Stream newZippedStream = newZippedFile.Open();
-                    fileStream.CopyTo(newZippedStream);
-                    fileStream.Close();
+                    memoryStream.CopyTo(newZippedStream);
+                    memoryStream.Close();
+                    newZippedStream.Close();
                     currentFile++;
                     if (progress != null && currentFile % progressCallCount == 0) {
                         progress.Report(new($"Compressed file: {fixedPath.Substring(fixedPath.LastIndexOf('/') + 1)}", Math.Round(currentFile / (double)fileCount, 2) * 100));
                     }
                 }
+                zipStream.Flush();
+                zipArchive.Dispose();
                 zipStream.Close();
                 progress.Report(new("Zip file has been created.", 100));
             });

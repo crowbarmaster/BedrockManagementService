@@ -2,38 +2,41 @@
 using MinecraftService.Shared.Classes.Updaters;
 using MinecraftService.Shared.Interfaces;
 using System.Collections.Generic;
+using System.Linq;
 using static MinecraftService.Shared.Classes.SharedStringBase;
 
-namespace MinecraftService.Shared.Classes {
-    public class EnumTypeLookup {
+namespace MinecraftService.Shared.Classes
+{
+    public class EnumTypeLookup : IEnumTypeLookup {
         private readonly IServerLogger _logger;
         private readonly IServiceConfiguration _service;
-        public Dictionary<MinecraftServerArch, IUpdater> UpdatersByArch;
+        private Dictionary<MinecraftServerArch, IUpdater> _updatersByArch;
 
         public EnumTypeLookup(IServerLogger logger, IServiceConfiguration service) {
             _logger = logger;
             _service = service;
-            UpdatersByArch = new Dictionary<MinecraftServerArch, IUpdater> {
+            _updatersByArch = new Dictionary<MinecraftServerArch, IUpdater> {
                 { MinecraftServerArch.Bedrock, new BedrockUpdater(_logger, _service) },
                 { MinecraftServerArch.LiteLoader, new LiteUpdater(_logger, _service) },
                 { MinecraftServerArch.Java, new JavaUpdater(_logger, _service) },
             };
         }
 
-        public IUpdater GetUpdaterByArch(MinecraftServerArch arch) => UpdatersByArch[arch];
+        public IUpdater GetUpdaterByArch(MinecraftServerArch arch) => _updatersByArch[arch];
 
-        public IUpdater GetUpdaterByArchName(string archName) => UpdatersByArch[GetArchFromString(archName)];
+        public IUpdater GetUpdaterByArch(string archName) => _updatersByArch[GetArchFromString(archName)];
 
-        public IServerConfiguration PrepareNewServerByArchName(string archName, IProcessInfo processInfo, IServerLogger logger, IServiceConfiguration service) {
-            switch (archName) {
-                case "Bedrock":
-                    return new BedrockConfiguration(processInfo, logger, service);
-                case "LiteLoader":
-                    return new LiteLoaderConfiguration(processInfo, logger, service);
-                case "Java":
-                    return new JavaConfiguration(processInfo, logger, service);
-            }
-            return null;
+        public Dictionary<MinecraftServerArch, IUpdater> GetAllUpdaters() => _updatersByArch;
+
+        public IServerConfiguration PrepareNewServerByArch(string archName, IProcessInfo processInfo, IServerLogger logger, IServiceConfiguration service) => PrepareNewServerByArch(GetArchFromString(archName), processInfo, logger, service);
+
+        public IServerConfiguration PrepareNewServerByArch(MinecraftServerArch archType, IProcessInfo processInfo, IServerLogger logger, IServiceConfiguration service) {
+            return archType switch {
+                MinecraftServerArch.Bedrock => new BedrockConfiguration(processInfo, logger, service),
+                MinecraftServerArch.LiteLoader => new LiteLoaderConfiguration(processInfo, logger, service),
+                MinecraftServerArch.Java => new JavaConfiguration(processInfo, logger, service),
+                _ => null,
+            };
         }
     }
 }

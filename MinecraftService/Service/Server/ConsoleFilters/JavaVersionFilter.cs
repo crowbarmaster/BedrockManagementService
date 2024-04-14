@@ -40,7 +40,7 @@ namespace MinecraftService.Service.Server.ConsoleFilters {
                     _logger.AppendLine($"Server {_serverConfiguration.GetServerName()} decected incorrect or out of date version! Replacing build...");
                     _javaServer.PerformOfflineServerTask(() => {
                         _javaServer.ForceKillServer();
-                        _serverConfiguration.GetUpdater().ReplaceServerBuild().Wait();
+                        _serverConfiguration.GetUpdater().ReplaceBuild(_serverConfiguration).Wait();
                     });
                 } else {
                     _logger.AppendLine($"Server {_serverConfiguration.GetServerName()} is out of date, Enable AutoDeployUpdates option to update to latest!");

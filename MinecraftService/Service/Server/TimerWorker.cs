@@ -29,6 +29,8 @@ namespace MinecraftService.Service.Server {
             _parentServerConfig = serverConfiguration;
             _timerType = timerType;
             _serviceLogger = runningServer.GetServiceLogger();
+            cancelSource = new CancellationTokenSource();
+            InitMessagesActions();
         }
 
         public Task<bool> Start() => Task.Run(() => {
@@ -104,7 +106,7 @@ namespace MinecraftService.Service.Server {
                         _parentServerConfig.GetUpdater().CheckLatestVersion().Wait();
                         if (_parentServerConfig.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue() && _parentServerConfig.GetDeployedVersion() != _serviceConfiguration.GetLatestVersion(_parentServerConfig.GetServerArch())) {
                             _serviceLogger.AppendLine("Version change detected! Restarting server(s) to apply update...");
-                            _parentServerController.PerformOfflineServerTask(new Action(() => _parentServerConfig.GetUpdater().ReplaceServerBuild(_serviceConfiguration.GetLatestVersion(_parentServerConfig.GetServerArch())).Wait()));
+                            _parentServerController.PerformOfflineServerTask(new Action(() => _parentServerConfig.GetUpdater().ReplaceBuild(_parentServerConfig, _serviceConfiguration.GetLatestVersion(_parentServerConfig.GetServerArch())).Wait()));
                         }
                     }, cancelSource.Token);
                     return true;

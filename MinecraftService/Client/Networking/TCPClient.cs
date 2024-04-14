@@ -93,7 +93,7 @@ namespace MinecraftService.Client.Networking {
         }
 
         public void RecieveEvent(object sender, System.Timers.ElapsedEventArgs elapsedArgs) {
-            if (_netCancelSource.IsCancellationRequested) {
+            if (_netCancelSource != null && _netCancelSource.IsCancellationRequested) {
                 _heartbeatTimer.Stop();
                 return;
             }
@@ -113,19 +113,21 @@ namespace MinecraftService.Client.Networking {
                         if (_progressDialog == null || _progressDialog.IsDisposed) {
                             _progressDialog = new(null);
                         }
-                        _progressDialog.Show();
+                        FormManager.MainWindow.Invoke(_progressDialog.Show);
+
                         _progressDialog.GetDialogProgress().Report(new("Downloading large file from service...", 0.0));
                         double chunkCount = Math.Round(expectedLen / 1024000.00, 0, MidpointRounding.ToPositiveInfinity);
                         double currentProgress = 0.0;
                         do {
+
                             int recvCount = expectedLen >= 1024000 ? 1024000 : expectedLen;
                             byteCount = stream.Read(buffer, originalLen - expectedLen, recvCount);
-                            _progressDialog.GetDialogProgress().Report(new($"Downloading large file from service, {originalLen - expectedLen} bytes recieved.", currentProgress));
+                            _progressDialog.GetDialogProgress().Report(new($"Downloading large file from service, {(originalLen - expectedLen) / 1024} bytes recieved.", currentProgress));
                             expectedLen -= recvCount;
                         } while (expectedLen > 0);
                         _progressDialog.EndProgress(new(() => {
-                            _progressDialog.Invoke(_progressDialog.Close);
-                            _progressDialog.Invoke(_progressDialog.Dispose);
+                            FormManager.MainWindow.Invoke(_progressDialog.Close);
+                            FormManager.MainWindow.Invoke(_progressDialog.Dispose);
                             _progressDialog = null;
                         }));
                     } else {

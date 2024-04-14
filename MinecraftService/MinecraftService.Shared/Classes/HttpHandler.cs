@@ -8,12 +8,12 @@ namespace MinecraftService.Shared.Classes {
     public class HTTPHandler {
         public static MinecraftServerLogger Logger = new MinecraftServerLogger();
 
-        public static async Task<bool> RetrieveFileFromUrl(string url, string outputPath) {
+        public static async Task<bool> RetrieveFileFromUrl(string url, string outputPath, bool overwrite = false) {
             FileInfo outputFileInfo = new(outputPath);
             if (!outputFileInfo.Directory.Exists) {
                 outputFileInfo.Directory.Create();
             }
-            if (outputFileInfo.Exists && outputFileInfo.Length > 1024) {
+            if (outputFileInfo.Exists && outputFileInfo.Length > 1024 && !overwrite) {
                 return true;
             }
             using HttpClient httpClient = new();
@@ -39,6 +39,20 @@ namespace MinecraftService.Shared.Classes {
             request.Dispose();
             contentStream.Dispose();
             return true;
+        }
+
+        public static async Task<Stream> ReadFileToStream(string url) {
+            using HttpClient httpClient = new();
+            using HttpRequestMessage request = new(HttpMethod.Get, url);
+            using Stream contentStream = await (await httpClient.SendAsync(request)).Content.ReadAsStreamAsync();
+            try {
+                if (contentStream.Length > 1024) {
+                    return contentStream;
+                }
+            } catch {
+                Logger.AppendLine("ReadFileToStream ran into an error fetching file to stream!");
+            }
+            return null;
         }
 
         public static async Task<string> FetchHTTPContent(string url, KeyValuePair<string, string> optionalHeader = new()) {

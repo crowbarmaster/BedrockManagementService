@@ -43,10 +43,10 @@ jobs:
              mkdir ServerTemp;
              cd .\\ServerTemp;
              Invoke-WebRequest -Uri $javaManifestReleasecontentJson.downloads.server.url -OutFile '.\\Server.jar';
-             "javaVer=$javaManifestReleasecontentJson.minimumLauncherVersion" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
-             "jdsVer=$javaManifestReleasecontentJson.id" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
-             "isBeta=$isBetaStatus" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
-             "downloadUrl=$javaManifestReleasecontentJson.downloads.server.url" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
+             echo "javaVer=$javaManifestReleasecontentJson.minimumLauncherVersion" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
+             echo "jdsVer=$javaManifestReleasecontentJson.id" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
+             echo "isBeta=$isBetaStatus" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
+             echo "downloadUrl=$javaManifestReleasecontentJson.downloads.server.url" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
         - uses: actions/setup-java@v4
           with:
             distribution: 'oracle' # See 'Supported distributions' for available options

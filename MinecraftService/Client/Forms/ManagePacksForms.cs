@@ -26,7 +26,7 @@ namespace MinecraftService.Client.Forms {
         private readonly DirectoryInfo _packExtractDir;
         public ManagePacksForms(byte serverIndex, IServerLogger logger, IProcessInfo processInfo) {
             _logger = logger;
-            _packExtractDir = new DirectoryInfo($"{SharedStringBase.GetNewTempDirectory()}\\ExaminePacks");
+            _packExtractDir = new DirectoryInfo(SharedStringBase.GetNewTempDirectory("PackManager"));
             _processInfo = processInfo;
             _serverIndex = serverIndex;
             InitializeComponent();

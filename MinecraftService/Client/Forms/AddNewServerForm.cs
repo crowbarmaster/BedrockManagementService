@@ -40,7 +40,7 @@ namespace MinecraftService.Client.Forms {
             EnumTypeLookup typeLookup = new EnumTypeLookup(FormManager.Logger, FormManager.MainWindow.connectedHost);
             foreach (KeyValuePair<MinecraftServerArch, string> kvp in MinecraftArchStrings) {
                 ServerCombinedPropModel serverCombinedPropModel = new();
-                server = typeLookup.PrepareNewServerByArchName(kvp.Value, FormManager.processInfo, FormManager.Logger, FormManager.MainWindow.connectedHost);
+                server = typeLookup.PrepareNewServerByArch(kvp.Value, FormManager.processInfo, FormManager.Logger, FormManager.MainWindow.connectedHost);
                 server.InitializeDefaults();
                 serverCombinedPropModel.ServerPropList = server.GetAllProps();
                 serverCombinedPropModel.ServicePropList = server.GetSettingsList();

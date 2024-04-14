@@ -17,14 +17,14 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
             Dictionary<MinecraftServerArch, SimpleVersionModel[]> resultDictionary = new();
-            EnumTypeLookup lookup = new(_logger, _serviceConfiguration);
-            foreach (KeyValuePair<MinecraftServerArch, IUpdater> updaterKvp in lookup.UpdatersByArch) {
-                List<SimpleVersionModel> verStrings = updaterKvp.Value.GetVersionList();
+            foreach (KeyValuePair<MinecraftServerArch, IUpdater> updaterKvp in _serviceConfiguration.GetUpdaterTable()) {
+                updaterKvp.Value.Initialize().Wait();
+                List<SimpleVersionModel> verStrings = updaterKvp.Value.GetSimpleVersionList();
                 verStrings.Reverse();
                 resultDictionary.Add(updaterKvp.Key, verStrings.ToArray());
             }
-            string jsomString = JsonConvert.SerializeObject(resultDictionary, SharedStringBase.GlobalJsonSerialierSettings);
-            byte[] resultBytes = Encoding.UTF8.GetBytes(jsomString);
+            string jsonString = JsonConvert.SerializeObject(resultDictionary, SharedStringBase.GlobalJsonSerialierSettings);
+            byte[] resultBytes = Encoding.UTF8.GetBytes(jsonString);
             return (resultBytes, 0, NetworkMessageTypes.VersionListRequest);
         }
     }

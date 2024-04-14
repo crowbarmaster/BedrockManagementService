@@ -18,14 +18,16 @@ namespace MinecraftService.Service.Management {
         private readonly IServerLogger _logger;
         private readonly FileUtilities FileUtilities;
         private BedrockUpdater _updater;
+        private IEnumTypeLookup _typeLookup;
         private List<string> serviceConfigExcludeList = new() { "MinecraftType", "ServerName", "ServerExeName", "FileName", "ServerPath", "ServerVersion" };
 
-        public ConfigManager(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, IServerLogger logger, FileUtilities fileUtilities) {
+        public ConfigManager(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, IServerLogger logger, FileUtilities fileUtilities, IEnumTypeLookup enumTypeLookup) {
             _processInfo = processInfo;
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
             FileUtilities = fileUtilities;
             _updater = new(_logger, _serviceConfiguration);
+            _typeLookup = enumTypeLookup;
         }
 
         public Task LoadGlobals() => Task.Run(() => {
@@ -45,7 +47,6 @@ namespace MinecraftService.Service.Management {
 
         public Task LoadServerConfigurations() => Task.Run(() => {
             IServerConfiguration serverInfo;
-            EnumTypeLookup typeLookup = new(_logger, _serviceConfiguration);
             _serviceConfiguration.GetServerList().Clear();
             string[] files = Directory.GetFiles(GetServiceDirectory(ServiceDirectoryKeys.ServerConfigs), "*.conf");
             foreach (string file in files) {
@@ -54,13 +55,19 @@ namespace MinecraftService.Service.Management {
                     string[] fileEntries = File.ReadAllLines(file);
                     string[] archType = fileEntries[0].Split('=');
                     if (archType[0] != "MinecraftType") {
+                        if (!_serviceConfiguration.GetUpdater(MinecraftServerArch.Bedrock).IsInitialized()) {
+                            _serviceConfiguration.GetUpdater(MinecraftServerArch.Bedrock).Initialize();
+                        }
                         serverInfo = new BedrockConfiguration(_processInfo, _logger, _serviceConfiguration);
                     } else {
-                        serverInfo = typeLookup.PrepareNewServerByArchName(archType[1], _processInfo, _logger, _serviceConfiguration);
+                        MinecraftServerArch selectedArch = GetArchFromString(archType[1]);
+                        if (!_serviceConfiguration.GetUpdater(selectedArch).IsInitialized()) {
+                            _serviceConfiguration.GetUpdater(selectedArch).Initialize();
+                        }
+                        serverInfo = _typeLookup.PrepareNewServerByArch(selectedArch, _processInfo, _logger, _serviceConfiguration);
                     }
                     if (serverInfo.InitializeDefaults()) {
                         serverInfo.ProcessUserConfiguration(fileEntries);
-                        serverInfo.ValidateServerPropFile(serverInfo.GetDeployedVersion() == "None" ? _serviceConfiguration.GetLatestVersion(serverInfo.GetServerArch()) : serverInfo.GetServerVersion());
                         _logger.AppendLine($"Loaded config for server {serverInfo.GetServerName()}.");
                     }
                     _serviceConfiguration.AddNewServerInfo(serverInfo);
@@ -71,16 +78,13 @@ namespace MinecraftService.Service.Management {
                     continue;
                 }
             }
-            if (_serviceConfiguration.GetServerList().Count == 0) {
-                serverInfo = new BedrockConfiguration(_processInfo, _logger, _serviceConfiguration);
-                if (!serverInfo.InitializeDefaults()) {
-                    _logger.AppendLine("Error creating default server!");
-                }
-                SaveServerConfiguration(serverInfo);
-                _serviceConfiguration.AddNewServerInfo(serverInfo);
-                _logger.AppendLine("Successfully created and saved Default Server.");
-            }
         });
+
+        public void VerifyServerArchInit(MinecraftServerArch serverArch) {
+            if (!_typeLookup.GetUpdaterByArch(serverArch).IsInitialized()) {
+                _typeLookup.GetUpdaterByArch(serverArch).Initialize();
+            }
+        }
 
         public void SaveGlobalFile() {
             string[] output = new string[_serviceConfiguration.GetAllProps().Count + 3];

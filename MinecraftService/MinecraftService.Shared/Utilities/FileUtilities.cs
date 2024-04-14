@@ -92,7 +92,7 @@ namespace MinecraftService.Shared.Utilities {
             packParser.ParseDirectory(behaviorFolderPath, 0);
             WorldPackFileModel worldPacks = new(resoruceFilePath);
             worldPacks.Contents.AddRange(new WorldPackFileModel(behaviorFilePath).Contents);
-            string packBackupFolderPath = $@"{GetNewTempDirectory()}\InstalledPacks";
+            string packBackupFolderPath = GetNewTempDirectory("InstalledPacks");
             Directory.CreateDirectory(packBackupFolderPath);
             if (worldPacks.Contents.Count > 0) {
                 foreach (WorldPackEntryJsonModel model in worldPacks.Contents) {

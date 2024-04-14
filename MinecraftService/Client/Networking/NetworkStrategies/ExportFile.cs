@@ -16,7 +16,7 @@ namespace MinecraftService.Client.Networking.NetworkStrategies {
             string data = Encoding.UTF8.GetString(messageData, 5, messageData.Length - 5);
             ExportImportFileModel exportModel = JsonConvert.DeserializeObject<ExportImportFileModel>(data, SharedStringBase.GlobalJsonSerialierSettings);
             if (exportModel != null) {
-                FormManager.MainWindow.Invoke(() => FormManager.MainWindow.RecieveExportData(exportModel));
+                FormManager.MainWindow.RecieveExportData(exportModel).Wait();
             }
             return true;
         });

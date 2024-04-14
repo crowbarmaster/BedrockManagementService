@@ -113,7 +113,7 @@ namespace MinecraftService.Service.Server {
                 _logger.AppendLine($"Copied files from backup \"{backupZipFileInfo.Name}\" to server worlds directory.");
                 MinecraftPackParser parser = new(_logger, progress);
                 foreach (FileInfo file in backupPacksDir.GetFiles()) {
-                    string tempDir = $@"{SharedStringBase.GetNewTempDirectory()}\PackTemp";
+                    string tempDir = SharedStringBase.GetNewTempDirectory("RollbackPacks");
                     ZipUtilities.ExtractToDirectory(file.FullName, tempDir, progress);
                     parser.FoundPacks.Clear();
                     parser.ParseDirectory(tempDir, 0);

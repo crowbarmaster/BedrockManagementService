@@ -15,11 +15,12 @@ namespace MinecraftService.Service.Core {
         private readonly ITCPListener _tCPListener;
         private readonly IPlayerManager _playerManager;
         private DateTime _upTime;
-
+        private IEnumTypeLookup _typeLookup;
         private List<IServerController> _loadedServers { get; set; } = new();
         private ServiceStatus _CurrentServiceStatus { get; set; }
+        private Dictionary<MinecraftServerArch, IUpdater> _serverUpdaters { get; set; } = new();
 
-        public MmsService(IConfigurator configurator, IServerLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ITCPListener tCPListener) {
+        public MmsService(IConfigurator configurator, IServerLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ITCPListener tCPListener, IEnumTypeLookup typeLookup) {
             _tCPListener = tCPListener;
             _configurator = configurator;
             _logger = logger;
@@ -27,6 +28,7 @@ namespace MinecraftService.Service.Core {
             _processInfo = serviceProcessInfo;
             _playerManager = new ServicePlayerManager(serviceConfiguration);
             _logger = logger;
+            _typeLookup = typeLookup;
         }
 
         public Task<bool> Initialize() {
@@ -47,26 +49,14 @@ namespace MinecraftService.Service.Core {
                 _CurrentServiceStatus = ServiceStatus.Starting;
                 _configurator.LoadGlobals().Wait();
                 _logger.Initialize();
-                if (!_serviceConfiguration.GetProp(ServicePropertyKeys.AcceptedMojangLic).GetBoolValue()) {
-                    if (Environment.UserInteractive == true) {
-                        _logger.AppendLine("You must agree to the terms set by Mojang for use of this software.\n" +
-                            "Read terms at: https://minecraft.net/terms \n" +
-                            "Type \"Yes\" to affirm you agree to afformentioned terms to continue:");
-                        string answer = Console.ReadLine();
-                        if (answer != null && answer == "Yes") {
-                            _serviceConfiguration.GetProp(ServicePropertyKeys.AcceptedMojangLic).SetValue("True");
-                        } else {
-                            _logger.AppendLine("You have not accepted Mojang's EULA.\n Read terms at: https://minecraft.net/terms \n MinecraftService will now terminate.");
-                            return false;
-                        }
-                    } else {
-                        _logger.AppendLine("You have not accepted Mojang's EULA.\n Read terms at: https://minecraft.net/terms \n MinecraftService will now terminate.");
-                        return false;
-                    }
+                if (!VerifyMojangLicenseAcceptance()) {
+                    return false;
                 }
-                EnumTypeLookup typeLookup = new EnumTypeLookup(_logger, _serviceConfiguration);
-                foreach (KeyValuePair<MinecraftServerArch, IUpdater> kvp in typeLookup.UpdatersByArch) {
-                    kvp.Value.Initialize();
+                foreach (KeyValuePair<MinecraftServerArch, IUpdater> updater in _typeLookup.GetAllUpdaters()) {
+                    if (!updater.Value.IsInitialized()) {
+                        updater.Value.Initialize().Wait();
+                    }
+                    _serviceConfiguration.SetUpdater(updater.Key, updater.Value);
                 }
                 _configurator.LoadServerConfigurations().Wait();
                 _loadedServers.Clear();
@@ -76,6 +66,24 @@ namespace MinecraftService.Service.Core {
                 _tCPListener.Initialize();
                 return true;
             });
+        }
+
+        private bool VerifyMojangLicenseAcceptance() {
+            if (!_serviceConfiguration.GetProp(ServicePropertyKeys.AcceptedMojangLic).GetBoolValue()) {
+                if (Environment.UserInteractive == true) {
+                    _logger.AppendLine("You must agree to the terms set by Mojang for use of this software.\n" +
+                        "Read terms at: https://minecraft.net/terms \n" +
+                        "Type \"Yes\" to affirm you agree to afformentioned terms to continue:");
+                    string answer = Console.ReadLine();
+                    if (answer != null && answer == "Yes") {
+                        _serviceConfiguration.GetProp(ServicePropertyKeys.AcceptedMojangLic).SetValue("True");
+                        return true;
+                    }
+                }
+                _logger.AppendLine("You have not accepted Mojang's EULA.\n Read terms at: https://minecraft.net/terms \n MinecraftService will now terminate.");
+                return false;
+            }
+            return true;
         }
 
         public ServiceStatusModel GetServiceStatus() {
@@ -103,17 +111,21 @@ namespace MinecraftService.Service.Core {
             }
             try {
                 ValidSettingsCheck().Wait();
-                foreach (var brs in _loadedServers) {
-                    if (brs.IsPrimaryServer()) {
-                        brs.ServerStart().Wait();
+                if (_loadedServers.Count == 0) {
+                    _logger.AppendLine("No servers are configured. Please create a configuration file or use the GUI to create a new server.");
+                } else {
+                    foreach (var brs in _loadedServers) {
+                        if (brs.IsPrimaryServer()) {
+                            brs.ServerStart().Wait();
+                        }
+                        if (!brs.ServerAutostartEnabled()) {
+                            continue;
+                        }
+                        if (!brs.IsPrimaryServer()) {
+                            brs.ServerStart();
+                        }
+                        brs.StartWatchdog();
                     }
-                    if (!brs.ServerAutostartEnabled()) {
-                        continue;
-                    }
-                    if (!brs.IsPrimaryServer()) {
-                        brs.ServerStart();
-                    }
-                    brs.StartWatchdog();
                 }
 
                 _tCPListener.SetServiceStarted();
@@ -191,6 +203,9 @@ namespace MinecraftService.Service.Core {
                 string serverName = GetServerByIndex(serverIndex).GetServerName();
                 _loadedServers.RemoveAt(serverIndex);
                 _logger.AppendLine($"Removed server info for server {serverName}");
+                if (_loadedServers.Count == 0) {
+                    _logger.AppendLine("No servers are configured. Please create a configuration file or use the GUI to create a new server.");
+                }
                 return true;
             } catch {
                 return false;
@@ -232,55 +247,53 @@ namespace MinecraftService.Service.Core {
 
         private Task ValidSettingsCheck() {
             return Task.Run(() => {
-                if (_serviceConfiguration.GetServerList().Count() < 1) {
-                    throw new Exception("No Servers Configured");
-                }
-                var duplicatePortList = _serviceConfiguration.GetServerList()
-                  .Select(x => x.GetAllProps()
-                      .GroupBy(z => z.StringValue)
-                      .SelectMany(z => z
-                          .Where(y => y.KeyName.StartsWith(MmsDependServerPropStrings[MmsDependServerPropKeys.PortI4]))))
-                  .GroupBy(z => z.Select(x => x.StringValue))
-                  .SelectMany(x => x.Key)
-                  .GroupBy(x => x)
-                  .Where(x => x.Count() > 1)
-                  .ToList();
-                var duplicateNameList = _serviceConfiguration.GetServerList()
-                    .GroupBy(x => x.GetServerName())
-                    .Where(x => x.Count() > 1)
-                    .ToList();
-                if (duplicateNameList.Count() > 0) {
-                    throw new Exception($"Duplicate server name {duplicateNameList.First().First().GetServerName()} was found. Please check configuration files");
-                }
-                if (duplicatePortList.Count() > 0) {
-                    string serverPorts = string.Join(", ", duplicatePortList.Select(x => x.Key).ToArray());
-                    throw new Exception($"Duplicate ports used! Check server configurations targeting port(s) {serverPorts}");
-                }
-                foreach (var server in _serviceConfiguration.GetServerList()) {
-                    string deployedVersion = server.GetDeployedVersion();
-                    string serverExePath = $@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath).StringValue}\{server.GetSettingsProp(ServerPropertyKeys.ServerExeName).StringValue}";
-                    FileInfo oldExeFile = new($@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath).StringValue}\BedrockService.{server.GetServerName()}.exe");
-                    FileInfo oldJarFile = new($@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath).StringValue}\BedrockService.{server.GetServerName()}.jar");
-                    if (oldExeFile.Exists) {
-                        oldExeFile.MoveTo(serverExePath);
+                if (_serviceConfiguration.GetServerList().Count() > 1) {
+                    var duplicatePortList = _serviceConfiguration.GetServerList()
+                      .Select(x => x.GetAllProps()
+                          .GroupBy(z => z.StringValue)
+                          .SelectMany(z => z
+                              .Where(y => y.KeyName.StartsWith(MmsDependServerPropStrings[MmsDependServerPropKeys.PortI4]))))
+                      .GroupBy(z => z.Select(x => x.StringValue))
+                      .SelectMany(x => x.Key)
+                      .GroupBy(x => x)
+                      .Where(x => x.Count() > 1)
+                      .ToList();
+                    var duplicateNameList = _serviceConfiguration.GetServerList()
+                        .GroupBy(x => x.GetServerName())
+                        .Where(x => x.Count() > 1)
+                        .ToList();
+                    if (duplicateNameList.Count() > 0) {
+                        throw new Exception($"Duplicate server name {duplicateNameList.First().First().GetServerName()} was found. Please check configuration files");
                     }
-                    if (oldJarFile.Exists) {
-                        oldJarFile.MoveTo(serverExePath);
+                    if (duplicatePortList.Count() > 0) {
+                        string serverPorts = string.Join(", ", duplicatePortList.Select(x => x.Key).ToArray());
+                        throw new Exception($"Duplicate ports used! Check server configurations targeting port(s) {serverPorts}");
                     }
-                    if (deployedVersion == "None" || !File.Exists(serverExePath)) {
-                        server.GetUpdater().ReplaceServerBuild().Wait();
-                    }
-                    if (server.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()) {
-                        if (server.GetServerVersion() != _serviceConfiguration.GetLatestVersion(server.GetServerArch())) {
-                            server.GetUpdater().ReplaceServerBuild(_serviceConfiguration.GetLatestVersion(server.GetServerArch())).Wait();
+                    foreach (var server in _serviceConfiguration.GetServerList()) {
+                        string deployedVersion = server.GetDeployedVersion();
+                        string serverExePath = $@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath).StringValue}\{server.GetSettingsProp(ServerPropertyKeys.ServerExeName).StringValue}";
+                        FileInfo oldExeFile = new($@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath).StringValue}\BedrockService.{server.GetServerName()}.exe");
+                        FileInfo oldJarFile = new($@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath).StringValue}\BedrockService.{server.GetServerName()}.jar");
+                        if (oldExeFile.Exists) {
+                            oldExeFile.MoveTo(serverExePath);
                         }
-                    } else {
-                        if (server.GetServerVersion() != server.GetDeployedVersion()) {
-                            server.GetUpdater().ReplaceServerBuild().Wait();
+                        if (oldJarFile.Exists) {
+                            oldJarFile.MoveTo(serverExePath);
+                        }
+                        if (deployedVersion == "None" || !File.Exists(serverExePath)) {
+                            server.GetUpdater().ReplaceBuild(server).Wait();
+                        }
+                        if (server.GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()) {
+                            if (server.GetServerVersion() != _serviceConfiguration.GetLatestVersion(server.GetServerArch())) {
+                                server.GetUpdater().ReplaceBuild(server, _serviceConfiguration.GetLatestVersion(server.GetServerArch())).Wait();
+                            }
+                        } else {
+                            if (server.GetServerVersion() != server.GetDeployedVersion()) {
+                                server.GetUpdater().ReplaceBuild(server).Wait();
+                            }
                         }
                     }
                 }
-                return true;
             });
         }
     }

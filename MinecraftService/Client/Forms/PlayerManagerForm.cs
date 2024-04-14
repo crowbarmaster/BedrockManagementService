@@ -56,7 +56,7 @@ namespace MinecraftService.Client.Forms {
                 var playerTimes = playerToEdit.GetTimes();
                 string playerWhitelist = playerToEdit.IsPlayerWhitelisted().ToString();
                 string playerPermission = playerToEdit.GetPermissionLevel();
-                if (FormManager.MainWindow.selectedServer.GetServerArch() == SharedStringBase.MinecraftServerArch.Java) {
+                if (FormManager.MainWindow.SelectedServer.GetServerArch() == SharedStringBase.MinecraftServerArch.Java) {
                     playerPermission = GetJavaPermLevel(playerToEdit.GetPermissionLevel());
                 }
                 string playerIgnoreLimit = playerToEdit.PlayerIgnoresLimit().ToString();
@@ -105,7 +105,7 @@ namespace MinecraftService.Client.Forms {
                 }
                 var playerTimes = player.GetTimes();
                 string playerPermission = player.GetPermissionLevel();
-                if (FormManager.MainWindow.selectedServer.GetServerArch() == SharedStringBase.MinecraftServerArch.Java) {
+                if (FormManager.MainWindow.SelectedServer.GetServerArch() == SharedStringBase.MinecraftServerArch.Java) {
                     playerPermission = GetJavaPermLevel(player.GetPermissionLevel());
                 }
                 TimeSpan timeSpent = TimeSpan.FromTicks(playerTimes.Disconn - playerTimes.Conn);

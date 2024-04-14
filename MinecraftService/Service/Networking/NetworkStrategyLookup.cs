@@ -33,7 +33,7 @@ namespace MinecraftService.Service.Networking {
                 {NetworkMessageTypes.PlayersUpdate, new PlayersUpdate(configurator, serviceConfiguration, service) },
                 {NetworkMessageTypes.LevelEditRequest, new LevelEditRequest(serviceConfiguration) },
                 {NetworkMessageTypes.LevelEditFile, new LevelEditFile(serviceConfiguration, service, logger) },
-                {NetworkMessageTypes.ExportFile, new ExportFileRequest(configurator, serviceConfiguration, logger) },
+                {NetworkMessageTypes.ExportFile, new ExportFileRequest(configurator, service, serviceConfiguration, logger) },
                 {NetworkMessageTypes.LLPluginFile, new LiteLoaderPluginFile(serviceConfiguration) }
             };
             _flaggedMessageLookup = new Dictionary<NetworkMessageTypes, IFlaggedMessageParser>()

@@ -16,13 +16,11 @@ namespace MinecraftService.Shared.Classes.Configurations {
         private readonly IProcessInfo _processInfo;
         private readonly IServerLogger _logger;
         private readonly IServiceConfiguration _serviceConfiguration;
-        private readonly IUpdater _updater;
 
         public BedrockConfiguration(IProcessInfo processInfo, IServerLogger logger, IServiceConfiguration serviceConfiguration) : base() {
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
             _processInfo = processInfo;
-            _updater = new BedrockUpdater(logger, _serviceConfiguration, this);
         }
 
         public bool InitializeDefaults() {
@@ -46,7 +44,7 @@ namespace MinecraftService.Shared.Classes.Configurations {
             string serverExePath = $@"{GetSettingsProp(ServerPropertyKeys.ServerPath).StringValue}\{GetSettingsProp(ServerPropertyKeys.ServerExeName).StringValue}";
             if (GetDeployedVersion() == "None" || !File.Exists(serverExePath) || GetDeployedVersion() != GetServerVersion()) {
                 _logger.AppendLine("Executable missing, or server is out of date. Replacing server build, Please wait...");
-                GetUpdater().ReplaceServerBuild().Wait();
+                GetUpdater().ReplaceBuild(this).Wait();
                 return;
             }
         }
@@ -318,6 +316,6 @@ namespace MinecraftService.Shared.Classes.Configurations {
             File.WriteAllText(GetServerFilePath(ServerFileNameKeys.DeployedINI, this), version);
         }
 
-        public IUpdater GetUpdater() => _updater;
+        public IUpdater GetUpdater() => _serviceConfiguration.GetUpdater(_serverArch);
     }
 }

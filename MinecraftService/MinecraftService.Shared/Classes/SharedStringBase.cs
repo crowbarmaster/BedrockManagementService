@@ -80,8 +80,6 @@ namespace MinecraftService.Shared.Classes {
             MmsVersionIni,
             LatestVerIni_Name,
             VersionManifest_Name,
-            JavaLatestReleaseManifest,
-            JavaLatestBetaManifest,
             BdsUpdatePackage_Ver,
             JdsUpdatePackage_Ver,
             LLUpdatePackage_Ver,
@@ -166,8 +164,6 @@ namespace MinecraftService.Shared.Classes {
             { MmsFileNameKeys.MmsVersionIni, ServiceDirectoryKeys.Root },
             { MmsFileNameKeys.LatestVerIni_Name, ServiceDirectoryKeys.MmsConfig },
             { MmsFileNameKeys.VersionManifest_Name, ServiceDirectoryKeys.MmsConfig },
-            { MmsFileNameKeys.JavaLatestReleaseManifest, ServiceDirectoryKeys.MmsConfig },
-            { MmsFileNameKeys.JavaLatestBetaManifest, ServiceDirectoryKeys.MmsConfig },
             { MmsFileNameKeys.BdsUpdatePackage_Ver, ServiceDirectoryKeys.BuildArchives },
             { MmsFileNameKeys.JdsUpdatePackage_Ver, ServiceDirectoryKeys.JavaCoreFiles_Ver },
             { MmsFileNameKeys.LLUpdatePackage_Ver, ServiceDirectoryKeys.LLBuilds },
@@ -208,7 +204,7 @@ namespace MinecraftService.Shared.Classes {
             { MinecraftServerArch.Java, "Java" }
         };
 
-        public static string GetNewTempDirectory() => $"{Path.GetTempPath()}MMSTemp\\{Guid.NewGuid()}";
+        public static string GetNewTempDirectory(string folderName) => $"{Path.GetTempPath()}MMSTemp\\{folderName}_{Guid.NewGuid()}";
 
         public static MinecraftServerArch GetArchFromString(string archName) {
             switch (archName) {
@@ -238,10 +234,9 @@ namespace MinecraftService.Shared.Classes {
             { MmsUrlKeys.LLPackageOld_Ver, "https://github.com/LiteLDev/LiteLoaderBDSv2/releases/download/{0}/LiteLoader-{0}.zip" },
             { MmsUrlKeys.LLPackage_Ver, "https://github.com/LiteLDev/LiteLoaderBDSv2/releases/download/{0}/LiteLoaderBDS.zip" },
             { MmsUrlKeys.LLModPackage_Ver, "https://github.com/LiteLDev/LiteLoaderBDSv2/releases/download/{0}/Modules.zip" },
-            { MmsUrlKeys.LLReleasesJson, "https://github.com/crowbarmaster/BedrockManagementService/raw/master/BMS_Files/liteloader_version_manifest.json" },
-            { MmsUrlKeys.BdsVersionJson, "https://github.com/crowbarmaster/BedrockManagementService/raw/master/BMS_Files/bedrock_version_manifest.json" },
-            { MmsUrlKeys.JdsVersionJson, "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json" },
-            { MmsUrlKeys.PluginRepoJson, "https://github.com/crowbarmaster/BedrockManagementService/raw/master/BMS_Files/plugin_repo.json"},
+            { MmsUrlKeys.LLReleasesJson, "https://raw.githubusercontent.com/crowbarmaster/BedrockManagementService/master/BMS_Files/liteloader_version_manifest.json" },
+            { MmsUrlKeys.BdsVersionJson, "https://raw.githubusercontent.com/crowbarmaster/BedrockManagementService/master/MMS_Files/bedrock_version_prop_manifest.json" },
+            { MmsUrlKeys.JdsVersionJson, "https://raw.githubusercontent.com/crowbarmaster/BedrockManagementService/master/MMS_Files/java_version_prop_manifest.json" },
             { MmsUrlKeys.Jdk17DownloadLink, "https://download.oracle.com/java/17/latest/jdk-17_windows-x64_bin.zip"}
         };
 
@@ -267,9 +262,7 @@ namespace MinecraftService.Shared.Classes {
             { MmsFileNameKeys.ClientCommandHistory, "ClientCommandHistory.txt" },
             { MmsFileNameKeys.ServerConfig_Name, "{0}.conf" },
             { MmsFileNameKeys.LatestVerIni_Name, "LatestVer-{0}.ini" },
-            { MmsFileNameKeys.VersionManifest_Name, "VersionManifest-{0}.json" },
-            { MmsFileNameKeys.JavaLatestReleaseManifest, "JavaLatestReleaseManifest.json" },
-            { MmsFileNameKeys.JavaLatestBetaManifest, "JavaLatestBetaManifest.json" },
+            { MmsFileNameKeys.VersionManifest_Name, "VersionPropManifest-{0}.json" },
             { MmsFileNameKeys.MmsVersionIni, "ServiceVersion.ini" },
             { MmsFileNameKeys.BedrockStockProps_Ver, "stock_props.conf" },
             { MmsFileNameKeys.JavaStockProps_Ver, "server.properties" },

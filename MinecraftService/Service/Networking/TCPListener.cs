@@ -217,7 +217,7 @@ namespace MinecraftService.Service.Networking {
                                 }
                             }
                         }
-                        Task.Delay(500).Wait();
+                         Task.Delay(500).Wait();
                     } catch (OutOfMemoryException) {
                         _logger.AppendLine("Out of memory exception thrown.");
                     } catch (ObjectDisposedException) {

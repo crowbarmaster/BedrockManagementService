@@ -15,7 +15,7 @@ namespace MinecraftService.Client.Forms {
 
         public NewPlayerRegistrationForm() {
             InitializeComponent();
-            _serverConfiguration = FormManager.MainWindow.selectedServer;
+            _serverConfiguration = FormManager.MainWindow.SelectedServer;
         }
 
         private void saveClick(object sender, EventArgs e) {

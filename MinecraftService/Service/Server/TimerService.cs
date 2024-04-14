@@ -40,6 +40,7 @@ namespace MinecraftService.Service.Server {
             }
             TimerWorker worker;
             worker = CreateTimer(timerType);
+            
             if (worker.Start().Result) {
                 ActiveTimers.Add(worker);
             }

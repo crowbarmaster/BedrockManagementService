@@ -16,19 +16,17 @@ namespace MinecraftService.Shared.Classes.Configurations {
         private readonly IProcessInfo _processInfo;
         private readonly IServerLogger _logger;
         private readonly IServiceConfiguration _serviceConfiguration;
-        private readonly IUpdater _updater;
 
         public LiteLoaderConfiguration(IProcessInfo processInfo, IServerLogger logger, IServiceConfiguration serviceConfiguration) : base() {
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
             _processInfo = processInfo;
             ServerArch = _serverArch;
-            _updater = new LiteUpdater(logger, _serviceConfiguration, this);
         }
 
         public bool InitializeDefaults() {
             _servicePath = _processInfo.GetDirectory();
-            DefaultPropList = _serviceConfiguration.GetServerDefaultPropList(MinecraftServerArch.LiteLoader);
+            DefaultPropList = _serviceConfiguration.GetServerDefaultPropList(_serverArch);
             ServerPropList = MinecraftFileUtilities.CopyPropList(DefaultPropList);
             ServersPath = new Property(ServicePropertyStrings[ServicePropertyKeys.ServersPath], _serviceConfiguration.GetProp(ServicePropertyKeys.ServersPath).StringValue);
             ServicePropList.Clear();
@@ -103,7 +101,7 @@ namespace MinecraftService.Shared.Classes.Configurations {
         }
 
         public bool ValidateServerPropFile(string version) {
-            string propFile = GetServiceFilePath(MmsFileNameKeys.BedrockStockProps_Ver, _updater.GetBaseVersion(version));
+            string propFile = GetServiceFilePath(MmsFileNameKeys.BedrockStockProps_Ver, _serviceConfiguration.GetUpdater(_serverArch).GetBaseVersion(version));
             FileInfo file = new(propFile);
             if (version != "None" && _processInfo.DeclaredType() != "Client") {
                 if (!file.Exists || file.Length == 0) {
@@ -120,7 +118,7 @@ namespace MinecraftService.Shared.Classes.Configurations {
         public void UpdateServerProps(string version) {
             DefaultPropList.Clear();
             try {
-                File.ReadAllLines(GetServiceFilePath(MmsFileNameKeys.BedrockStockProps_Ver, _updater.GetBaseVersion(version))).ToList().ForEach(entry => {
+                File.ReadAllLines(GetServiceFilePath(MmsFileNameKeys.BedrockStockProps_Ver, _serviceConfiguration.GetUpdater(_serverArch).GetBaseVersion(version))).ToList().ForEach(entry => {
                     string[] splitEntry = entry.Split('=');
                     Property propToSet = new Property(splitEntry[0], splitEntry[1]);
                     Property existingProp = ServerPropList.FirstOrDefault(x => x.KeyName == propToSet.KeyName);
@@ -319,13 +317,13 @@ namespace MinecraftService.Shared.Classes.Configurations {
             SetSettingsProp(ServerPropertyKeys.ServerVersion, version);
         }
 
-        public IUpdater GetUpdater() => _updater;
+        public IUpdater GetUpdater() => _serviceConfiguration.GetUpdater(_serverArch);
 
         public void ValidateDeployedServer() {
             string serverExePath = $@"{GetSettingsProp(ServerPropertyKeys.ServerPath).StringValue}\{GetSettingsProp(ServerPropertyKeys.ServerExeName).StringValue}";
             if (GetDeployedVersion() == "None" || !File.Exists(serverExePath) || GetDeployedVersion() != GetServerVersion()) {
                 _logger.AppendLine("Executable missing, or server is out of date. Replacing server build, Please wait...");
-                GetUpdater().ReplaceServerBuild().Wait();
+                GetUpdater().ReplaceBuild(this).Wait();
                 return;
             }
         }
