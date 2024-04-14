@@ -88,7 +88,7 @@ namespace MinecraftService.Shared.Classes {
                 if (_serverConfiguration != null) {
                     _serverConfiguration.GetLog().Add(entry);
                 } 
-                if (_serviceConfiguration != null) {
+                if (_serviceConfiguration != null && _logOwner == "Service") {
                     _serviceConfiguration.GetLog().Add(entry);
                 }
                 if (_logToFile && _logWriter != null) {
