@@ -118,6 +118,11 @@ namespace MinecraftService.Client.Management {
             return StartLogThread();
         }
 
+        public void ResetServerServiceLogCounts() {
+            currentServerLogLength = 0;
+            currentServiceLogLength = 0;
+        }
+
         public void SetConnectedHost(IServiceConfiguration host) => _connectedHost = host;
 
         public bool StartLogThread() {
