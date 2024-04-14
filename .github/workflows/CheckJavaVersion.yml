@@ -41,12 +41,9 @@ jobs:
              $javaManifestReleasecontent = Invoke-WebRequest -UseBasicParsing -Headers $ConnectionHeaders -Uri $latestRelease.url;
              $javaManifestReleasecontentJson = $javaManifestReleasecontent | ConvertFrom-Json;
              $isBetaStatus = $javaManifestReleasecontentJson.type -eq 'snapshot' ? 'True' : 'False';
-             mkdir ServerTemp;
-             cd .\\ServerTemp;
              $javaVer = $javaManifestReleasecontentJson.minimumLauncherVersion;
              $jdsVer = $javaManifestReleasecontentJson.id;
              $downloadUrl = $javaManifestReleasecontentJson.downloads.server.url;
-             Invoke-WebRequest -Uri $javaManifestReleasecontentJson.downloads.server.url -OutFile '.\\Server.jar';
              echo "javaVer=$javaVer" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
              echo "jdsVer=$jdsVer" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
              echo "isBeta=$isBetaStatus" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
@@ -56,7 +53,11 @@ jobs:
             distribution: 'oracle' # See 'Supported distributions' for available options
             java-version: "${{ env.javaVer }}"
         - run: |
+             Set-PSDebug -Trace 1;
+             mkdir ServerTemp;
+             cd .\\ServerTemp;
              $curPath = Get-Location;
+             Invoke-WebRequest -Uri "${{ env.downloadUrl }}" -OutFile '.\\Server.jar';
              $processStartInfo = [Diagnostics.ProcessStartInfo] @{
              	UseShellExecute = 0
              	CreateNoWindow = 1
@@ -86,9 +87,9 @@ jobs:
              }
              cd ..;
              $newEntry = [JavaVersionHistoryModel]@{
-             	Version = $javaManifestReleasecontentJson.Id;
-             	DownloadUrl = $javaManifestReleasecontentJson.downloads.server.url;
-             	IsBeta = $isBetaStatus 
+             	Version = "${{ env.jdsVer }}";
+             	DownloadUrl = "${{ env.downloadUrl }}";
+             	IsBeta = "${{ env.isBetaStatus }}";
              	PropList = $propList;
              }
              $localJavaManifestJson += $newEntry;
