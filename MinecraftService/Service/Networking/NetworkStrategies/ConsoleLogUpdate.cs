@@ -39,7 +39,6 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
                         srvString.Append($"{srvName}|;|{srvText.FromIndex(loop)}|;|{loop}|?|");
                         loop++;
                     }
-
                 } else {
                     srvTextLen = _serviceConfiguration.GetLog().Count;
                     clientCurLen = int.Parse(dataSplit[1]);
