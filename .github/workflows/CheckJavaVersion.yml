@@ -32,7 +32,6 @@ jobs:
              $localJavaManifestJson = Get-Content "MMS_Files\\java_version_prop_manifest.json" | ConvertFrom-Json;
              $latestRelease = $javaManifestJson.versions | Select-Object -First 1;
              $latestLocalRelease = $localJavaManifestJson | Select-Object -Last 1;
-             $propList = @();
              if($localJavaManifestJson) {
              	if($latestRelease.id -eq $latestLocalRelease.Version) {
              		return;
@@ -64,6 +63,7 @@ jobs:
                 [PropInfoEntry[]] $PropList;
              }
              Set-PSDebug -Trace 1;
+             $propList = @();
              mkdir ServerTemp;
              cd .\\ServerTemp;
              $curPath = Get-Location;
