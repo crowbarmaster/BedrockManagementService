@@ -29,6 +29,7 @@ jobs:
              $javaManifestUri = 'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json';
              $javaManifestcontent = Invoke-WebRequest -UseBasicParsing -Headers $ConnectionHeaders -Uri $javaManifestUri;
              $javaManifestJson = $javaManifestcontent | ConvertFrom-Json;
+             $localJavaManifestJson = Get-Content "MMS_Files\\java_version_prop_manifest.json" | ConvertFrom-Json;
              $latestRelease = $javaManifestJson.versions | Select-Object -First 1;
              $latestLocalRelease = $localJavaManifestJson | Select-Object -Last 1;
              echo "javaVer=0" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
