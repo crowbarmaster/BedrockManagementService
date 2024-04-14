@@ -53,6 +53,16 @@ jobs:
             distribution: 'oracle' # See 'Supported distributions' for available options
             java-version: "${{ env.javaVer }}"
         - run: |
+             class PropInfoEntry {
+                [string]$Key;
+                [string]$Value;
+             }
+             class JavaVersionHistoryModel {
+                [string]$Version;
+                [string]$IsBeta;
+                [string]$DownloadUrl;
+                [PropInfoEntry[]] $PropList;
+             }
              Set-PSDebug -Trace 1;
              mkdir ServerTemp;
              cd .\\ServerTemp;
