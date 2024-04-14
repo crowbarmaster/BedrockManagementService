@@ -34,6 +34,7 @@ namespace MinecraftService.Service.Server.ServerControllers {
         private DateTime _startTime;
         private bool _serverModifiedFlag = true;
         private const string _startupMessage = "INFO] Server started.";
+        private ConsoleFilterStrategyClass _consoleFilter;
 
         public JavaServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IServerLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, IPlayerManager servicePlayerManager) {
             _serverConfiguration = serverConfiguration;
@@ -44,6 +45,8 @@ namespace MinecraftService.Service.Server.ServerControllers {
             _serviceLogger = logger;
             _serverLogger = new MinecraftServerLogger(_processInfo, _serviceConfiguration, _serverConfiguration);
             _backupManager = new JavaBackupManager(_serviceLogger, this, _serverConfiguration, _serviceConfiguration);
+            _consoleFilter = new ConsoleFilterStrategyClass(_serviceLogger, _configurator, _serverConfiguration, this, _serviceConfiguration);
+
         }
 
         public void Initialize() {
@@ -71,6 +74,7 @@ namespace MinecraftService.Service.Server.ServerControllers {
                 }
                 _serverConfiguration.ValidateDeployedServer();
                 StartServerTask();
+                _timerService.StartTimerService();
                 while (_currentServerStatus != ServerStatus.Started) {
                     Task.Delay(10).Wait();
                 }
@@ -202,7 +206,6 @@ namespace MinecraftService.Service.Server.ServerControllers {
 
         private void StdOutToLog(object sender, DataReceivedEventArgs e) {
             if (e.Data != null && !e.Data.Contains("Running AutoCompaction...")) {
-                ConsoleFilterStrategyClass consoleFilter = new ConsoleFilterStrategyClass(_serviceLogger, _configurator, _serverConfiguration, this, _serviceConfiguration);
                 string input = e.Data;
                 string logFileText = "NO LOG FILE! - ";
                 int trimIndex = 0;
@@ -221,7 +224,7 @@ namespace MinecraftService.Service.Server.ServerControllers {
                         _backupManager.SetBackupComplete();
                         WriteToStandardIn("say Server backup complete.");
                     }
-                    foreach (KeyValuePair<string, IConsoleFilter> filter in consoleFilter.JavaFilterList) {
+                    foreach (KeyValuePair<string, IConsoleFilter> filter in _consoleFilter.JavaFilterList) {
                         if (input.Contains(filter.Key)) {
                             filter.Value.Filter(input);
                             break;

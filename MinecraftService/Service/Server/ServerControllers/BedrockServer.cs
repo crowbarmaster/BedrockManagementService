@@ -36,7 +36,8 @@ namespace MinecraftService.Service.Server.ServerControllers {
         private const string _startupMessage = "INFO] Server started.";
         private bool _serverModifiedFlag = true;
         private bool _LiteLoadedServer = false;
-        ConsoleGarbageFilter _garbageFilter = new ConsoleGarbageFilter();
+        private ConsoleGarbageFilter _garbageFilter = new ConsoleGarbageFilter();
+        private ConsoleFilterStrategyClass _consoleFilter;
 
         public BedrockServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IServerLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, IPlayerManager servicePlayerManager) {
             _serverConfiguration = serverConfiguration;
@@ -47,6 +48,7 @@ namespace MinecraftService.Service.Server.ServerControllers {
             _logger = logger;
             _serverLogger = new MinecraftServerLogger(_processInfo, _serviceConfiguration, _serverConfiguration);
             _backupManager = new BedrockBackupManager(_logger, this, serverConfiguration, serviceConfiguration);
+            _consoleFilter = new ConsoleFilterStrategyClass(_logger, _configurator, _serverConfiguration, this, _serviceConfiguration);
         }
 
         public void Initialize() {
@@ -76,6 +78,7 @@ namespace MinecraftService.Service.Server.ServerControllers {
                 }
                 _serverConfiguration.ValidateDeployedServer();
                 StartServerTask();
+                _timerService.StartTimerService();
                 while (_currentServerStatus != ServerStatus.Started) {
                     Task.Delay(10).Wait();
                 }
@@ -190,7 +193,6 @@ namespace MinecraftService.Service.Server.ServerControllers {
 
         private void StdOutToLog(object sender, DataReceivedEventArgs e) {
             if (e.Data != null) {
-                ConsoleFilterStrategyClass consoleFilter = new ConsoleFilterStrategyClass(_logger, _configurator, _serverConfiguration, this, _serviceConfiguration);
                 string input = e.Data;
                 string logFileText = "NO LOG FILE! - ";
                 int trimIndex = 0;
@@ -213,7 +215,7 @@ namespace MinecraftService.Service.Server.ServerControllers {
                     if (input.Contains("Changes to the world are resumed")) {
                         _backupManager.SetBackupComplete();
                     }
-                    foreach (KeyValuePair<string, IConsoleFilter> filter in consoleFilter.FilterList) {
+                    foreach (KeyValuePair<string, IConsoleFilter> filter in _consoleFilter.FilterList) {
                         if (input.Contains(filter.Key)) {
                             filter.Value.Filter(input);
                             break;

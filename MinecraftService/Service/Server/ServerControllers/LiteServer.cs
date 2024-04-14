@@ -31,6 +31,7 @@ namespace MinecraftService.Service.Server.ServerControllers {
         private List<IPlayer> _connectedPlayers = new();
         private DateTime _startTime;
         private bool _serverModifiedFlag = true;
+        private ConsoleFilterStrategyClass _consoleFilter;
 
         public LiteServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IServerLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, IPlayerManager servicePlayerManager) {
             _serverConfiguration = serverConfiguration;
@@ -41,6 +42,7 @@ namespace MinecraftService.Service.Server.ServerControllers {
             _logger = logger;
             _serverLogger = new MinecraftServerLogger(_processInfo, _serviceConfiguration, _serverConfiguration);
             _backupManager = new BedrockBackupManager(_logger, this, _serverConfiguration, _serviceConfiguration);
+            _consoleFilter = new ConsoleFilterStrategyClass(_logger, _configurator, _serverConfiguration, this, _serviceConfiguration);
         }
 
         public void Initialize() {
@@ -69,6 +71,7 @@ namespace MinecraftService.Service.Server.ServerControllers {
                     Task.Delay(500).Wait();
                 }
                 StartServerTask();
+                _timerService.StartTimerService();
                 while (_currentServerStatus != ServerStatus.Started) {
                     Task.Delay(10).Wait();
                 }
@@ -181,7 +184,6 @@ namespace MinecraftService.Service.Server.ServerControllers {
 
         private void StdOutToLog(object sender, DataReceivedEventArgs e) {
             if (e.Data != null && !e.Data.Contains("Running AutoCompaction...")) {
-                ConsoleFilterStrategyClass consoleFilter = new ConsoleFilterStrategyClass(_logger, _configurator, _serverConfiguration, this, _serviceConfiguration);
                 if (!string.IsNullOrEmpty(e.Data)) {
                     string text = e.Data;
                     _serverLogger.AppendLine(text.Substring(text.IndexOf('[') == -1 ? 0 : text.IndexOf('[')));
@@ -192,7 +194,7 @@ namespace MinecraftService.Service.Server.ServerControllers {
                     if (text.Contains("Changes to the world are resumed")) {
                         _backupManager.SetBackupComplete();
                     }
-                    foreach (KeyValuePair<string, IConsoleFilter> filter in consoleFilter.LLFilterList) {
+                    foreach (KeyValuePair<string, IConsoleFilter> filter in _consoleFilter.LLFilterList) {
                         if (text.Contains(filter.Key)) {
                             filter.Value.Filter(text);
                             break;
