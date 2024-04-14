@@ -117,19 +117,23 @@ namespace MinecraftService.Client.Forms {
 
         private void ServerTypeComboBox_SelectedIndexChanged(object sender, System.EventArgs e) {
             _typeChanging = true;
-            SelectedPropModel = LoadedConfigs[GetArchFromString((string)ServerTypeComboBox.SelectedItem)];
+            MinecraftServerArch selectedArch = GetArchFromString((string)ServerTypeComboBox.SelectedItem);
+            SelectedPropModel = LoadedConfigs[selectedArch];
             VersionSelectComboBox.SelectedIndex = -1;
             VersionSelectComboBox.Items.Clear();
             VersionSelectComboBox.Items.AddRange(SelectedPropModel.VersionList.Where(x => x.IsBeta == BetaVersionCheckBox.Checked).ToArray());
-            ipV6Box.Enabled = GetArchFromString((string)ServerTypeComboBox.SelectedItem) != MinecraftServerArch.Java;
+            ipV6Box.Enabled = selectedArch != MinecraftServerArch.Java;
             if (VersionSelectComboBox.Items.Count > 0) {
                 VersionSelectComboBox.SelectedIndex = 0;
             }
             _typeChanging = false;
+            bool isBedrock = selectedArch == MinecraftServerArch.Bedrock;
+            BetaVersionCheckBox.Enabled = !isBedrock;
+            BetaVersionCheckBox.Visible = !isBedrock;
         }
 
         private void VersionSelectComboBox_SelectedIndexChanged(object sender, System.EventArgs e) {
-            if (!_typeChanging && VersionSelectComboBox.Items.Count > 0 && _latestVersionLookup.GetValueOrDefault(GetArchFromString((string)ServerTypeComboBox.SelectedItem)).Version != ((SimpleVersionModel)((ComboBox)sender).SelectedItem).Version) {
+            if (!_typeChanging && VersionSelectComboBox.Items.Count > 0 && (SimpleVersionModel)((ComboBox)sender).SelectedItem != null && _latestVersionLookup.GetValueOrDefault(GetArchFromString((string)ServerTypeComboBox.SelectedItem)).Version != ((SimpleVersionModel)((ComboBox)sender).SelectedItem).Version) {
                 _customVersionSelected = true;
             }
         }
