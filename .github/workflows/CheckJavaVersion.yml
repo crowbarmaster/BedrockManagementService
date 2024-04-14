@@ -48,7 +48,7 @@ jobs:
              echo "downloadUrl=$downloadUrl" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
 
     processVersion:
-        if: ${{ env.javaVer }} != 'null'
+        if: "${{ jobs.check-version.env.javaVer != 'null' }}"
         name: process-version
         
         runs-on: windows-2022
