@@ -533,5 +533,10 @@
     "version": "1.21.0.03",
     "winurl": "https://minecraft.azureedge.net/bin-win/bedrock-server-1.21.0.03.zip",
     "linurl": "https://minecraft.azureedge.net/bin-linux/bedrock-server-1.21.0.03.zip"
+  },
+  {
+    "version": "1.21.1.03",
+    "winurl": "https://minecraft.azureedge.net/bin-win/bedrock-server-1.21.1.03.zip",
+    "linurl": "https://minecraft.azureedge.net/bin-linux/bedrock-server-1.21.1.03.zip"
   }
 ]
