@@ -577,15 +577,23 @@ namespace MinecraftService.Client.Forms {
         private void cmdTextBox_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e) {
             if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down) {
                 if (_localCommandHistory.Count > 0) {
+                    // Ensure _distanceFromLastCommand is within valid range
                     _distanceFromLastCommand = _distanceFromLastCommand < 0 ? 0 : _distanceFromLastCommand;
+
                     if (e.KeyCode == Keys.Up) {
-                        if (_localCommandHistory.Count > _distanceFromLastCommand) {
+                        if (_distanceFromLastCommand < _localCommandHistory.Count) {
                             _distanceFromLastCommand++;
                         }
                     } else {
-                        _distanceFromLastCommand = _distanceFromLastCommand-- > 0 ? _distanceFromLastCommand : 0;
+                        if (_distanceFromLastCommand > 0) {
+                            _distanceFromLastCommand--;
+                        }
                     }
-                    cmdTextBox.Text = _localCommandHistory.ElementAt(_localCommandHistory.Count - _distanceFromLastCommand);
+
+                    int index = _localCommandHistory.Count - _distanceFromLastCommand;
+                    if (index >= 0 && index < _localCommandHistory.Count) {
+                        cmdTextBox.Text = _localCommandHistory.ElementAt(index);
+                    }
                 }
             }
         }
