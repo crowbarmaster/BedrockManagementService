@@ -51,6 +51,7 @@ namespace MinecraftService.Shared.Classes.Updaters {
             while (content == string.Empty) {
                 try {
                     content = HTTPHandler.FetchHTTPContent(MmsUrlStrings[MmsUrlKeys.BdsVersionJson]).Result;
+                    File.WriteAllText(GetServiceFilePath(MmsFileNameKeys.VersionManifest_Name, _serverArch.ToString()), content);
                 } catch {
                     if (retryCount > 2) {
                         if (File.Exists(versionManifestPath)) {

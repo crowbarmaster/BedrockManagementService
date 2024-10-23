@@ -26,7 +26,7 @@ jobs:
            $reply = Invoke-WebRequest -UseBasicParsing -Headers $ConnectionHeaders -Uri "https://www.minecraft.net/en-us/download/server/bedrock";
            $existing = get-content 'BMS_Files\\bedrock_version_manifest.json';
            $latestVer;
-           if ($reply.Content -match 'https://minecraft.azureedge.net/bin-win/bedrock-server-(?<version>.+)\.zip') {
+           if ($reply.Content -match 'https://www.minecraft.net/bedrockdedicatedserver/bin-win/bedrock-server-(?<version>.+)\.zip') {
                $version = $Matches.version;
                if ( $existing ) {
                    $json = $existing | ConvertFrom-Json;
@@ -35,8 +35,8 @@ jobs:
                    if($entryVer -ne $version) {
                        $newEnt = [LegacyBedrockInfo]@{
                            version=$version;
-                           winurl='https://minecraft.azureedge.net/bin-win/bedrock-server-'+$version+'.zip';
-                           linurl='https://minecraft.azureedge.net/bin-linux/bedrock-server-'+$version+'.zip';
+                           winurl='https://www.minecraft.net/bedrockdedicatedserver/bin-win/bedrock-server-'+$version+'.zip';
+                           linurl='https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-'+$version+'.zip';
                        };
                        $json += $newEnt;
            			   $json | ConvertTo-Json -depth 100 | Out-File "BMS_Files\\bedrock_version_manifest.json";

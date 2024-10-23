@@ -229,8 +229,8 @@ namespace MinecraftService.Shared.Classes {
 
         public static Dictionary<MmsUrlKeys, string> MmsUrlStrings = new() {
             { MmsUrlKeys.BdsDownloadPage, "https://www.minecraft.net/en-us/download/server/bedrock" },
-            { MmsUrlKeys.BdsPackage_Ver, "https://minecraft.azureedge.net/bin-win/bedrock-server-{0}.zip" },
-            { MmsUrlKeys.BdsVersionRegx, @"(https://minecraft.azureedge.net/bin-win/bedrock-server-)(.*)(\.zip)" },
+            { MmsUrlKeys.BdsPackage_Ver, "https://www.minecraft.net/bedrockdedicatedserver/bin-win/bedrock-server-{0}.zip" },
+            { MmsUrlKeys.BdsVersionRegx, @"(https://www.minecraft.net/bedrockdedicatedserver/bin-win/bedrock-server-)(.*)(\.zip)" },
             { MmsUrlKeys.LLPackageOld_Ver, "https://github.com/LiteLDev/LiteLoaderBDSv2/releases/download/{0}/LiteLoader-{0}.zip" },
             { MmsUrlKeys.LLPackage_Ver, "https://github.com/LiteLDev/LiteLoaderBDSv2/releases/download/{0}/LiteLoaderBDS.zip" },
             { MmsUrlKeys.LLModPackage_Ver, "https://github.com/LiteLDev/LiteLoaderBDSv2/releases/download/{0}/Modules.zip" },

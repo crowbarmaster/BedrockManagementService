@@ -30,7 +30,7 @@ jobs:
            [Net.ServicePointManager]::SecurityProtocol = "tls12", "tls11";
            $reply = Invoke-WebRequest -UseBasicParsing -Headers $ConnectionHeaders -Uri "https://www.minecraft.net/en-us/download/server/bedrock";
            $propMftFile = get-content 'MMS_Files\\bedrock_version_prop_manifest.json';
-           if ($reply.Content -match 'https://minecraft.azureedge.net/bin-win/bedrock-server-(?<version>.+)\.zip') {
+           if ($reply.Content -match 'https://www.minecraft.net/bedrockdedicatedserver/bin-win/bedrock-server-(?<version>.+)\.zip') {
                $version = $Matches.version;
                if ($propMftFile) {
                    $propMftJson = $propMftFile | ConvertFrom-Json;
@@ -70,8 +70,8 @@ jobs:
            			  $zipStream.Close();
            			  $newListEntry = [BedrockInfo]@{
            			  	version=$version;
-           			  	winurl='https://minecraft.azureedge.net/bin-win/bedrock-server-'+$version+'.zip';
-           			  	linurl='https://minecraft.azureedge.net/bin-linux/bedrock-server-'+$version+'.zip';
+           			  	winurl='https://www.minecraft.net/bedrockdedicatedserver/bin-win/bedrock-server-'+$version+'.zip';
+           			  	linurl='https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-'+$version+'.zip';
            			  	proplist= $propList;
            			  }
            			  $propMftJson += $newListEntry;
