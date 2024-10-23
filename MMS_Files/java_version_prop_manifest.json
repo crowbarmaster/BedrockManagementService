@@ -77041,5 +77041,9746 @@
         "Value": "false"
       }
     ]
+  },
+  {
+    "Version": "1.20.5-pre2",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/c794b404663758cba43c67d097a25c5d4eb84a37/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-animals",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-npcs",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.20.5-pre3",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/5ac067ccc569ef9e2177cf4331c8e82d3e072692/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-animals",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-npcs",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.20.5-pre4",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/2793397cf42243a69fca37ff0887e8560a36c583/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-animals",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-npcs",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.20.5-rc1",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/ec45f58d589dc1b00b25c6798dd10d2af70867e5/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-animals",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-npcs",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.20.5-rc2",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/921814646156d838286dc0634a0031f042c6e0d2/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-animals",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-npcs",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.20.5-rc3",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/7d735a8eda6797ed196141b76e96b46546bde091/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-animals",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-npcs",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.20.5",
+    "IsBeta": "false",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/79493072f65e17243fd36a699c9a96b4381feb91/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-animals",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-npcs",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.20.6-rc1",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/a9b9c22721ec3ac516627f30554f21ed7c23efe5/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-animals",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-npcs",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.20.6",
+    "IsBeta": "false",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/145ff0858209bcfc164859ba735d4199aafa1eea/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-animals",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-npcs",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "24w18a",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/22618c686c86be630601e5d9fcf581674105c899/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-animals",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-npcs",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "24w19b",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/447bfe84875399d44d383de7f534e1cc10bae9a5/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-animals",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-npcs",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "24w20a",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/e3b1bcc2d7a09b6f1acfef7090ee64409feb3b94/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-animals",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-npcs",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "24w21a",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/6ba7192e60bedb3ff02db3c57b75f7ea56c63242/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-animals",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-npcs",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "24w21b",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/743d74805b64f83052fe449993f42182f76b129e/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-animals",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-npcs",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.21-pre1",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/57e59ee5d8bc6ce664a7d76de45f8df9c110381f/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-animals",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-npcs",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.21-pre2",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/3a8da3a1afcfb09d701fa17e405d09cd0c635748/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-animals",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-npcs",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.21-pre3",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/96266e18a95faa1c785ac852315e886d0e8bb174/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-animals",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-npcs",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.21-pre4",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/14b1a86d9fcfc82c013e82910e8209617c3a721e/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-animals",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-npcs",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.21-rc1",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/902101d2fb0f968b9c0ddb8b8cff9afef23f72c7/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-animals",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-npcs",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.21",
+    "IsBeta": "false",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/450698d1863ab5180c25d7c804ef0fe6369dd1ba/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-animals",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-npcs",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.21.1-rc1",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/e56720aba46f7f07238c4c054a160fc942da9f78/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-animals",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-npcs",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.21.1",
+    "IsBeta": "false",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/59353fb40c36d304f2035d51e7d6e6baa98dc05c/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-animals",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-npcs",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "24w33a",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/90f9c80aeef3966343e661a1487b7918c90ae61d/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "pause-when-empty-seconds",
+        "Value": "60"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "text-filtering-version",
+        "Value": "0"
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "24w34a",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/ff16e26392a5ced7cfe52ffdc5461cd646b9b65d/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "pause-when-empty-seconds",
+        "Value": "60"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "text-filtering-version",
+        "Value": "0"
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "24w35a",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/93d259fdba93aa7d3c1763cfb0136295087e0de3/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "pause-when-empty-seconds",
+        "Value": "60"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "text-filtering-version",
+        "Value": "0"
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "24w36a",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/30663a50aaf407751ae9e704758364ed9433206d/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "pause-when-empty-seconds",
+        "Value": "60"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "text-filtering-version",
+        "Value": "0"
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "24w37a",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/4ba5f8917ac400474751b6e0f20d311d3b726fe7/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "pause-when-empty-seconds",
+        "Value": "60"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "text-filtering-version",
+        "Value": "0"
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "24w38a",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/b87bfc3763d88a1364b8ac30fe6f2ac3550948f8/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "pause-when-empty-seconds",
+        "Value": "60"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "text-filtering-version",
+        "Value": "0"
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "24w39a",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/31bc8a4f3c73e3873f4a0d42e7c65a7ae43cc44a/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "pause-when-empty-seconds",
+        "Value": "60"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "text-filtering-version",
+        "Value": "0"
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "24w40a",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/2e2e224520156be9bc7c76be8158af9825d873d9/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "pause-when-empty-seconds",
+        "Value": "60"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "text-filtering-version",
+        "Value": "0"
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.21.2-pre1",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/7e6e5da8bb024227ffa0d24cfa3181e6a772bb76/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "pause-when-empty-seconds",
+        "Value": "60"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "text-filtering-version",
+        "Value": "0"
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.21.2-pre2",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/eddbd98f45ec134898b9a7657f4e3b679692dc45/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "pause-when-empty-seconds",
+        "Value": "60"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "text-filtering-version",
+        "Value": "0"
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.21.2-pre3",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/8d2de8704771e210d69e7b7ac70d858a677bcb70/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "pause-when-empty-seconds",
+        "Value": "60"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "text-filtering-version",
+        "Value": "0"
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.21.2-pre4",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/aed86bb19e8fb39147c9a4534ab5e2b94fa569ea/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "pause-when-empty-seconds",
+        "Value": "60"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "text-filtering-version",
+        "Value": "0"
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.21.2-pre5",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/c3294c5538c63aaa744313c8b98276bb26490a85/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "pause-when-empty-seconds",
+        "Value": "60"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "text-filtering-version",
+        "Value": "0"
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.21.2-rc1",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/8db23b5e87d998956ac5b9a5d94d1b4db4b9ea44/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "pause-when-empty-seconds",
+        "Value": "60"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "text-filtering-version",
+        "Value": "0"
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.21.2-rc2",
+    "IsBeta": "true",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/d0601b3f493bb5b4e421ef35b676d4cb9c1f606f/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "pause-when-empty-seconds",
+        "Value": "60"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "text-filtering-version",
+        "Value": "0"
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.21.2",
+    "IsBeta": "false",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/7bf95409b0d9b5388bfea3704ec92012d273c14c/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "pause-when-empty-seconds",
+        "Value": "60"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "text-filtering-version",
+        "Value": "0"
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
+  },
+  {
+    "Version": "1.21.3",
+    "IsBeta": "false",
+    "DownloadUrl": "https://piston-data.mojang.com/v1/objects/45810d238246d90e811d896f87b14695b7fb6839/server.jar",
+    "PropList": [
+      {
+        "Key": "accepts-transfers",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-flight",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-nether",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-console-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "broadcast-rcon-to-ops",
+        "Value": "true"
+      },
+      {
+        "Key": "bug-report-link",
+        "Value": ""
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "enable-command-block",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-jmx-monitoring",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-query",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-rcon",
+        "Value": "false"
+      },
+      {
+        "Key": "enable-status",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-secure-profile",
+        "Value": "true"
+      },
+      {
+        "Key": "enforce-whitelist",
+        "Value": "false"
+      },
+      {
+        "Key": "entity-broadcast-range-percentage",
+        "Value": "100"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "function-permission-level",
+        "Value": "2"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "generate-structures",
+        "Value": "true"
+      },
+      {
+        "Key": "generator-settings",
+        "Value": "{}"
+      },
+      {
+        "Key": "hardcore",
+        "Value": "false"
+      },
+      {
+        "Key": "hide-online-players",
+        "Value": "false"
+      },
+      {
+        "Key": "initial-disabled-packs",
+        "Value": ""
+      },
+      {
+        "Key": "initial-enabled-packs",
+        "Value": "vanilla"
+      },
+      {
+        "Key": "level-name",
+        "Value": "world"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "level-type",
+        "Value": "minecraft\\:normal"
+      },
+      {
+        "Key": "log-ips",
+        "Value": "true"
+      },
+      {
+        "Key": "max-chained-neighbor-updates",
+        "Value": "1000000"
+      },
+      {
+        "Key": "max-players",
+        "Value": "20"
+      },
+      {
+        "Key": "max-tick-time",
+        "Value": "60000"
+      },
+      {
+        "Key": "max-world-size",
+        "Value": "29999984"
+      },
+      {
+        "Key": "motd",
+        "Value": "A Minecraft Server"
+      },
+      {
+        "Key": "network-compression-threshold",
+        "Value": "256"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "op-permission-level",
+        "Value": "4"
+      },
+      {
+        "Key": "pause-when-empty-seconds",
+        "Value": "60"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "0"
+      },
+      {
+        "Key": "prevent-proxy-connections",
+        "Value": "false"
+      },
+      {
+        "Key": "pvp",
+        "Value": "true"
+      },
+      {
+        "Key": "query.port",
+        "Value": "25565"
+      },
+      {
+        "Key": "rate-limit",
+        "Value": "0"
+      },
+      {
+        "Key": "rcon.password",
+        "Value": ""
+      },
+      {
+        "Key": "rcon.port",
+        "Value": "25575"
+      },
+      {
+        "Key": "region-file-compression",
+        "Value": "deflate"
+      },
+      {
+        "Key": "require-resource-pack",
+        "Value": "false"
+      },
+      {
+        "Key": "resource-pack",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-id",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-prompt",
+        "Value": ""
+      },
+      {
+        "Key": "resource-pack-sha1",
+        "Value": ""
+      },
+      {
+        "Key": "server-ip",
+        "Value": ""
+      },
+      {
+        "Key": "server-port",
+        "Value": "25565"
+      },
+      {
+        "Key": "simulation-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "spawn-monsters",
+        "Value": "true"
+      },
+      {
+        "Key": "spawn-protection",
+        "Value": "16"
+      },
+      {
+        "Key": "sync-chunk-writes",
+        "Value": "true"
+      },
+      {
+        "Key": "text-filtering-config",
+        "Value": ""
+      },
+      {
+        "Key": "text-filtering-version",
+        "Value": "0"
+      },
+      {
+        "Key": "use-native-transport",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "10"
+      },
+      {
+        "Key": "white-list",
+        "Value": "false"
+      }
+    ]
   }
 ]
