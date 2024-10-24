@@ -204,7 +204,11 @@ namespace MinecraftService.Shared.Classes {
             { MinecraftServerArch.Java, "Java" }
         };
 
-        public static string GetNewTempDirectory(string folderName) => $"{Path.GetTempPath()}MMSTemp\\{folderName}_{Guid.NewGuid()}";
+        public static string GetNewTempDirectory(string folderName) {
+            string newPath = $"{Path.GetTempPath()}MMSTemp\\{folderName}_{Guid.NewGuid()}";
+            Directory.CreateDirectory(newPath);
+            return newPath;
+        }
 
         public static MinecraftServerArch GetArchFromString(string archName) {
             switch (archName) {
