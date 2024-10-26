@@ -21,7 +21,7 @@ namespace MinecraftService.Client.Management {
         public bool DisplayTimestamps = false;
         public List<string> ServiceLogs = new();
         private CancellationTokenSource _logTaskCancelSource;
-        private IServiceConfiguration _connectedHost;
+        private ServiceConfigurator _connectedHost;
         private readonly IServerLogger _logger;
         private int currentServerLogLength;
         private int currentServiceLogLength;
@@ -123,7 +123,7 @@ namespace MinecraftService.Client.Management {
             currentServiceLogLength = 0;
         }
 
-        public void SetConnectedHost(IServiceConfiguration host) => _connectedHost = host;
+        public void SetConnectedHost(ServiceConfigurator host) => _connectedHost = host;
 
         public bool StartLogThread() {
             try {

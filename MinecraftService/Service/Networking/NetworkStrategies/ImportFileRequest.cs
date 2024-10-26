@@ -7,10 +7,10 @@ using System.Text;
 
 namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class ImportFileRequest : IMessageParser {
-        private readonly IServiceConfiguration _configuration;
+        private readonly ServiceConfigurator _configuration;
         private readonly IProcessInfo _processInfo;
         private readonly IConfigurator _configurator;
-        public ImportFileRequest(IConfigurator configurator, IProcessInfo processInfo, IServiceConfiguration configuration) {
+        public ImportFileRequest(IConfigurator configurator, IProcessInfo processInfo, ServiceConfigurator configuration) {
             _configuration = configuration;
             _processInfo = processInfo;
             _configurator = configurator;

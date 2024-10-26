@@ -12,7 +12,7 @@ using static MinecraftService.Shared.Classes.SharedStringBase;
 
 namespace MinecraftService.Shared.Classes {
     public class MinecraftServerLogger : IServerLogger {
-        private readonly IBaseConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IProcessInfo _processInfo;
         private readonly IServerConfiguration _serverConfiguration;
         [NonSerialized]

@@ -11,16 +11,16 @@ using static MinecraftService.Shared.Classes.SharedStringBase;
 namespace MinecraftService.Shared.Classes.Updaters {
     public class QuiltUpdater : JavaUpdater, IUpdater {
         private IServerLogger _logger;
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IServerConfiguration _serverConfiguration;
         private readonly MinecraftServerArch _serverArch = MinecraftServerArch.Java;
 
-        public QuiltUpdater(IServerLogger logger, IServiceConfiguration serviceConfiguration) : base(logger, serviceConfiguration) {
+        public QuiltUpdater(IServerLogger logger, ServiceConfigurator serviceConfiguration) : base(logger, serviceConfiguration) {
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
         }
 
-        public QuiltUpdater(IServerLogger logger, IServiceConfiguration serviceConfiguration, IServerConfiguration serverConfiguration) : base(logger, serviceConfiguration, serverConfiguration) {
+        public QuiltUpdater(IServerLogger logger, ServiceConfigurator serviceConfiguration, IServerConfiguration serverConfiguration) : base(logger, serviceConfiguration, serverConfiguration) {
             _serviceConfiguration = serviceConfiguration;
             _serverConfiguration = serverConfiguration;
             _logger = logger;

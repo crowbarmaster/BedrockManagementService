@@ -9,7 +9,7 @@ namespace MinecraftService.Service.Server {
     public class BedrockBackupManager : IBackupManager {
         private readonly IServerLogger _logger;
         private readonly IServerController _server;
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IServerConfiguration _serverConfiguration;
         private bool _autoBackupsContainPacks = false;
         private bool _backupRunning = false;
@@ -19,7 +19,7 @@ namespace MinecraftService.Service.Server {
             Manual
         }
 
-        public BedrockBackupManager(IServerLogger logger, IServerController server, IServerConfiguration serverConfiguration, IServiceConfiguration serviceConfiguration) {
+        public BedrockBackupManager(IServerLogger logger, IServerController server, IServerConfiguration serverConfiguration, ServiceConfigurator serviceConfiguration) {
             _logger = logger;
             _server = server;
             _serverConfiguration = serverConfiguration;

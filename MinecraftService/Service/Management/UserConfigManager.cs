@@ -13,7 +13,7 @@ using static MinecraftService.Shared.Classes.SharedStringBase;
 namespace MinecraftService.Service.Management {
     public class ConfigManager : IConfigurator {
         private static readonly object _fileLock = new();
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IProcessInfo _processInfo;
         private readonly IServerLogger _logger;
         private readonly FileUtilities FileUtilities;
@@ -21,7 +21,7 @@ namespace MinecraftService.Service.Management {
         private IEnumTypeLookup _typeLookup;
         private List<string> serviceConfigExcludeList = new() { "MinecraftType", "ServerName", "ServerExeName", "FileName", "ServerPath", "ServerVersion" };
 
-        public ConfigManager(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, IServerLogger logger, FileUtilities fileUtilities, IEnumTypeLookup enumTypeLookup) {
+        public ConfigManager(IProcessInfo processInfo, ServiceConfigurator serviceConfiguration, IServerLogger logger, FileUtilities fileUtilities, IEnumTypeLookup enumTypeLookup) {
             _processInfo = processInfo;
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;

@@ -6,10 +6,10 @@ using static MinecraftService.Shared.Classes.SharedStringBase;
 namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class LiteLoaderPluginFile : IMessageParser {
 
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
         private readonly int _messageHeaderLength = 5;
 
-        public LiteLoaderPluginFile(IServiceConfiguration serviceConfiguration) {
+        public LiteLoaderPluginFile(ServiceConfigurator serviceConfiguration) {
             _serviceConfiguration = serviceConfiguration;
         }
 

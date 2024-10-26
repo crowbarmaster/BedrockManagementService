@@ -8,10 +8,10 @@ using static MinecraftService.Shared.Classes.SharedStringBase;
 namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class RemovePack : IMessageParser {
 
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IServerLogger _logger;
 
-        public RemovePack(IServiceConfiguration serviceConfiguration, IServerLogger logger) {
+        public RemovePack(ServiceConfigurator serviceConfiguration, IServerLogger logger) {
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
         }

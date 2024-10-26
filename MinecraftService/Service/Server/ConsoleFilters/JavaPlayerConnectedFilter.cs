@@ -13,9 +13,9 @@ namespace MinecraftService.Service.Server.ConsoleFilters {
         IServerLogger _logger;
         IConfigurator _configurator;
         IServerController _javaServer;
-        IServiceConfiguration _serviceConfiguration;
+        ServiceConfigurator _serviceConfiguration;
 
-        public JavaPlayerConnectedFilter(IServerLogger logger, IConfigurator configurator, IServerConfiguration serverConfiguration, IServerController javaServer, IServiceConfiguration mineraftService) {
+        public JavaPlayerConnectedFilter(IServerLogger logger, IConfigurator configurator, IServerConfiguration serverConfiguration, IServerController javaServer, ServiceConfigurator mineraftService) {
             _serverConfiguration = serverConfiguration;
             _logger = logger;
             _configurator = configurator;

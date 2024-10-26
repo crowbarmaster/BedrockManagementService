@@ -8,7 +8,7 @@ namespace MinecraftService.Shared.Interfaces
         Dictionary<SharedStringBase.MinecraftServerArch, IUpdater> GetAllUpdaters();
         IUpdater GetUpdaterByArch(SharedStringBase.MinecraftServerArch arch);
         IUpdater GetUpdaterByArch(string archName);
-        IServerConfiguration PrepareNewServerByArch(SharedStringBase.MinecraftServerArch archType, IProcessInfo processInfo, IServerLogger logger, IServiceConfiguration service);
-        IServerConfiguration PrepareNewServerByArch(string archName, IProcessInfo processInfo, IServerLogger logger, IServiceConfiguration service);
+        IServerConfiguration PrepareNewServerByArch(SharedStringBase.MinecraftServerArch archType, IProcessInfo processInfo, IServerLogger logger, ServiceConfigurator service);
+        IServerConfiguration PrepareNewServerByArch(string archName, IProcessInfo processInfo, IServerLogger logger, ServiceConfigurator service);
     }
 }

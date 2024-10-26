@@ -12,18 +12,18 @@ using static MinecraftService.Shared.Classes.SharedStringBase;
 namespace MinecraftService.Shared.Classes.Updaters {
     public class JavaUpdater : IUpdater {
         private IServerLogger _logger;
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IServerConfiguration serverConfiguration;
         private readonly MinecraftServerArch _serverArch = MinecraftServerArch.Java;
         private bool _isInitialized = false;
         private Dictionary<string, JavaVersionHistoryModel> _versionLookupTable = new();
 
-        public JavaUpdater(IServerLogger logger, IServiceConfiguration serviceConfiguration) {
+        public JavaUpdater(IServerLogger logger, ServiceConfigurator serviceConfiguration) {
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
         }
 
-        public JavaUpdater(IServerLogger logger, IServiceConfiguration serviceConfiguration, IServerConfiguration serverConfiguration) {
+        public JavaUpdater(IServerLogger logger, ServiceConfigurator serviceConfiguration, IServerConfiguration serverConfiguration) {
             _serviceConfiguration = serviceConfiguration;
             serverConfiguration = serverConfiguration;
             _logger = logger;

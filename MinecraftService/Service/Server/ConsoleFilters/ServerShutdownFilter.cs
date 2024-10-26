@@ -13,9 +13,9 @@ namespace MinecraftService.Service.Server.ConsoleFilters {
         IServerLogger _logger;
         IConfigurator _configurator;
         IServerController _bedrockServer;
-        IServiceConfiguration _serviceConfiguration;
+        ServiceConfigurator _serviceConfiguration;
 
-        public ServerShutdownFilter(IServerLogger logger, IConfigurator configurator, IServerConfiguration serverConfiguration, IServerController bedrockServer, IServiceConfiguration mineraftService) {
+        public ServerShutdownFilter(IServerLogger logger, IConfigurator configurator, IServerConfiguration serverConfiguration, IServerController bedrockServer, ServiceConfigurator mineraftService) {
             _serverConfiguration = serverConfiguration;
             _logger = logger;
             _configurator = configurator;

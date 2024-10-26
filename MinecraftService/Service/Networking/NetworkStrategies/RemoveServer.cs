@@ -6,11 +6,11 @@ using System.Text;
 namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class RemoveServer : IFlaggedMessageParser {
 
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IConfigurator _configurator;
         private readonly IMinecraftService _mineraftService;
 
-        public RemoveServer(IConfigurator configurator, IServiceConfiguration serviceConfiguration, IMinecraftService mineraftService) {
+        public RemoveServer(IConfigurator configurator, ServiceConfigurator serviceConfiguration, IMinecraftService mineraftService) {
             this._mineraftService = mineraftService;
             _configurator = configurator;
 

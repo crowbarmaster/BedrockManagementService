@@ -6,9 +6,9 @@ using System.Text;
 namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class ServerStatusRequest : IMessageParser {
         private readonly IMinecraftService _service;
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
 
-        public ServerStatusRequest(IMinecraftService service, IServiceConfiguration serviceConfiguration) {
+        public ServerStatusRequest(IMinecraftService service, ServiceConfigurator serviceConfiguration) {
             _service = service;
             _serviceConfiguration = serviceConfiguration;
         }

@@ -15,9 +15,9 @@ namespace MinecraftService.Service.Server {
         IServerLogger _logger;
         IConfigurator _configurator;
         IServerController _bedrockServer;
-        IServiceConfiguration _serviceConfiguration;
+        ServiceConfigurator _serviceConfiguration;
 
-        public ConsoleFilterStrategyClass(IServerLogger logger, IConfigurator configurator, IServerConfiguration serverConfiguration, IServerController bedrockServer, IServiceConfiguration mineraftService) {
+        public ConsoleFilterStrategyClass(IServerLogger logger, IConfigurator configurator, IServerConfiguration serverConfiguration, IServerController bedrockServer, ServiceConfigurator mineraftService) {
             _serverConfiguration = serverConfiguration;
             _logger = logger;
             _configurator = configurator;

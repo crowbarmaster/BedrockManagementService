@@ -4,9 +4,9 @@ using System.Text;
 
 namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class Connect : IMessageParser {
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
 
-        public Connect(IServiceConfiguration serviceConfiguration) {
+        public Connect(ServiceConfigurator serviceConfiguration) {
             _serviceConfiguration = serviceConfiguration;
         }
 

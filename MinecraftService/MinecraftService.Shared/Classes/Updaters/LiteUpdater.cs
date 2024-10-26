@@ -15,19 +15,19 @@ namespace MinecraftService.Shared.Classes.Updaters {
     public class LiteUpdater : BedrockUpdater, IUpdater {
         private IServerLogger _logger;
         private bool _isInitialized = false;
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IServerConfiguration serverConfiguration;
         private readonly MinecraftServerArch _serverArch = MinecraftServerArch.LiteLoader;
         private string _version;
         private Dictionary<string, LiteLoaderVersionManifest> _versionLookupTable = new();
 
-        public LiteUpdater(IServerLogger logger, IServiceConfiguration serviceConfiguration) : base(logger, serviceConfiguration) {
+        public LiteUpdater(IServerLogger logger, ServiceConfigurator serviceConfiguration) : base(logger, serviceConfiguration) {
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
             _version = "None";
         }
 
-        public LiteUpdater(IServerLogger logger, IServiceConfiguration serviceConfiguration, IServerConfiguration serverConfiguration) : base(logger, serviceConfiguration, serverConfiguration) {
+        public LiteUpdater(IServerLogger logger, ServiceConfigurator serviceConfiguration, IServerConfiguration serverConfiguration) : base(logger, serviceConfiguration, serverConfiguration) {
             _serviceConfiguration = serviceConfiguration;
             serverConfiguration = serverConfiguration;
             _logger = logger;

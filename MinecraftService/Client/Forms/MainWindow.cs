@@ -23,7 +23,7 @@ using static MinecraftService.Shared.Classes.SharedStringBase;
 
 namespace MinecraftService.Client.Forms {
     public partial class MainWindow : Form {
-        public IServiceConfiguration connectedHost;
+        public ServiceConfigurator connectedHost;
         public IServerConfiguration SelectedServer;
         public IClientSideServiceConfiguration clientSideServiceConfiguration;
         public ServiceStatusModel ServiceStatus;

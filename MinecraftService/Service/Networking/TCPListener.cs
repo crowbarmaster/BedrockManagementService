@@ -8,7 +8,7 @@ namespace MinecraftService.Service.Networking {
         private TcpClient? _client;
         private TcpListener? _inListener;
         private NetworkStream? _stream;
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IServerLogger _logger;
         private int _heartbeatFailTimeout;
         private readonly int _heartbeatFailTimeoutLimit = 2;
@@ -22,7 +22,7 @@ namespace MinecraftService.Service.Networking {
         private bool _canClientConnect = true;
         private bool _serviceStarted = false;
 
-        public TCPListener(IServiceConfiguration serviceConfiguration, IServerLogger logger, IProcessInfo processInfo) {
+        public TCPListener(ServiceConfigurator serviceConfiguration, IServerLogger logger, IProcessInfo processInfo) {
             _logger = logger;
             _serviceConfiguration = serviceConfiguration;
             _cancelTokenSource = new CancellationTokenSource();

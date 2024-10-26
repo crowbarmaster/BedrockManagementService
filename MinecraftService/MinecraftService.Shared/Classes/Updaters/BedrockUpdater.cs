@@ -14,17 +14,17 @@ namespace MinecraftService.Shared.Classes.Updaters {
     public class BedrockUpdater : IUpdater {
         private IServerLogger _logger;
         private bool _isInitialized = false;
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IServerConfiguration serverConfiguration;
         private readonly MinecraftServerArch _serverArch = MinecraftServerArch.Bedrock;
         private Dictionary<string, BedrockVersionHistoryModel> _versionLookupTable = new();
 
-        public BedrockUpdater(IServerLogger logger, IServiceConfiguration serviceConfiguration) {
+        public BedrockUpdater(IServerLogger logger, ServiceConfigurator serviceConfiguration) {
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
         }
 
-        public BedrockUpdater(IServerLogger logger, IServiceConfiguration serviceConfiguration, IServerConfiguration serverConfiguration) {
+        public BedrockUpdater(IServerLogger logger, ServiceConfigurator serviceConfiguration, IServerConfiguration serverConfiguration) {
             _serviceConfiguration = serviceConfiguration;
             serverConfiguration = serverConfiguration;
             _logger = logger;

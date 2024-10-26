@@ -9,12 +9,12 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class AddNewServer : IMessageParser {
         private readonly IProcessInfo _processInfo;
 
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IConfigurator _configurator;
         private readonly IMinecraftService _minecraftService;
         private readonly IServerLogger _logger;
 
-        public AddNewServer(IServerLogger logger, IProcessInfo processInfo, IConfigurator configurator, IServiceConfiguration serviceConfiguration, IMinecraftService minecraftService) {
+        public AddNewServer(IServerLogger logger, IProcessInfo processInfo, IConfigurator configurator, ServiceConfigurator serviceConfiguration, IMinecraftService minecraftService) {
             _processInfo = processInfo;
             _minecraftService = minecraftService;
             _configurator = configurator;

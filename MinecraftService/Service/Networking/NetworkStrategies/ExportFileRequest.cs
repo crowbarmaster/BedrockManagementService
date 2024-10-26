@@ -10,11 +10,11 @@ using static MinecraftService.Shared.Classes.SharedStringBase;
 
 namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class ExportFileRequest : IMessageParser {
-        private readonly IServiceConfiguration _configuration;
+        private readonly ServiceConfigurator _configuration;
         private readonly IMinecraftService _minecraftService;
         private readonly IConfigurator _configurator;
         private readonly IServerLogger _logger;
-        public ExportFileRequest(IConfigurator configurator, IMinecraftService minecraftService, IServiceConfiguration configuration, IServerLogger logger) {
+        public ExportFileRequest(IConfigurator configurator, IMinecraftService minecraftService, ServiceConfigurator configuration, IServerLogger logger) {
             _minecraftService = minecraftService;
             _configuration = configuration;
             _configurator = configurator;

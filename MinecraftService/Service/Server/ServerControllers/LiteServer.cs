@@ -20,7 +20,7 @@ namespace MinecraftService.Service.Server.ServerControllers {
         private Process? _serverProcess;
         private ServerStatus _currentServerStatus;
         private readonly IServerConfiguration _serverConfiguration;
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IConfigurator _configurator;
         private readonly IServerLogger _logger;
         private readonly IProcessInfo _processInfo;
@@ -33,14 +33,14 @@ namespace MinecraftService.Service.Server.ServerControllers {
         private bool _serverModifiedFlag = true;
         private ConsoleFilterStrategyClass _consoleFilter;
 
-        public LiteServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IServerLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, IPlayerManager servicePlayerManager) {
+        public LiteServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IServerLogger logger, ServiceConfigurator serviceConfiguration, IProcessInfo processInfo) {
             _serverConfiguration = serverConfiguration;
             _processInfo = processInfo;
             _serviceConfiguration = serviceConfiguration;
             _playerManager = serviceConfiguration.GetProp(ServicePropertyKeys.GlobalizedPlayerDatabase).GetBoolValue() || processInfo.DeclaredType() == "Client" ? servicePlayerManager : serverConfiguration.GetPlayerManager();
             _configurator = configurator;
             _logger = logger;
-            _serverLogger = new MinecraftServerLogger(_processInfo, _serviceConfiguration, _serverConfiguration);
+            _serverLogger = new MinecraftServerLogger(_processInfo, (ServiceConfigurator)_serviceConfiguration, _serverConfiguration);
             _backupManager = new BedrockBackupManager(_logger, this, _serverConfiguration, _serviceConfiguration);
             _consoleFilter = new ConsoleFilterStrategyClass(_logger, _configurator, _serverConfiguration, this, _serviceConfiguration);
         }

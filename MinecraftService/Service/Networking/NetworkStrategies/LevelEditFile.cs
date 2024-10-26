@@ -3,11 +3,11 @@ using static MinecraftService.Shared.Classes.SharedStringBase;
 
 namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class LevelEditFile : IMessageParser {
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IMinecraftService _mineraftService;
         private readonly IServerLogger _logger;
 
-        public LevelEditFile(IServiceConfiguration serviceConfiguration, IMinecraftService mineraftService, IServerLogger logger) {
+        public LevelEditFile(ServiceConfigurator serviceConfiguration, IMinecraftService mineraftService, IServerLogger logger) {
             _logger = logger;
             _mineraftService = mineraftService;
             _serviceConfiguration = serviceConfiguration;

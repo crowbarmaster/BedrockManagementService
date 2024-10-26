@@ -4,9 +4,9 @@ using static MinecraftService.Shared.Classes.SharedStringBase;
 namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class LevelEditRequest : IMessageParser {
 
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
 
-        public LevelEditRequest(IServiceConfiguration serviceConfiguration) {
+        public LevelEditRequest(ServiceConfigurator serviceConfiguration) {
             _serviceConfiguration = serviceConfiguration;
         }
 

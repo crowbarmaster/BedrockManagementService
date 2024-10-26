@@ -25,7 +25,7 @@ namespace MinecraftService.Client.Networking.NetworkStrategies {
                 string data = Encoding.UTF8.GetString(messageData, 5, messageData.Length - 5);
                 if (!string.IsNullOrEmpty(data)) {
                     _logger.AppendLine("Connection to Host successful!");
-                    FormManager.MainWindow.connectedHost = JsonConvert.DeserializeObject<IServiceConfiguration>(data, SharedStringBase.GlobalJsonSerialierSettings);
+                    FormManager.MainWindow.connectedHost = JsonConvert.DeserializeObject<ServiceConfigurator>(data, SharedStringBase.GlobalJsonSerialierSettings);
                     _client.Connected = true;
                     FormManager.MainWindow.RefreshServerBoxContents();
                     FormManager.MainWindow.ServerBusy = false;

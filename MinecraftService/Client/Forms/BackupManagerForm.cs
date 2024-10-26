@@ -18,7 +18,7 @@ using Newtonsoft.Json;
 
 namespace MinecraftService.Client.Forms {
     public partial class BackupManagerForm : Form {
-        IServiceConfiguration _serviceConfig;
+        ServiceConfigurator _serviceConfig;
         BackupInfoModel _defaultEntry;
         private bool _callbackRecieved;
         private byte[] _backupData;

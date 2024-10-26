@@ -6,11 +6,11 @@ using System.Text;
 namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class ServerPropUpdate : IMessageParser {
         private readonly IServerLogger _logger;
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IMinecraftService _mineraftService;
         private readonly IConfigurator _configurator;
 
-        public ServerPropUpdate(IServerLogger logger, IConfigurator configurator, IServiceConfiguration serviceConfiguration, IMinecraftService mineraftService) {
+        public ServerPropUpdate(IServerLogger logger, IConfigurator configurator, ServiceConfigurator serviceConfiguration, IMinecraftService mineraftService) {
             _logger = logger;
             _configurator = configurator;
             _serviceConfiguration = serviceConfiguration;

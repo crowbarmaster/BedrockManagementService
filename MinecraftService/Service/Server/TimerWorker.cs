@@ -11,7 +11,7 @@ using static MinecraftService.Shared.Classes.SharedStringBase;
 
 namespace MinecraftService.Service.Server {
     public class TimerWorker {
-        private IServiceConfiguration _serviceConfiguration;
+        private ServiceConfigurator _serviceConfiguration;
         private IServerController _parentServerController;
         private IServerConfiguration _parentServerConfig;
         private IServerLogger _serviceLogger;
@@ -23,7 +23,7 @@ namespace MinecraftService.Service.Server {
         private Task _firedEventLogic;
         private CancellationTokenSource cancelSource;
 
-        public TimerWorker(IServerController runningServer, IServerConfiguration serverConfiguration, IServiceConfiguration service, MmsTimerTypes timerType) {
+        public TimerWorker(IServerController runningServer, IServerConfiguration serverConfiguration, ServiceConfigurator service, MmsTimerTypes timerType) {
             _serviceConfiguration = service;
             _parentServerController = runningServer;
             _parentServerConfig = serverConfiguration;

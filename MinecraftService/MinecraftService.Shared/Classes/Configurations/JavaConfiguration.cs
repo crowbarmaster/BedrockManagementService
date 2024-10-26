@@ -15,9 +15,9 @@ namespace MinecraftService.Shared.Classes.Configurations {
         private readonly MinecraftServerArch _serverArch = MinecraftServerArch.Java;
         private readonly IProcessInfo _processInfo;
         private readonly IServerLogger _logger;
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
 
-        public JavaConfiguration(IProcessInfo processInfo, IServerLogger logger, IServiceConfiguration serviceConfiguration) : base() {
+        public JavaConfiguration(IProcessInfo processInfo, IServerLogger logger, ServiceConfigurator serviceConfiguration) : base() {
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
             _processInfo = processInfo;

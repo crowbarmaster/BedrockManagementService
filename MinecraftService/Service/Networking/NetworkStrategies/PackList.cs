@@ -9,11 +9,11 @@ using static MinecraftService.Shared.Classes.SharedStringBase;
 namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class PackList : IMessageParser {
 
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IProcessInfo _processInfo;
         private readonly IServerLogger _logger;
 
-        public PackList(IProcessInfo processInfo, IServiceConfiguration serviceConfiguration, IServerLogger logger) {
+        public PackList(IProcessInfo processInfo, ServiceConfigurator serviceConfiguration, IServerLogger logger) {
             _logger = logger;
             _serviceConfiguration = serviceConfiguration;
             _processInfo = processInfo;

@@ -5,10 +5,10 @@ using System.Text;
 
 namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class StartCmdUpdate : IMessageParser {
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IConfigurator _configurator;
 
-        public StartCmdUpdate(IConfigurator configurator, IServiceConfiguration serviceConfiguration) {
+        public StartCmdUpdate(IConfigurator configurator, ServiceConfigurator serviceConfiguration) {
             _configurator = configurator;
             _serviceConfiguration = serviceConfiguration;
         }

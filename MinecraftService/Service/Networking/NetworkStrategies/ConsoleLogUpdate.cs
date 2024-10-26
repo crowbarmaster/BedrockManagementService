@@ -6,9 +6,9 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
 
         private readonly IServerLogger _logger;
         private readonly IMinecraftService _service;
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
 
-        public ConsoleLogUpdate(IServerLogger logger, IServiceConfiguration serviceConfiguration, IMinecraftService service) {
+        public ConsoleLogUpdate(IServerLogger logger, ServiceConfigurator serviceConfiguration, IMinecraftService service) {
             _service = service;
             _logger = logger;
 

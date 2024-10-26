@@ -11,9 +11,9 @@ namespace MinecraftService.Service.Server {
         public List<TimerWorker> ActiveTimers { get; set; } = new();
         private IServerController _runningServer;
         private IServerConfiguration _parentServerConfig;
-        private IServiceConfiguration _serviceConfiguration;
+        private ServiceConfigurator _serviceConfiguration;
 
-        public TimerService(IServerController runningServer, IServerConfiguration serverConfiguration, IServiceConfiguration service) {
+        public TimerService(IServerController runningServer, IServerConfiguration serverConfiguration, ServiceConfigurator service) {
             _runningServer = runningServer;
             _parentServerConfig = serverConfiguration;
             _serviceConfiguration = service;

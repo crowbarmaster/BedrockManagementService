@@ -9,10 +9,10 @@ namespace MinecraftService.Shared.Classes
 {
     public class EnumTypeLookup : IEnumTypeLookup {
         private readonly IServerLogger _logger;
-        private readonly IServiceConfiguration _service;
+        private readonly ServiceConfigurator _service;
         private Dictionary<MinecraftServerArch, IUpdater> _updatersByArch;
 
-        public EnumTypeLookup(IServerLogger logger, IServiceConfiguration service) {
+        public EnumTypeLookup(IServerLogger logger, ServiceConfigurator service) {
             _logger = logger;
             _service = service;
             _updatersByArch = new Dictionary<MinecraftServerArch, IUpdater> {

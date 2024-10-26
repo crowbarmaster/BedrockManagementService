@@ -7,11 +7,11 @@ using static MinecraftService.Shared.Classes.SharedStringBase;
 namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class PlayersUpdate : IMessageParser {
 
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IConfigurator _configurator;
         private readonly IMinecraftService _service;
 
-        public PlayersUpdate(IConfigurator configurator, IServiceConfiguration serviceConfiguration, IMinecraftService service) {
+        public PlayersUpdate(IConfigurator configurator, ServiceConfigurator serviceConfiguration, IMinecraftService service) {
             _service = service;
             _configurator = configurator;
             _serviceConfiguration = serviceConfiguration;

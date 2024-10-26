@@ -13,9 +13,9 @@ namespace MinecraftService.Service.Server.ConsoleFilters {
         IServerLogger _logger;
         IConfigurator _configurator;
         IServerController _minecraftServer;
-        IServiceConfiguration _serviceConfiguration;
+        ServiceConfigurator _serviceConfiguration;
 
-        public BackupStringFilter(IServerLogger logger, IConfigurator configurator, IServerConfiguration serverConfiguration, IServerController minecraftServer, IServiceConfiguration minecraftService) {
+        public BackupStringFilter(IServerLogger logger, IConfigurator configurator, IServerConfiguration serverConfiguration, IServerController minecraftServer, ServiceConfigurator minecraftService) {
             _serverConfiguration = serverConfiguration;
             _logger = logger;
             _configurator = configurator;

@@ -7,7 +7,7 @@ namespace MinecraftService.Service.Networking {
         private readonly Dictionary<NetworkMessageTypes, IMessageParser> _standardMessageLookup;
         private readonly Dictionary<NetworkMessageTypes, IFlaggedMessageParser> _flaggedMessageLookup;
 
-        public NetworkStrategyLookup(ITCPListener listener, IMinecraftService service, IServerLogger logger, IConfigurator configurator, IServiceConfiguration serviceConfiguration, IProcessInfo processInfo, FileUtilities fileUtils) {
+        public NetworkStrategyLookup(ITCPListener listener, IMinecraftService service, IServerLogger logger, IConfigurator configurator, ServiceConfigurator serviceConfiguration, IProcessInfo processInfo, FileUtilities fileUtils) {
             _standardMessageLookup = new Dictionary<NetworkMessageTypes, IMessageParser>()
             {
                 {NetworkMessageTypes.Connect, new Connect(serviceConfiguration) },

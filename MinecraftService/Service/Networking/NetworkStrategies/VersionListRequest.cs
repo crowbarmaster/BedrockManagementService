@@ -7,10 +7,10 @@ using static MinecraftService.Shared.Classes.SharedStringBase;
 namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class VersionListRequest : IMessageParser {
 
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IServerLogger _logger;
 
-        public VersionListRequest(IServerLogger logger, IServiceConfiguration serviceConfiguration) {
+        public VersionListRequest(IServerLogger logger, ServiceConfigurator serviceConfiguration) {
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
         }

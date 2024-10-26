@@ -8,7 +8,7 @@ using static MinecraftService.Shared.Classes.SharedStringBase;
 
 namespace MinecraftService.Service.Core {
     public class MmsService : IMinecraftService {
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IServerLogger _logger;
         private readonly IProcessInfo _processInfo;
         private readonly IConfigurator _configurator;
@@ -20,7 +20,7 @@ namespace MinecraftService.Service.Core {
         private ServiceStatus _CurrentServiceStatus { get; set; }
         private Dictionary<MinecraftServerArch, IUpdater> _serverUpdaters { get; set; } = new();
 
-        public MmsService(IConfigurator configurator, IServerLogger logger, IServiceConfiguration serviceConfiguration, IProcessInfo serviceProcessInfo, ITCPListener tCPListener, IEnumTypeLookup typeLookup) {
+        public MmsService(IConfigurator configurator, IServerLogger logger, ServiceConfigurator serviceConfiguration, IProcessInfo serviceProcessInfo, ITCPListener tCPListener, IEnumTypeLookup typeLookup) {
             _tCPListener = tCPListener;
             _configurator = configurator;
             _logger = logger;

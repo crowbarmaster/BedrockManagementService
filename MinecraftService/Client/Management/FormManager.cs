@@ -13,7 +13,7 @@ using MinecraftService.Shared.Interfaces;
 namespace MinecraftService.Client.Management {
     public sealed class FormManager {
         public static readonly IProcessInfo processInfo = new ServiceProcessInfo("Client", Path.GetDirectoryName(Application.ExecutablePath), Process.GetCurrentProcess().Id, false, true);
-        public static readonly IServiceConfiguration ClientLogContainer;
+        public static readonly ServiceConfigurator ClientLogContainer;
         public static readonly IServerLogger Logger;
         private static MainWindow main;
         private static TCPClient client;

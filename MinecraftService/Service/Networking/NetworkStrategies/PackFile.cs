@@ -5,10 +5,10 @@ using static MinecraftService.Shared.Classes.SharedStringBase;
 namespace MinecraftService.Service.Networking.NetworkStrategies {
     public class PackFile : IMessageParser {
 
-        private readonly IServiceConfiguration _serviceConfiguration;
+        private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IServerLogger _logger;
 
-        public PackFile(IServiceConfiguration serviceConfiguration, IServerLogger logger) {
+        public PackFile(ServiceConfigurator serviceConfiguration, IServerLogger logger) {
             _logger = logger;
             _serviceConfiguration = serviceConfiguration;
         }
