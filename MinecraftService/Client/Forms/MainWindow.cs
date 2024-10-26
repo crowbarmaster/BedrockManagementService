@@ -1,12 +1,14 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -19,6 +21,7 @@ using MinecraftService.Shared.Interfaces;
 using MinecraftService.Shared.SerializeModels;
 using MinecraftService.Shared.Utilities;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using static MinecraftService.Shared.Classes.SharedStringBase;
 
 namespace MinecraftService.Client.Forms {
@@ -47,6 +50,16 @@ namespace MinecraftService.Client.Forms {
         private List<Shared.PackParser.MinecraftPackContainer> _incomingPacks;
         private byte _manPacksServer;
 
+        private const string RepoUrl = "https://api.github.com/repos/crowbarmaster/BedrockManagementService/releases/latest";
+        private const string CurrentVersion = "3.1.9063.752"; // Your current version here
+        private bool isCheckingForUpdates = false;
+        private System.Windows.Forms.Timer updateCheckTimer; // Specify the full namespace here
+        private string latestVersion;
+        private string releasesUrl; // URL for the releases page
+
+
+
+
         public MainWindow(IProcessInfo processInfo, IServerLogger logger) {
             _processInfo = processInfo;
             ClientLogger = logger;
@@ -61,10 +74,95 @@ namespace MinecraftService.Client.Forms {
             _uiWaitDialog = new(null);
         }
 
+        // START UPDATER CODE BLOCK
+        private void InitializeUpdateCheckTimer() {
+            updateCheckTimer = new System.Windows.Forms.Timer(); // Use full namespace to avoid ambiguity
+            updateCheckTimer.Interval = 86400000; // 24 hours in milliseconds
+            updateCheckTimer.Tick += async (sender, e) => await CheckForUpdates(); // Directly use the async method
+            updateCheckTimer.Start();
+        }
+
+        private async Task CheckForUpdates() {
+            if (isCheckingForUpdates) return; // Prevent re-entrant calls
+            isCheckingForUpdates = true;
+
+            using (var client = new HttpClient()) {
+                client.DefaultRequestHeaders.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("BedrockManagementService", "1.0"));
+
+                try {
+                    var response = await client.GetStringAsync(RepoUrl);
+                    var json = JObject.Parse(response);
+                    latestVersion = json["tag_name"]?.ToString();
+                    releasesUrl = json["html_url"]?.ToString(); // Get the releases page URL
+
+                    if (latestVersion != null && latestVersion != CurrentVersion) {
+                        // Start flashing if there's an update
+                        StartFlashingLabel();
+                    } else {
+                        // Update the label to indicate no updates found
+                        updateNotifierLinkLabel.Text = "No updates available"; // Adjust text as needed
+                        StopFlashing(); // Stop flashing if no updates are found
+                    }
+                } catch (Exception ex) {
+                    Console.WriteLine("Error checking for updates: " + ex.Message);
+                    // Optionally handle errors, e.g., show a message to the user
+                } finally {
+                    isCheckingForUpdates = false; // Allow checks to happen again
+                }
+            }
+        }
+        private async Task StopFlashing() {  
+            // Stop the timer or whatever mechanism you're using to flash the label
+            updateNotifierLinkLabel.ForeColor = System.Drawing.Color.Black; // Reset to original color
+            await Task.Delay(5000);
+            updateNotifierLinkLabel.Text = "Check for updates"; // Reset to original text if desired
+        }
+
+
+
+        private async void updateNotifierLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e) {
+            updateNotifierLinkLabel.Enabled = false; // Disable to prevent multiple clicks while checking
+
+            StopFlashing(); // Stop flashing if user manually checks
+            await CheckForUpdates();
+
+            // If an update is found, open the releases page
+            if (latestVersion != null && latestVersion != CurrentVersion) {
+                Process.Start(new ProcessStartInfo {
+                    FileName = releasesUrl, // Use the URL stored in CheckForUpdates
+                    UseShellExecute = true
+                });
+            }
+            updateNotifierLinkLabel.Enabled = true; // Re-enable after check
+        }
+
+
+        private void StartFlashingLabel() {
+            System.Windows.Forms.Timer flashingTimer = new System.Windows.Forms.Timer(); // Specify the full namespace here
+            flashingTimer.Interval = 500; // 500 ms for flashing
+            flashingTimer.Tick += (s, e) =>
+            {
+                // Toggle the label text between "Update found" and an empty string
+                updateNotifierLinkLabel.Text = updateNotifierLinkLabel.Text == "Update found" ? "" : "Update found";
+            };
+            flashingTimer.Start();
+
+            // Stop flashing after 2 minutes
+            Task.Delay(120000).ContinueWith(t =>
+            {
+                flashingTimer.Stop();
+                updateNotifierLinkLabel.Text = "Check for updates"; // Reset the label text after flashing
+            });
+        }
+
+
+        // END AUTO UPDATER CODE BLOCK 
+
         private void MainWindow_Shown(object sender, EventArgs e) {
             _enableLogUpdating = true;
             _logManager.InitLogThread();
             _localCommandHistory = new(FileUtilities.ReadLines(GetServiceFilePath(MmsFileNameKeys.ClientCommandHistory)));
+            InitializeUpdateCheckTimer();
         }
 
         private void ConnectTimer_Elapsed(object sender, ElapsedEventArgs e) {
