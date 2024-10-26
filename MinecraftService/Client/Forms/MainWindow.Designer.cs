@@ -1,4 +1,4 @@
-﻿
+
 using System.Windows.Forms;
 
 namespace MinecraftService.Client.Forms {
@@ -72,6 +72,7 @@ namespace MinecraftService.Client.Forms {
             importableBackupWithPacksToolStripMenuItem = new ToolStripMenuItem();
             fullServerPackageToolStripMenuItem = new ToolStripMenuItem();
             serviceConfigFileToolStripMenuItem1 = new ToolStripMenuItem();
+            updateNotifierLinkLabel = new LinkLabel();
             clientPage.SuspendLayout();
             servicePage.SuspendLayout();
             serverPage.SuspendLayout();
@@ -559,11 +560,23 @@ namespace MinecraftService.Client.Forms {
             serviceConfigFileToolStripMenuItem1.Text = "Service config file";
             serviceConfigFileToolStripMenuItem1.Click += serviceConfigFileToolStripMenuItem1_Click;
             // 
+            // updateNotifierLinkLabel
+            // 
+            updateNotifierLinkLabel.AutoSize = true;
+            updateNotifierLinkLabel.Location = new System.Drawing.Point(876, 430);
+            updateNotifierLinkLabel.Name = "updateNotifierLinkLabel";
+            updateNotifierLinkLabel.Size = new System.Drawing.Size(108, 15);
+            updateNotifierLinkLabel.TabIndex = 90;
+            updateNotifierLinkLabel.TabStop = true;
+            updateNotifierLinkLabel.Text = "Check for updates?";
+            updateNotifierLinkLabel.LinkClicked += updateNotifierLinkLabel_LinkClicked;
+            // 
             // MainWindow
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(1009, 454);
+            Controls.Add(updateNotifierLinkLabel);
             Controls.Add(logPageControl);
             Controls.Add(startStopBtn);
             Controls.Add(clientConfigBtn);
@@ -651,6 +664,7 @@ namespace MinecraftService.Client.Forms {
         private System.Windows.Forms.ToolStripMenuItem importableBackupToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importableBackupWithPacksToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem fullServerPackageToolStripMenuItem;
+        private LinkLabel updateNotifierLinkLabel;
     }
 }
 
