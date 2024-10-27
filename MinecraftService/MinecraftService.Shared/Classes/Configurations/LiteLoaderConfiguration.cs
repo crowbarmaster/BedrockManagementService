@@ -37,7 +37,7 @@ namespace MinecraftService.Shared.Classes.Configurations {
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerExeName], $"MinecraftService.LLServer.exe"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.MinecraftType], "LiteLoader"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.BackupPath], $@"{_servicePath}\ServerBackups"));
-            PlayerManager = new BedrockPlayerManager(this);
+            PlayerManager = new PlayerManager(GetProp(MmsDependServerPropKeys.ServerName).StringValue, GetProp(MmsDependServerPropKeys.PermLevel).StringValue);
             return true;
         }
 
@@ -281,7 +281,7 @@ namespace MinecraftService.Shared.Classes.Configurations {
 
         public IPlayer GetOrCreatePlayer(string xuid, string username = null) => PlayerManager.GetOrCreatePlayer(xuid, username);
 
-        public IPlayerManager GetPlayerManager() => PlayerManager;
+        public PlayerManager GetPlayerManager() => PlayerManager;
 
         public IServerConfiguration GetServerInfo() => this;
 

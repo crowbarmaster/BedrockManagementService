@@ -10,7 +10,6 @@ namespace MinecraftService.Service.Core.Interfaces {
         ServiceStatusModel GetServiceStatus();
         IServerController GetServerByIndex(int index);
         IServerController? GetServerByName(string name);
-        IPlayerManager GetPlayerManager();
         List<IServerController> GetAllServers();
         void TestStart();
         void TestStop();

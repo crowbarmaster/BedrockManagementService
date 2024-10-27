@@ -36,7 +36,7 @@ namespace MinecraftService.Shared.Interfaces {
         string GetDeployedVersion();
         void SetDeployedVersion(string version);
         IUpdater GetUpdater();
-        IPlayerManager GetPlayerManager();
+        PlayerManager GetPlayerManager();
         void ValidateDeployedServer();
     }
 }

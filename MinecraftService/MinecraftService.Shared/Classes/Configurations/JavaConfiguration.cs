@@ -37,7 +37,7 @@ namespace MinecraftService.Shared.Classes.Configurations {
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.MinecraftType], "Java"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.BackupPath], $@"{_servicePath}\ServerBackups"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.JavaArgs], "-Xmx1024M -Xms1024M -XX:+UnlockExperimentalVMOptions -XX:+AlwaysPreTouch -XX:+UseStringDeduplication -Dfml.ignorePatchDiscrepancies=true -Dfml.ignoreInvalidMinecraftCertificates=true -XX:-OmitStackTraceInFastThrow -XX:+OptimizeStringConcat -Dfml.readTimeout=180 -XX:+UseLargePages"));
-            PlayerManager = new JavaPlayerManager(this);
+            PlayerManager = new PlayerManager(GetProp(MmsDependServerPropKeys.ServerName).StringValue, GetProp(MmsDependServerPropKeys.PermLevel).StringValue);
             return true;
         }
 
@@ -265,7 +265,7 @@ namespace MinecraftService.Shared.Classes.Configurations {
 
         public IPlayer GetOrCreatePlayer(string xuid, string username = null) => PlayerManager.GetOrCreatePlayer(xuid, username);
 
-        public IPlayerManager GetPlayerManager() => PlayerManager;
+        public PlayerManager GetPlayerManager() => PlayerManager;
 
         public IServerConfiguration GetServerInfo() => this;
 

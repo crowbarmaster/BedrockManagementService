@@ -13,7 +13,7 @@ namespace MinecraftService.Service.Server.Interfaces {
         bool RollbackToBackup(string targetZip);
         IServerLogger GetLogger();
         IServerLogger GetServiceLogger();
-        IPlayerManager GetPlayerManager();
+        PlayerManager GetPlayerManager();
         List<IPlayer> GetActivePlayerList();
         bool IsServerModified();
         void SetServerModified(bool isModified);

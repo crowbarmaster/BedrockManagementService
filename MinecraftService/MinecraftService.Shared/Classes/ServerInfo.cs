@@ -8,7 +8,7 @@ namespace MinecraftService.Shared.Classes {
     public class ServerInfo {
         public MinecraftServerArch ServerArch { get; set; }
         public int ProcessID { get; set; }
-        public IPlayerManager PlayerManager { get; set; }
+        public PlayerManager PlayerManager { get; set; }
         public Property ServersPath { get; set; }
         public int TotalBackupSizeKilobytes { get; set; }
         public int TotalBackupsStored { get; set; }

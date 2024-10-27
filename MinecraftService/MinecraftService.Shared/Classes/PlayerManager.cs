@@ -1,31 +1,26 @@
 ﻿using MinecraftService.Shared.Interfaces;
 using MinecraftService.Shared.Utilities;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using static MinecraftService.Shared.Classes.SharedStringBase;
-#nullable enable
+
 namespace MinecraftService.Shared.Classes {
-    public class JavaPlayerManager : IPlayerManager {
-        public List<IPlayer> PlayerList = new();
-
-        readonly IServerConfiguration? _serverConfiguration;
-        readonly string? _knownDatabasePath;
-        readonly string? _registeredDatabasePath;
-
-        public JavaPlayerManager(IServerConfiguration? serverConfiguration) {
-            if (serverConfiguration == null) {
-                throw new ArgumentNullException(nameof(serverConfiguration));
-            }
-            _serverConfiguration = serverConfiguration;
-            _knownDatabasePath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerTelem_Name, _serverConfiguration.GetServerName());
-            _registeredDatabasePath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerRegistry_Name, _serverConfiguration.GetServerName());
+    public class PlayerManager {
+        public List<IPlayer> PlayerList = [];
+        public readonly string Parent;
+        public readonly string DefaultPerm;
+        public readonly string KnownDatabasePath;
+        public readonly string RegisteredDatabasePath;
+        public PlayerManager(string parent, string defaultPerm) {
+            Parent = parent;
+            DefaultPerm = defaultPerm;
+            KnownDatabasePath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerTelem_Name, parent);
+            RegisteredDatabasePath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerRegistry_Name, parent);
         }
-
-        [JsonConstructor]
-        public JavaPlayerManager() { }
 
         public IPlayer PlayerConnected(string username, string uuid) {
             IPlayer playerFound = GetOrCreatePlayer(uuid, username);
@@ -39,21 +34,23 @@ namespace MinecraftService.Shared.Classes {
             return playerFound;
         }
 
-        public IPlayer GetOrCreatePlayer(string uuid, string username = "") {
-            IPlayer foundPlayer = PlayerList.FirstOrDefault(p => p.GetPlayerID() == uuid);
-            if (foundPlayer == null) {
-                if (username != "") {
+        public IPlayer? GetOrCreatePlayer(string uid, string username = "") {
+            IPlayer? foundPlayer = PlayerList.FirstOrDefault(p => p.GetPlayerID() == uid);
+            Player player = new();
+            if (uid.Length > 16) {
+                if (foundPlayer == null && username != "") {
                     foundPlayer = PlayerList.FirstOrDefault(ply => ply.GetUsername() == username);
                 }
-                if (foundPlayer == null) {
-                    Player player = new();
-                    if (uuid != string.Empty) {
-                        player.Initialize(uuid, username);
-                        PlayerList.Add(player);
-                        return player;
-                    } else {
-                        return null;
-                    }
+            } else {
+                player = new(DefaultPerm);
+            }
+            if (foundPlayer == null) {
+                if (uid != string.Empty) {
+                    player.Initialize(uid, username);
+                    PlayerList.Add(player);
+                    return player;
+                } else {
+                    return null;
                 }
             }
             return foundPlayer;
@@ -72,7 +69,7 @@ namespace MinecraftService.Shared.Classes {
 
         public void SetPlayerList(List<IPlayer> playerList) => PlayerList = playerList;
 
-        private List<string[]> FilterLinesFromFile(string filePath) {
+        public List<string[]> FilterLinesFromFile(string filePath) {
             FileUtilities.CreateInexistantFile(filePath);
             return File.ReadAllLines(filePath)
                     .Where(x => !x.StartsWith("#"))
@@ -82,22 +79,22 @@ namespace MinecraftService.Shared.Classes {
         }
 
         public void LoadPlayerDatabase() {
-            string serverName = _serverConfiguration.GetServerName();
-            string dbPath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerTelem_Name, serverName);
-            string regPath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerRegistry_Name, serverName);
+            List<IPlayer> playerList = [];
+            string dbPath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerTelem_Name, Parent);
+            string regPath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerRegistry_Name, Parent);
             List<string[]> playerDbEntries = FilterLinesFromFile(dbPath);
             List<string[]> playerRegEntries = FilterLinesFromFile(regPath);
             playerDbEntries.ForEach(x => {
-                GetOrCreatePlayer(x[0])?.UpdatePlayerFromDbStrings(x);
+                new Player(DefaultPerm).UpdatePlayerFromDbStrings(x);
             });
             playerRegEntries.ForEach(x => {
-                GetOrCreatePlayer(x[0])?.UpdatePlayerFromRegStrings(x);
+                new Player(DefaultPerm).UpdatePlayerFromDbStrings(x);
             });
         }
 
         public void SavePlayerDatabase() {
-            TextWriter knownDbWriter = new StreamWriter(_knownDatabasePath);
-            TextWriter regDbWriter = new StreamWriter(_registeredDatabasePath);
+            TextWriter knownDbWriter = new StreamWriter(KnownDatabasePath);
+            TextWriter regDbWriter = new StreamWriter(RegisteredDatabasePath);
             regDbWriter.WriteLine("# Registered player list");
             regDbWriter.WriteLine("# Register player entries: PlayerEntry=xuid,username,permission,isWhitelisted,ignoreMaxPlayers");
             regDbWriter.WriteLine("# Example: 1234111222333444,TestUser,visitor,false,false");
@@ -117,5 +114,7 @@ namespace MinecraftService.Shared.Classes {
             regDbWriter.Close();
         }
 
+
+        public PlayerManager() { }
     }
 }

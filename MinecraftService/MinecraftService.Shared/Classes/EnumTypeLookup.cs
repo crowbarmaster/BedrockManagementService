@@ -28,9 +28,9 @@ namespace MinecraftService.Shared.Classes
 
         public Dictionary<MinecraftServerArch, IUpdater> GetAllUpdaters() => _updatersByArch;
 
-        public IServerConfiguration PrepareNewServerByArch(string archName, IProcessInfo processInfo, IServerLogger logger, IServiceConfiguration service) => PrepareNewServerByArch(GetArchFromString(archName), processInfo, logger, service);
+        public IServerConfiguration PrepareNewServerByArch(string archName, IProcessInfo processInfo, IServerLogger logger, ServiceConfigurator service) => PrepareNewServerByArch(GetArchFromString(archName), processInfo, logger, service);
 
-        public IServerConfiguration PrepareNewServerByArch(MinecraftServerArch archType, IProcessInfo processInfo, IServerLogger logger, IServiceConfiguration service) {
+        public IServerConfiguration PrepareNewServerByArch(MinecraftServerArch archType, IProcessInfo processInfo, IServerLogger logger, ServiceConfigurator service) {
             return archType switch {
                 MinecraftServerArch.Bedrock => new BedrockConfiguration(processInfo, logger, service),
                 MinecraftServerArch.LiteLoader => new LiteLoaderConfiguration(processInfo, logger, service),

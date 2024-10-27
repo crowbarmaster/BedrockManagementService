@@ -6,7 +6,7 @@ using static MinecraftService.Shared.Classes.SharedStringBase;
 
 namespace MinecraftService.Shared.Classes {
     public class ServiceInfo {
-        public IPlayerManager PlayerManager { get; set; }
+        public PlayerManager PlayerManager { get; set; }
         public Dictionary<MinecraftServerArch, IUpdater> LoadedUpdaters { get; set; } = new();
         public List<LogEntry> serviceLog = new();
         public List<IServerConfiguration> ServerList = new();

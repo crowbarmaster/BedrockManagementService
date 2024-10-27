@@ -13,7 +13,6 @@ namespace MinecraftService.Service.Core {
         private readonly IProcessInfo _processInfo;
         private readonly IConfigurator _configurator;
         private readonly ITCPListener _tCPListener;
-        private readonly IPlayerManager _playerManager;
         private DateTime _upTime;
         private IEnumTypeLookup _typeLookup;
         private List<IServerController> _loadedServers { get; set; } = new();
@@ -26,7 +25,6 @@ namespace MinecraftService.Service.Core {
             _logger = logger;
             _serviceConfiguration = serviceConfiguration;
             _processInfo = serviceProcessInfo;
-            _playerManager = new ServicePlayerManager(serviceConfiguration);
             _logger = logger;
             _typeLookup = typeLookup;
         }
@@ -100,8 +98,6 @@ namespace MinecraftService.Service.Core {
                 LatestVersion = _serviceConfiguration.GetLatestVersion(MinecraftServerArch.Bedrock)
             };
         }
-
-        public IPlayerManager GetPlayerManager() => _playerManager;
 
         public bool Start(HostControl? hostControl) {
             if (!Initialize().Result) {
@@ -215,7 +211,7 @@ namespace MinecraftService.Service.Core {
         public List<IServerController> GetAllServers() => _loadedServers;
 
         public void InitializeNewServer(IServerConfiguration server) {
-            IServerController minecraftServer = ServerTypeLookup.GetServerControllerByArch(server.GetServerArch(), server, _configurator, _logger, _serviceConfiguration, _processInfo, _playerManager);
+            IServerController minecraftServer = ServerTypeLookup.GetServerControllerByArch(server.GetServerArch(), server, _configurator, _logger, _serviceConfiguration, _processInfo);
             minecraftServer.Initialize();
             _loadedServers.Add(minecraftServer);
             _serviceConfiguration.AddNewServerInfo(server);
@@ -236,7 +232,7 @@ namespace MinecraftService.Service.Core {
         private void InstanciateServers() {
             try {
                 foreach (IServerConfiguration server in _serviceConfiguration.GetServerList()) {
-                    IServerController minecraftServer = ServerTypeLookup.GetServerControllerByArch(server.GetServerArch(), server, _configurator, _logger, _serviceConfiguration, _processInfo, _playerManager);
+                    IServerController minecraftServer = ServerTypeLookup.GetServerControllerByArch(server.GetServerArch(), server, _configurator, _logger, _serviceConfiguration, _processInfo);
                     minecraftServer.Initialize();
                     _loadedServers.Add(minecraftServer);
                 }

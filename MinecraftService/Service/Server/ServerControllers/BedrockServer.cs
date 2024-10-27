@@ -27,7 +27,7 @@ namespace MinecraftService.Service.Server.ServerControllers {
         private readonly IConfigurator _configurator;
         private readonly IServerLogger _logger;
         private readonly IProcessInfo _processInfo;
-        private readonly IPlayerManager _playerManager;
+        private readonly PlayerManager _playerManager;
         private readonly IBackupManager _backupManager;
         private TimerService _timerService;
         private IServerLogger _serverLogger;
@@ -43,7 +43,7 @@ namespace MinecraftService.Service.Server.ServerControllers {
             _serverConfiguration = serverConfiguration;
             _processInfo = processInfo;
             _serviceConfiguration = serviceConfiguration;
-            _playerManager = serviceConfiguration.GetProp(ServicePropertyKeys.GlobalizedPlayerDatabase).GetBoolValue() || processInfo.DeclaredType() == "Client" ? servicePlayerManager : serverConfiguration.GetPlayerManager();
+            _playerManager = serviceConfiguration.GetProp(ServicePropertyKeys.GlobalizedPlayerDatabase).GetBoolValue() || processInfo.DeclaredType() == "Client" ? serviceConfiguration.PlayerManager : serverConfiguration.GetPlayerManager();
             _configurator = configurator;
             _logger = logger;
             _serverLogger = new MinecraftServerLogger(_processInfo, (ServiceConfigurator)_serviceConfiguration, _serverConfiguration);
@@ -172,7 +172,7 @@ namespace MinecraftService.Service.Server.ServerControllers {
 
         public bool IsPrimaryServer() => _serverConfiguration.IsPrimaryServer();
 
-        public IPlayerManager GetPlayerManager() => _playerManager;
+        public PlayerManager GetPlayerManager() => _playerManager;
 
         private Task StopWatchdog() {
             return Task.Run(() => {

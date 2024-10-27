@@ -10,13 +10,10 @@ using System.Threading.Tasks;
 using static MinecraftService.Shared.Classes.SharedStringBase;
 
 namespace MinecraftService.Shared.Classes {
-    public class ServiceConfigurator : ServiceInfo, IServiceConfiguration {
+    public class ServiceConfigurator : ServiceInfo {
         private readonly IProcessInfo _processInfo;
         public ServiceConfigurator(IProcessInfo processInfo) : base() {
             _processInfo = processInfo;
-            if (processInfo != null && processInfo.DeclaredType() != "Client") {
-                PlayerManager = new ServicePlayerManager(this);
-            }
         }
 
         public bool InitializeDefaults() {
@@ -71,10 +68,11 @@ namespace MinecraftService.Shared.Classes {
         public (int totalBackups, int totalSize) GetServiceBackupInfo() => (TotalBackupsServiceWide, TotalBackupSizeServiceWideMegabytes);
 
         public string GetLatestVersion(MinecraftServerArch serverArch, bool isBeta = false) {
+            if (!LoadedUpdaters.TryGetValue(serverArch, out IUpdater value)) return string.Empty;
             if(serverArch == MinecraftServerArch.Bedrock) {
-                return LoadedUpdaters[serverArch].GetSimpleVersionList().Last().Version;
+                return value.GetSimpleVersionList().Last().Version;
             }
-            return LoadedUpdaters[serverArch].GetSimpleVersionList().Last(x => x.IsBeta == isBeta).Version;
+            return value.GetSimpleVersionList().Last(x => x.IsBeta == isBeta).Version;
         }
 
         public void ProcessUserConfiguration(string[] fileEntries) {
@@ -86,6 +84,9 @@ namespace MinecraftService.Shared.Classes {
                     }
                     SetProp(split[0], split[1]);
                 }
+            }
+            if (_processInfo != null && _processInfo.DeclaredType() != "Client") {
+                PlayerManager = new PlayerManager("Service", GetProp(ServicePropertyKeys.DefaultGlobalPermLevel).StringValue);
             }
         }
 

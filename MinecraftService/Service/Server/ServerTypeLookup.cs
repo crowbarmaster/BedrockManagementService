@@ -10,14 +10,14 @@ using static MinecraftService.Shared.Classes.SharedStringBase;
 
 namespace MinecraftService.Service.Server {
     public static class ServerTypeLookup {
-        public static IServerController GetServerControllerByArch(MinecraftServerArch serverArch, IServerConfiguration server, IConfigurator configurator, IServerLogger logger, IServiceConfiguration service, IProcessInfo processInfo, IPlayerManager playerManager) {
+        public static IServerController GetServerControllerByArch(MinecraftServerArch serverArch, IServerConfiguration server, IConfigurator configurator, IServerLogger logger, ServiceConfigurator service, IProcessInfo processInfo) {
             switch (serverArch) {
                 case MinecraftServerArch.Bedrock:
-                    return new BedrockServer(server, configurator, logger, service, processInfo, playerManager);
+                    return new BedrockServer(server, configurator, logger, service, processInfo);
                 case MinecraftServerArch.LiteLoader:
-                    return new LiteServer(server, configurator, logger, service, processInfo, playerManager);
+                    return new LiteServer(server, configurator, logger, service, processInfo);
                 case MinecraftServerArch.Java:
-                    return new JavaServer(server, configurator, logger, service, processInfo, playerManager);
+                    return new JavaServer(server, configurator, logger, service, processInfo);
             }
             return null;
         }

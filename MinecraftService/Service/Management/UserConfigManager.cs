@@ -100,35 +100,7 @@ namespace MinecraftService.Service.Management {
         }
 
         public void SavePlayerDatabase(IServerConfiguration server) {
-            string dbPath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerTelem_Name, server.GetServerName());
-            string regPath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerRegistry_Name, server.GetServerName());
-            List<IPlayer> playerList = server.GetPlayerList();
-            if (_serviceConfiguration.GetProp(ServicePropertyKeys.GlobalizedPlayerDatabase).GetBoolValue()) {
-                dbPath = GetServiceFilePath(MmsFileNameKeys.GlobalPlayerTelem);
-                regPath = GetServiceFilePath(MmsFileNameKeys.GlobalPlayerRegistry);
-                playerList = _serviceConfiguration.GetPlayerList();
-            }
-            lock (_fileLock) {
-                TextWriter writer = new StreamWriter(dbPath);
-                foreach (Player entry in playerList) {
-                    writer.WriteLine(entry.ToString("Known"));
-                }
-                writer.Flush();
-                writer.Close();
-            }
-            lock (_fileLock) {
-                TextWriter writer = new StreamWriter(regPath);
-                writer.WriteLine("# Registered player list");
-                writer.WriteLine("# Register player entries: PlayerEntry=xuid,username,permission,isWhitelisted,ignoreMaxPlayers");
-                writer.WriteLine("# Example: 1234111222333444,TestUser,visitor,false,false");
-                writer.WriteLine("");
-                foreach (IPlayer player in playerList) {
-                    if (!player.IsDefaultRegistration())
-                        writer.WriteLine(player.ToString("Registered"));
-                }
-                writer.Flush();
-                writer.Close();
-            }
+            server.GetPlayerManager().SavePlayerDatabase();
         }
 
         public void SaveServerConfiguration(IServerConfiguration server) {
@@ -322,31 +294,7 @@ namespace MinecraftService.Service.Management {
         }
 
         private void LoadPlayerDatabase(IServerConfiguration server) {
-            if (_serviceConfiguration.GetProp(ServicePropertyKeys.GlobalizedPlayerDatabase).GetBoolValue()) {
-                string dbPath = GetServiceFilePath(MmsFileNameKeys.GlobalPlayerTelem);
-                string regPath = GetServiceFilePath(MmsFileNameKeys.GlobalPlayerRegistry);
-                List<string[]> playerDbEntries = MinecraftFileUtilities.FilterLinesFromPlayerDbFile(dbPath);
-                List<string[]> playerRegEntries = MinecraftFileUtilities.FilterLinesFromPlayerDbFile(regPath);
-                playerDbEntries.ForEach(x => {
-                    _serviceConfiguration.GetOrCreatePlayer(x[0]).UpdatePlayerFromDbStrings(x);
-                });
-                playerRegEntries.ForEach(x => {
-                    _serviceConfiguration.GetOrCreatePlayer(x[0]).UpdatePlayerFromRegStrings(x);
-                });
-
-            } else {
-                string serverName = server.GetServerName();
-                string dbPath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerTelem_Name, server.GetServerName());
-                string regPath = GetServiceFilePath(MmsFileNameKeys.ServerPlayerRegistry_Name, server.GetServerName());
-                List<string[]> playerDbEntries = MinecraftFileUtilities.FilterLinesFromPlayerDbFile(dbPath);
-                List<string[]> playerRegEntries = MinecraftFileUtilities.FilterLinesFromPlayerDbFile(regPath);
-                playerDbEntries.ForEach(x => {
-                    server.GetOrCreatePlayer(x[0]).UpdatePlayerFromDbStrings(x);
-                });
-                playerRegEntries.ForEach(x => {
-                    server.GetOrCreatePlayer(x[0]).UpdatePlayerFromRegStrings(x);
-                });
-            }
+            server.GetPlayerManager().LoadPlayerDatabase();
         }
 
         private bool DeleteAllBackups(IServerConfiguration serverInfo) {
