@@ -3,7 +3,6 @@
 // This file may need updated according to the specific scenario of the application being upgraded.
 // For more information on ASP.NET Core hosting, see https://docs.microsoft.com/aspnet/core/fundamentals/host/web-host
 
-global using Microsoft.AspNetCore.Hosting;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 global using MinecraftService.Service.Core.Interfaces;
@@ -48,8 +47,6 @@ namespace MinecraftService.Service {
                         .AddSingleton<IServerLogger, MinecraftServerLogger>()
                         .AddSingleton<ServiceConfigurator>()
                         .AddSingleton<IEnumTypeLookup, EnumTypeLookup>()
-                        .AddSingleton<IServiceConfiguration>(x => x.GetRequiredService<ServiceConfigurator>())
-                        .AddSingleton<IBaseConfiguration>(x => x.GetRequiredService<ServiceConfigurator>())
                         .AddSingleton<IMinecraftService, Core.MmsService>()
                         .AddSingleton<ITCPListener, TCPListener>()
                         .AddSingleton<IConfigurator, ConfigManager>();
