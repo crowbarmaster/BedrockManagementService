@@ -22,7 +22,7 @@ namespace MinecraftService.Shared.Classes {
         private string _logOwner = "Service";
         private Logger _nLogger;
 
-        public MinecraftServerLogger(IProcessInfo processInfo, IBaseConfiguration serviceConfiguration, IServerConfiguration serverConfiguration = null) {
+        public MinecraftServerLogger(IProcessInfo processInfo, ServiceConfigurator serviceConfiguration, IServerConfiguration serverConfiguration = null) {
             _serviceConfiguration = serviceConfiguration;
             _serverConfiguration = serverConfiguration;
             _processInfo = processInfo;

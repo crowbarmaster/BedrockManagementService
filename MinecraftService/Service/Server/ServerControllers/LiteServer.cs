@@ -112,7 +112,7 @@ namespace MinecraftService.Service.Server.ServerControllers {
         }
 
         public void PerformOfflineServerTask(Action taskToRun) {
-            if (_currentServerStatus == ServerStatus.Started) {
+            if (IsServerStarted()) {
                 ServerStop(false).Wait();
                 Task.Run(taskToRun).Wait();
                 ServerStart().Wait();

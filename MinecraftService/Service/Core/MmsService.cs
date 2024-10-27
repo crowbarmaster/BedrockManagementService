@@ -135,7 +135,13 @@ namespace MinecraftService.Service.Core {
         }
 
         public void TestStart() {
-            Task.Run(() => Start(null));
+            Task.Run(() => {
+                if (Start(null)) {
+                    while(_CurrentServiceStatus != ServiceStatus.Stopped) {
+                        Task.Delay(1000).Wait();
+                    }
+                }
+            });
         }
 
         public bool Stop(HostControl? hostControl) {
