@@ -1,25 +1,30 @@
 ﻿using MinecraftService.Service.Server.Interfaces;
 using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Classes.Service;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.PackParser;
 using MinecraftService.Shared.SerializeModels;
 using System.IO.Compression;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
-namespace MinecraftService.Service.Server {
+namespace MinecraftService.Service.Server
+{
     public class BedrockBackupManager : IBackupManager {
-        private readonly IServerLogger _logger;
+        private readonly MmsLogger _logger;
         private readonly IServerController _server;
         private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IServerConfiguration _serverConfiguration;
         private bool _autoBackupsContainPacks = false;
         private bool _backupRunning = false;
+        private const string _backupStringTemplate = "Backup-yyyyMMdd_HHmmssff.zip";
 
         public enum BackupType {
             Auto,
             Manual
         }
 
-        public BedrockBackupManager(IServerLogger logger, IServerController server, IServerConfiguration serverConfiguration, ServiceConfigurator serviceConfiguration) {
+        public BedrockBackupManager(MmsLogger logger, IServerController server, IServerConfiguration serverConfiguration, ServiceConfigurator serviceConfiguration) {
             _logger = logger;
             _server = server;
             _serverConfiguration = serverConfiguration;

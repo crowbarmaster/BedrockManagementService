@@ -198,8 +198,9 @@ namespace MinecraftService.Service.Management {
         private class BackupComparer : IComparer<BackupInfoModel> {
             public int Compare(BackupInfoModel? x, BackupInfoModel? y) {
                 if (x != null && y != null) {
-                    DateTime xTime = DateTime.ParseExact(x.Filename.Substring(7, 17), "yyyyMMdd_HHmmssff", CultureInfo.InvariantCulture);
-                    DateTime yTime = DateTime.ParseExact(y.Filename.Substring(7, 17), "yyyyMMdd_HHmmssff", CultureInfo.InvariantCulture);
+                    if (!DateTime.TryParseExact(x.Filename.Substring(7, 17), "yyyyMMdd_HHmmssff", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime xTime) || DateTime.TryParseExact(y.Filename.Substring(7, 17), "yyyyMMdd_HHmmssff", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime yTime)) {
+                        return 0;
+                    }
                     if (xTime > yTime) {
                         return 1;
                     } else if (yTime > xTime) {
@@ -215,15 +216,17 @@ namespace MinecraftService.Service.Management {
                 IServerConfiguration server = _serviceConfiguration.GetServerInfoByIndex(serverIndex);
                 _serviceConfiguration.CalculateTotalBackupsAllServers().Wait();
                 List<BackupInfoModel> newList = new();
+                List<FileInfo> files = new DirectoryInfo($@"{server.GetSettingsProp(ServerPropertyKeys.BackupPath)}\{server.GetServerName()}").GetFiles().ToList();
+                foreach (FileInfo dir in files) {
                 try {
-                    foreach (FileInfo dir in new DirectoryInfo($@"{server.GetSettingsProp(ServerPropertyKeys.BackupPath)}\{server.GetServerName()}").GetFiles()) {
                         newList.Add(new BackupInfoModel(dir));
+                    } catch (Exception e) {
+                        _logger.AppendLine(e.Message);
+                        continue;
+                    }
                     }
                     newList.Sort(new BackupComparer());
                     newList.Reverse();
-                } catch (IOException) {
-                    return newList;
-                }
                 return newList;
             });
         }

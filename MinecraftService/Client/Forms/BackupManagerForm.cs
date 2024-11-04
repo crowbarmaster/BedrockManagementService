@@ -11,7 +11,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using MinecraftService.Client.Management;
-using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.Interfaces;
 using MinecraftService.Shared.SerializeModels;
 using Newtonsoft.Json;
@@ -29,7 +31,7 @@ namespace MinecraftService.Client.Forms {
         }
 
         public void UpdateBackupManagerData(List<BackupInfoModel> backupInfo) {
-            _defaultEntry = new BackupInfoModel(new System.IO.FileInfo("-----.zip"));
+            _defaultEntry = new BackupInfoModel();
             _serviceConfig = FormManager.MainWindow.connectedHost;
             backupSelectBox.Items.Clear();
             if (backupInfo != null && backupInfo.Count > 0) {
