@@ -1,13 +1,15 @@
 ﻿
 using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Shared.Classes.Networking;
 using Newtonsoft.Json;
 using System.Text;
 
-namespace MinecraftService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies
+{
     public class EnumBackups : IMessageParser {
-        private readonly IConfigurator _configurator;
+        private readonly UserConfigManager _configurator;
 
-        public EnumBackups(IConfigurator configurator) {
+        public EnumBackups(UserConfigManager configurator) {
             _configurator = configurator;
         }
 

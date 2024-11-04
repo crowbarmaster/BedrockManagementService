@@ -10,7 +10,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using MinecraftService.Client.Forms;
 using MinecraftService.Client.Management;
-using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.Interfaces;
 using MinecraftService.Shared.PackParser;
 using MinecraftService.Shared.SerializeModels;
@@ -32,19 +34,19 @@ namespace MinecraftService.Client.Networking {
         private int _heartbeatFailTimeout;
         private const int _heartbeatFailTimeoutLimit = 2;
         private const int _heartbeatFireInterval = 300;
-        private readonly IServerLogger _logger;
+        private readonly MmsLogger _logger;
         private readonly Dictionary<NetworkMessageTypes, INetworkMessage> _messageLookupContainer;
         private readonly System.Timers.Timer _heartbeatTimer;
         ProgressDialog _progressDialog = new(null);
 
-        public TCPClient(IServerLogger logger) {
+        public TCPClient(MmsLogger logger) {
             _logger = logger;
             _messageLookupContainer = new NetworkMessageLookup(logger, this).MessageLookupContainer;
             _heartbeatTimer = new System.Timers.Timer(_heartbeatFireInterval);
             _heartbeatTimer.Elapsed += RecieveEvent;
         }
 
-        public void ConnectHost(IClientSideServiceConfiguration host) {
+        public void ConnectHost(ClientSideServiceConfiguration host) {
             if (EstablishConnection(host.GetAddress(), int.Parse(host.GetPort()))) {
                 SendData(NetworkMessageTypes.Connect);
                 return;

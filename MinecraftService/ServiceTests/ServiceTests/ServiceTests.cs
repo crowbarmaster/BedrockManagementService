@@ -50,14 +50,16 @@ namespace MMS_Tests.ServiceTests {
 
             [Fact]
             public async Task Verify_Service_Startup() {
-                await _testFixture.StartFixture();
+                Assert.Equal(ServiceStatus.Stopped, _testFixture.MinecraftService.GetServiceStatus().ServiceStatus);
+                await _testFixture.StartFixture().Wait();
                 Assert.Equal(ServiceStatus.Started, _testFixture.MinecraftService.GetServiceStatus().ServiceStatus);
             }
 
             [Fact]
             public void Verify_Service_Stop() {
+                Assert.Equal(ServiceStatus.Started, _testFixture.MinecraftService.GetServiceStatus().ServiceStatus);
                 _testFixture.Dispose();
-                Assert.True(_testFixture.MinecraftService.GetServiceStatus().ServiceStatus == ServiceStatus.Stopped);
+                Assert.Equal(ServiceStatus.Stopped, _testFixture.MinecraftService.GetServiceStatus().ServiceStatus);
             }
         }
     }

@@ -1,14 +1,19 @@
 ﻿using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Service;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.PackParser;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
-namespace MinecraftService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies
+{
     public class PackFile : IMessageParser {
 
         private readonly ServiceConfigurator _serviceConfiguration;
-        private readonly IServerLogger _logger;
+        private readonly MmsLogger _logger;
 
-        public PackFile(ServiceConfigurator serviceConfiguration, IServerLogger logger) {
+        public PackFile(ServiceConfigurator serviceConfiguration, MmsLogger logger) {
             _logger = logger;
             _serviceConfiguration = serviceConfiguration;
         }

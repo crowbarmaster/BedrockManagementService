@@ -1,19 +1,25 @@
 ﻿using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Server;
+using MinecraftService.Shared.Classes.Service;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
 using MinecraftService.Shared.PackParser;
 using Newtonsoft.Json;
 using NLog.LayoutRenderers;
 using System.Text;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
-namespace MinecraftService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies
+{
     public class PackList : IMessageParser {
 
         private readonly ServiceConfigurator _serviceConfiguration;
-        private readonly IProcessInfo _processInfo;
-        private readonly IServerLogger _logger;
+        private readonly ProcessInfo _processInfo;
+        private readonly MmsLogger _logger;
 
-        public PackList(IProcessInfo processInfo, ServiceConfigurator serviceConfiguration, IServerLogger logger) {
+        public PackList(ProcessInfo processInfo, ServiceConfigurator serviceConfiguration, MmsLogger logger) {
             _logger = logger;
             _serviceConfiguration = serviceConfiguration;
             _processInfo = processInfo;

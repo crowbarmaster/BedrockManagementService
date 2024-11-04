@@ -3,16 +3,20 @@ using MinecraftService.Service;
 using MinecraftService.Service.Server;
 using MinecraftService.Service.Server.Interfaces;
 using MinecraftService.Service.Server.ServerControllers;
-using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
+using MinecraftService.Shared.Classes.Server;
+using MinecraftService.Shared.Classes.Service;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.PackParser;
 using MinecraftService.Shared.SerializeModels;
 using MinecraftService.Shared.Utilities;
 using NCrontab;
 using System.IO.Compression;
 using System.Timers;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
-namespace MinecraftService.Service.Server.ServerControllers {
+namespace MinecraftService.Service.Server.ServerControllers
+{
     public class JavaServer : IServerController {
         private Task? _serverTask;
         private Task? _watchdogTask;
@@ -23,27 +27,27 @@ namespace MinecraftService.Service.Server.ServerControllers {
         private ServerStatus _currentServerStatus;
         private readonly IServerConfiguration _serverConfiguration;
         private readonly ServiceConfigurator _serviceConfiguration;
-        private readonly IConfigurator _configurator;
-        private readonly IServerLogger _serviceLogger;
-        private readonly IProcessInfo _processInfo;
+        private readonly UserConfigManager _configurator;
+        private readonly MmsLogger _serviceLogger;
+        private readonly ProcessInfo _processInfo;
         private readonly PlayerManager _playerManager;
         private readonly IBackupManager _backupManager;
         private TimerService _timerService;
-        private IServerLogger _serverLogger;
-        private List<IPlayer> _connectedPlayers = new();
+        private MmsLogger _serverLogger;
+        private List<Player> _connectedPlayers = new();
         private DateTime _startTime;
         private bool _serverModifiedFlag = true;
         private const string _startupMessage = "INFO] Server started.";
         private ConsoleFilterStrategyClass _consoleFilter;
 
-        public JavaServer(IServerConfiguration serverConfiguration, IConfigurator configurator, IServerLogger logger, ServiceConfigurator serviceConfiguration, IProcessInfo processInfo) {
+        public JavaServer(IServerConfiguration serverConfiguration, UserConfigManager configurator, MmsLogger logger, ServiceConfigurator serviceConfiguration, ProcessInfo processInfo) {
             _serverConfiguration = serverConfiguration;
             _processInfo = processInfo;
             _serviceConfiguration = serviceConfiguration;
             _playerManager = serviceConfiguration.GetProp(ServicePropertyKeys.GlobalizedPlayerDatabase).GetBoolValue() || processInfo.DeclaredType() == "Client" ? serviceConfiguration.PlayerManager : serverConfiguration.GetPlayerManager();
             _configurator = configurator;
             _serviceLogger = logger;
-            _serverLogger = new MinecraftServerLogger(_processInfo, (ServiceConfigurator)_serviceConfiguration, _serverConfiguration);
+            _serverLogger = new MmsLogger(_processInfo, (ServiceConfigurator)_serviceConfiguration, _serverConfiguration);
             _backupManager = new JavaBackupManager(_serviceLogger, this, _serverConfiguration, _serviceConfiguration);
             _consoleFilter = new ConsoleFilterStrategyClass(_serviceLogger, _configurator, _serverConfiguration, this, _serviceConfiguration);
 
@@ -161,11 +165,11 @@ namespace MinecraftService.Service.Server.ServerControllers {
 
         public string GetServerName() => _serverConfiguration.GetServerName();
 
-        public List<IPlayer> GetActivePlayerList() => _connectedPlayers;
+        public List<Player> GetActivePlayerList() => _connectedPlayers;
 
-        public IServerLogger GetLogger() => _serverLogger;
+        public MmsLogger GetLogger() => _serverLogger;
 
-        public IServerLogger GetServiceLogger() => _serviceLogger;
+        public MmsLogger GetServiceLogger() => _serviceLogger;
 
         private void PerformRollback(string zipFilePath) => _backupManager.PerformRollback(zipFilePath);
 

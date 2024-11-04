@@ -14,23 +14,26 @@ using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
 using MinecraftService.Client.Management;
-using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Server;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.Interfaces;
 using MinecraftService.Shared.SerializeModels;
 using MinecraftService.Shared.Utilities;
 using Newtonsoft.Json;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
 namespace MinecraftService.Client.Forms {
     public partial class MainWindow : Form {
         public ServiceConfigurator connectedHost;
         public IServerConfiguration SelectedServer;
-        public IClientSideServiceConfiguration clientSideServiceConfiguration;
+        public ClientSideServiceConfiguration clientSideServiceConfiguration;
         public ServiceStatusModel ServiceStatus;
         private List<string> _localCommandHistory = new();
         public bool ServerBusy = false;
         private int _distanceFromLastCommand = 0;
-        public IServerLogger ClientLogger;
+        public MmsLogger ClientLogger;
         public ConfigManager ConfigManager;
         private int _connectTimeout;
         private bool _followTail = false;
@@ -39,7 +42,7 @@ namespace MinecraftService.Client.Forms {
         private AddNewServerForm _newServerForm;
         private BackupManagerForm _backupManager;
         private const int _connectTimeoutLimit = 3;
-        private readonly IProcessInfo _processInfo;
+        private readonly ProcessInfo _processInfo;
         private readonly System.Timers.Timer _connectTimer = new(100.0);
         private ProgressDialog _uiWaitDialog;
         private System.Timers.Timer _uiWaitTimer = new(250);
@@ -47,7 +50,7 @@ namespace MinecraftService.Client.Forms {
         private List<Shared.PackParser.MinecraftPackContainer> _incomingPacks;
         private byte _manPacksServer;
 
-        public MainWindow(IProcessInfo processInfo, IServerLogger logger) {
+        public MainWindow(ProcessInfo processInfo, MmsLogger logger) {
             _processInfo = processInfo;
             ClientLogger = logger;
             ClientLogger.Initialize();
@@ -234,7 +237,7 @@ namespace MinecraftService.Client.Forms {
         public void InitForm() {
             ConfigManager.LoadConfigs();
             HostListBox.Items.Clear();
-            foreach (IClientSideServiceConfiguration host in ConfigManager.HostConnectList) {
+            foreach (ClientSideServiceConfiguration host in ConfigManager.HostConnectList) {
                 HostListBox.Items.Add(host.GetHostName());
             }
             if (HostListBox.Items.Count > 0) {
@@ -552,7 +555,7 @@ namespace MinecraftService.Client.Forms {
             ServerBusy = false;
         }
 
-        public void RecievePlayerData(byte serverIndex, List<IPlayer> playerList) {
+        public void RecievePlayerData(byte serverIndex, List<Player> playerList) {
             ServerBusy = false;
             _uiWaitDialog.SetCallback(new(() => {
                 connectedHost.GetServerInfoByIndex(serverIndex).SetPlayerList(playerList);

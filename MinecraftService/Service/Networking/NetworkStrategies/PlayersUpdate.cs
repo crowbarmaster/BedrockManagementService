@@ -1,17 +1,23 @@
 ﻿
 using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Server;
+using MinecraftService.Shared.Classes.Service;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using Newtonsoft.Json;
 using System.Text;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
-namespace MinecraftService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies
+{
     public class PlayersUpdate : IMessageParser {
 
         private readonly ServiceConfigurator _serviceConfiguration;
-        private readonly IConfigurator _configurator;
+        private readonly UserConfigManager _configurator;
         private readonly IMinecraftService _service;
 
-        public PlayersUpdate(IConfigurator configurator, ServiceConfigurator serviceConfiguration, IMinecraftService service) {
+        public PlayersUpdate(UserConfigManager configurator, ServiceConfigurator serviceConfiguration, IMinecraftService service) {
             _service = service;
             _configurator = configurator;
             _serviceConfiguration = serviceConfiguration;
@@ -19,8 +25,8 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
 
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
             string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
-            List<IPlayer> fetchedPlayers = JsonConvert.DeserializeObject<List<IPlayer>>(stringData, GlobalJsonSerialierSettings);
-            foreach (IPlayer player in fetchedPlayers) {
+            List<Player> fetchedPlayers = JsonConvert.DeserializeObject<List<Player>>(stringData, GlobalJsonSerialierSettings);
+            foreach (Player player in fetchedPlayers) {
                 try {
                     _service.GetServerByIndex(serverIndex).GetPlayerManager().AddUpdatePlayer(player);
                 } catch (Exception) {

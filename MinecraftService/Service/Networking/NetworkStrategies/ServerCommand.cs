@@ -1,13 +1,16 @@
 ﻿using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Service.Core;
 using System.Text;
 
-namespace MinecraftService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies
+{
     public class ServerCommand : IMessageParser {
         private readonly IMinecraftService _service;
-        private readonly IServerLogger _logger;
+        private readonly MmsLogger _logger;
 
 
-        public ServerCommand(IMinecraftService service, IServerLogger logger) {
+        public ServerCommand(IMinecraftService service, MmsLogger logger) {
             _service = service;
             _logger = logger;
         }

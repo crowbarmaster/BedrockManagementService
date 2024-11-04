@@ -5,7 +5,7 @@
 using System;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Classes.Service.Core;
 
 namespace MinecraftService.Client.Forms {
     public partial class ProgressDialog : Form {

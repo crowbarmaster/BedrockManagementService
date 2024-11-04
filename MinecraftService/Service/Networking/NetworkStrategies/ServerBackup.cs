@@ -1,7 +1,9 @@
 ﻿using MinecraftService.Service.Networking.Interfaces;
 using MinecraftService.Service.Server.Interfaces;
+using MinecraftService.Shared.Classes.Networking;
 
-namespace MinecraftService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies
+{
     public class ServerBackup : IMessageParser {
 
         private readonly IMinecraftService _service;

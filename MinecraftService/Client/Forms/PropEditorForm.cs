@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Classes.Service.Core;
 
 namespace MinecraftService.Client.Forms {
     public partial class PropEditorForm : Form {

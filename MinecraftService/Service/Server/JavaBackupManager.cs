@@ -1,13 +1,17 @@
 ﻿using MinecraftService.Service.Server.Interfaces;
+using MinecraftService.Shared.Classes.Service;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.PackParser;
 using MinecraftService.Shared.SerializeModels;
 using MinecraftService.Shared.Utilities;
 using System.IO.Compression;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
-namespace MinecraftService.Service.Server {
+namespace MinecraftService.Service.Server
+{
     public class JavaBackupManager : BedrockBackupManager, IBackupManager {
-        private readonly IServerLogger _logger;
+        private readonly MmsLogger _logger;
         private readonly IServerController _server;
         private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IServerConfiguration _serverConfiguration;
@@ -19,7 +23,7 @@ namespace MinecraftService.Service.Server {
             Manual
         }
 
-        public JavaBackupManager(IServerLogger logger, IServerController server, IServerConfiguration serverConfiguration, ServiceConfigurator serviceConfiguration) : base(logger, server, serverConfiguration, serviceConfiguration) {
+        public JavaBackupManager(MmsLogger logger, IServerController server, IServerConfiguration serverConfiguration, ServiceConfigurator serviceConfiguration) : base(logger, server, serverConfiguration, serviceConfiguration) {
             _logger = logger;
             _server = server;
             _serverConfiguration = serverConfiguration;

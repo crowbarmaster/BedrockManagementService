@@ -5,21 +5,22 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.Interfaces;
 
 namespace MinecraftService.Client.Management {
     public class ConfigManager {
         public string ConfigDir = $@"{Directory.GetCurrentDirectory()}";
         public string ConfigFile;
-        public List<IClientSideServiceConfiguration> HostConnectList = new();
+        public List<ClientSideServiceConfiguration> HostConnectList = new();
         public string NBTStudioPath;
         public bool DefaultScrollLock = false;
         public bool DisplayTimestamps = false;
         public bool DebugNetworkOutput = false;
-        private readonly IServerLogger Logger;
+        private readonly MmsLogger Logger;
 
-        public ConfigManager(IServerLogger logger) {
+        public ConfigManager(MmsLogger logger) {
             Logger = logger;
             ConfigFile = $@"{ConfigDir}\Client.conf";
         }
@@ -40,7 +41,7 @@ namespace MinecraftService.Client.Management {
                     if (entrySplit[0] == "HostEntry") {
                         string[] hostSplit = entrySplit[1].Split(';');
                         string[] addressSplit = hostSplit[1].Split(':');
-                        IClientSideServiceConfiguration hostToList = new ClientSideServiceConfiguration(hostSplit[0], addressSplit[0], addressSplit[1]);
+                        ClientSideServiceConfiguration hostToList = new ClientSideServiceConfiguration(hostSplit[0], addressSplit[0], addressSplit[1]);
                         HostConnectList.Add(hostToList);
                     }
                     if (entrySplit[0] == "NBTStudioPath") {

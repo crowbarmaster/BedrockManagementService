@@ -1,8 +1,12 @@
 ﻿using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using Newtonsoft.Json;
 using System.Text;
 
-namespace MinecraftService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies
+{
     public class PlayerRequest : IMessageParser {
 
         private readonly IMinecraftService _service;

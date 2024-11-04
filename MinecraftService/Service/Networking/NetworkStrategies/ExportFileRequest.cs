@@ -1,20 +1,25 @@
 ﻿
 using MinecraftService.Service.Networking.Interfaces;
 using MinecraftService.Service.Server.Interfaces;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Service;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
 using MinecraftService.Shared.SerializeModels;
 using Newtonsoft.Json;
 using System.IO.Compression;
 using System.Text;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
-namespace MinecraftService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies
+{
     public class ExportFileRequest : IMessageParser {
         private readonly ServiceConfigurator _configuration;
         private readonly IMinecraftService _minecraftService;
-        private readonly IConfigurator _configurator;
-        private readonly IServerLogger _logger;
-        public ExportFileRequest(IConfigurator configurator, IMinecraftService minecraftService, ServiceConfigurator configuration, IServerLogger logger) {
+        private readonly UserConfigManager _configurator;
+        private readonly MmsLogger _logger;
+        public ExportFileRequest(UserConfigManager configurator, IMinecraftService minecraftService, ServiceConfigurator configuration, MmsLogger logger) {
             _minecraftService = minecraftService;
             _configuration = configuration;
             _configurator = configurator;

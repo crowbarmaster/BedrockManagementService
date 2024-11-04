@@ -1,4 +1,7 @@
 ﻿using MinecraftService.Service.Server.Interfaces;
+using MinecraftService.Shared.Classes.Service;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.Interfaces;
 using NCrontab;
 using System;
@@ -7,14 +10,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
-namespace MinecraftService.Service.Server {
+namespace MinecraftService.Service.Server
+{
     public class TimerWorker {
         private ServiceConfigurator _serviceConfiguration;
         private IServerController _parentServerController;
         private IServerConfiguration _parentServerConfig;
-        private IServerLogger _serviceLogger;
+        private MmsLogger _serviceLogger;
         private MmsTimerTypes _timerType;
         private System.Timers.Timer? _timer;
         private CrontabSchedule? _cron;
@@ -108,6 +112,7 @@ namespace MinecraftService.Service.Server {
                             _serviceLogger.AppendLine("Version change detected! Restarting server(s) to apply update...");
                             _parentServerController.PerformOfflineServerTask(new Action(() => _parentServerConfig.GetUpdater().ReplaceBuild(_parentServerConfig, _serviceConfiguration.GetLatestVersion(_parentServerConfig.GetServerArch())).Wait()));
                         }
+                        _timer.Interval = (_cron.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds;
                     }, cancelSource.Token);
                     return true;
                     break;
@@ -126,7 +131,7 @@ namespace MinecraftService.Service.Server {
                         } else {
                             _serviceLogger.AppendLine($"Backup for server {_parentServerConfig.GetServerName()} was skipped due to inactivity.");
                         }
-
+                        _timer.Interval = (_cron.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds;
                     }, cancelSource.Token);
                     break;
                 case MmsTimerTypes.Restart:
@@ -139,6 +144,7 @@ namespace MinecraftService.Service.Server {
                     _initializeMessage = $"Automatic server restarts for server {_parentServerConfig.GetServerName()} enabled, next scheduled restart at: {_cron.GetNextOccurrence(DateTime.Now):G}.";
                     _firedEventLogic = new Task(() => {
                         _parentServerController.RestartServer();
+                        _timer.Interval = (_cron.GetNextOccurrence(DateTime.Now) - DateTime.Now).TotalMilliseconds;
                     }, cancelSource.Token);
                     break;
                 default:

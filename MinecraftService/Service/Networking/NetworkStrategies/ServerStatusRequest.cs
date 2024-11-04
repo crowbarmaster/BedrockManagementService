@@ -1,9 +1,14 @@
 ﻿using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Service;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.SerializeModels;
 using Newtonsoft.Json;
 using System.Text;
 
-namespace MinecraftService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies
+{
     public class ServerStatusRequest : IMessageParser {
         private readonly IMinecraftService _service;
         private readonly ServiceConfigurator _serviceConfiguration;

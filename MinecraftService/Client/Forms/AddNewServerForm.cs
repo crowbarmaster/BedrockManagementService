@@ -6,10 +6,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using MinecraftService.Client.Management;
-using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.Interfaces;
 using MinecraftService.Shared.SerializeModels;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
 namespace MinecraftService.Client.Forms {
     public partial class AddNewServerForm : Form {
@@ -20,7 +21,7 @@ namespace MinecraftService.Client.Forms {
         private bool _customVersionSelected = false;
         private bool _typeChanging = false;
         private readonly List<IServerConfiguration> _serverConfigurations;
-        private readonly IClientSideServiceConfiguration _serviceConfiguration;
+        private readonly ClientSideServiceConfiguration _serviceConfiguration;
         private readonly List<string> serviceConfigExcludeList = new()
         {
             ServerPropertyStrings[ServerPropertyKeys.MinecraftType],
@@ -31,16 +32,15 @@ namespace MinecraftService.Client.Forms {
             ServerPropertyStrings[ServerPropertyKeys.ServerVersion]
         };
 
-        public AddNewServerForm(IClientSideServiceConfiguration serviceConfiguration, List<IServerConfiguration> serverConfigurations, Dictionary<SharedStringBase.MinecraftServerArch, SimpleVersionModel[]> verLists) {
+        public AddNewServerForm(ClientSideServiceConfiguration serviceConfiguration, List<IServerConfiguration> serverConfigurations, Dictionary<SharedStringBase.MinecraftServerArch, SimpleVersionModel[]> verLists) {
             VersionLists = verLists;
             _serviceConfiguration = serviceConfiguration;
             _serverConfigurations = serverConfigurations;
             InitializeComponent();
             IServerConfiguration server;
-            EnumTypeLookup typeLookup = new EnumTypeLookup(FormManager.Logger, FormManager.MainWindow.connectedHost);
             foreach (KeyValuePair<MinecraftServerArch, string> kvp in MinecraftArchStrings) {
                 ServerCombinedPropModel serverCombinedPropModel = new();
-                server = typeLookup.PrepareNewServerByArch(kvp.Value, FormManager.processInfo, FormManager.Logger, FormManager.MainWindow.connectedHost);
+                server = ServiceConfigurator.PrepareNewServerConfig(kvp.Value, FormManager.processInfo, FormManager.Logger, FormManager.MainWindow.connectedHost);
                 server.InitializeDefaults();
                 serverCombinedPropModel.ServerPropList = server.GetAllProps();
                 serverCombinedPropModel.ServicePropList = server.GetSettingsList();

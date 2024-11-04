@@ -1,16 +1,21 @@
 ﻿
 using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Service;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using Newtonsoft.Json;
 using System.Text;
 
-namespace MinecraftService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies
+{
     public class RemoveServer : IFlaggedMessageParser {
 
         private readonly ServiceConfigurator _serviceConfiguration;
-        private readonly IConfigurator _configurator;
+        private readonly UserConfigManager _configurator;
         private readonly IMinecraftService _mineraftService;
 
-        public RemoveServer(IConfigurator configurator, ServiceConfigurator serviceConfiguration, IMinecraftService mineraftService) {
+        public RemoveServer(UserConfigManager configurator, ServiceConfigurator serviceConfiguration, IMinecraftService mineraftService) {
             this._mineraftService = mineraftService;
             _configurator = configurator;
 

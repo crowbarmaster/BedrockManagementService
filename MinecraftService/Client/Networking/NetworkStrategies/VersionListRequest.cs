@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using MinecraftService.Client.Management;
-using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Classes.Service.Core;
 using Newtonsoft.Json;
 
 namespace MinecraftService.Client.Networking.NetworkStrategies {

@@ -1,16 +1,21 @@
 ﻿
 using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Service;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using Newtonsoft.Json;
 using System.Text;
 
-namespace MinecraftService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies
+{
     public class ServerPropUpdate : IMessageParser {
-        private readonly IServerLogger _logger;
+        private readonly MmsLogger _logger;
         private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IMinecraftService _mineraftService;
-        private readonly IConfigurator _configurator;
+        private readonly UserConfigManager _configurator;
 
-        public ServerPropUpdate(IServerLogger logger, IConfigurator configurator, ServiceConfigurator serviceConfiguration, IMinecraftService mineraftService) {
+        public ServerPropUpdate(MmsLogger logger, UserConfigManager configurator, ServiceConfigurator serviceConfiguration, IMinecraftService mineraftService) {
             _logger = logger;
             _configurator = configurator;
             _serviceConfiguration = serviceConfiguration;

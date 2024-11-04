@@ -6,16 +6,17 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using MinecraftService.Client.Management;
-using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.Interfaces;
 using Newtonsoft.Json;
 
 namespace MinecraftService.Client.Networking.NetworkStrategies {
     public class ClientConnect : INetworkMessage {
-        public IServerLogger _logger;
+        public MmsLogger _logger;
         public TCPClient _client;
 
-        public ClientConnect(IServerLogger logger, TCPClient client) {
+        public ClientConnect(MmsLogger logger, TCPClient client) {
             _logger = logger;
             _client = client;
         }

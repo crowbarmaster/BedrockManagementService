@@ -1,13 +1,16 @@
 ﻿using MinecraftService.Service.Server.Interfaces;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
-namespace MinecraftService.Service.Server.ConsoleFilters {
+namespace MinecraftService.Service.Server.ConsoleFilters
+{
     public class ConsoleGarbageFilter {
 
         public class CannedEntry {

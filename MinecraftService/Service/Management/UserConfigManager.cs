@@ -1,33 +1,35 @@
 ﻿using MinecraftService.Shared.Classes;
-using MinecraftService.Shared.Classes.Configurations;
-using MinecraftService.Shared.Classes.Updaters;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Server;
+using MinecraftService.Shared.Classes.Server.Configurations;
+using MinecraftService.Shared.Classes.Server.Updaters;
+using MinecraftService.Shared.Classes.Service;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.FileModels.MinecraftFileModels;
 using MinecraftService.Shared.Interfaces;
-using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
 using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
 using MinecraftService.Shared.SerializeModels;
 using System.Globalization;
 using System.Xml.Linq;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
-namespace MinecraftService.Service.Management {
-    public class ConfigManager : IConfigurator {
-        private static readonly object _fileLock = new();
+namespace MinecraftService.Service.Management
+{
+    public class UserConfigManager {
         private readonly ServiceConfigurator _serviceConfiguration;
-        private readonly IProcessInfo _processInfo;
-        private readonly IServerLogger _logger;
+        private readonly ProcessInfo _processInfo;
+        private readonly MmsLogger _logger;
         private readonly FileUtilities FileUtilities;
-        private BedrockUpdater _updater;
-        private IEnumTypeLookup _typeLookup;
+        private UpdaterContainer _updaterContainer;
         private List<string> serviceConfigExcludeList = new() { "MinecraftType", "ServerName", "ServerExeName", "FileName", "ServerPath", "ServerVersion" };
 
-        public ConfigManager(IProcessInfo processInfo, ServiceConfigurator serviceConfiguration, IServerLogger logger, FileUtilities fileUtilities, IEnumTypeLookup enumTypeLookup) {
+        public UserConfigManager(ProcessInfo processInfo, ServiceConfigurator serviceConfiguration, MmsLogger logger, FileUtilities fileUtilities, UpdaterContainer updaters) {
             _processInfo = processInfo;
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
             FileUtilities = fileUtilities;
-            _updater = new(_logger, _serviceConfiguration);
-            _typeLookup = enumTypeLookup;
+            _updaterContainer = updaters;
         }
 
         public Task LoadGlobals() => Task.Run(() => {
@@ -56,15 +58,15 @@ namespace MinecraftService.Service.Management {
                     string[] archType = fileEntries[0].Split('=');
                     if (archType[0] != "MinecraftType") {
                         if (!_serviceConfiguration.GetUpdater(MinecraftServerArch.Bedrock).IsInitialized()) {
-                            _serviceConfiguration.GetUpdater(MinecraftServerArch.Bedrock).Initialize();
+                            _serviceConfiguration.GetUpdater(MinecraftServerArch.Bedrock).Initialize().Wait();
                         }
                         serverInfo = new BedrockConfiguration(_processInfo, _logger, _serviceConfiguration);
                     } else {
                         MinecraftServerArch selectedArch = GetArchFromString(archType[1]);
                         if (!_serviceConfiguration.GetUpdater(selectedArch).IsInitialized()) {
-                            _serviceConfiguration.GetUpdater(selectedArch).Initialize();
+                            _serviceConfiguration.GetUpdater(selectedArch).Initialize().Wait();
                         }
-                        serverInfo = _typeLookup.PrepareNewServerByArch(selectedArch, _processInfo, _logger, _serviceConfiguration);
+                        serverInfo = ServiceConfigurator.PrepareNewServerConfig(selectedArch, _processInfo, _logger, _serviceConfiguration);
                     }
                     if (serverInfo.InitializeDefaults()) {
                         serverInfo.ProcessUserConfiguration(fileEntries);
@@ -81,8 +83,8 @@ namespace MinecraftService.Service.Management {
         });
 
         public void VerifyServerArchInit(MinecraftServerArch serverArch) {
-            if (!_typeLookup.GetUpdaterByArch(serverArch).IsInitialized()) {
-                _typeLookup.GetUpdaterByArch(serverArch).Initialize();
+            if (!_updaterContainer.GetUpdaterByArch(serverArch).IsInitialized()) {
+                _updaterContainer.GetUpdaterByArch(serverArch).Initialize();
             }
         }
 
@@ -218,15 +220,15 @@ namespace MinecraftService.Service.Management {
                 List<BackupInfoModel> newList = new();
                 List<FileInfo> files = new DirectoryInfo($@"{server.GetSettingsProp(ServerPropertyKeys.BackupPath)}\{server.GetServerName()}").GetFiles().ToList();
                 foreach (FileInfo dir in files) {
-                try {
+                    try {
                         newList.Add(new BackupInfoModel(dir));
                     } catch (Exception e) {
                         _logger.AppendLine(e.Message);
                         continue;
                     }
-                    }
-                    newList.Sort(new BackupComparer());
-                    newList.Reverse();
+                }
+                newList.Sort(new BackupComparer());
+                newList.Reverse();
                 return newList;
             });
         }
@@ -280,21 +282,6 @@ namespace MinecraftService.Service.Management {
                 _serviceConfiguration.RemoveServerInfo(serverInfo);
             } catch { }
         });
-
-        public void DeleteBackupForServer(byte serverIndex, string backupName) {
-            string serverName = _serviceConfiguration.GetServerInfoByIndex(serverIndex).GetServerName();
-            DirectoryInfo serverBackupDir = new($@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp(ServerPropertyKeys.BackupPath)}\{serverName}");
-            try {
-                foreach (FileInfo file in serverBackupDir.GetFiles())
-                    if (file.Name == backupName || backupName == "-RemoveAll-") {
-                        file.Delete();
-                        _logger.AppendLine($"Deleted backup {file.Name}.");
-                    }
-                _serviceConfiguration.CalculateTotalBackupsAllServers().Wait();
-            } catch (IOException e) {
-                _logger.AppendLine($"Error deleting selected backups! {e.Message}");
-            }
-        }
 
         private void LoadPlayerDatabase(IServerConfiguration server) {
             server.GetPlayerManager().LoadPlayerDatabase();

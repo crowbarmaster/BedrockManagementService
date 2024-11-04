@@ -1,16 +1,21 @@
 ﻿using MinecraftService.Service.Networking.Interfaces;
 using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Service;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using Newtonsoft.Json;
 using System.Text;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
-namespace MinecraftService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies
+{
     public class VersionListRequest : IMessageParser {
 
         private readonly ServiceConfigurator _serviceConfiguration;
-        private readonly IServerLogger _logger;
+        private readonly MmsLogger _logger;
 
-        public VersionListRequest(IServerLogger logger, ServiceConfigurator serviceConfiguration) {
+        public VersionListRequest(MmsLogger logger, ServiceConfigurator serviceConfiguration) {
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
         }
@@ -18,7 +23,8 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
         public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
             Dictionary<MinecraftServerArch, SimpleVersionModel[]> resultDictionary = new();
             foreach (KeyValuePair<MinecraftServerArch, IUpdater> updaterKvp in _serviceConfiguration.GetUpdaterTable()) {
-                updaterKvp.Value.Initialize().Wait();
+                if(!updaterKvp.Value.IsInitialized())
+                    updaterKvp.Value.Initialize().Wait();
                 List<SimpleVersionModel> verStrings = updaterKvp.Value.GetSimpleVersionList();
                 verStrings.Reverse();
                 resultDictionary.Add(updaterKvp.Key, verStrings.ToArray());

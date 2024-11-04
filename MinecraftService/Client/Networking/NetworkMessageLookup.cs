@@ -4,14 +4,15 @@
 
 using System.Collections.Generic;
 using MinecraftService.Client.Networking.NetworkStrategies;
-using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.Interfaces;
 
 namespace MinecraftService.Client.Networking {
     internal class NetworkMessageLookup {
         public Dictionary<NetworkMessageTypes, INetworkMessage> MessageLookupContainer { get; set; }
 
-        public NetworkMessageLookup(IServerLogger logger, TCPClient client) {
+        public NetworkMessageLookup(MmsLogger logger, TCPClient client) {
             MessageLookupContainer = new Dictionary<NetworkMessageTypes, INetworkMessage>() {
                 { NetworkMessageTypes.Connect, new ClientConnect(logger, client) },
                 { NetworkMessageTypes.EnumBackups, new EnumBackups() },

@@ -1,16 +1,21 @@
 ﻿
 using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Server;
+using MinecraftService.Shared.Classes.Service;
+using MinecraftService.Shared.Classes.Service.Configuration;
 using MinecraftService.Shared.SerializeModels;
 using Newtonsoft.Json;
 using System.IO.Compression;
 using System.Text;
 
-namespace MinecraftService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies
+{
     public class ImportFileRequest : IMessageParser {
         private readonly ServiceConfigurator _configuration;
-        private readonly IProcessInfo _processInfo;
-        private readonly IConfigurator _configurator;
-        public ImportFileRequest(IConfigurator configurator, IProcessInfo processInfo, ServiceConfigurator configuration) {
+        private readonly ProcessInfo _processInfo;
+        private readonly UserConfigManager _configurator;
+        public ImportFileRequest(UserConfigManager configurator, ProcessInfo processInfo, ServiceConfigurator configuration) {
             _configuration = configuration;
             _processInfo = processInfo;
             _configurator = configurator;

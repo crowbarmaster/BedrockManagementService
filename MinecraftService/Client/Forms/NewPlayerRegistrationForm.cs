@@ -5,12 +5,13 @@
 using System;
 using System.Windows.Forms;
 using MinecraftService.Client.Management;
-using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Classes.Server;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.Interfaces;
 
 namespace MinecraftService.Client.Forms {
     public partial class NewPlayerRegistrationForm : Form {
-        public IPlayer PlayerToAdd;
+        public Player PlayerToAdd;
         private readonly IServerConfiguration _serverConfiguration;
 
         public NewPlayerRegistrationForm() {

@@ -9,10 +9,12 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.Interfaces;
 using MinecraftService.Shared.SerializeModels;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
 namespace MinecraftService.Client.Management {
     class LogManager {
@@ -22,12 +24,12 @@ namespace MinecraftService.Client.Management {
         public List<string> ServiceLogs = new();
         private CancellationTokenSource _logTaskCancelSource;
         private ServiceConfigurator _connectedHost;
-        private readonly IServerLogger _logger;
+        private readonly MmsLogger _logger;
         private int currentServerLogLength;
         private int currentServiceLogLength;
         private int currentClientLogLength;
 
-        public LogManager(IServerLogger logger) {
+        public LogManager(MmsLogger logger) {
             _logger = logger;
         }
 

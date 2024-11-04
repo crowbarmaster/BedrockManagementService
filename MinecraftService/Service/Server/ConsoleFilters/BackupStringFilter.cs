@@ -1,21 +1,25 @@
 ﻿using MinecraftService.Service.Server.Interfaces;
+using MinecraftService.Shared.Classes.Service;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
-namespace MinecraftService.Service.Server.ConsoleFilters {
+namespace MinecraftService.Service.Server.ConsoleFilters
+{
     public class BackupStringFilter : IConsoleFilter {
         IServerConfiguration _serverConfiguration;
-        IServerLogger _logger;
-        IConfigurator _configurator;
+        MmsLogger _logger;
+        UserConfigManager _configurator;
         IServerController _minecraftServer;
         ServiceConfigurator _serviceConfiguration;
 
-        public BackupStringFilter(IServerLogger logger, IConfigurator configurator, IServerConfiguration serverConfiguration, IServerController minecraftServer, ServiceConfigurator minecraftService) {
+        public BackupStringFilter(MmsLogger logger, UserConfigManager configurator, IServerConfiguration serverConfiguration, IServerController minecraftServer, ServiceConfigurator minecraftService) {
             _serverConfiguration = serverConfiguration;
             _logger = logger;
             _configurator = configurator;

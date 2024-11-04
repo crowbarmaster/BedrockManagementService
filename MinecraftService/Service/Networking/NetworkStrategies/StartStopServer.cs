@@ -1,8 +1,10 @@
 ﻿using MinecraftService.Service.Networking.Interfaces;
 using MinecraftService.Service.Server.Interfaces;
+using MinecraftService.Shared.Classes.Networking;
 using MinecraftService.Shared.SerializeModels;
 
-namespace MinecraftService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies
+{
     public class StartStopServer : IMessageParser {
         private readonly IMinecraftService _service;
 

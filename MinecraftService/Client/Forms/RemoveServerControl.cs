@@ -4,7 +4,7 @@
 
 using System;
 using System.Windows.Forms;
-using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Classes.Networking;
 
 namespace MinecraftService.Client.Forms {
     public partial class RemoveServerControl : Form {

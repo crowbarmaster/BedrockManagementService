@@ -1,14 +1,19 @@
 ﻿using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Service;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using System.Text;
 
-namespace MinecraftService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies
+{
     public class ConsoleLogUpdate : IMessageParser {
 
-        private readonly IServerLogger _logger;
+        private readonly MmsLogger _logger;
         private readonly IMinecraftService _service;
         private readonly ServiceConfigurator _serviceConfiguration;
 
-        public ConsoleLogUpdate(IServerLogger logger, ServiceConfigurator serviceConfiguration, IMinecraftService service) {
+        public ConsoleLogUpdate(MmsLogger logger, ServiceConfigurator serviceConfiguration, IMinecraftService service) {
             _service = service;
             _logger = logger;
 
@@ -25,7 +30,7 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
                 int srvTextLen;
                 int clientCurLen;
                 int loop;
-                IServerLogger srvText;
+                MmsLogger srvText;
                 if (srvName != "Service") {
                     try {
                         srvText = _service.GetServerByName(srvName).GetLogger();

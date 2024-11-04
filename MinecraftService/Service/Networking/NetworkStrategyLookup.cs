@@ -1,13 +1,19 @@
 ﻿
 using MinecraftService.Service.Networking.Interfaces;
 using MinecraftService.Service.Networking.NetworkStrategies;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Server;
+using MinecraftService.Shared.Classes.Service;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 
-namespace MinecraftService.Service.Networking {
+namespace MinecraftService.Service.Networking
+{
     public class NetworkStrategyLookup {
         private readonly Dictionary<NetworkMessageTypes, IMessageParser> _standardMessageLookup;
         private readonly Dictionary<NetworkMessageTypes, IFlaggedMessageParser> _flaggedMessageLookup;
 
-        public NetworkStrategyLookup(ITCPListener listener, IMinecraftService service, IServerLogger logger, IConfigurator configurator, ServiceConfigurator serviceConfiguration, IProcessInfo processInfo, FileUtilities fileUtils) {
+        public NetworkStrategyLookup(ITCPListener listener, IMinecraftService service, MmsLogger logger, UserConfigManager configurator, ServiceConfigurator serviceConfiguration, ProcessInfo processInfo, FileUtilities fileUtils) {
             _standardMessageLookup = new Dictionary<NetworkMessageTypes, IMessageParser>()
             {
                 {NetworkMessageTypes.Connect, new Connect(serviceConfiguration) },
@@ -20,7 +26,7 @@ namespace MinecraftService.Service.Networking {
                 {NetworkMessageTypes.BackupAll, new ServerBackupAll(service) },
                 {NetworkMessageTypes.EnumBackups, new EnumBackups(configurator) },
                 {NetworkMessageTypes.BackupRollback, new BackupRollback(service) },
-                {NetworkMessageTypes.DelBackups, new DeleteBackups(configurator) },
+                {NetworkMessageTypes.DelBackups, new DeleteBackups(logger, serviceConfiguration) },
                 {NetworkMessageTypes.PropUpdate, new ServerPropUpdate(logger, configurator, serviceConfiguration, service) },
                 {NetworkMessageTypes.StartCmdUpdate, new StartCmdUpdate(configurator, serviceConfiguration) },
                 {NetworkMessageTypes.ConsoleLogUpdate, new ConsoleLogUpdate(logger, serviceConfiguration, service) },
@@ -34,7 +40,6 @@ namespace MinecraftService.Service.Networking {
                 {NetworkMessageTypes.LevelEditRequest, new LevelEditRequest(serviceConfiguration) },
                 {NetworkMessageTypes.LevelEditFile, new LevelEditFile(serviceConfiguration, service, logger) },
                 {NetworkMessageTypes.ExportFile, new ExportFileRequest(configurator, service, serviceConfiguration, logger) },
-                {NetworkMessageTypes.LLPluginFile, new LiteLoaderPluginFile(serviceConfiguration) }
             };
             _flaggedMessageLookup = new Dictionary<NetworkMessageTypes, IFlaggedMessageParser>()
             {

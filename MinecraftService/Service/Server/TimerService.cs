@@ -1,12 +1,16 @@
 ﻿using MinecraftService.Service.Server.Interfaces;
+using MinecraftService.Shared.Classes.Service;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
-namespace MinecraftService.Service.Server {
+namespace MinecraftService.Service.Server
+{
     public class TimerService {
         public List<TimerWorker> ActiveTimers { get; set; } = new();
         private IServerController _runningServer;

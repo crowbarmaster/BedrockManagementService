@@ -7,16 +7,18 @@ using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
 using MinecraftService.Client.Management;
-using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Server;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.Interfaces;
 using Newtonsoft.Json;
 
 namespace MinecraftService.Client.Forms {
     public partial class PlayerManagerForm : Form {
         private readonly IServerConfiguration _server;
-        private List<IPlayer> playersFound = new();
-        private readonly List<IPlayer> modifiedPlayers = new();
-        private IPlayer playerToEdit;
+        private List<Player> playersFound = new();
+        private readonly List<Player> modifiedPlayers = new();
+        private Player playerToEdit;
         private bool _loaded = false;
         private const string _searchLegendText =
             "Search Legend:\n" +
@@ -98,8 +100,8 @@ namespace MinecraftService.Client.Forms {
 
         private void RefreshGridContents() {
             gridView.Rows.Clear();
-            foreach (IPlayer ply in playersFound) {
-                IPlayer player = ply;
+            foreach (Player ply in playersFound) {
+                Player player = ply;
                 if (modifiedPlayers.Contains(player)) {
                     player = modifiedPlayers[modifiedPlayers.IndexOf(player)];
                 }
@@ -138,7 +140,7 @@ namespace MinecraftService.Client.Forms {
         private void searchEntryBox_TextChanged(object sender, EventArgs e) {
             playersFound = _server.GetPlayerList();
             string curText = searchEntryBox.Text.ToLower();
-            List<IPlayer> tempList = new();
+            List<Player> tempList = new();
             string[] splitCommands = new string[1] { curText };
             string cmd;
             string value;
@@ -153,7 +155,7 @@ namespace MinecraftService.Client.Forms {
                             string[] finalSplit = s.Split(':', StringSplitOptions.TrimEntries);
                             cmd = finalSplit[0].ToLower();
                             value = finalSplit[1].ToLower();
-                            tempList = new List<IPlayer>();
+                            tempList = new List<Player>();
                             foreach (Player player in playersFound) {
                                 string key = player.SearchForProperty(cmd);
                                 if (key != null && key.Contains(value)) {

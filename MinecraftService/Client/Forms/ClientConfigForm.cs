@@ -6,12 +6,12 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using MinecraftService.Client.Management;
-using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Classes.Service.Configuration;
 using MinecraftService.Shared.Interfaces;
 
 namespace MinecraftService.Client.Forms {
     public partial class ClientConfigForm : Form {
-        private readonly List<IClientSideServiceConfiguration> _clientConfigs;
+        private readonly List<ClientSideServiceConfiguration> _clientConfigs;
         private readonly ConfigManager _configManager;
         public ClientConfigForm(ConfigManager configManager) {
             InitializeComponent();
@@ -23,7 +23,7 @@ namespace MinecraftService.Client.Forms {
             if (!string.IsNullOrEmpty(_configManager.NBTStudioPath)) {
                 nbtPathLabel.Text = $"NBT Studio path: {_configManager.NBTStudioPath}";
             }
-            foreach (IClientSideServiceConfiguration config in _clientConfigs) {
+            foreach (ClientSideServiceConfiguration config in _clientConfigs) {
                 serverGridView.Rows.Add(new string[3] { config.GetHostName(), config.GetAddress(), config.GetPort() });
             }
         }
@@ -45,7 +45,7 @@ namespace MinecraftService.Client.Forms {
         }
 
         private void saveBtn_Click(object sender, EventArgs e) {
-            List<IClientSideServiceConfiguration> newConfigs = new();
+            List<ClientSideServiceConfiguration> newConfigs = new();
             foreach (DataGridViewRow row in serverGridView.Rows) {
                 if (!string.IsNullOrEmpty((string)row.Cells[0].Value)) {
                     newConfigs.Add(new ClientSideServiceConfiguration((string)row.Cells[0].Value, (string)row.Cells[1].Value, (string)row.Cells[2].Value));

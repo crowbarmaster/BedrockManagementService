@@ -1,32 +1,42 @@
 ﻿
+using MinecraftService.Service.Core.Interfaces;
 using MinecraftService.Service.Networking.Interfaces;
 using MinecraftService.Service.Server;
 using MinecraftService.Service.Server.Interfaces;
+using MinecraftService.Shared.Classes.Server;
+using MinecraftService.Shared.Classes.Server.Updaters;
+using MinecraftService.Shared.Classes.Service;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
 using MinecraftService.Shared.SerializeModels;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using NCrontab;
+using Newtonsoft.Json.Linq;
+using System.Timers;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
-namespace MinecraftService.Service.Core {
+namespace MinecraftService.Service.Core
+{
     public class MmsService : IMinecraftService {
         private readonly ServiceConfigurator _serviceConfiguration;
-        private readonly IServerLogger _logger;
-        private readonly IProcessInfo _processInfo;
-        private readonly IConfigurator _configurator;
+        private readonly MmsLogger _logger;
+        private readonly ProcessInfo _processInfo;
+        private readonly UserConfigManager _configurator;
         private readonly ITCPListener _tCPListener;
         private DateTime _upTime;
-        private IEnumTypeLookup _typeLookup;
+        private UpdaterContainer _updaterContainer;
         private List<IServerController> _loadedServers { get; set; } = new();
         private ServiceStatus _CurrentServiceStatus { get; set; }
         private Dictionary<MinecraftServerArch, IUpdater> _serverUpdaters { get; set; } = new();
 
-        public MmsService(IConfigurator configurator, IServerLogger logger, ServiceConfigurator serviceConfiguration, IProcessInfo serviceProcessInfo, ITCPListener tCPListener, IEnumTypeLookup typeLookup) {
+        public MmsService(UserConfigManager configurator, MmsLogger logger, ServiceConfigurator serviceConfiguration, ProcessInfo serviceProcessInfo, ITCPListener tCPListener, UpdaterContainer updaters) {
             _tCPListener = tCPListener;
             _configurator = configurator;
             _logger = logger;
             _serviceConfiguration = serviceConfiguration;
             _processInfo = serviceProcessInfo;
             _logger = logger;
-            _typeLookup = typeLookup;
+            _updaterContainer = updaters;
         }
 
         public Task<bool> Initialize() {
@@ -50,12 +60,10 @@ namespace MinecraftService.Service.Core {
                 if (!VerifyMojangLicenseAcceptance()) {
                     return false;
                 }
-                foreach (KeyValuePair<MinecraftServerArch, IUpdater> updater in _typeLookup.GetAllUpdaters()) {
-                    if (!updater.Value.IsInitialized()) {
-                        updater.Value.Initialize().Wait();
-                    }
-                    _serviceConfiguration.SetUpdater(updater.Key, updater.Value);
-                }
+                _updaterContainer.SetUpdaterTable(new Dictionary<MinecraftServerArch, IUpdater>(new Dictionary<MinecraftServerArch, IUpdater> {
+                    { MinecraftServerArch.Bedrock, new BedrockUpdater(_logger, _serviceConfiguration) },
+                    { MinecraftServerArch.Java, new JavaUpdater(_logger, _serviceConfiguration) },
+                }));
                 _configurator.LoadServerConfigurations().Wait();
                 _loadedServers.Clear();
                 InstanciateServers();
@@ -85,7 +93,7 @@ namespace MinecraftService.Service.Core {
         }
 
         public ServiceStatusModel GetServiceStatus() {
-            List<IPlayer> serviceActivePlayers = new();
+            List<Player> serviceActivePlayers = new();
             _loadedServers.ForEach(server => {
                 serviceActivePlayers.AddRange(server.GetServerStatus().ActivePlayerList);
             });
@@ -217,7 +225,7 @@ namespace MinecraftService.Service.Core {
         public List<IServerController> GetAllServers() => _loadedServers;
 
         public void InitializeNewServer(IServerConfiguration server) {
-            IServerController minecraftServer = ServerTypeLookup.GetServerControllerByArch(server.GetServerArch(), server, _configurator, _logger, _serviceConfiguration, _processInfo);
+            IServerController minecraftServer = ServerTypeLookup.PrepareNewServerController(server.GetServerArch(), server, _configurator, _logger, _serviceConfiguration, _processInfo);
             minecraftServer.Initialize();
             _loadedServers.Add(minecraftServer);
             _serviceConfiguration.AddNewServerInfo(server);
@@ -238,7 +246,7 @@ namespace MinecraftService.Service.Core {
         private void InstanciateServers() {
             try {
                 foreach (IServerConfiguration server in _serviceConfiguration.GetServerList()) {
-                    IServerController minecraftServer = ServerTypeLookup.GetServerControllerByArch(server.GetServerArch(), server, _configurator, _logger, _serviceConfiguration, _processInfo);
+                    IServerController minecraftServer = ServerTypeLookup.PrepareNewServerController(server.GetServerArch(), server, _configurator, _logger, _serviceConfiguration, _processInfo);
                     minecraftServer.Initialize();
                     _loadedServers.Add(minecraftServer);
                 }

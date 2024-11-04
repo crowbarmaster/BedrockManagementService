@@ -1,20 +1,25 @@
 ﻿using MinecraftService.Service.Networking.Interfaces;
-using MinecraftService.Shared.Classes.Configurations;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Server;
+using MinecraftService.Shared.Classes.Service;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.SerializeModels;
 using Newtonsoft.Json;
 using System.Text;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
-namespace MinecraftService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies
+{
     public class AddNewServer : IMessageParser {
-        private readonly IProcessInfo _processInfo;
+        private readonly ProcessInfo _processInfo;
 
         private readonly ServiceConfigurator _serviceConfiguration;
-        private readonly IConfigurator _configurator;
+        private readonly UserConfigManager _configurator;
         private readonly IMinecraftService _minecraftService;
-        private readonly IServerLogger _logger;
+        private readonly MmsLogger _logger;
 
-        public AddNewServer(IServerLogger logger, IProcessInfo processInfo, IConfigurator configurator, ServiceConfigurator serviceConfiguration, IMinecraftService minecraftService) {
+        public AddNewServer(MmsLogger logger, ProcessInfo processInfo, UserConfigManager configurator, ServiceConfigurator serviceConfiguration, IMinecraftService minecraftService) {
             _processInfo = processInfo;
             _minecraftService = minecraftService;
             _configurator = configurator;
@@ -26,10 +31,9 @@ namespace MinecraftService.Service.Networking.NetworkStrategies {
             string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
             ServerCombinedPropModel propModel = JsonConvert.DeserializeObject<ServerCombinedPropModel>(stringData, GlobalJsonSerialierSettings);
             Property? archProp = propModel?.ServicePropList?.First(x => x.KeyName == ServerPropertyStrings[ServerPropertyKeys.MinecraftType]);
-            EnumTypeLookup typeLookup = new(_logger, _serviceConfiguration);
             MinecraftServerArch selectedArch = GetArchFromString(archProp.StringValue);
             _configurator.VerifyServerArchInit(selectedArch);
-            IServerConfiguration newServer = typeLookup.PrepareNewServerByArch(selectedArch, _processInfo, _logger, _serviceConfiguration);
+            IServerConfiguration newServer = ServiceConfigurator.PrepareNewServerConfig(selectedArch, _processInfo, _logger, _serviceConfiguration);
             newServer.InitializeDefaults();
             newServer.SetAllSettings(propModel?.ServicePropList);
             newServer.SetAllProps(propModel?.ServerPropList);

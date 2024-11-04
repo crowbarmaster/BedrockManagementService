@@ -1,17 +1,22 @@
 ﻿using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Service;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.PackParser;
 using Newtonsoft.Json;
 using System.Text;
 using System.Text.Json;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
-namespace MinecraftService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies
+{
     public class RemovePack : IMessageParser {
 
         private readonly ServiceConfigurator _serviceConfiguration;
-        private readonly IServerLogger _logger;
+        private readonly MmsLogger _logger;
 
-        public RemovePack(ServiceConfigurator serviceConfiguration, IServerLogger logger) {
+        public RemovePack(ServiceConfigurator serviceConfiguration, MmsLogger logger) {
             _serviceConfiguration = serviceConfiguration;
             _logger = logger;
         }

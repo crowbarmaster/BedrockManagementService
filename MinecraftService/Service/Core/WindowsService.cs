@@ -1,16 +1,18 @@
-﻿using MinecraftService.Shared.SerializeModels;
+﻿using MinecraftService.Shared.Classes.Server;
+using MinecraftService.Shared.Classes.Service.Core;
+using MinecraftService.Shared.SerializeModels;
 using Topshelf.Runtime;
 
 namespace MinecraftService.Service.Core {
     public class WindowsService : IService {
         private readonly IMinecraftService _mineraftService;
         private Topshelf.Host? _host;
-        private readonly IProcessInfo _processInfo;
-        private readonly IServerLogger _logger;
+        private readonly ProcessInfo _processInfo;
+        private readonly MmsLogger _logger;
         private readonly IHostApplicationLifetime _applicationLifetime;
         TopshelfExitCode _exitCode;
 
-        public WindowsService(IProcessInfo processInfo, IServerLogger logger, IMinecraftService mineraftService, NetworkStrategyLookup networkStrategyLookup, IHostApplicationLifetime appLifetime) {
+        public WindowsService(ProcessInfo processInfo, MmsLogger logger, IMinecraftService mineraftService, NetworkStrategyLookup networkStrategyLookup, IHostApplicationLifetime appLifetime) {
             _logger = logger;
             _processInfo = processInfo;
             _mineraftService = mineraftService;

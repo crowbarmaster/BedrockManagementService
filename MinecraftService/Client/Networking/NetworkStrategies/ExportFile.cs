@@ -5,7 +5,7 @@
 using System.Text;
 using System.Threading.Tasks;
 using MinecraftService.Client.Management;
-using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.SerializeModels;
 using Newtonsoft.Json;
 

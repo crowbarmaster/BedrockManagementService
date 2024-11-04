@@ -1,15 +1,21 @@
 ﻿using MinecraftService.Service.Networking.Interfaces;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Server;
+using MinecraftService.Shared.Classes.Service;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using System.Net;
 using System.Net.Sockets;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
-namespace MinecraftService.Service.Networking {
+namespace MinecraftService.Service.Networking
+{
     public class TCPListener : ITCPListener {
         private TcpClient? _client;
         private TcpListener? _inListener;
         private NetworkStream? _stream;
         private readonly ServiceConfigurator _serviceConfiguration;
-        private readonly IServerLogger _logger;
+        private readonly MmsLogger _logger;
         private int _heartbeatFailTimeout;
         private readonly int _heartbeatFailTimeoutLimit = 2;
         private Dictionary<NetworkMessageTypes, IMessageParser>? _standardMessageLookup;
@@ -22,7 +28,7 @@ namespace MinecraftService.Service.Networking {
         private bool _canClientConnect = true;
         private bool _serviceStarted = false;
 
-        public TCPListener(ServiceConfigurator serviceConfiguration, IServerLogger logger, IProcessInfo processInfo) {
+        public TCPListener(ServiceConfigurator serviceConfiguration, MmsLogger logger, ProcessInfo processInfo) {
             _logger = logger;
             _serviceConfiguration = serviceConfiguration;
             _cancelTokenSource = new CancellationTokenSource();

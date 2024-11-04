@@ -6,7 +6,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using MinecraftService.Client.Management;
-using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Classes.Server;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.Interfaces;
 using Newtonsoft.Json;
 
@@ -15,7 +16,7 @@ namespace MinecraftService.Client.Networking.NetworkStrategies {
 
         public Task<bool> ProcessMessage(byte[] messageData) => Task.Run(() => {
             string data = Encoding.UTF8.GetString(messageData, 5, messageData.Length - 5);
-            List<IPlayer> fetchedPlayers = JsonConvert.DeserializeObject<List<IPlayer>>(data, SharedStringBase.GlobalJsonSerialierSettings);
+            List<Player> fetchedPlayers = JsonConvert.DeserializeObject<List<Player>>(data, SharedStringBase.GlobalJsonSerialierSettings);
             FormManager.MainWindow.RecievePlayerData(messageData[2], fetchedPlayers);
             return true;
         });

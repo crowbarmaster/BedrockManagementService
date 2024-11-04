@@ -6,14 +6,15 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using MinecraftService.Client.Management;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.Interfaces;
 using MinecraftService.Shared.SerializeModels;
 
 namespace MinecraftService.Client.Networking.NetworkStrategies {
     public class ConsoleLogUpdate : INetworkMessage {
-        private readonly IServerLogger _logger;
+        private readonly MmsLogger _logger;
 
-        public ConsoleLogUpdate(IServerLogger logger) {
+        public ConsoleLogUpdate(MmsLogger logger) {
             _logger = logger;
         }
 

@@ -7,21 +7,23 @@ using System.IO;
 using System.Windows.Forms;
 using MinecraftService.Client.Forms;
 using MinecraftService.Client.Networking;
-using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Classes.Server;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.Interfaces;
 
 namespace MinecraftService.Client.Management {
     public sealed class FormManager {
-        public static readonly IProcessInfo processInfo = new ServiceProcessInfo("Client", Path.GetDirectoryName(Application.ExecutablePath), Process.GetCurrentProcess().Id, false, true);
+        public static readonly ProcessInfo processInfo = new ProcessInfo("Client", Path.GetDirectoryName(Application.ExecutablePath), Process.GetCurrentProcess().Id, false, true);
         public static readonly ServiceConfigurator ClientLogContainer;
-        public static readonly IServerLogger Logger;
+        public static readonly MmsLogger Logger;
         private static MainWindow main;
         private static TCPClient client;
 
         static FormManager() {
-            ClientLogContainer = new ServiceConfigurator(processInfo);
+            ClientLogContainer = new ServiceConfigurator(processInfo, new());
             ClientLogContainer.InitializeDefaults();
-            Logger = new MinecraftServerLogger(processInfo, ClientLogContainer);
+            Logger = new MmsLogger(processInfo, ClientLogContainer);
             Logger.AppendLine($"Bedrock Client version {Application.ProductVersion} has started.");
             Logger.AppendLine($"Working directory: {processInfo.GetDirectory()}");
             SharedStringBase.SetWorkingDirectory(processInfo);

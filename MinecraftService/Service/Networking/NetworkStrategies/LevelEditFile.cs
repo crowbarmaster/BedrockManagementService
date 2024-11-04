@@ -1,13 +1,18 @@
 ﻿using MinecraftService.Service.Networking.Interfaces;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using MinecraftService.Shared.Classes.Networking;
+using MinecraftService.Shared.Classes.Service;
+using MinecraftService.Shared.Classes.Service.Configuration;
+using MinecraftService.Shared.Classes.Service.Core;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
-namespace MinecraftService.Service.Networking.NetworkStrategies {
+namespace MinecraftService.Service.Networking.NetworkStrategies
+{
     public class LevelEditFile : IMessageParser {
         private readonly ServiceConfigurator _serviceConfiguration;
         private readonly IMinecraftService _mineraftService;
-        private readonly IServerLogger _logger;
+        private readonly MmsLogger _logger;
 
-        public LevelEditFile(ServiceConfigurator serviceConfiguration, IMinecraftService mineraftService, IServerLogger logger) {
+        public LevelEditFile(ServiceConfigurator serviceConfiguration, IMinecraftService mineraftService, MmsLogger logger) {
             _logger = logger;
             _mineraftService = mineraftService;
             _serviceConfiguration = serviceConfiguration;
