@@ -4,9 +4,10 @@ using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
-namespace MinecraftService.Shared.PackParser {
+namespace MinecraftService.Shared.PackParser
+{
     public class MinecraftKnownPacksClass {
         public WorldPackFileModel InstalledResourcePacks;
         public WorldPackFileModel InstalledBehaviorPacks;

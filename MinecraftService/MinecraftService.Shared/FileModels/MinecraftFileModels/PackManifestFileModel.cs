@@ -1,7 +1,7 @@
-﻿using MinecraftService.Shared.Classes;
-using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
+﻿using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
 
-namespace MinecraftService.Shared.FileModels.MinecraftFileModels {
+namespace MinecraftService.Shared.FileModels.MinecraftFileModels
+{
     public class PackManifestFileModel : BaseJsonFile {
         public PackManifestJsonModel Contents { get; set; } = new();
 

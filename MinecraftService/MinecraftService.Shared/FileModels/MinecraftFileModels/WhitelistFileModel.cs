@@ -1,8 +1,8 @@
-﻿using MinecraftService.Shared.Classes;
-using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
+﻿using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
 using System.Collections.Generic;
 
-namespace MinecraftService.Shared.FileModels.MinecraftFileModels {
+namespace MinecraftService.Shared.FileModels.MinecraftFileModels
+{
     public class WhitelistFileModel : BaseJsonFile {
         public List<WhitelistEntryJsonModel> Contents { get; set; } = new();
 

@@ -1,7 +1,8 @@
 ﻿using MinecraftService.Shared.Classes;
+using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.SerializeModels;
 using System.Collections.Generic;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
 namespace MinecraftService.Shared.Interfaces {
     public interface IBaseConfiguration {

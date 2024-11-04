@@ -1,8 +1,6 @@
-﻿using MinecraftService.Shared.Classes;
-using MinecraftService.Shared.FileModels.LiteLoaderFileModels.FileAccessModels;
+﻿using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.FileModels.MinecraftFileModels;
 using MinecraftService.Shared.Interfaces;
-using MinecraftService.Shared.JsonModels.LiteLoaderJsonModels;
 using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
 using MinecraftService.Shared.PackParser;
 using Newtonsoft.Json;
@@ -11,9 +9,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
-namespace MinecraftService.Shared.Utilities {
+namespace MinecraftService.Shared.Utilities
+{
     public class MinecraftFileUtilities {
         public static bool UpdateWorldPackFile(string filePath, PackManifestJsonModel manifest) {
             WorldPackFileModel worldPackFile = new(filePath);
@@ -97,72 +96,6 @@ namespace MinecraftService.Shared.Utilities {
                 });
             permissionsFile.SaveToFile(permissionsFile.Contents);
             whitelistFile.SaveToFile(whitelistFile.Contents);
-        }
-
-        public static void CreateDefaultLoaderConfigFile(IServerConfiguration server) {
-            string configFilePath = GetServerFilePath(ServerFileNameKeys.LLConfig, server);
-            FileInfo fileInfo = new(configFilePath);
-            if (!fileInfo.Directory.Exists) {
-                fileInfo.Directory.Create();
-            }
-            LiteLoaderFileModel configFile = new() { FilePath = configFilePath };
-            LiteLoaderConfigJsonModel configLayout = new() {
-                ColorLog = false,
-                DebugMode = false,
-                Language = "system",
-                LogLevel = 4,
-                Modules = new() {
-                    AddonsHelper = new() { autoInstallPath = "plugins/AddonsHelper", enabled = true },
-                    CheckRunningBDS = new() { enabled = true },
-                    CrashLogger = new() { enabled = true, path = "plugins\\LiteLoader\\CrashLogger.exe" },
-                    DisableAutoCompactionLog = new() { enabled = true },
-                    EconomyCore = new() { enabled = true },
-                    ErrorStackTraceback = new() { enabled = true, cacheSymbol = true },
-                    FixAbility = new() { enabled = true },
-                    FixBDSCrash = new() { enabled = true },
-                    FixBroadcastBug = new() { enabled = true },
-                    FixListenPort = new() { enabled = false },
-                    FixMcBug = new() { enabled = true },
-                    ForceUtf8Input = new() { enabled = false },
-                    OutputFilter = new() { enabled = true, filterRegex = new List<object>(), onlyFilterConsoleOutput = true },
-                    ParticleAPI = new() { enabled = false },
-                    PermissionAPI = new() { enabled = true },
-                    SimpleServerLogger = new() { enabled = true },
-                    TpdimCommand = new() { enabled = true },
-                    UnlockCmd = new() { enabled = true },
-                    UnoccupyPort19132 = new() { enabled = true },
-                    WelcomeText = new() { enabled = false }
-                },
-                ResourcePackEncryption = new() { UUID = "KEY" },
-                ScriptEngine = new() { enabled = true, alwaysLaunch = false },
-                Version = 1
-            };
-            configFile.Contents = configLayout;
-            configFile.SaveToFile();
-        }
-
-        public static void WriteLiteLoaderConfigFile(IServerConfiguration server) {
-            string configFilePath = $@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\plugins\LiteLoader\LiteLoader.json";
-            LiteLoaderFileModel configFile = new() { FilePath = configFilePath };
-        }
-
-        public static LiteLoaderConfigNodeModel LoadLiteLoaderConfigFile(IServerConfiguration server) {
-            if (!File.Exists(GetServerFilePath(ServerFileNameKeys.LLConfig, server))) {
-                CreateDefaultLoaderConfigFile(server);
-            }
-            return new("Root", File.ReadAllText(GetServerFilePath(ServerFileNameKeys.LLConfig, server)));
-        }
-
-        public static void VerifyLiteLoaderCompatableSettings(IProcessInfo processInfo, IServerConfiguration server) {
-            if (server.GetLiteLoaderConfig() == null) {
-                return;
-            }
-            server.GetLiteLoaderConfig().Properties["ColorLog"] = false;
-            if (processInfo.IsDebugEnabled()) {
-                server.GetLiteLoaderConfig().Properties["DebugMode"] = false;
-                server.GetLiteLoaderConfig().GetChildByName("Modules").GetChildByName("CrashLogger").Properties["enabled"] = false;
-            }
-            server.GetLiteLoaderConfig().SaveToFile(GetServerFilePath(ServerFileNameKeys.LLConfig, server));
         }
 
         public static void WriteServerPropsFile(IServerConfiguration server) {

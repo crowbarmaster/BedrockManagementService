@@ -1,11 +1,12 @@
-﻿using MinecraftService.Shared.Classes;
+﻿using MinecraftService.Shared.Classes.Service.Core;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace MinecraftService.Shared.Interfaces {
+namespace MinecraftService.Shared.Interfaces
+{
     public interface IUpdater {
         Task Initialize();
-        void SetNewLogger(IServerLogger logger);
+        void SetNewLogger(MmsLogger logger);
         bool IsInitialized();
         Task CheckLatestVersion();
         List<Property> GetVersionPropList(string version);

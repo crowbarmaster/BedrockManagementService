@@ -1,6 +1,7 @@
-﻿using MinecraftService.Shared.Classes;
+﻿using MinecraftService.Shared.Classes.Networking;
 
-namespace MinecraftService.Shared.SerializeModels {
+namespace MinecraftService.Shared.SerializeModels
+{
     public class ExportImportFileModel {
         public FileTypeFlags FileType;
         public string Filename;

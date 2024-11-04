@@ -1,4 +1,4 @@
-﻿using MinecraftService.Shared.Classes;
+﻿using MinecraftService.Shared.Classes.Service.Core;
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -6,7 +6,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace MinecraftService.Shared.Utilities {
+namespace MinecraftService.Shared.Utilities
+{
     public class ZipUtilities {
 
         private static int RoundOff(int i) {
@@ -19,9 +20,6 @@ namespace MinecraftService.Shared.Utilities {
             int fileCount = archive.Entries.Count;
             for (int i = 0; i < fileCount + 0; i++) {
                 string fixedEntry = archive.Entries[i].FullName;
-                if (fixedEntry.StartsWith("LiteLoaderBDS/")) {
-                    fixedEntry = fixedEntry[14..];
-                }
                 if (jdkName.IsMatch(fixedEntry)) {
                     Match match = jdkName.Match(fixedEntry);
                     fixedEntry = match.Groups[1].Value;

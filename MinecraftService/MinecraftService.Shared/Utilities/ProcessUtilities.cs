@@ -1,13 +1,30 @@
-﻿using MinecraftService.Shared.Classes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using static MinecraftService.Shared.Classes.SharedStringBase;
+using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
-namespace MinecraftService.Shared.Utilities {
+namespace MinecraftService.Shared.Utilities
+{
+    public class RunningJavaProcessInfo {
+        public int ProcessId { get; set; }
+        public string ProcessName { get; set; }
+
+        public RunningJavaProcessInfo(string input) {
+            if (!string.IsNullOrEmpty(input)) {
+                string pid = input[..input.IndexOf(' ')];
+                string name = input[input.IndexOf(' ')..];
+                int outputNum;
+                if (int.TryParse(pid, out outputNum)) {
+                    ProcessId = outputNum;
+                    ProcessName = name;
+                }
+            }
+        }
+    }
+
     public static class ProcessUtilities {
         public static bool MonitoredAppExists(string monitoredAppName) {
             try {
