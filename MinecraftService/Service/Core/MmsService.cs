@@ -8,7 +8,7 @@ using MinecraftService.Shared.Classes.Server.Updaters;
 using MinecraftService.Shared.Classes.Service;
 using MinecraftService.Shared.Classes.Service.Configuration;
 using MinecraftService.Shared.Classes.Service.Core;
-using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
+using MinecraftService.Shared.JsonModels.Minecraft;
 using MinecraftService.Shared.SerializeModels;
 using NCrontab;
 using Newtonsoft.Json.Linq;
@@ -17,19 +17,19 @@ using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
 namespace MinecraftService.Service.Core
 {
-    public class MmsService : IMinecraftService {
+    public class MmsService : ServiceControl {
         private readonly ServiceConfigurator _serviceConfiguration;
         private readonly MmsLogger _logger;
         private readonly ProcessInfo _processInfo;
         private readonly UserConfigManager _configurator;
-        private readonly ITCPListener _tCPListener;
+        private readonly ITCPObject _tCPListener;
         private DateTime _upTime;
         private UpdaterContainer _updaterContainer;
         private List<IServerController> _loadedServers { get; set; } = new();
         private ServiceStatus _CurrentServiceStatus { get; set; }
         private Dictionary<MinecraftServerArch, IUpdater> _serverUpdaters { get; set; } = new();
 
-        public MmsService(UserConfigManager configurator, MmsLogger logger, ServiceConfigurator serviceConfiguration, ProcessInfo serviceProcessInfo, ITCPListener tCPListener, UpdaterContainer updaters) {
+        public MmsService(UserConfigManager configurator, MmsLogger logger, ServiceConfigurator serviceConfiguration, ProcessInfo serviceProcessInfo, ITCPObject tCPListener, UpdaterContainer updaters) {
             _tCPListener = tCPListener;
             _configurator = configurator;
             _logger = logger;

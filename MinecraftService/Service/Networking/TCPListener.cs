@@ -4,13 +4,15 @@ using MinecraftService.Shared.Classes.Server;
 using MinecraftService.Shared.Classes.Service;
 using MinecraftService.Shared.Classes.Service.Configuration;
 using MinecraftService.Shared.Classes.Service.Core;
+using Newtonsoft.Json;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
 namespace MinecraftService.Service.Networking
 {
-    public class TCPListener : ITCPListener {
+    public class TCPListener : ITCPObject {
         private TcpClient? _client;
         private TcpListener? _inListener;
         private NetworkStream? _stream;
@@ -18,8 +20,7 @@ namespace MinecraftService.Service.Networking
         private readonly MmsLogger _logger;
         private int _heartbeatFailTimeout;
         private readonly int _heartbeatFailTimeoutLimit = 2;
-        private Dictionary<NetworkMessageTypes, IMessageParser>? _standardMessageLookup;
-        private Dictionary<NetworkMessageTypes, IFlaggedMessageParser>? _flaggedMessageLookup;
+        private Dictionary<MessageTypes, IMessageParser>? _messageLookup;
         private readonly IPAddress _ipAddress = IPAddress.Parse("0.0.0.0");
         private CancellationTokenSource _cancelTokenSource = new();
         private Task? _tcpTask;
@@ -38,7 +39,7 @@ namespace MinecraftService.Service.Networking
             if (!_resettingListener) {
                 ResetListener().Wait();
                 if (_tcpTask == null) {
-                    _tcpTask = StartListening();
+                    _tcpTask = Begin();
                     _recieverTask = IncomingListener();
                     _tcpTask.Start();
                     _resettingListener = false;
@@ -47,12 +48,12 @@ namespace MinecraftService.Service.Networking
             }
         }
 
-        public Task StartListening() {
+        public Task Begin() {
             return new Task(() => {
                 _inListener = new TcpListener(_ipAddress, _serviceConfiguration.GetProp(ServicePropertyKeys.ClientPort).GetIntValue());
                 try {
 
-                    while (_standardMessageLookup == null) { Task.Delay(100).Wait(); }
+                    while (_messageLookup == null) { Task.Delay(100).Wait(); }
                     _inListener.Start();
                 } catch (SocketException e) {
                     _logger.AppendLine($"Error! {e.Message}");
@@ -76,7 +77,7 @@ namespace MinecraftService.Service.Networking
                                     TcpClient tempClient = _inListener.AcceptTcpClientAsync(_cancelTokenSource.Token).Result;
                                     if (tempClient != null) {
                                         _logger.AppendLine("Client connected before ready, or client already active. Rejected!");
-                                        tempClient.GetStream().Write(CreatePacketHeader(new byte[0], NetworkMessageSource.Service, NetworkMessageDestination.Client, 0, NetworkMessageTypes.ClientReject, NetworkMessageFlags.None));
+                                        tempClient.GetStream().Write((new Message { Type = MessageTypes.ClientReject }).GetMessageBytes());
                                         tempClient.GetStream().Flush();
                                         tempClient.GetStream().Close();
                                     }
@@ -113,9 +114,8 @@ namespace MinecraftService.Service.Networking
             });
         }
 
-        public void SetStrategyDictionaries(Dictionary<NetworkMessageTypes, IMessageParser> standard, Dictionary<NetworkMessageTypes, IFlaggedMessageParser> flagged) {
-            _standardMessageLookup = standard;
-            _flaggedMessageLookup = flagged;
+        public void SetStrategies(Dictionary<MessageTypes, IMessageParser> strategies) {
+            _messageLookup = strategies;
         }
 
         public void SetServiceStarted() => _serviceStarted = true;
@@ -142,12 +142,12 @@ namespace MinecraftService.Service.Networking
             });
         }
 
-        private void SendData(byte[] bytesToSend, NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type, NetworkMessageFlags status) {
-            byte[] byteHeader = CreatePacketHeader(bytesToSend, source, destination, serverIndex, type, status);
+        private void SendData(Message message) {
+            byte[] sendBytes = message.GetMessageBytes();
 
             if (_tcpTask?.Status == TaskStatus.Running && _recieverTask?.Status == TaskStatus.Running && !_cancelTokenSource.IsCancellationRequested) {
                 try {
-                    _stream.Write(byteHeader, 0, byteHeader.Length);
+                    _stream.Write(sendBytes, 0, sendBytes.Length);
                     _stream.Flush();
                     _heartbeatFailTimeout = 0;
                 } catch {
@@ -164,35 +164,14 @@ namespace MinecraftService.Service.Networking
             }
         }
 
-        private static byte[] CreatePacketHeader(byte[] bytesToSend, NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type, NetworkMessageFlags status) {
-            byte[] byteHeader = new byte[9 + bytesToSend.Length];
-            byte[] len = BitConverter.GetBytes(5 + bytesToSend.Length);
-            Buffer.BlockCopy(len, 0, byteHeader, 0, 4);
-            byteHeader[4] = (byte)source;
-            byteHeader[5] = (byte)destination;
-            byteHeader[6] = serverIndex;
-            byteHeader[7] = (byte)type;
-            byteHeader[8] = (byte)status;
-            Buffer.BlockCopy(bytesToSend, 0, byteHeader, 9, bytesToSend.Length);
-            return byteHeader;
-        }
-
-        private void SendData((byte[] data, byte srvIndex, NetworkMessageTypes type) tuple) => SendData(tuple.data, NetworkMessageSource.Service, NetworkMessageDestination.Client, tuple.srvIndex, tuple.type, NetworkMessageFlags.None);
-
-        private void SendData(NetworkMessageTypes type) => SendData(Array.Empty<byte>(), NetworkMessageSource.Service, NetworkMessageDestination.Client, 0, type, NetworkMessageFlags.None);
-
         private Task IncomingListener() {
             return new Task(() => {
                 _logger.AppendLine("TCP Client packet listener started.");
                 int byteCount = 0;
-                NetworkMessageSource msgSource = 0;
-                NetworkMessageDestination msgDest = 0;
-                byte serverIndex = 0xFF;
-                NetworkMessageTypes msgType = 0;
-                NetworkMessageFlags msgFlag = 0;
+                Message incomingMsg = new();
                 while (!_cancelTokenSource.IsCancellationRequested) {
                     try {
-                        SendData(NetworkMessageTypes.Heartbeat);
+                        SendData(Message.Heartbeat);
                         byte[] buffer = new byte[4];
                         while (_client?.Client != null && _client.Client.Available != 0) // Recieve data from client.
                         {
@@ -200,26 +179,27 @@ namespace MinecraftService.Service.Networking
                             int expectedLen = BitConverter.ToInt32(buffer, 0);
                             buffer = new byte[expectedLen];
                             byteCount = _stream.Read(buffer, 0, expectedLen);
-                            msgSource = (NetworkMessageSource)buffer[0];
-                            msgDest = (NetworkMessageDestination)buffer[1];
-                            serverIndex = buffer[2];
-                            msgType = (NetworkMessageTypes)buffer[3];
-                            msgFlag = (NetworkMessageFlags)buffer[4];
-                            if (msgType == NetworkMessageTypes.Disconnect) {
+                            try {
+                                incomingMsg = new Message(buffer);
+                            } catch (Exception ex) {
+                                _logger.AppendLine(ex.Message);
+                            }
+                            if (incomingMsg == Message.Empty()) {
+                                continue;
+                            }
+                            if (incomingMsg.Type == MessageTypes.Disconnect) {
                                 Task.Run(Initialize);
                             }
-                            if (msgType < NetworkMessageTypes.Heartbeat) {
+                            if (incomingMsg.Type < MessageTypes.Heartbeat) {
                                 try {
-                                    while (_standardMessageLookup == null || _flaggedMessageLookup == null) {
+                                    while (_messageLookup == null) {
                                         Task.Delay(100).Wait();
                                     }
-                                    if (_standardMessageLookup.ContainsKey(msgType))
-                                        SendData(_standardMessageLookup[msgType].ParseMessage(buffer, serverIndex));
-                                    else
-                                        SendData(_flaggedMessageLookup[msgType].ParseMessage(buffer, serverIndex, msgFlag));
+                                    if (_messageLookup.ContainsKey(incomingMsg.Type))
+                                        SendData(_messageLookup[incomingMsg.Type].ParseMessage(incomingMsg));
 
                                 } catch (Exception e) {
-                                    _logger.AppendLine($"TCPListener ParseMessage (MsgType: {msgType}) event caught error:\n{e.Message}\n{e.StackTrace}");
+                                    _logger.AppendLine($"TCPListener ParseMessage (MsgType: {incomingMsg.Type}) event caught error:\n{e.Message}\n{e.StackTrace}");
                                 }
                             }
                         }
@@ -229,7 +209,7 @@ namespace MinecraftService.Service.Networking
                     } catch (ObjectDisposedException) {
                         _logger.AppendLine("Client was disposed!");
                     } catch (InvalidOperationException e) {
-                        if (msgType != NetworkMessageTypes.ConsoleLogUpdate) {
+                        if (incomingMsg.Type != MessageTypes.ConsoleLogUpdate) {
                             _logger.AppendLine(e.Message);
                             _logger.AppendLine(e.StackTrace);
                         }

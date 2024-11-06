@@ -1,7 +1,7 @@
 ﻿using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.FileModels.MinecraftFileModels;
 using MinecraftService.Shared.Interfaces;
-using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
+using MinecraftService.Shared.JsonModels.Minecraft;
 using MinecraftService.Shared.PackParser;
 using Newtonsoft.Json;
 using System;

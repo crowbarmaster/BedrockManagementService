@@ -8,16 +8,11 @@ using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.Interfaces;
 
 namespace MinecraftService.Client.Networking.NetworkStrategies {
-    public class Backup : INetworkMessage {
-        private readonly MmsLogger _logger;
+    public class Backup(MmsLogger logger) : INetworkMessage {
 
-        public Backup(MmsLogger logger) {
-            _logger = logger;
-        }
-
-        public Task<bool> ProcessMessage(byte[] messageData) => Task.Run(() => {
-            NetworkMessageFlags msgStatus = (NetworkMessageFlags)messageData[4];
-            _logger.AppendLine(msgStatus.ToString());
+        public Task<bool> ProcessMessage(Message message) => Task.Run(() => {
+            MessageFlags msgStatus = (MessageFlags)message.Data[4];
+            logger.AppendLine(msgStatus.ToString());
             return true;
         });
     }

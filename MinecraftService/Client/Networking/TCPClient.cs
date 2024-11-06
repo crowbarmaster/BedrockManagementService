@@ -35,7 +35,7 @@ namespace MinecraftService.Client.Networking {
         private const int _heartbeatFailTimeoutLimit = 2;
         private const int _heartbeatFireInterval = 300;
         private readonly MmsLogger _logger;
-        private readonly Dictionary<NetworkMessageTypes, INetworkMessage> _messageLookupContainer;
+        private readonly Dictionary<MessageTypes, INetworkMessage> _messageLookupContainer;
         private readonly System.Timers.Timer _heartbeatTimer;
         ProgressDialog _progressDialog = new(null);
 
@@ -48,7 +48,7 @@ namespace MinecraftService.Client.Networking {
 
         public void ConnectHost(ClientSideServiceConfiguration host) {
             if (EstablishConnection(host.GetAddress(), int.Parse(host.GetPort()))) {
-                SendData(NetworkMessageTypes.Connect);
+                SendData(Message.Connect);
                 return;
             }
         }
@@ -99,11 +99,8 @@ namespace MinecraftService.Client.Networking {
                 _heartbeatTimer.Stop();
                 return;
             }
-            SendData(NetworkMessageTypes.Heartbeat);
-            NetworkMessageSource source = 0;
-            NetworkMessageDestination destination = 0;
-            byte serverIndex = 0;
-            NetworkMessageTypes msgType = 0;
+            SendData(Message.Heartbeat);
+            Message incomingMsg = new();
             try {
                 byte[] buffer = new byte[4];
                 while (OpenedTcpClient.Client.Available > 0) {
@@ -135,46 +132,32 @@ namespace MinecraftService.Client.Networking {
                     } else {
                         byteCount = stream.Read(buffer, 0, expectedLen);
                     }
-                    source = (NetworkMessageSource)buffer[0];
-                    destination = (NetworkMessageDestination)buffer[1];
-                    serverIndex = buffer[2];
-                    msgType = (NetworkMessageTypes)buffer[3];
-                    NetworkMessageFlags msgStatus = (NetworkMessageFlags)buffer[4];
-                    string data = "";
-                    if (msgType != NetworkMessageTypes.PackFile || msgType != NetworkMessageTypes.LevelEditFile)
-                        data = GetOffsetString(buffer);
-                    if (FormManager.MainWindow.ConfigManager.DebugNetworkOutput) {
-                        _logger.AppendLine($@"Network msg: {source} * {destination} * {msgType} * {msgStatus} * {serverIndex}");
-                        _logger.AppendLine($@"Data: {data}");
-                    }
-                    if (destination != NetworkMessageDestination.Client) {
+                    incomingMsg = new Message(buffer);
+                    if (incomingMsg == Message.Empty()) {
                         continue;
                     }
-                    if (_messageLookupContainer != null && _messageLookupContainer.ContainsKey(msgType) && _messageLookupContainer[msgType].ProcessMessage(buffer).Result) {
+                    if (incomingMsg.Type != MessageTypes.PackFile || incomingMsg.Type != MessageTypes.LevelEditFile)
+                    if (FormManager.MainWindow.ConfigManager.DebugNetworkOutput) {
+                        _logger.AppendLine($@"Network msg: {incomingMsg.Type} * {incomingMsg.Flag} * {incomingMsg.ServerIndex}");
+                        _logger.AppendLine($@"Data: {incomingMsg.GetDataString()}");
+                    }
+                    if (_messageLookupContainer != null && _messageLookupContainer.ContainsKey(incomingMsg.Type) && _messageLookupContainer[incomingMsg.Type].ProcessMessage(incomingMsg).Result) {
                         if (FormManager.MainWindow.ConfigManager.DebugNetworkOutput) {
                             _logger.AppendLine($@"Network message processed - success.");
                         }
                     }
                 }
             } catch (Exception e) {
-                _logger.AppendLine($"TCPClient error! MsgSource: {source} ServerIndex: {serverIndex} MsgType: {msgType} Stacktrace: {e.Message}\n{e.StackTrace}");
+                _logger.AppendLine($"TCPClient error! ServerIndex: {incomingMsg.ServerIndex} MsgType: {Enum.GetName(incomingMsg.Type)} Stacktrace: {e.Message}\n{e.StackTrace}");
                 _heartbeatTimer.Enabled = true;
             }
         }
 
-        public bool SendData(byte[] bytes, NetworkMessageSource source, NetworkMessageDestination destination, byte serverIndex, NetworkMessageTypes type, NetworkMessageFlags status) {
-            byte[] compiled = new byte[9 + bytes.Length];
-            byte[] len = BitConverter.GetBytes(5 + bytes.Length);
-            Buffer.BlockCopy(len, 0, compiled, 0, 4);
-            compiled[4] = (byte)source;
-            compiled[5] = (byte)destination;
-            compiled[6] = serverIndex;
-            compiled[7] = (byte)type;
-            compiled[8] = (byte)status;
-            Buffer.BlockCopy(bytes, 0, compiled, 9, bytes.Length);
+        public bool SendData(Message message) {
+            byte[] sendBtytes = message.GetMessageBytes();
             if (EstablishedLink) {
                 try {
-                    stream.Write(compiled, 0, compiled.Length);
+                    stream.Write(sendBtytes, 0, sendBtytes.Length);
                     stream.Flush();
                     _heartbeatFailTimeout = 0;
                     return true;
@@ -194,18 +177,6 @@ namespace MinecraftService.Client.Networking {
             return false;
         }
 
-        public void SendData(NetworkMessageTypes type) => SendData(new byte[0], NetworkMessageSource.Client, NetworkMessageDestination.Service, 0xFF, type, NetworkMessageFlags.None);
-
-        public void SendData(byte serverIndex, NetworkMessageTypes type) => SendData(new byte[0], NetworkMessageSource.Client, NetworkMessageDestination.Service, serverIndex, type, NetworkMessageFlags.None);
-
-        public void SendData(byte serverIndex, NetworkMessageTypes type, NetworkMessageFlags flag) => SendData(new byte[0], NetworkMessageSource.Client, NetworkMessageDestination.Service, serverIndex, type, flag);
-
-        public void SendData(byte[] bytes, byte serverIndex, NetworkMessageTypes type) => SendData(bytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, serverIndex, type, NetworkMessageFlags.None);
-
-        public void SendData(byte[] bytes, NetworkMessageTypes type) => SendData(bytes, NetworkMessageSource.Client, NetworkMessageDestination.Service, 0xFF, type, NetworkMessageFlags.None);
-
-        public void SendData(NetworkMessageSource source, NetworkMessageDestination destination, NetworkMessageTypes type, NetworkMessageFlags status) => SendData(new byte[0], source, destination, 0xFF, type, status);
-
         public void Dispose() {
             if (_netCancelSource != null) {
                 _netCancelSource.Cancel();
@@ -219,7 +190,5 @@ namespace MinecraftService.Client.Networking {
             }
 
         }
-
-        private string GetOffsetString(byte[] array) => Encoding.UTF8.GetString(array, 5, array.Length - 5);
     }
 }

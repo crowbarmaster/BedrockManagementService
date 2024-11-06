@@ -1,6 +1,6 @@
 ﻿using MinecraftService.Shared.FileModels.MinecraftFileModels;
 using MinecraftService.Shared.Interfaces;
-using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
+using MinecraftService.Shared.JsonModels.Minecraft;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;

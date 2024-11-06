@@ -4,12 +4,13 @@
 
 using System.Threading.Tasks;
 using MinecraftService.Client.Management;
+using MinecraftService.Shared.Classes.Networking;
 
 namespace MinecraftService.Client.Networking.NetworkStrategies {
     public class BackupCallback : INetworkMessage {
 
-        public Task<bool> ProcessMessage(byte[] messageData) => Task.Run(() => {
-            bool rollbackPassed = messageData[5] == 1;
+        public Task<bool> ProcessMessage(Message message) => Task.Run(() => {
+            bool rollbackPassed = message.Flag == MessageFlags.Passed;
             FormManager.MainWindow.BackupRollbackCompleted(rollbackPassed);
             FormManager.MainWindow.ServerBusy = false;
             return true;

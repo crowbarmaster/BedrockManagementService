@@ -10,24 +10,24 @@ using MinecraftService.Shared.Interfaces;
 
 namespace MinecraftService.Client.Networking {
     internal class NetworkMessageLookup {
-        public Dictionary<NetworkMessageTypes, INetworkMessage> MessageLookupContainer { get; set; }
+        public Dictionary<MessageTypes, INetworkMessage> MessageLookupContainer { get; set; }
 
         public NetworkMessageLookup(MmsLogger logger, TCPClient client) {
-            MessageLookupContainer = new Dictionary<NetworkMessageTypes, INetworkMessage>() {
-                { NetworkMessageTypes.Connect, new ClientConnect(logger, client) },
-                { NetworkMessageTypes.EnumBackups, new EnumBackups() },
-                { NetworkMessageTypes.CheckUpdates, new UnlockUI() },
-                { NetworkMessageTypes.UICallback, new UnlockUI() },
-                { NetworkMessageTypes.BackupCallback, new BackupCallback() },
-                { NetworkMessageTypes.VersionListRequest, new VersionListRequest() },
-                { NetworkMessageTypes.ConsoleLogUpdate, new ConsoleLogUpdate(logger) },
-                { NetworkMessageTypes.Backup, new Backup(logger) },
-                { NetworkMessageTypes.PackList, new PackList() },
-                { NetworkMessageTypes.PlayersRequest, new PlayersRequest() },
-                { NetworkMessageTypes.LevelEditFile, new LevelEditFile() },
-                { NetworkMessageTypes.ServerStatusRequest, new ServerStatusRequest() },
-                { NetworkMessageTypes.ClientReject, new ClientReject() },
-                { NetworkMessageTypes.ExportFile, new ExportFile() }
+            MessageLookupContainer = new Dictionary<MessageTypes, INetworkMessage>() {
+                { MessageTypes.Connect, new ClientConnect(logger, client) },
+                { MessageTypes.EnumBackups, new EnumBackups() },
+                { MessageTypes.CheckUpdates, new UnlockUI() },
+                { MessageTypes.UICallback, new UnlockUI() },
+                { MessageTypes.BackupCallback, new BackupCallback() },
+                { MessageTypes.VersionListRequest, new VersionListRequest() },
+                { MessageTypes.ConsoleLogUpdate, new ConsoleLogUpdate(logger) },
+                { MessageTypes.Backup, new Backup(logger) },
+                { MessageTypes.PackList, new PackList() },
+                { MessageTypes.PlayersRequest, new PlayersRequest() },
+                { MessageTypes.LevelEditFile, new LevelEditFile() },
+                { MessageTypes.ServerStatusRequest, new ServerStatusRequest() },
+                { MessageTypes.ClientReject, new ClientReject() },
+                { MessageTypes.ExportFile, new ExportFile() }
             };
         }
     }

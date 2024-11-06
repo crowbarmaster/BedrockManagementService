@@ -6,20 +6,16 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using MinecraftService.Client.Management;
+using MinecraftService.Shared.Classes.Networking;
 using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.Interfaces;
 using MinecraftService.Shared.SerializeModels;
 
 namespace MinecraftService.Client.Networking.NetworkStrategies {
-    public class ConsoleLogUpdate : INetworkMessage {
-        private readonly MmsLogger _logger;
+    public class ConsoleLogUpdate(MmsLogger logger) : INetworkMessage {
 
-        public ConsoleLogUpdate(MmsLogger logger) {
-            _logger = logger;
-        }
-
-        public Task<bool> ProcessMessage(byte[] messageData) => Task.Run(() => {
-            string data = Encoding.UTF8.GetString(messageData, 5, messageData.Length - 5);
+        public Task<bool> ProcessMessage(Message message) => Task.Run(() => {
+            string data = Encoding.UTF8.GetString(message.Data, 5, message.Data.Length - 5);
             try {
                 string[] strings = data.Split("|?|");
                 for (int i = 0; i < strings.Length; i++) {
@@ -41,7 +37,7 @@ namespace MinecraftService.Client.Networking.NetworkStrategies {
                     }
                 }
             } catch (Exception e) {
-                _logger.AppendLine($"Error updating logs: {e.Message}");
+                logger.AppendLine($"Error updating logs: {e.Message}");
                 return false;
             }
             return true;

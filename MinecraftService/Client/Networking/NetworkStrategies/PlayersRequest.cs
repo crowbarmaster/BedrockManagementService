@@ -8,16 +8,17 @@ using System.Threading.Tasks;
 using MinecraftService.Client.Management;
 using MinecraftService.Shared.Classes.Server;
 using MinecraftService.Shared.Classes.Service.Core;
+using MinecraftService.Shared.Classes.Networking;
 using MinecraftService.Shared.Interfaces;
 using Newtonsoft.Json;
 
 namespace MinecraftService.Client.Networking.NetworkStrategies {
     public class PlayersRequest : INetworkMessage {
 
-        public Task<bool> ProcessMessage(byte[] messageData) => Task.Run(() => {
-            string data = Encoding.UTF8.GetString(messageData, 5, messageData.Length - 5);
+        public Task<bool> ProcessMessage(Message message) => Task.Run(() => {
+            string data = Encoding.UTF8.GetString(message.Data, 5, message.Data.Length - 5);
             List<Player> fetchedPlayers = JsonConvert.DeserializeObject<List<Player>>(data, SharedStringBase.GlobalJsonSerialierSettings);
-            FormManager.MainWindow.RecievePlayerData(messageData[2], fetchedPlayers);
+            FormManager.MainWindow.RecievePlayerData(message.Data[2], fetchedPlayers);
             return true;
         });
     }

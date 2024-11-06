@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace MinecraftService.Shared.JsonModels.MinecraftJsonModels {
+namespace MinecraftService.Shared.JsonModels.Minecraft {
     public class PackManifestJsonModel {
         public int format_version { get; set; }
         public Header header { get; set; }

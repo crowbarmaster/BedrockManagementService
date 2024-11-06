@@ -1,4 +1,5 @@
 ﻿
+using MinecraftService.Service.Core;
 using MinecraftService.Service.Networking.Interfaces;
 using MinecraftService.Shared.Classes.Networking;
 using MinecraftService.Shared.Classes.Service;
@@ -9,26 +10,14 @@ using System.Text;
 
 namespace MinecraftService.Service.Networking.NetworkStrategies
 {
-    public class RemoveServer : IFlaggedMessageParser {
+    public class RemoveServer(UserConfigManager configurator, ServiceConfigurator serviceConfiguration, MmsService mineraftService) : IMessageParser {
 
-        private readonly ServiceConfigurator _serviceConfiguration;
-        private readonly UserConfigManager _configurator;
-        private readonly IMinecraftService _mineraftService;
-
-        public RemoveServer(UserConfigManager configurator, ServiceConfigurator serviceConfiguration, IMinecraftService mineraftService) {
-            this._mineraftService = mineraftService;
-            _configurator = configurator;
-
-            _serviceConfiguration = serviceConfiguration;
-        }
-
-        public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex, NetworkMessageFlags flag) {
-            _mineraftService.GetServerByIndex(serverIndex).ServerStop(true).Wait();
-            _configurator.RemoveServerConfigs(_serviceConfiguration.GetServerInfoByIndex(serverIndex), flag).Wait();
-            _mineraftService.RemoveServerInfoByIndex(serverIndex);
-            byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_serviceConfiguration, Formatting.Indented, SharedStringBase.GlobalJsonSerialierSettings));
-            return (serializeToBytes, 0, NetworkMessageTypes.Connect);
-
+        public Message ParseMessage(Message message) {
+            mineraftService.GetServerByIndex(message.ServerIndex).ServerStop(true).Wait();
+            configurator.RemoveServerConfigs(serviceConfiguration.GetServerInfoByIndex(message.ServerIndex), message.Flag).Wait();
+            mineraftService.RemoveServerInfoByIndex(message.ServerIndex);
+            byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(serviceConfiguration, Formatting.Indented, SharedStringBase.GlobalJsonSerialierSettings));
+            return new(serializeToBytes, 0, MessageTypes.Connect);
         }
     }
 }

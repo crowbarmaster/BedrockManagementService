@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MinecraftService.Shared.JsonModels.MinecraftJsonModels {
+namespace MinecraftService.Shared.JsonModels.Minecraft {
     public class WhitelistEntryJsonModel {
         public bool ignoresPlayerLimit { get; set; }
         public string name { get; set; }

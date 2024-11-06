@@ -9,9 +9,11 @@ using MinecraftService.Client.Management;
 namespace MinecraftService.Client.Networking.NetworkStrategies {
     public class ClientReject : INetworkMessage {
 
-        public Task<bool> ProcessMessage(byte[] _) => Task.Run(() => {
-            FormManager.MainWindow.Invoke((MethodInvoker)delegate { FormManager.MainWindow.ServerInfoBox.Text = "Connection attempt rejected by Service!"; });
-            FormManager.MainWindow.Invoke((MethodInvoker)delegate { FormManager.MainWindow.HostInfoLabel.Text = "Connection attempt rejected by Service!"; });
+        public Task<bool> ProcessMessage(Shared.Classes.Networking.Message _) => Task.Run(() => {
+            FormManager.MainWindow.Invoke((MethodInvoker)delegate { 
+                FormManager.MainWindow.ServerInfoBox.Text = "Connection attempt rejected by Service!";
+                FormManager.MainWindow.HostInfoLabel.Text = "Connection attempt rejected by Service!";
+            });
             return true;
         });
     }

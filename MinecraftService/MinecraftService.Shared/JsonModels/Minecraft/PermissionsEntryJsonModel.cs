@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MinecraftService.Shared.JsonModels.MinecraftJsonModels {
+namespace MinecraftService.Shared.JsonModels.Minecraft {
     public class PermissionsEntryJsonModel {
         public string permission { get; set; }
         public string xuid { get; set; }

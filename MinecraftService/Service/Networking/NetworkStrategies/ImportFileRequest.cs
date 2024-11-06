@@ -11,18 +11,10 @@ using System.Text;
 
 namespace MinecraftService.Service.Networking.NetworkStrategies
 {
-    public class ImportFileRequest : IMessageParser {
-        private readonly ServiceConfigurator _configuration;
-        private readonly ProcessInfo _processInfo;
-        private readonly UserConfigManager _configurator;
-        public ImportFileRequest(UserConfigManager configurator, ProcessInfo processInfo, ServiceConfigurator configuration) {
-            _configuration = configuration;
-            _processInfo = processInfo;
-            _configurator = configurator;
-        }
+    public class ImportFileRequest(UserConfigManager configurator, ProcessInfo processInfo, ServiceConfigurator configuration) : IMessageParser {
 
-        public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
-            ExportImportFileModel fileModel = JsonConvert.DeserializeObject<ExportImportFileModel>(Encoding.UTF8.GetString(data));
+        public Message ParseMessage(Message message) {
+            ExportImportFileModel fileModel = JsonConvert.DeserializeObject<ExportImportFileModel>(Encoding.UTF8.GetString(message.Data));
             switch (fileModel.FileType) {
                 case FileTypeFlags.ServerPackage:
                     MemoryStream ms = new(fileModel.Data);
@@ -33,7 +25,7 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
                     ZipArchiveEntry playerRegFile = null;
 
                     foreach (ZipArchiveEntry entry in zipArchive.Entries) {
-                        if (entry.Name.Contains(".conf") && !entry.Name.Contains("Service.conf")) {
+                        if (entry.Name.Contains(".conf") && !entry.Name.Equals("Service.conf")) {
                             serverConfFile = entry;
                         }
                         if (entry.Name.Contains("Backup-")) {
@@ -48,14 +40,14 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
                     }
                     if (serverConfFile != null) {
                         // serverConfFile.ExtractToFile()
-                        return (null, 0, NetworkMessageTypes.Heartbeat);
+                        return new Message { Type = MessageTypes.Heartbeat };
                     }
                     break;
                 case FileTypeFlags.ServicePackage:
-                    return (null, 0, NetworkMessageTypes.Heartbeat);
+                    return new Message { Type = MessageTypes.Heartbeat };
                     break;
             }
-            return (null, 0, NetworkMessageTypes.Heartbeat);
+            return new Message { Type = MessageTypes.Heartbeat };
         }
     }
 }

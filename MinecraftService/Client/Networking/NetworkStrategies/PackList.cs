@@ -6,15 +6,16 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using MinecraftService.Client.Management;
+using MinecraftService.Shared.Classes.Networking;
 using MinecraftService.Shared.PackParser;
 using Newtonsoft.Json.Linq;
 
 namespace MinecraftService.Client.Networking.NetworkStrategies {
     public class PackList : INetworkMessage {
 
-        public Task<bool> ProcessMessage(byte[] messageData) => Task.Run(() => {
-            byte serverIndex = messageData[2];
-            string data = Encoding.UTF8.GetString(messageData, 5, messageData.Length - 5);
+        public Task<bool> ProcessMessage(Message message) => Task.Run(() => {
+            byte serverIndex = message.ServerIndex;
+            string data = Encoding.UTF8.GetString(message.Data);
             List<MinecraftPackContainer> temp = new();
             JArray jArray = JArray.Parse(data);
             foreach (JToken token in jArray)

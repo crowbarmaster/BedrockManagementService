@@ -14,12 +14,12 @@ namespace MMS_Tests.ServiceTests {
         public class TestFixture : IDisposable {
 
             public IHost Host;
-            public IMinecraftService MinecraftService;
+            public MmsService MinecraftService;
             public JsonSerializerSettings SerializerSettings = new() { TypeNameHandling = TypeNameHandling.All };
 
             public TestFixture() {
                 Host = Program.CreateHostBuilder(new string[] { }).Build();
-                MinecraftService = Host.Services.GetRequiredService<IMinecraftService>();
+                MinecraftService = Host.Services.GetRequiredService<MmsService>();
             }
 
             public async Task StartFixture() {
@@ -51,7 +51,7 @@ namespace MMS_Tests.ServiceTests {
             [Fact]
             public async Task Verify_Service_Startup() {
                 Assert.Equal(ServiceStatus.Stopped, _testFixture.MinecraftService.GetServiceStatus().ServiceStatus);
-                await _testFixture.StartFixture().Wait();
+                await _testFixture.StartFixture();
                 Assert.Equal(ServiceStatus.Started, _testFixture.MinecraftService.GetServiceStatus().ServiceStatus);
             }
 

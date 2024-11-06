@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace MinecraftService.Shared.JsonModels.GitHubApiJsonModels {
+namespace MinecraftService.Shared.JsonModels.GitHubApi {
     public class GitHubReleaseListJsonModel {
         public string url { get; set; }
         public string assets_url { get; set; }

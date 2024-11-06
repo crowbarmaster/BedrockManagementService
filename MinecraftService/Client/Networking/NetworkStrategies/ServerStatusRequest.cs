@@ -13,15 +13,17 @@ using Newtonsoft.Json;
 namespace MinecraftService.Client.Networking.NetworkStrategies {
     public class ServerStatusRequest : INetworkMessage {
 
-        public Task<bool> ProcessMessage(byte[] messageData) => Task.Run(() => {
-            string data = Encoding.UTF8.GetString(messageData, 5, messageData.Length - 5);
-            StatusUpdateModel status = JsonConvert.DeserializeObject<StatusUpdateModel>(data, SharedStringBase.GlobalJsonSerialierSettings);
+        public Task<bool> ProcessMessage(Message message) => Task.Run(() => {
+            StatusUpdateModel status = JsonConvert.DeserializeObject<StatusUpdateModel>(Encoding.UTF8.GetString(message.Data), SharedStringBase.GlobalJsonSerialierSettings);
             if (status != null && status.ServerStatusModel != null && status.ServerStatusModel.ServerIndex != 255 && FormManager.MainWindow.SelectedServer != null) {
                 ServerStatusModel formerServerStatus = FormManager.MainWindow.SelectedServer.GetStatus();
                 if (!status.ServerStatusModel.Equals(formerServerStatus)) {
                     FormManager.MainWindow.connectedHost.GetServerInfoByIndex(status.ServerStatusModel.ServerIndex).SetStatus(status.ServerStatusModel);
                     FormManager.MainWindow.Invoke(() => FormManager.MainWindow.RefreshAllCompenentStates());
-                    FormManager.TCPClient.SendData(messageData[2], NetworkMessageTypes.EnumBackups);
+                    FormManager.TCPClient.SendData(new() {
+                        ServerIndex = message.ServerIndex,
+                        Type = MessageTypes.EnumBackups
+                    });
                 }
                 FormManager.MainWindow.ServiceStatus = status.ServiceStatusModel;
             }

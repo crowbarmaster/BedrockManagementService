@@ -1,11 +1,12 @@
 ﻿
+using MinecraftService.Service.Core;
 using MinecraftService.Service.Networking.Interfaces;
 using MinecraftService.Service.Server.Interfaces;
 using MinecraftService.Shared.Classes.Networking;
 using MinecraftService.Shared.Classes.Service;
 using MinecraftService.Shared.Classes.Service.Configuration;
 using MinecraftService.Shared.Classes.Service.Core;
-using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
+using MinecraftService.Shared.JsonModels.Minecraft;
 using MinecraftService.Shared.SerializeModels;
 using Newtonsoft.Json;
 using System.IO.Compression;
@@ -14,37 +15,27 @@ using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
 namespace MinecraftService.Service.Networking.NetworkStrategies
 {
-    public class ExportFileRequest : IMessageParser {
-        private readonly ServiceConfigurator _configuration;
-        private readonly IMinecraftService _minecraftService;
-        private readonly UserConfigManager _configurator;
-        private readonly MmsLogger _logger;
-        public ExportFileRequest(UserConfigManager configurator, IMinecraftService minecraftService, ServiceConfigurator configuration, MmsLogger logger) {
-            _minecraftService = minecraftService;
-            _configuration = configuration;
-            _configurator = configurator;
-            _logger = logger;
-        }
+    public class ExportFileRequest(UserConfigManager configurator, MmsService minecraftService, ServiceConfigurator configuration, MmsLogger logger) : IMessageParser {
 
-        public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
-            string jsonString = Encoding.UTF8.GetString(data, 5, data.Length - 5);
+        public Message ParseMessage(Message message) {
+            string jsonString = Encoding.UTF8.GetString(message.Data, 5, message.Data.Length - 5);
             ExportImportFileModel exportFileInfo = JsonConvert.DeserializeObject<ExportImportFileModel>(jsonString);
             if (exportFileInfo == null) {
-                return (null, 0, 0);
+                return new();
             }
             using MemoryStream ms = new();
             using ZipArchive packageFile = new(ms, ZipArchiveMode.Create);
             byte[]? exportData = null;
-            if (serverIndex != 255) {
-                IServerConfiguration server = _configuration.GetServerInfoByIndex(serverIndex);
-                _minecraftService.GetServerByIndex(serverIndex).ServerStop(false).Wait();
+            if (message.ServerIndex != 255) {
+                IServerConfiguration server = configuration.GetServerInfoByIndex(message.ServerIndex);
+                minecraftService.GetServerByIndex(message.ServerIndex).ServerStop(false).Wait();
                 exportFileInfo.Filename = $"{exportFileInfo.FileType}-{server.GetServerName()}-{DateTime.Now:yyyyMMdd_hhmmssff}.zip";
                 if (exportFileInfo.FileType == FileTypeFlags.Backup) {
                     string backupPath = $"{server.GetSettingsProp(ServerPropertyKeys.BackupPath)}\\{server.GetServerName()}\\{exportFileInfo.Filename}";
                     packageFile.CreateEntryFromFile(backupPath, exportFileInfo.Filename);
                 }
                 if (exportFileInfo.FileType == FileTypeFlags.ServerPackage) {
-                    PrepareServerFiles(serverIndex, exportFileInfo, server, packageFile);
+                    PrepareServerFiles(message.ServerIndex, exportFileInfo, server, packageFile);
                 }
             } else {
                 exportFileInfo.Filename = $"{exportFileInfo.FileType}-Service-{DateTime.Now:yyyyMMdd_hhmmssff}.zip";
@@ -59,10 +50,10 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
             zipStream.Dispose();
             packageFile.Dispose();
 
-            _minecraftService.GetServerByIndex(serverIndex).ServerStart();
+            minecraftService.GetServerByIndex(message.ServerIndex).ServerStart();
             exportFileInfo.Data = ms.ToArray();
             exportData = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(exportFileInfo));
-            return (exportData, 0, NetworkMessageTypes.ExportFile);
+            return new(exportData, 0, MessageTypes.ExportFile);
         }
 
         private void PrepareServerFiles(byte serverIndex, ExportImportFileModel exportFileInfo, IServerConfiguration server, ZipArchive packageFile) {
@@ -70,13 +61,13 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
                 packageFile.CreateEntryFromFile(GetServiceFilePath(MmsFileNameKeys.ServerConfig_Name, server.GetServerName()), GetServiceFileName(MmsFileNameKeys.ServerConfig_Name, server.GetServerName()));
             }
             if (exportFileInfo.PackageFlags >= PackageFlags.LastBackup) {
-                BackupInfoModel lastBackup = _configurator.EnumerateBackupsForServer(serverIndex).Result.FirstOrDefault();
+                BackupInfoModel lastBackup = configurator.EnumerateBackupsForServer(serverIndex).Result.FirstOrDefault();
                 if (lastBackup != null) {
                     packageFile.CreateEntryFromFile($"{server.GetSettingsProp(ServerPropertyKeys.BackupPath)}\\{server.GetServerName()}\\{lastBackup.Filename}", lastBackup.Filename);
                 }
             }
             if (exportFileInfo.PackageFlags >= PackageFlags.WorldPacks) {
-                Progress<ProgressModel> progress = new Progress<ProgressModel>((p) => _logger.AppendLine($"Creating pack archive. {p.Progress}% completed..."));
+                Progress<ProgressModel> progress = new Progress<ProgressModel>((p) => logger.AppendLine($"Creating pack archive. {p.Progress}% completed..."));
                 FileUtilities.AppendServerPacksToArchive(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString(), server.GetProp(MmsDependServerPropKeys.LevelName).ToString(), packageFile, progress);
             }
             if (exportFileInfo.PackageFlags >= PackageFlags.PlayerDatabase) {
@@ -89,7 +80,7 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
             }
             if(exportFileInfo.PackageFlags == PackageFlags.Full) {
                 string zipPath = $@"{SharedStringBase.GetNewTempDirectory("ServerPackage")}\ServerPackage.zip";
-                Progress<ProgressModel> progress = new Progress<ProgressModel>((p) => _logger.AppendLine($"Creating server archive. {p.Progress}% completed..."));
+                Progress<ProgressModel> progress = new Progress<ProgressModel>((p) => logger.AppendLine($"Creating server archive. {p.Progress}% completed..."));
                 ZipUtilities.CreateFromDirectory(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString(), zipPath, progress).Wait();
                 packageFile.CreateEntryFromFile(zipPath, "ServerPackage.zip");
             }

@@ -5,14 +5,14 @@ using Topshelf.Runtime;
 
 namespace MinecraftService.Service.Core {
     public class WindowsService : IService {
-        private readonly IMinecraftService _mineraftService;
+        private readonly MmsService _mineraftService;
         private Topshelf.Host? _host;
         private readonly ProcessInfo _processInfo;
         private readonly MmsLogger _logger;
         private readonly IHostApplicationLifetime _applicationLifetime;
         TopshelfExitCode _exitCode;
 
-        public WindowsService(ProcessInfo processInfo, MmsLogger logger, IMinecraftService mineraftService, NetworkStrategyLookup networkStrategyLookup, IHostApplicationLifetime appLifetime) {
+        public WindowsService(ProcessInfo processInfo, MmsLogger logger, MmsService mineraftService, NetworkStrategyLookup networkStrategyLookup, IHostApplicationLifetime appLifetime) {
             _logger = logger;
             _processInfo = processInfo;
             _mineraftService = mineraftService;

@@ -2,11 +2,11 @@
 
 namespace MinecraftService.Service.Networking.Interfaces
 {
-    public interface ITCPListener {
+    public interface ITCPObject {
         void Initialize();
-        Task StartListening();
+        Task Begin();
         Task CancelAllTasks();
-        void SetStrategyDictionaries(Dictionary<NetworkMessageTypes, IMessageParser> standard, Dictionary<NetworkMessageTypes, IFlaggedMessageParser> flagged);
+        void SetStrategies(Dictionary<MessageTypes, IMessageParser> strategies);
         void SetServiceStarted();
         void SetServiceStopped();
     }

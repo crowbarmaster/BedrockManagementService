@@ -20,6 +20,7 @@ global using System.Reflection;
 global using System.Threading;
 global using System.Threading.Tasks;
 global using Topshelf;
+using MinecraftService.Service.Core;
 using MinecraftService.Service.Networking.Interfaces;
 using MinecraftService.Shared.Classes.Server;
 using MinecraftService.Shared.Classes.Server.Updaters;
@@ -53,8 +54,8 @@ namespace MinecraftService.Service
                         .AddSingleton<MmsLogger, MmsLogger>()
                         .AddSingleton<ServiceConfigurator>()
                         .AddSingleton<UpdaterContainer>()
-                        .AddSingleton<IMinecraftService, Core.MmsService>()
-                        .AddSingleton<ITCPListener, TCPListener>()
+                        .AddSingleton<MmsService>()
+                        .AddSingleton<ITCPObject, TCPListener>()
                         .AddSingleton<UserConfigManager, UserConfigManager>();
                 });
     }

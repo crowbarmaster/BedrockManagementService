@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MinecraftService.Shared.JsonModels.MinecraftJsonModels {
+namespace MinecraftService.Shared.JsonModels.Minecraft {
     public class KnownPacksJsonModel {
         public int file_version { get; set; }
         public string file_system { get; set; }

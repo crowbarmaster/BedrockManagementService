@@ -1,4 +1,5 @@
-﻿using MinecraftService.Service.Networking.Interfaces;
+﻿using MinecraftService.Service.Core;
+using MinecraftService.Service.Networking.Interfaces;
 using MinecraftService.Shared.Classes.Networking;
 using MinecraftService.Shared.Classes.Service;
 using MinecraftService.Shared.Classes.Service.Configuration;
@@ -7,21 +8,10 @@ using System.Text;
 
 namespace MinecraftService.Service.Networking.NetworkStrategies
 {
-    public class ConsoleLogUpdate : IMessageParser {
+    public class ConsoleLogUpdate(MmsLogger logger, ServiceConfigurator serviceConfiguration, MmsService service) : IMessageParser {
 
-        private readonly MmsLogger _logger;
-        private readonly IMinecraftService _service;
-        private readonly ServiceConfigurator _serviceConfiguration;
-
-        public ConsoleLogUpdate(MmsLogger logger, ServiceConfigurator serviceConfiguration, IMinecraftService service) {
-            _service = service;
-            _logger = logger;
-
-            _serviceConfiguration = serviceConfiguration;
-        }
-
-        public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
-            string stringData = Encoding.UTF8.GetString(data, 5, data.Length - 5);
+        public Message ParseMessage(Message message) {
+            string stringData = Encoding.UTF8.GetString(message.Data, 5, message.Data.Length - 5);
             StringBuilder srvString = new();
             string[] split = stringData.Split("|?|");
             for (int i = 0; i < split.Length; i++) {
@@ -33,7 +23,7 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
                 MmsLogger srvText;
                 if (srvName != "Service") {
                     try {
-                        srvText = _service.GetServerByName(srvName).GetLogger();
+                        srvText = service.GetServerByName(srvName).GetLogger();
                     } catch (NullReferenceException) {
                         break;
                     }
@@ -45,20 +35,20 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
                         loop++;
                     }
                 } else {
-                    srvTextLen = _serviceConfiguration.GetLog().Count;
+                    srvTextLen = serviceConfiguration.GetLog().Count;
                     clientCurLen = int.Parse(dataSplit[1]);
                     loop = clientCurLen;
                     while (loop < srvTextLen) {
-                        srvString.Append($"{srvName}|;|{_logger.FromIndex(loop)}|;|{loop}|?|");
+                        srvString.Append($"{srvName}|;|{logger.FromIndex(loop)}|;|{loop}|?|");
                         loop++;
                     }
                 }
             }
             if (srvString.Length > 3) {
                 srvString.Remove(srvString.Length - 3, 3);
-                return (Encoding.UTF8.GetBytes(srvString.ToString()), 0, NetworkMessageTypes.ConsoleLogUpdate);
+                return new(Encoding.UTF8.GetBytes(srvString.ToString()), 0, MessageTypes.ConsoleLogUpdate);
             }
-            return (Array.Empty<byte>(), 0, 0);
+            return new();
         }
     }
 }

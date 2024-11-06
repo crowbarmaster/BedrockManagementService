@@ -1,4 +1,4 @@
-﻿using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
+﻿using MinecraftService.Shared.JsonModels.Minecraft;
 using System.Collections.Generic;
 
 namespace MinecraftService.Shared.FileModels.MinecraftFileModels

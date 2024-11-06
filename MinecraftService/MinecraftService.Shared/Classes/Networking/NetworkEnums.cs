@@ -1,22 +1,8 @@
 ﻿namespace MinecraftService.Shared.Classes.Networking
 {
-    public enum NetworkMessageSource
+    public enum MessageTypes
     {
-        Client,
-        Server,
-        Service
-    }
-
-
-    public enum NetworkMessageDestination
-    {
-        Client,
-        Server,
-        Service
-    }
-
-    public enum NetworkMessageTypes
-    {
+        None,
         Connect,
         AddNewServer,
         RemoveServer,
@@ -69,7 +55,7 @@
         Full
     }
 
-    public enum NetworkMessageFlags
+    public enum MessageFlags
     {
         Failed,
         Passed,

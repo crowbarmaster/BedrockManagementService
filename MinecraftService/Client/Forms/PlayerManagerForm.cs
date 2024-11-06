@@ -131,7 +131,11 @@ namespace MinecraftService.Client.Forms {
             if (modifiedPlayers.Count > 0) {
                 JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.All };
                 byte[] sendBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(modifiedPlayers, Formatting.Indented, settings));
-                FormManager.TCPClient.SendData(sendBytes, FormManager.MainWindow.connectedHost.GetServerIndex(_server), NetworkMessageTypes.PlayersUpdate);
+                FormManager.TCPClient.SendData(new() {
+                    Data = sendBytes,
+                    ServerIndex = FormManager.MainWindow.connectedHost.GetServerIndex(FormManager.MainWindow.SelectedServer),
+                    Type = MessageTypes.PlayersUpdate
+                });
                 FormManager.MainWindow.DisableUI("Service is registering new player data...");
                 DialogResult = DialogResult.OK;
             }

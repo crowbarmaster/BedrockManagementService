@@ -1,18 +1,14 @@
-﻿using MinecraftService.Service.Networking.Interfaces;
+﻿using MinecraftService.Service.Core;
+using MinecraftService.Service.Networking.Interfaces;
 using MinecraftService.Shared.Classes.Networking;
 
 namespace MinecraftService.Service.Networking.NetworkStrategies
 {
-    public class ServerRestart : IMessageParser {
-        private readonly IMinecraftService _service;
+    public class ServerRestart(MmsService service) : IMessageParser {
 
-        public ServerRestart(IMinecraftService service) {
-            _service = service;
-        }
-
-        public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
-            _service.GetServerByIndex(serverIndex).RestartServer().Wait();
-            return (Array.Empty<byte>(), 0, NetworkMessageTypes.UICallback);
+        public Message ParseMessage(Message message) {
+            service.GetServerByIndex(message.ServerIndex).RestartServer().Wait();
+            return Message.EmptyUICallback;
         }
     }
 }

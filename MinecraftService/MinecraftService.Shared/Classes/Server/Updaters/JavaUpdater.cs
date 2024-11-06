@@ -2,7 +2,7 @@
 using MinecraftService.Shared.Classes.Service.Configuration;
 using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.Interfaces;
-using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
+using MinecraftService.Shared.JsonModels.Service;
 using MinecraftService.Shared.Utilities;
 using Newtonsoft.Json;
 using System;

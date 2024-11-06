@@ -374,3 +374,4 @@ GenerateLog.bat
 /BedrockService/LLPeProviderService/LibClang
 /BMS_Files/plugin_repo.json
 /BedrockService/Service/Properties/launchSettings.json
+/MinecraftService/Client/GlobalSuppressions.cs

@@ -4,11 +4,12 @@
 
 using System.Threading.Tasks;
 using MinecraftService.Client.Management;
+using MinecraftService.Shared.Classes.Networking;
 
 namespace MinecraftService.Client.Networking.NetworkStrategies {
     public class UnlockUI : INetworkMessage {
 
-        public Task<bool> ProcessMessage(byte[] _) => Task.Run(() => {
+        public Task<bool> ProcessMessage(Message _) => Task.Run(() => {
             FormManager.MainWindow.ServerBusy = false;
             return true;
         });

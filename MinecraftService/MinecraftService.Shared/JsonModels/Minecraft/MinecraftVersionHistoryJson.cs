@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace MinecraftService.Shared.JsonModels.MinecraftJsonModels {
+namespace MinecraftService.Shared.JsonModels.Minecraft {
     public class MinecraftVersionHistoryJson {
         [JsonPropertyName("version")]
         public string Version { get; set; }

@@ -8,7 +8,7 @@ using MinecraftService.Shared.Classes.Service.Configuration;
 using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.FileModels.MinecraftFileModels;
 using MinecraftService.Shared.Interfaces;
-using MinecraftService.Shared.JsonModels.MinecraftJsonModels;
+using MinecraftService.Shared.JsonModels.Minecraft;
 using MinecraftService.Shared.SerializeModels;
 using System.Globalization;
 using System.Xml.Linq;
@@ -233,42 +233,42 @@ namespace MinecraftService.Service.Management
             });
         }
 
-        public Task RemoveServerConfigs(IServerConfiguration serverInfo, NetworkMessageFlags flag) => Task.Run(() => {
+        public Task RemoveServerConfigs(IServerConfiguration serverInfo, MessageFlags flag) => Task.Run(() => {
             try {
                 _logger.AppendLine("Beginning removal of selected options. Please wait!");
                 Task.Delay(3000).Wait();
                 switch (flag) {
-                    case NetworkMessageFlags.RemoveBckPly:
+                    case MessageFlags.RemoveBckPly:
                         if (DeleteAllBackups(serverInfo))
                             _logger.AppendLine($"Deleted Backups for server {serverInfo.GetServerName()}");
                         if (DeletePlayerFiles(serverInfo))
                             _logger.AppendLine($"Deleted Player files for server {serverInfo.GetServerName()}");
                         break;
-                    case NetworkMessageFlags.RemoveBckSrv:
+                    case MessageFlags.RemoveBckSrv:
                         if (DeleteAllBackups(serverInfo))
                             _logger.AppendLine($"Deleted Backups for server {serverInfo.GetServerName()}");
                         if (DeleteServerFiles(serverInfo))
                             _logger.AppendLine($"Deleted server directory for server {serverInfo.GetServerName()}");
                         break;
-                    case NetworkMessageFlags.RemovePlySrv:
+                    case MessageFlags.RemovePlySrv:
                         if (DeletePlayerFiles(serverInfo))
                             _logger.AppendLine($"Deleted Player files for server {serverInfo.GetServerName()}");
                         if (DeleteServerFiles(serverInfo))
                             _logger.AppendLine($"Deleted server directory for server {serverInfo.GetServerName()}");
                         break;
-                    case NetworkMessageFlags.RemoveSrv:
+                    case MessageFlags.RemoveSrv:
                         if (DeleteServerFiles(serverInfo))
                             _logger.AppendLine($"Deleted server directory for server {serverInfo.GetServerName()}");
                         break;
-                    case NetworkMessageFlags.RemovePlayers:
+                    case MessageFlags.RemovePlayers:
                         if (DeletePlayerFiles(serverInfo))
                             _logger.AppendLine($"Deleted Player files for server {serverInfo.GetServerName()}");
                         break;
-                    case NetworkMessageFlags.RemoveBackups:
+                    case MessageFlags.RemoveBackups:
                         if (DeleteAllBackups(serverInfo))
                             _logger.AppendLine($"Deleted Backups for server {serverInfo.GetServerName()}");
                         break;
-                    case NetworkMessageFlags.RemoveAll:
+                    case MessageFlags.RemoveAll:
                         if (DeleteAllBackups(serverInfo))
                             _logger.AppendLine($"Deleted Backups for server {serverInfo.GetServerName()}");
                         if (DeletePlayerFiles(serverInfo))
@@ -276,7 +276,7 @@ namespace MinecraftService.Service.Management
                         if (DeleteServerFiles(serverInfo))
                             _logger.AppendLine($"Deleted server directory for server {serverInfo.GetServerName()}");
                         break;
-                    case NetworkMessageFlags.None:
+                    case MessageFlags.None:
                         break;
                 }
                 _serviceConfiguration.RemoveServerInfo(serverInfo);

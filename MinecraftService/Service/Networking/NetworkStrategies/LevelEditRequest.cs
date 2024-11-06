@@ -7,19 +7,13 @@ using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
 namespace MinecraftService.Service.Networking.NetworkStrategies
 {
-    public class LevelEditRequest : IMessageParser {
+    public class LevelEditRequest(ServiceConfigurator serviceConfiguration) : IMessageParser {
 
-        private readonly ServiceConfigurator _serviceConfiguration;
-
-        public LevelEditRequest(ServiceConfigurator serviceConfiguration) {
-            _serviceConfiguration = serviceConfiguration;
-        }
-
-        public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
-            IServerConfiguration server = _serviceConfiguration.GetServerInfoByIndex(serverIndex);
-            string pathToLevelDat = $@"{_serviceConfiguration.GetServerInfoByIndex(serverIndex).GetSettingsProp(ServerPropertyKeys.ServerPath)}\worlds\{server.GetProp(MmsDependServerPropKeys.LevelName)}\level.dat";
+        public Message ParseMessage(Message message) {
+            IServerConfiguration server = serviceConfiguration.GetServerInfoByIndex(message.ServerIndex);
+            string pathToLevelDat = $@"{serviceConfiguration.GetServerInfoByIndex(message.ServerIndex).GetSettingsProp(ServerPropertyKeys.ServerPath)}\worlds\{server.GetProp(MmsDependServerPropKeys.LevelName)}\level.dat";
             byte[] levelDatToBytes = File.ReadAllBytes(pathToLevelDat);
-            return (levelDatToBytes, 0, NetworkMessageTypes.LevelEditFile);
+            return new(levelDatToBytes, 0, MessageTypes.LevelEditFile);
         }
     }
 }

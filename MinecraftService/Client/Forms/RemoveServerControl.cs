@@ -8,7 +8,7 @@ using MinecraftService.Shared.Classes.Networking;
 
 namespace MinecraftService.Client.Forms {
     public partial class RemoveServerControl : Form {
-        public NetworkMessageFlags SelectedFlag;
+        public MessageFlags SelectedFlag;
         public RemoveServerControl() {
             InitializeComponent();
         }
@@ -19,24 +19,24 @@ namespace MinecraftService.Client.Forms {
             }
             foreach (var item in checkedListBox1.CheckedItems) {
                 if (item.ToString() == "Remove server files") {
-                    SelectedFlag = NetworkMessageFlags.RemoveSrv;
+                    SelectedFlag = MessageFlags.RemoveSrv;
                 }
                 if (item.ToString() == "Remove server's backups") {
-                    if (SelectedFlag == NetworkMessageFlags.RemoveSrv) {
-                        SelectedFlag = NetworkMessageFlags.RemoveBckSrv;
+                    if (SelectedFlag == MessageFlags.RemoveSrv) {
+                        SelectedFlag = MessageFlags.RemoveBckSrv;
                     } else {
-                        SelectedFlag = NetworkMessageFlags.RemoveBackups;
+                        SelectedFlag = MessageFlags.RemoveBackups;
                     }
                 }
                 if (item.ToString() == "Remove player record files") {
-                    if (SelectedFlag == NetworkMessageFlags.RemoveSrv) {
-                        SelectedFlag = NetworkMessageFlags.RemovePlySrv;
+                    if (SelectedFlag == MessageFlags.RemoveSrv) {
+                        SelectedFlag = MessageFlags.RemovePlySrv;
                     }
-                    if (SelectedFlag == NetworkMessageFlags.RemoveBckSrv) {
-                        SelectedFlag = NetworkMessageFlags.RemoveAll;
+                    if (SelectedFlag == MessageFlags.RemoveBckSrv) {
+                        SelectedFlag = MessageFlags.RemoveAll;
                     }
-                    if (SelectedFlag == NetworkMessageFlags.RemoveBackups) {
-                        SelectedFlag = NetworkMessageFlags.RemoveBckPly;
+                    if (SelectedFlag == MessageFlags.RemoveBackups) {
+                        SelectedFlag = MessageFlags.RemoveBckPly;
                     }
                 }
             }

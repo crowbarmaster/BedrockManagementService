@@ -8,18 +8,13 @@ using System.Text;
 
 namespace MinecraftService.Service.Networking.NetworkStrategies
 {
-    public class Connect : IMessageParser {
-        private readonly ServiceConfigurator _serviceConfiguration;
+    public class Connect(ServiceConfigurator serviceConfiguration) : IMessageParser {
 
-        public Connect(ServiceConfigurator serviceConfiguration) {
-            _serviceConfiguration = serviceConfiguration;
-        }
-
-        public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
+        public Message ParseMessage(Message message) {
             Formatting indented = Formatting.Indented;
-            string jsonString = JsonConvert.SerializeObject(_serviceConfiguration, indented, SharedStringBase.GlobalJsonSerialierSettings);
+            string jsonString = JsonConvert.SerializeObject(serviceConfiguration, indented, SharedStringBase.GlobalJsonSerialierSettings);
             byte[] serializeToBytes = Encoding.UTF8.GetBytes(jsonString);
-            return (serializeToBytes, 0, NetworkMessageTypes.Connect);
+            return new(serializeToBytes, 0, MessageTypes.Connect);
         }
     }
 }

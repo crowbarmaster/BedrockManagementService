@@ -56,7 +56,11 @@ namespace MinecraftService.Client.Forms {
                 return;
             }
             byte[] backupName = Encoding.UTF8.GetBytes(backupSelectBox.Text);
-            FormManager.TCPClient.SendData(backupName, _serviceConfig.GetServerIndex(FormManager.MainWindow.SelectedServer), NetworkMessageTypes.DelBackups);
+            FormManager.TCPClient.SendData(new() {
+                Data = backupName,
+                ServerIndex = _serviceConfig.GetServerIndex(FormManager.MainWindow.SelectedServer),
+                Type = MessageTypes.DelBackups
+            });
             Task.Delay(500).Wait();
             backupSelectBox.Items.Remove(backupSelectBox.SelectedItem);
         }
@@ -68,7 +72,11 @@ namespace MinecraftService.Client.Forms {
             closeBtn.Enabled = false;
             infoTextBox.Lines = new string[4] { string.Empty, string.Empty, string.Empty, "Now rolling back to selected backup... Please wait!" };
             byte[] backupName = Encoding.UTF8.GetBytes(backupSelectBox.Text);
-            FormManager.TCPClient.SendData(backupName, _serviceConfig.GetServerIndex(FormManager.MainWindow.SelectedServer), NetworkMessageTypes.BackupRollback);
+            FormManager.TCPClient.SendData(new() {
+                Data = backupName,
+                ServerIndex = _serviceConfig.GetServerIndex(FormManager.MainWindow.SelectedServer),
+                Type = MessageTypes.BackupRollback
+            });
         }
 
         private void exportToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -88,7 +96,11 @@ namespace MinecraftService.Client.Forms {
                 _callbackRecieved = false;
                 string[] newText = new string[4];
                 newText[3] = "Downloading your selection now, please wait!";
-                FormManager.TCPClient.SendData(dataBytes, _serviceConfig.GetServerIndex(FormManager.MainWindow.SelectedServer), NetworkMessageTypes.ExportFile);
+                FormManager.TCPClient.SendData(new() {
+                    Data = dataBytes,
+                    ServerIndex = _serviceConfig.GetServerIndex(FormManager.MainWindow.SelectedServer),
+                    Type = MessageTypes.ExportFile,
+                });
                 while (!_callbackRecieved) {
                     Task.Delay(500).Wait();
                 }
@@ -102,7 +114,11 @@ namespace MinecraftService.Client.Forms {
 
         private void purgeBackupsToolStripMenuItem_Click(object sender, EventArgs e) {
             if (MessageBox.Show("This will remove all backups from the server. This is irrevesable!!", "Confirm removal", MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes) {
-                FormManager.TCPClient.SendData(Encoding.UTF8.GetBytes("-RemoveAll-"), _serviceConfig.GetServerIndex(FormManager.MainWindow.SelectedServer), NetworkMessageTypes.DelBackups);
+                FormManager.TCPClient.SendData(new() {
+                    Data = Encoding.UTF8.GetBytes("-RemoveAll-"),
+                    ServerIndex = _serviceConfig.GetServerIndex(FormManager.MainWindow.SelectedServer),
+                    Type = MessageTypes.DelBackups
+                });
             }
         }
 
@@ -112,7 +128,11 @@ namespace MinecraftService.Client.Forms {
             editor.PopulateBoxes(filteredList);
             if (editor.ShowDialog() == DialogResult.OK) {
                 byte[] serializedBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(editor.workingProps));
-                FormManager.TCPClient.SendData(serializedBytes, _serviceConfig.GetServerIndex(FormManager.MainWindow.SelectedServer), NetworkMessageTypes.PropUpdate);
+                FormManager.TCPClient.SendData(new() {
+                    Data = serializedBytes,
+                    ServerIndex = _serviceConfig.GetServerIndex(FormManager.MainWindow.SelectedServer),
+                    Type = MessageTypes.PropUpdate
+                });
                 MessageBox.Show("Backup settings sent to service! Restart server to apply.");
             }
         }

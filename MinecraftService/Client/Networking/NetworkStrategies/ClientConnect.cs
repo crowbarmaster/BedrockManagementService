@@ -6,36 +6,30 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using MinecraftService.Client.Management;
+using MinecraftService.Shared.Classes.Networking;
 using MinecraftService.Shared.Classes.Service.Configuration;
 using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.Interfaces;
 using Newtonsoft.Json;
 
 namespace MinecraftService.Client.Networking.NetworkStrategies {
-    public class ClientConnect : INetworkMessage {
-        public MmsLogger _logger;
-        public TCPClient _client;
+    public class ClientConnect(MmsLogger logger, TCPClient client) : INetworkMessage {
 
-        public ClientConnect(MmsLogger logger, TCPClient client) {
-            _logger = logger;
-            _client = client;
-        }
-
-        public Task<bool> ProcessMessage(byte[] messageData) => Task.Run(() => {
+        public Task<bool> ProcessMessage(Message message) => Task.Run(() => {
             try {
-                string data = Encoding.UTF8.GetString(messageData, 5, messageData.Length - 5);
+                string data = Encoding.UTF8.GetString(message.Data);
                 if (!string.IsNullOrEmpty(data)) {
-                    _logger.AppendLine("Connection to Host successful!");
+                    logger.AppendLine("Connection to Host successful!");
                     FormManager.MainWindow.connectedHost = JsonConvert.DeserializeObject<ServiceConfigurator>(data, SharedStringBase.GlobalJsonSerialierSettings);
-                    _client.Connected = true;
+                    client.Connected = true;
                     FormManager.MainWindow.RefreshServerBoxContents();
                     FormManager.MainWindow.ServerBusy = false;
                     return true;
                 }
             } catch (Exception e) {
-                _logger.AppendLine($"Error: ConnectMan reported error: {e.Message}\n{e.StackTrace}");
-                _client.CloseConnection();
-                _client.Cancel();
+                logger.AppendLine($"Error: ConnectMan reported error: {e.Message}\n{e.StackTrace}");
+                client.CloseConnection();
+                client.Cancel();
                 return false;
             }
             return false;

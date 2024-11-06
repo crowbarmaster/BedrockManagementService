@@ -10,20 +10,12 @@ using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
 namespace MinecraftService.Service.Networking.NetworkStrategies
 {
-    public class VersionListRequest : IMessageParser {
+    public class VersionListRequest(MmsLogger logger, ServiceConfigurator serviceConfiguration) : IMessageParser {
 
-        private readonly ServiceConfigurator _serviceConfiguration;
-        private readonly MmsLogger _logger;
-
-        public VersionListRequest(MmsLogger logger, ServiceConfigurator serviceConfiguration) {
-            _serviceConfiguration = serviceConfiguration;
-            _logger = logger;
-        }
-
-        public (byte[] data, byte srvIndex, NetworkMessageTypes type) ParseMessage(byte[] data, byte serverIndex) {
+        public Message ParseMessage(Message message) {
             Dictionary<MinecraftServerArch, SimpleVersionModel[]> resultDictionary = new();
-            foreach (KeyValuePair<MinecraftServerArch, IUpdater> updaterKvp in _serviceConfiguration.GetUpdaterTable()) {
-                if(!updaterKvp.Value.IsInitialized())
+            foreach (KeyValuePair<MinecraftServerArch, IUpdater> updaterKvp in serviceConfiguration.GetUpdaterTable()) {
+                if (!updaterKvp.Value.IsInitialized())
                     updaterKvp.Value.Initialize().Wait();
                 List<SimpleVersionModel> verStrings = updaterKvp.Value.GetSimpleVersionList();
                 verStrings.Reverse();
@@ -31,7 +23,7 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
             }
             string jsonString = JsonConvert.SerializeObject(resultDictionary, SharedStringBase.GlobalJsonSerialierSettings);
             byte[] resultBytes = Encoding.UTF8.GetBytes(jsonString);
-            return (resultBytes, 0, NetworkMessageTypes.VersionListRequest);
+            return new(resultBytes, message.ServerIndex, MessageTypes.VersionListRequest);
         }
     }
 }

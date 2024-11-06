@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MinecraftService.Shared.JsonModels.MinecraftJsonModels {
+namespace MinecraftService.Shared.JsonModels.Minecraft {
     public class JavaVersionDetailsModel {
         [JsonProperty("arguments")]
         public Arguments Arguments { get; set; }
