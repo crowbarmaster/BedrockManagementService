@@ -603,5 +603,10 @@
     "version": "1.21.60.10",
     "winurl": "https://www.minecraft.net/bedrockdedicatedserver/bin-win/bedrock-server-1.21.60.10.zip",
     "linurl": "https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-1.21.60.10.zip"
+  },
+  {
+    "version": "1.21.61.01",
+    "winurl": "https://www.minecraft.net/bedrockdedicatedserver/bin-win/bedrock-server-1.21.61.01.zip",
+    "linurl": "https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-1.21.61.01.zip"
   }
 ]
