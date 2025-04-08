@@ -623,5 +623,10 @@
     "version": "1.21.71.01",
     "winurl": "https://www.minecraft.net/bedrockdedicatedserver/bin-win/bedrock-server-1.21.71.01.zip",
     "linurl": "https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-1.21.71.01.zip"
+  },
+  {
+    "version": "1.21.72.02",
+    "winurl": "https://www.minecraft.net/bedrockdedicatedserver/bin-win/bedrock-server-1.21.72.02.zip",
+    "linurl": "https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-1.21.72.02.zip"
   }
 ]
