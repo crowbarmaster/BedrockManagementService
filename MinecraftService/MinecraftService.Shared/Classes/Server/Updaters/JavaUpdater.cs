@@ -98,7 +98,7 @@ namespace MinecraftService.Shared.Classes.Server.Updaters
 
                 _logger.AppendLine($"Latest Java release version found: \"{latestRelease.Version}\"");
                 File.WriteAllText(GetServiceFilePath(MmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[_serverArch]), latestRelease.Version);
-                _serviceConfiguration.SetServerDefaultPropList(_serverArch, MinecraftFileUtilities.GetDefaultPropListFromFile(GetServiceFilePath(MmsFileNameKeys.JavaStockProps_Ver, latestRelease.Version)));
+                _serviceConfiguration.SetServerDefaultPropList(_serverArch, MinecraftFileUtilities.CreatePropListFromFile(GetServiceFilePath(MmsFileNameKeys.JavaStockProps_Ver, latestRelease.Version)));
             });
         }
 
@@ -230,16 +230,16 @@ namespace MinecraftService.Shared.Classes.Server.Updaters
 
         public static Task ValidateJavaInstallation(MmsLogger logger) => Task.Run(() =>
         {
-            if (!File.Exists(GetServiceFilePath(MmsFileNameKeys.Jdk17JavaVanillaExe)))
+            if (!File.Exists(GetServiceFilePath(MmsFileNameKeys.JavaVanillaExe)))
             {
-                if (HTTPHandler.RetrieveFileFromUrl(MmsUrlStrings[MmsUrlKeys.Jdk17DownloadLink], "Jdk.zip").Result)
+                if (HTTPHandler.RetrieveFileFromUrl(MmsUrlStrings[MmsUrlKeys.Jdk21DownloadLink], "Jdk.zip").Result)
                 {
                     Progress<ProgressModel> progress = new(percent =>
                     {
-                        logger.AppendLine($"First time java install; Extracting JDK 17. {percent.Progress}% completed...");
+                        logger.AppendLine($"First time java install; Extracting JDK 21. {percent.Progress}% completed...");
                     });
-                    ZipUtilities.ExtractToDirectory("Jdk.zip", GetServiceDirectory(ServiceDirectoryKeys.Jdk17Path), progress).Wait();
-                    File.Copy(GetServiceFilePath(MmsFileNameKeys.Jdk17JavaVanillaExe), GetServiceFilePath(MmsFileNameKeys.Jdk17JavaMmsExe));
+                    ZipUtilities.ExtractToDirectory("Jdk.zip", GetServiceDirectory(ServiceDirectoryKeys.Jdk21Path), progress).Wait();
+                    File.Copy(GetServiceFilePath(MmsFileNameKeys.JavaVanillaExe), GetServiceFilePath(MmsFileNameKeys.JavaMmsExe));
                     File.Delete("Jdk.zip");
                 }
             }

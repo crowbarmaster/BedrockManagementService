@@ -96,8 +96,8 @@ namespace MinecraftService.Shared.Classes.Service.Core
             ServerPlayerTelem_Name,
             GlobalPlayerRegistry,
             GlobalPlayerTelem,
-            Jdk17JavaVanillaExe,
-            Jdk17JavaMmsExe,
+            JavaVanillaExe,
+            JavaMmsExe,
             ServerErrorFilter
         }
 
@@ -115,8 +115,8 @@ namespace MinecraftService.Shared.Classes.Service.Core
             BuildArchives,
             BedrockCoreFiles_Ver,
             JavaCoreFiles_Ver,
-            Jdk17Path,
-            Jdk17BinPath
+            Jdk21Path,
+            Jdk21BinPath
         }
 
         public enum ServerFileNameKeys
@@ -153,7 +153,7 @@ namespace MinecraftService.Shared.Classes.Service.Core
             BdsVersionJson,
             JdsVersionJson,
             PluginRepoJson,
-            Jdk17DownloadLink
+            Jdk21DownloadLink
         }
 
         public static Dictionary<MmsFileNameKeys, ServiceDirectoryKeys> MmsFileParentDirectories = new() {
@@ -172,8 +172,8 @@ namespace MinecraftService.Shared.Classes.Service.Core
             { MmsFileNameKeys.GlobalPlayerRegistry, ServiceDirectoryKeys.GlobalPlayerPath },
             { MmsFileNameKeys.ServerPlayerTelem_Name, ServiceDirectoryKeys.ServerPlayerPath },
             { MmsFileNameKeys.GlobalPlayerTelem, ServiceDirectoryKeys.GlobalPlayerPath },
-            { MmsFileNameKeys.Jdk17JavaVanillaExe, ServiceDirectoryKeys.Jdk17BinPath },
-            { MmsFileNameKeys.Jdk17JavaMmsExe, ServiceDirectoryKeys.Jdk17BinPath },
+            { MmsFileNameKeys.JavaVanillaExe, ServiceDirectoryKeys.Jdk21BinPath },
+            { MmsFileNameKeys.JavaMmsExe, ServiceDirectoryKeys.Jdk21BinPath },
             { MmsFileNameKeys.ServerErrorFilter, ServiceDirectoryKeys.MmsConfig }
         };
 
@@ -246,8 +246,8 @@ namespace MinecraftService.Shared.Classes.Service.Core
             { ServiceDirectoryKeys.BuildArchives, "MmsConfig\\BDSBuilds\\BuildArchives" },
             { ServiceDirectoryKeys.JavaCoreFiles_Ver, "MmsConfig\\JavaBuilds\\Build_{0}" },
             { ServiceDirectoryKeys.BedrockCoreFiles_Ver, "MmsConfig\\BDSBuilds\\CoreFiles\\Build_{0}" },
-            { ServiceDirectoryKeys.Jdk17Path, "Jdk17" },
-            { ServiceDirectoryKeys.Jdk17BinPath, "Jdk17\\bin" }
+            { ServiceDirectoryKeys.Jdk21Path, "Jdk21" },
+            { ServiceDirectoryKeys.Jdk21BinPath, "Jdk21\\bin" }
         };
 
         public static Dictionary<MmsFileNameKeys, string> MmsFileNameStrings = new() {
@@ -266,8 +266,8 @@ namespace MinecraftService.Shared.Classes.Service.Core
             { MmsFileNameKeys.ServerPlayerTelem_Name, "{0}.playerdb" },
             { MmsFileNameKeys.BdsUpdatePackage_Ver, "Update_{0}.zip" },
             { MmsFileNameKeys.JdsUpdatePackage_Ver, "server.jar" },
-            { MmsFileNameKeys.Jdk17JavaVanillaExe, "javaw.exe" },
-            { MmsFileNameKeys.Jdk17JavaMmsExe, "MmsServerInstance.exe" },
+            { MmsFileNameKeys.JavaVanillaExe, "javaw.exe" },
+            { MmsFileNameKeys.JavaMmsExe, "MmsServerInstance.exe" },
             { MmsFileNameKeys.ServerErrorFilter, "ServerErrorFilters.txt" }
         };
 
