@@ -41,7 +41,6 @@ namespace MinecraftService.Shared.Classes.Server.Configurations
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.MinecraftType], "Java"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.BackupPath], $@"{_servicePath}\ServerBackups"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.JavaArgs], "-Xmx1024M -Xms1024M -XX:+UnlockExperimentalVMOptions -XX:+AlwaysPreTouch -XX:+UseStringDeduplication -Dfml.ignorePatchDiscrepancies=true -Dfml.ignoreInvalidMinecraftCertificates=true -XX:-OmitStackTraceInFastThrow -XX:+OptimizeStringConcat -Dfml.readTimeout=180 -XX:+UseLargePages"));
-            PlayerManager = new PlayerManager(GetProp(MmsDependServerPropKeys.ServerName).StringValue, GetProp(MmsDependServerPropKeys.PermLevel).StringValue);
             return true;
         }
 
@@ -67,53 +66,38 @@ namespace MinecraftService.Shared.Classes.Server.Configurations
 
         public string GetServerVersion() => GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue() ? _serviceConfiguration.GetLatestVersion(_serverArch) : GetSettingsProp(ServerPropertyKeys.ServerVersion).StringValue;
 
-        public void ProcessUserConfiguration(string[] fileEntries)
-        {
-            if (fileEntries == null)
-                return;
 
-            foreach (string line in fileEntries)
-            {
-                if (!line.StartsWith("#") && !string.IsNullOrEmpty(line))
-                {
-                    string[] split = line.Split('=');
-                    if (split.Length == 1)
-                    {
-                        split = new string[] { split[0], "" };
-                    }
-                    Property SrvProp = ServerPropList.FirstOrDefault(prop => prop != null && prop.KeyName == split[0]);
-                    if (SrvProp != null)
-                    {
-                        SetProp(split[0], split[1]);
-                    }
-                    Property SvcProp = ServicePropList.FirstOrDefault(prop => prop != null && prop.KeyName == split[0]);
-                    if (SvcProp != null)
-                    {
-                        SetSettingsProp(split[0], split[1]);
-                    }
-                    switch (split[0])
-                    {
-                        case "ServerName":
-                            GetSettingsProp(ServerPropertyKeys.ServerName).SetValue(split[1]);
-                            GetSettingsProp(ServerPropertyKeys.ServerPath).SetValue($@"{ServersPath}\{split[1]}");
-                            GetSettingsProp(ServerPropertyKeys.ServerExeName).SetValue($"MinecraftService.{split[1]}.jar");
-                            GetSettingsProp(ServerPropertyKeys.FileName).SetValue($@"{split[1]}.conf");
-                            break;
+        public void ProcessUserConfiguration(List<string[]> fileEntries) {
+            foreach (string[] entry in fileEntries) {
+                Property SrvProp = ServerPropList.FirstOrDefault(prop => prop != null && prop.KeyName == entry[0]);
+                if (SrvProp != null) {
+                    SetProp(entry[0], entry[1]);
+                }
+                Property SvcProp = ServicePropList.FirstOrDefault(prop => prop != null && prop.KeyName == entry[0]);
+                if (SvcProp != null) {
+                    SetSettingsProp(entry[0], entry[1]);
+                }
+                switch (entry[0]) {
+                    case "ServerName":
+                        GetSettingsProp(ServerPropertyKeys.ServerName).SetValue(entry[1]);
+                        GetSettingsProp(ServerPropertyKeys.ServerPath).SetValue($@"{ServersPath}\{entry[1]}");
+                        GetSettingsProp(ServerPropertyKeys.ServerExeName).SetValue($"MinecraftService.{entry[1]}.jar");
+                        GetSettingsProp(ServerPropertyKeys.FileName).SetValue($@"{entry[1]}.conf");
+                        PlayerManager = new PlayerManager(entry[1], "0");
+                        break;
 
-                        case "AddStartCmd":
-                            StartCmds.Add(new StartCmdEntry(split[1]));
-                            break;
+                    case "AddStartCmd":
+                        StartCmds.Add(new StartCmdEntry(entry[1]));
+                        break;
 
-                        case "BackupPath":
-                            if (split[1] == "Default")
-                                GetSettingsProp(ServerPropertyKeys.BackupPath).SetValue($@"{_servicePath}\ServerBackups");
-                            break;
-                    }
+                    case "BackupPath":
+                        if (entry[1] == "Default")
+                            GetSettingsProp(ServerPropertyKeys.BackupPath).SetValue($@"{_servicePath}\ServerBackups");
+                        break;
                 }
             }
             PlayerManager.LoadPlayerDatabase();
-            if (File.Exists(GetServerFilePath(ServerFileNameKeys.DeployedINI, this)) && GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue())
-            {
+            if (File.Exists(GetServerFilePath(ServerFileNameKeys.DeployedINI, this)) && GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()) {
                 SetSettingsProp(ServerPropertyKeys.ServerVersion, File.ReadAllText(GetServerFilePath(ServerFileNameKeys.DeployedINI, this)));
             }
         }

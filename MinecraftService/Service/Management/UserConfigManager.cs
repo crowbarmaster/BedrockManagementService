@@ -36,7 +36,7 @@ namespace MinecraftService.Service.Management
             _serviceConfiguration.InitializeDefaults();
             if (File.Exists(GetServiceFilePath(MmsFileNameKeys.ServiceConfig))) {
                 try {
-                    _serviceConfiguration.ProcessUserConfiguration(File.ReadAllLines(GetServiceFilePath(MmsFileNameKeys.ServiceConfig)));
+                    _serviceConfiguration.ProcessUserConfiguration(MinecraftFileUtilities.FilterLinesFromPropFile(GetServiceFilePath(MmsFileNameKeys.ServiceConfig)));
                     _logger.AppendLine("Loaded Service props.");
                 } catch (Exception ex) {
                     _logger.AppendLine($"Error loading Service props: {ex.Message}");
@@ -54,8 +54,8 @@ namespace MinecraftService.Service.Management
             foreach (string file in files) {
                 FileInfo fileInfo = new(file);
                 try {
-                    string[] fileEntries = File.ReadAllLines(file);
-                    string[] archType = fileEntries[0].Split('=');
+                    List<string[]> configEntries = MinecraftFileUtilities.FilterLinesFromPropFile(file);
+                    string[] archType = configEntries[0];
                     if (archType[0] != "MinecraftType") {
                         if (!_serviceConfiguration.GetUpdater(MinecraftServerArch.Bedrock).IsInitialized()) {
                             _serviceConfiguration.GetUpdater(MinecraftServerArch.Bedrock).Initialize().Wait();
@@ -69,7 +69,7 @@ namespace MinecraftService.Service.Management
                         serverInfo = _serviceConfiguration.PrepareNewServerConfig(selectedArch, _processInfo, _logger);
                     }
                     if (serverInfo.InitializeDefaults()) {
-                        serverInfo.ProcessUserConfiguration(fileEntries);
+                        serverInfo.ProcessUserConfiguration(configEntries);
                         _logger.AppendLine($"Loaded config for server {serverInfo.GetServerName()}.");
                     }
                     _serviceConfiguration.AddNewServerInfo(serverInfo);
@@ -147,7 +147,7 @@ namespace MinecraftService.Service.Management
             output[index++] = $"ServerVersion={server.GetSettingsProp(ServerPropertyKeys.ServerVersion)}";
             output[index++] = string.Empty;
 
-            File.WriteAllLines(GetServiceFilePath(MmsFileNameKeys.ServerConfig_Name, server.GetServerName()), output);
+            File.WriteAllLines(GetServiceFilePath(MmsFileNameKeys.ServerConfig_ServerName, server.GetServerName()), output);
             Task.Delay(500).Wait();
         }
 
