@@ -12,14 +12,14 @@ using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
 namespace MinecraftService.Service.Server.ConsoleFilters
 {
-    public class JavaPlayerDisconnectedFilter : IConsoleFilter {
+    public class JavaPlayerLostConnectionFilter : IConsoleFilter {
         IServerConfiguration _serverConfiguration;
         MmsLogger _logger;
         UserConfigManager _configurator;
         IServerController _bedrockServer;
         ServiceConfigurator _serviceConfiguration;
 
-        public JavaPlayerDisconnectedFilter(MmsLogger logger, UserConfigManager configurator, IServerConfiguration serverConfiguration, IServerController bedrockServer, ServiceConfigurator mineraftService) {
+        public JavaPlayerLostConnectionFilter(MmsLogger logger, UserConfigManager configurator, IServerConfiguration serverConfiguration, IServerController bedrockServer, ServiceConfigurator mineraftService) {
             _serverConfiguration = serverConfiguration;
             _logger = logger;
             _configurator = configurator;
@@ -31,7 +31,7 @@ namespace MinecraftService.Service.Server.ConsoleFilters
             var playerInfo = ExtractPlayerInfoFromString(input);
             if (_bedrockServer.GetActivePlayerList().Any()) {
                 if(_bedrockServer.GetActivePlayerList().Remove(_bedrockServer.GetActivePlayerList().Where(x => x.GetPlayerID() == _bedrockServer.GetPlayerManager().PlayerDisconnected(playerInfo.username, playerInfo.xuid).GetPlayerID()).FirstOrDefault())) {
-                    _logger.AppendLine($"Player {playerInfo.username} disconnected from server {_serverConfiguration.GetServerName()}.");
+                    _logger.AppendLine($"Player {playerInfo.username} has lost connection from server {_serverConfiguration.GetServerName()}, and has been removed from active players.");
                 }
             }
             _configurator.SavePlayerDatabase(_serverConfiguration);
@@ -39,7 +39,12 @@ namespace MinecraftService.Service.Server.ConsoleFilters
 
         private (string username, string xuid) ExtractPlayerInfoFromString(string input) {
             int msgStartIndex = input.IndexOf("]:") + 3;
-            int usernameEnd = input.IndexOf(" left the game", msgStartIndex);
+            int usernameEnd = 0;
+            if (input.Contains(" (/")) {
+                usernameEnd = input.IndexOf(" (/", msgStartIndex);
+            } else {
+                usernameEnd = input.IndexOf(" lost connection", msgStartIndex);
+            }
             int usernameLength = usernameEnd - msgStartIndex;
             return (input.Substring(msgStartIndex, usernameLength), "");
         }

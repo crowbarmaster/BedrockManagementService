@@ -7,7 +7,7 @@ using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 namespace MinecraftService.Shared.Interfaces {
     public interface IBaseConfiguration {
         bool InitializeDefaults();
-        void ProcessUserConfiguration(string[] configEntries);
+        void ProcessUserConfiguration(List<string[]> configEntries);
         bool SetProp(Property propToSet);
         Property GetProp(string keyName);
         Property GetProp(ServicePropertyKeys key);

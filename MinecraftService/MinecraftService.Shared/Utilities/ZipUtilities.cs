@@ -16,7 +16,7 @@ namespace MinecraftService.Shared.Utilities
 
         public static Task ExtractToDirectory(Stream fileStream, string directory, IProgress<ProgressModel> progress, bool isClient = false) => Task.Run(() => {
             using ZipArchive archive = new(fileStream, ZipArchiveMode.Read);
-            Regex jdkName = new(@"jdk-17\.[0-9]+\.[0-9]+/?(.*)");
+            Regex jdkName = new(@"jdk-21\.[0-9]+\.[0-9]+/?(.*)");
             int fileCount = archive.Entries.Count;
             for (int i = 0; i < fileCount + 0; i++) {
                 string fixedEntry = archive.Entries[i].FullName;

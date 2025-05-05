@@ -231,7 +231,7 @@ namespace MinecraftService.Service.Server.ServerControllers
                     int procId = _serverConfiguration.GetRunningPid();
                     bool appExists = ProcessUtilities.MonitoredAppExists(procId);
                     if (!appExists && _currentServerStatus == ServerStatus.Started && !_watchdogCanceler.IsCancellationRequested) {
-                        _logger.AppendLine($"Started application {_serverConfiguration.GetSettingsProp(ServerPropertyKeys.FileName)} was not found in running processes... Resarting.");
+                        _logger.AppendLine($"Started application {_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName)} was not found in running processes... Resarting.");
                         _currentServerStatus = ServerStatus.Stopped;
                         ServerStart().Wait();
                     }

@@ -37,24 +37,6 @@
         BackupCallback
     }
 
-    public enum FileTypeFlags
-    {
-        Backup,
-        ServerPackage,
-        ServicePackage,
-        ServerConfig,
-        ServiceConfig
-    }
-
-    public enum PackageFlags
-    {
-        ConfigFile,
-        LastBackup,
-        WorldPacks,
-        PlayerDatabase,
-        Full
-    }
-
     public enum MessageFlags
     {
         Failed,

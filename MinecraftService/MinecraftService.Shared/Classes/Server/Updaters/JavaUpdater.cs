@@ -98,8 +98,8 @@ namespace MinecraftService.Shared.Classes.Server.Updaters
 
                 _logger.AppendLine($"Latest Java release version found: \"{latestRelease.Version}\"");
                 File.WriteAllText(GetServiceFilePath(MmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[_serverArch]), latestRelease.Version);
-                _serviceConfiguration.SetServerDefaultPropList(_serverArch, MinecraftFileUtilities.CreatePropListFromFile(GetServiceFilePath(MmsFileNameKeys.JavaStockProps_Ver, latestRelease.Version)));
-            });
+                   _serviceConfiguration.SetServerDefaultPropList(_serverArch, MinecraftFileUtilities.CreatePropListFromFile(GetServiceFilePath(MmsFileNameKeys.JavaStockProps_Ver, latestRelease.Version)));
+         });
         }
 
         public JavaVersionHistoryModel GetJavaVersionModel(string version)

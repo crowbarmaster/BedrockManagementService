@@ -7,7 +7,6 @@ using System.IO;
 using System.Text;
 using MinecraftService.Shared.Classes.Service.Configuration;
 using MinecraftService.Shared.Classes.Service.Core;
-using MinecraftService.Shared.Interfaces;
 
 namespace MinecraftService.Client.Management {
     public class ConfigManager {

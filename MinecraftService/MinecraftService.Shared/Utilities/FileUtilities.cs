@@ -84,15 +84,15 @@ namespace MinecraftService.Shared.Utilities
         }
 
         public static void AppendServerPacksToArchive(string serverPath, string levelName, ZipArchive destinationArchive, IProgress<ProgressModel> progress) {
-            string resouceFolderPath = GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName);
-            string behaviorFolderPath = GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName);
-            string behaviorFilePath = GetServerFilePath(ServerFileNameKeys.WorldBehaviorPacks, serverPath, levelName);
-            string resoruceFilePath = GetServerFilePath(ServerFileNameKeys.WorldResourcePacks, serverPath, levelName);
+            string resouceFolderPath = GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir_LevelName, serverPath, levelName);
+            string behaviorFolderPath = GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir_LevelName, serverPath, levelName);
+            string behaviorManifestPath = GetServerFilePath(ServerFileNameKeys.WorldBehaviorPacks, serverPath, levelName);
+            string rescManifestPath = GetServerFilePath(ServerFileNameKeys.WorldResourcePacks, serverPath, levelName);
             MinecraftPackParser packParser = new();
             packParser.ParseDirectory(resouceFolderPath, 0);
             packParser.ParseDirectory(behaviorFolderPath, 0);
-            WorldPackFileModel worldPacks = new(resoruceFilePath);
-            worldPacks.Contents.AddRange(new WorldPackFileModel(behaviorFilePath).Contents);
+            WorldPackFileModel worldPacks = new(rescManifestPath);
+            worldPacks.Contents.AddRange(new WorldPackFileModel(behaviorManifestPath).Contents);
             string packBackupFolderPath = GetNewTempDirectory("InstalledPacks");
             Directory.CreateDirectory(packBackupFolderPath);
             if (worldPacks.Contents.Count > 0) {

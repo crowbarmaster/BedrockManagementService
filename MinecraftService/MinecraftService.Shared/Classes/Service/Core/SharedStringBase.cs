@@ -84,7 +84,7 @@ namespace MinecraftService.Shared.Classes.Service.Core
             ServiceConfig,
             ClientConfig,
             ClientCommandHistory,
-            ServerConfig_Name,
+            ServerConfig_ServerName,
             MmsVersionIni,
             LatestVerIni_Name,
             VersionManifest_Name,
@@ -141,8 +141,8 @@ namespace MinecraftService.Shared.Classes.Service.Core
         {
             ServerRoot,
             ServerWorldDir_LevelName,
-            ResourcePacksDir,
-            BehaviorPacksDir,
+            ResourcePacksDir_LevelName,
+            BehaviorPacksDir_LevelName,
         }
 
         public enum MmsUrlKeys
@@ -160,7 +160,7 @@ namespace MinecraftService.Shared.Classes.Service.Core
             { MmsFileNameKeys.ServiceConfig, ServiceDirectoryKeys.Root },
             { MmsFileNameKeys.ClientConfig, ServiceDirectoryKeys.Root },
             { MmsFileNameKeys.ClientCommandHistory, ServiceDirectoryKeys.MmsConfig },
-            { MmsFileNameKeys.ServerConfig_Name, ServiceDirectoryKeys.ServerConfigs },
+            { MmsFileNameKeys.ServerConfig_ServerName, ServiceDirectoryKeys.ServerConfigs },
             { MmsFileNameKeys.MmsVersionIni, ServiceDirectoryKeys.Root },
             { MmsFileNameKeys.LatestVerIni_Name, ServiceDirectoryKeys.MmsConfig },
             { MmsFileNameKeys.VersionManifest_Name, ServiceDirectoryKeys.MmsConfig },
@@ -222,8 +222,8 @@ namespace MinecraftService.Shared.Classes.Service.Core
         public static Dictionary<ServerDirectoryKeys, string> BdsDirectoryStrings = new() {
             { ServerDirectoryKeys.ServerRoot, "" },
             { ServerDirectoryKeys.ServerWorldDir_LevelName, "worlds\\{0}" },
-            { ServerDirectoryKeys.ResourcePacksDir, "development_resource_packs" },
-            { ServerDirectoryKeys.BehaviorPacksDir, "development_behavior_packs" },
+            { ServerDirectoryKeys.ResourcePacksDir_LevelName, "worlds\\{0}\\resource_packs" },
+            { ServerDirectoryKeys.BehaviorPacksDir_LevelName, "worlds\\{0}\\behavior_packs" }
         };
 
         public static Dictionary<MmsUrlKeys, string> MmsUrlStrings = new() {
@@ -232,7 +232,7 @@ namespace MinecraftService.Shared.Classes.Service.Core
             { MmsUrlKeys.BdsVersionRegx, @"(https://www.minecraft.net/bedrockdedicatedserver/bin-win/bedrock-server-)(.*)(\.zip)" },
             { MmsUrlKeys.BdsVersionJson, "https://raw.githubusercontent.com/crowbarmaster/BedrockManagementService/master/MMS_Files/bedrock_version_prop_manifest.json" },
             { MmsUrlKeys.JdsVersionJson, "https://raw.githubusercontent.com/crowbarmaster/BedrockManagementService/master/MMS_Files/java_version_prop_manifest.json" },
-            { MmsUrlKeys.Jdk17DownloadLink, "https://download.oracle.com/java/17/latest/jdk-17_windows-x64_bin.zip"}
+            { MmsUrlKeys.Jdk21DownloadLink, "https://download.oracle.com/java/21/latest/jdk-21_windows-x64_bin.zip"}
         };
 
         public static Dictionary<ServiceDirectoryKeys, string> MmsDirectoryStrings = new() {
@@ -254,7 +254,7 @@ namespace MinecraftService.Shared.Classes.Service.Core
             { MmsFileNameKeys.ServiceConfig, "Service.conf" },
             { MmsFileNameKeys.ClientConfig, "Client.conf" },
             { MmsFileNameKeys.ClientCommandHistory, "ClientCommandHistory.txt" },
-            { MmsFileNameKeys.ServerConfig_Name, "{0}.conf" },
+            { MmsFileNameKeys.ServerConfig_ServerName, "{0}.conf" },
             { MmsFileNameKeys.LatestVerIni_Name, "LatestVer-{0}.ini" },
             { MmsFileNameKeys.VersionManifest_Name, "VersionPropManifest-{0}.json" },
             { MmsFileNameKeys.MmsVersionIni, "ServiceVersion.ini" },

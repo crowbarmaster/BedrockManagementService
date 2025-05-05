@@ -244,7 +244,7 @@ namespace MinecraftService.Service.Server.ServerControllers
                     int procId = _serverConfiguration.GetRunningPid();
                     bool appExists = ProcessUtilities.MonitoredAppExists(procId);
                     if (!appExists && _currentServerStatus == ServerStatus.Started && !_watchdogCanceler.IsCancellationRequested) {
-                        _serviceLogger.AppendLine($"Started application {_serverConfiguration.GetSettingsProp(ServerPropertyKeys.FileName)} was not found in running processes... Resarting.");
+                        _serviceLogger.AppendLine($"Started application {_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName)} was not found in running processes... Restarting.");
                         _currentServerStatus = ServerStatus.Stopped;
                         ServerStart().Wait();
                     }
@@ -282,7 +282,7 @@ namespace MinecraftService.Service.Server.ServerControllers
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true,
-                FileName = GetServiceFilePath(MmsFileNameKeys.Jdk17JavaMmsExe),
+                FileName = GetServiceFilePath(MmsFileNameKeys.JavaMmsExe),
                 WorkingDirectory = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath).StringValue,
                 Arguments = $"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.JavaArgs)} -\"DMinecraftService_{_serverConfiguration.GetServerName()}\" -jar {fileName} nogui",
             };

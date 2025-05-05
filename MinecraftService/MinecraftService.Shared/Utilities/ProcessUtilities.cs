@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MinecraftService.Shared.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -100,7 +101,7 @@ namespace MinecraftService.Shared.Utilities
                 ProcessStartInfo processStartInfo = new ProcessStartInfo() {
                     UseShellExecute = false,
                     CreateNoWindow = true,
-                    FileName = GetServiceFilePath(MmsFileNameKeys.Jdk17JavaMmsExe),
+                    FileName = GetServiceFilePath(MmsFileNameKeys.JavaMmsExe),
                     WorkingDirectory = jarInfo.Directory.FullName,
                     Arguments = $@"-Xmx1024M -Xms1024M -jar {jarInfo.Name} nogui"
                 };
@@ -122,6 +123,45 @@ namespace MinecraftService.Shared.Utilities
                 process.Kill();
                 process.Dispose();
             });
+        }
+
+        private static Process CreateProcess(string exePath) {
+            ProcessStartInfo processStartInfo = new() {
+                UseShellExecute = false,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true,
+                FileName = exePath
+            };
+            return new Process() { StartInfo = processStartInfo };
+        }
+
+
+        public static string BerockVersionFromExe(string exePath) {
+            if (string.IsNullOrEmpty(exePath)) { throw new ArgumentNullException(nameof(exePath)); }
+            Process serverProcess = CreateProcess(exePath);
+            string versionOutput = "";
+            if (serverProcess != null) {
+                serverProcess.PriorityClass = ProcessPriorityClass.High;
+                serverProcess.OutputDataReceived += (s, e) => {
+                    if (e.Data != null) {
+                        if (e.Data.Contains("Version")) {
+                            int msgStartIndex = e.Data.IndexOf(']') + 2;
+                            string focusedMsg = e.Data[msgStartIndex..];
+                            int versionIndex = focusedMsg.IndexOf(' ') + 1;
+                            versionOutput = focusedMsg[versionIndex..];
+                            serverProcess.Kill();
+                        }
+                    }
+                };
+                serverProcess.BeginOutputReadLine();
+                serverProcess.EnableRaisingEvents = false;
+                serverProcess.WaitForExit(10000);
+                if (string.IsNullOrEmpty(versionOutput)) {
+                    throw new Exception("Attempted to quick-launch bedrock server at:\r\n{exepath}\r\nLaunch failed! Verify path!");
+                }
+            }
+            return versionOutput;
         }
 
         static bool TryOpenFile(string path, out Stream stream) {
@@ -147,7 +187,7 @@ namespace MinecraftService.Shared.Utilities
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 RedirectStandardOutput = true,
-                WorkingDirectory = GetServiceDirectory(ServiceDirectoryKeys.Jdk17BinPath),
+                WorkingDirectory = GetServiceDirectory(ServiceDirectoryKeys.Jdk21BinPath),
                 FileName = @"Jps.exe",
                 Arguments = $@"-mv"
             };

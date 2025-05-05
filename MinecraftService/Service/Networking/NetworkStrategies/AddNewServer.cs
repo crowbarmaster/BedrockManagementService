@@ -28,6 +28,7 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
             configurator.SaveServerConfiguration(newServer);
             minecraftService.InitializeNewServer(newServer);
 
+
             byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(serviceConfiguration, Formatting.Indented, GlobalJsonSerialierSettings));
             return new Message { 
                 Data = serializeToBytes,

@@ -16,7 +16,7 @@ namespace MinecraftService.Shared.PackParser
         public List<MinecraftPackContainer> FoundPacks = new();
         private readonly MmsLogger _serverLogger;
         private IProgress<ProgressModel> _progress;
-        private bool isClient = false;
+        private bool _isClient = false;
 
         [JsonConstructor]
         public MinecraftPackParser() {
@@ -38,7 +38,7 @@ namespace MinecraftService.Shared.PackParser
         });
 
         public Task ProcessClientFiles(string[] files, Action onCompletion) => Task.Run(() => {
-            isClient = true;
+            _isClient = true;
             if (Directory.Exists($@"{PackExtractDirectory}\ZipTemp")) {
                 Directory.CreateDirectory($@"{PackExtractDirectory}\ZipTemp");
             }
@@ -81,7 +81,7 @@ namespace MinecraftService.Shared.PackParser
             DirectoryInfo directoryInfo = new(directoryToParse);
             if (directoryInfo.Exists) {
                 var dirInfoFiles = directoryInfo.GetFiles("*", SearchOption.AllDirectories);
-                double partsPerFile = isClient ? 100 - currentProgress : dirInfoFiles.Count() / 6;
+                double partsPerFile = _isClient ? 100 - currentProgress : dirInfoFiles.Count() / 6;
                 int currentFile = 1;
                 foreach (FileInfo file in dirInfoFiles) {
                     currentFile++;
@@ -102,7 +102,6 @@ namespace MinecraftService.Shared.PackParser
                         } catch {
                             iconBytes = null;
                         }
-
                         FoundPacks.Add(new MinecraftPackContainer {
                             JsonManifest = null,
                             PackContentLocation = file.Directory.FullName,
@@ -147,6 +146,21 @@ namespace MinecraftService.Shared.PackParser
                                 _serverLogger.AppendLine($"Error parsing pack {plugin}! Error: {e.Message}");
                             }
                             continue;
+                        }
+                    }
+                }
+                if(FoundPacks.Any()) {
+                    foreach (MinecraftPackContainer pack in FoundPacks) {
+                        if (pack.JsonManifest.dependencies.Any()) {
+                            foreach (PackManifestJsonModel.Dependency dependency in pack.JsonManifest.dependencies) {
+                                var foundDepend = FoundPacks.Where(x => x.JsonManifest.header.uuid == dependency.uuid).ToList();
+                                if (!foundDepend.Any()) {
+                                    _serverLogger.AppendLine($"Warning! Pack {pack.FolderName} has a missing dependancy!");
+                                }
+                                if (foundDepend.First().JsonManifest.header.version != dependency.version) {
+                                    _serverLogger.AppendLine($"Warning! Pack {pack.FolderName} has a dependancy with mis-matched versions!");
+                                }
+                            }
                         }
                     }
                 }
