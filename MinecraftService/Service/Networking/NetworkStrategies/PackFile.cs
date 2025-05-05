@@ -29,13 +29,13 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
                     if (container.ManifestType == MinecraftPackTypeStrings[MinecraftPackTypes.Behavior]) {
                         filePath = GetServerFilePath(ServerFileNameKeys.WorldBehaviorPacks, server, levelName);
                         if (MinecraftFileUtilities.UpdateWorldPackFile(filePath, container.JsonManifest)) {
-                            FileUtilities.CopyFolderTree(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($"{GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName)}\\{container.FolderName}"));
+                            FileUtilities.CopyFolderTree(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($"{GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir_LevelName, serverPath, levelName)}\\{container.FolderName}"));
                         }
                     }
                     if (container.ManifestType == MinecraftPackTypeStrings[MinecraftPackTypes.Resource]) {
                         filePath = GetServerFilePath(ServerFileNameKeys.WorldResourcePacks, server, levelName);
                         if (MinecraftFileUtilities.UpdateWorldPackFile(filePath, container.JsonManifest)) {
-                            FileUtilities.CopyFolderTree(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($"{GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName)}\\{container.FolderName}"));
+                            FileUtilities.CopyFolderTree(new DirectoryInfo(container.PackContentLocation), new DirectoryInfo($"{GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir_LevelName, serverPath, levelName)}\\{container.FolderName}"));
                         }
                     }
                     logger.AppendLine($@"{container.GetFixedManifestType()} pack installed to server: {container.JsonManifest.header.name}.");

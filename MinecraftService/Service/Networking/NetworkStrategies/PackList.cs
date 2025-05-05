@@ -27,8 +27,8 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
             });
             MinecraftPackParser resourceParser = new(logger, progress);
             MinecraftPackParser behaviorParser = new(logger, progress);
-            resourceParser.ParseDirectory(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir, serverPath, levelName), 0);
-            behaviorParser.ParseDirectory(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir, serverPath, levelName), 0);
+            resourceParser.ParseDirectory(GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir_LevelName, serverPath, levelName), 0);
+            behaviorParser.ParseDirectory(GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir_LevelName, serverPath, levelName), 0);
             MinecraftFileUtilities.ValidateFixWorldPackFiles(serverPath, levelName).Wait();
             combinedList.AddRange(resourceParser.FoundPacks);
             combinedList.AddRange(behaviorParser.FoundPacks);

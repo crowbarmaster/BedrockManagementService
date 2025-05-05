@@ -39,20 +39,20 @@ namespace MinecraftService.Shared.PackParser
 
         public void RemovePackFromServer(IServerConfiguration configuration, MinecraftPackContainer pack) {
             string serverPath = configuration.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString();
-            string serverFolderName = configuration.GetProp(MmsDependServerPropKeys.LevelName).ToString();
+            string levelname = configuration.GetProp(MmsDependServerPropKeys.LevelName).ToString();
             string jsonPackPath = null;
             string jsonWorldPackEnablerPath = null;
             if (pack.ManifestType == "WorldPack") {
                 Directory.Delete($@"{serverPath}\worlds\{pack.FolderName}", true);
             }
             if (pack.ManifestType == "data") {
-                jsonPackPath = $@"{serverPath}\development_behavior_packs\{pack.FolderName}";
-                jsonWorldPackEnablerPath = $@"{serverPath}\worlds\{serverFolderName}\world_behavior_packs.json";
+                jsonPackPath = $@"{serverPath}\worlds\{levelname}\behavior_packs\{pack.FolderName}";
+                jsonWorldPackEnablerPath = $@"{serverPath}\worlds\{levelname}\world_behavior_packs.json";
                 Directory.Delete(jsonPackPath, true);
             }
             if (pack.ManifestType == "resources") {
-                jsonPackPath = $@"{serverPath}\development_resource_packs\{pack.FolderName}";
-                jsonWorldPackEnablerPath = $@"{serverPath}\worlds\{serverFolderName}\world_resource_packs.json";
+                jsonPackPath = $@"{serverPath}\worlds\{levelname}\resource_packs\{pack.FolderName}";
+                jsonWorldPackEnablerPath = $@"{serverPath}\worlds\{levelname}\world_resource_packs.json";
                 Directory.Delete(jsonPackPath, true);
             }
             if (jsonWorldPackEnablerPath != null) {

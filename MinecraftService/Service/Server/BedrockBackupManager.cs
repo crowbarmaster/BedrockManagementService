@@ -3,6 +3,7 @@ using MinecraftService.Shared.Classes;
 using MinecraftService.Shared.Classes.Service;
 using MinecraftService.Shared.Classes.Service.Configuration;
 using MinecraftService.Shared.Classes.Service.Core;
+using MinecraftService.Shared.JsonModels.Minecraft;
 using MinecraftService.Shared.PackParser;
 using MinecraftService.Shared.SerializeModels;
 using System.IO.Compression;
@@ -124,13 +125,13 @@ namespace MinecraftService.Service.Server
                     parser.ParseDirectory(tempDir, 0);
                     if (parser.FoundPacks[0].ManifestType == "data") {
                         currentMessage = $"Clearing and extracting BP {parser.FoundPacks[0].FolderName}";
-                        string folderPath = $@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\development_behavior_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
+                        string folderPath = $@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\worlds\{_serverConfiguration.GetProp(MmsDependServerPropKeys.LevelName)}\behavior_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
                         Task.Run(() => FileUtilities.DeleteFilesFromDirectory(folderPath, false, progress)).Wait();
                         ZipUtilities.ExtractToDirectory(file.FullName, folderPath, progress);
                     }
                     if (parser.FoundPacks[0].ManifestType == "resources") {
                         currentMessage = $"Clearing and extracting RP {parser.FoundPacks[0].FolderName}";
-                        string folderPath = $@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\development_resource_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
+                        string folderPath = $@"{_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\worlds\{_serverConfiguration.GetProp(MmsDependServerPropKeys.LevelName)}\53resource_packs\{file.Name.Substring(0, file.Name.Length - file.Extension.Length)}";
                         Task.Run(() => FileUtilities.DeleteFilesFromDirectory(folderPath, false, progress)).Wait();
                         ZipUtilities.ExtractToDirectory(file.FullName, folderPath, progress);
                     }
