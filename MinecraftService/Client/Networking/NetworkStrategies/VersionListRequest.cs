@@ -14,7 +14,7 @@ namespace MinecraftService.Client.Networking.NetworkStrategies {
     public class VersionListRequest : INetworkMessage {
 
         public Task<bool> ProcessMessage(Message message) => Task.Run(() => {
-            string data = Encoding.UTF8.GetString(message.Data, 5, message.Data.Length - 5);
+            string data = Encoding.UTF8.GetString(message.Data);
             Dictionary<SharedStringBase.MinecraftServerArch, SimpleVersionModel[]> versionLists = JsonConvert.DeserializeObject<Dictionary<SharedStringBase.MinecraftServerArch, SimpleVersionModel[]>>(data, SharedStringBase.GlobalJsonSerialierSettings);
             FormManager.MainWindow.VersionListArrived(versionLists);
             return true;

@@ -15,7 +15,7 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
     public class AddNewServer(MmsLogger logger, ProcessInfo processInfo, UserConfigManager configurator, ServiceConfigurator serviceConfiguration, MmsService minecraftService) : IMessageParser {
 
         public Message ParseMessage(Message message) {
-            string stringData = Encoding.UTF8.GetString(message.Data, 5, message.Data.Length - 5);
+            string stringData = Encoding.UTF8.GetString(message.Data);
             ServerCombinedPropModel propModel = JsonConvert.DeserializeObject<ServerCombinedPropModel>(stringData, GlobalJsonSerialierSettings);
             Property? archProp = propModel?.ServicePropList?.First(x => x.KeyName == ServerPropertyStrings[ServerPropertyKeys.MinecraftType]);
             MinecraftServerArch selectedArch = GetArchFromString(archProp.StringValue);
