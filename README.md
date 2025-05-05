@@ -33,7 +33,7 @@ TODO:
 ## Quick-start guide
 
 !! NOTICE !!
-You will need the .NET Hosting bundle runtimes, Located at the bottom of the following page: https://dotnet.microsoft.com/en-us/download/dotnet/6.0/runtime
+You will need the .NET Desktop bundle runtimes, Located at the bottom of the following page: https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-9.0.0-windows-x64-installer
 
 This service can be run strictly as a windows service, or as a regular console application.
 Download the latest release and extract to any directory. Run BedrockService.Service.exe, this will automatically download the latest copy of BDS (Bedrock Dedicated Server) from minecraft.net, extract to the default directory of C:\MCBedrockService, deploy stock settings and start the server. Once the new server is running, you can either close it and modify the configs with a text editor (see below for more details) or modify/add servers from the GUI Client.

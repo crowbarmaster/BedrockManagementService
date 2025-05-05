@@ -500,15 +500,15 @@ namespace MinecraftService.Client.Forms {
             // 
             serverPackageFileToolStripMenuItem.Name = "serverPackageFileToolStripMenuItem";
             serverPackageFileToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
-            serverPackageFileToolStripMenuItem.Text = "Server package file";
+            serverPackageFileToolStripMenuItem.Text = "Vanilla Bedrock server";
             serverPackageFileToolStripMenuItem.Click += serverPackageFileToolStripMenuItem_Click;
             // 
             // serviceConfigFileToolStripMenuItem
             // 
             serviceConfigFileToolStripMenuItem.Name = "serviceConfigFileToolStripMenuItem";
             serviceConfigFileToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
-            serviceConfigFileToolStripMenuItem.Text = "Service config file";
-            serviceConfigFileToolStripMenuItem.Click += serviceConfigFileToolStripMenuItem_Click;
+            serviceConfigFileToolStripMenuItem.Text = "Importable zip file";
+            serviceConfigFileToolStripMenuItem.Click += ImportableZipFileItemClicked;
             // 
             // exportToolStripMenuItem
             // 

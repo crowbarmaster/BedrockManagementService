@@ -375,3 +375,4 @@ GenerateLog.bat
 /BMS_Files/plugin_repo.json
 /BedrockService/Service/Properties/launchSettings.json
 /MinecraftService/Client/GlobalSuppressions.cs
+/MinecraftService/ServiceTests/TestFiles/BedrockTest.zip

@@ -202,16 +202,14 @@ namespace MinecraftService.Client.Forms {
         }
 
         public Task RecieveExportData(ExportImportFileModel file) => Task.Run(() => {
-            if (file == null) {
-                return;
-            }
-            if (file.FileType == FileTypeFlags.Backup && _backupManager != null) {
+            ExportImportManifestModel mainifest = file.Manifest;
+            if (mainifest.FileType == FileTypes.WorldBackup && _backupManager != null) {
                 _backupManager.RecieveExportData(file.Data);
             }
-            if (file.FileType == FileTypeFlags.ServerPackage) {
+            if (mainifest.FileType == FileTypes.BedrockServer) {
                 SaveFileDialog saveFileDialog = new() {
                     Filter = "Zip file|*.zip",
-                    FileName = file.Filename,
+                    FileName = mainifest.Filename,
                     RestoreDirectory = true,
                     Title = "Save exported file..."
                 };
@@ -219,10 +217,10 @@ namespace MinecraftService.Client.Forms {
                     File.WriteAllBytes(saveFileDialog.FileName, file.Data);
                 }
             }
-            if (file.FileType == FileTypeFlags.ServicePackage) {
+            if (mainifest.FileType == FileTypes.ServiceConfig) {
                 SaveFileDialog saveFileDialog = new() {
                     Filter = "Zip file|*.zip",
-                    FileName = $"MMS_{file.FileType}-{DateTime.Now:yyyyMMdd_hhmmssff}.zip",
+                    FileName = $"MMS_{mainifest.FileType}-{DateTime.Now:yyyyMMdd_hhmmssff}.zip",
                     RestoreDirectory = true,
                     Title = "Save exported file..."
                 };
@@ -809,9 +807,11 @@ namespace MinecraftService.Client.Forms {
         }
 
         private void asConfigOnlyToolStripMenuItem_Click(object sender, EventArgs e) {
+            ExportImportManifestModel manifest = new() {
+                FileType = FileTypes.ServerConfig
+            };
             ExportImportFileModel model = new() {
-                FileType = FileTypeFlags.ServerPackage,
-                PackageFlags = PackageFlags.ConfigFile
+                Manifest = manifest,
             };
             byte[] serializedBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(model));
             FormManager.TCPClient.SendData(new() {
@@ -822,11 +822,10 @@ namespace MinecraftService.Client.Forms {
         }
 
         private void importableBackupToolStripMenuItem_Click(object sender, EventArgs e) {
-            ExportImportFileModel model = new() {
-                FileType = FileTypeFlags.ServerPackage,
-                PackageFlags = PackageFlags.LastBackup
+            ExportImportManifestModel manifestModel = new() {
+                FileType = FileTypes.WorldBackup
             };
-            byte[] serializedBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(model));
+            byte[] serializedBytes = []; // Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(model));
             FormManager.TCPClient.SendData(new() {
                 Data = serializedBytes,
                 ServerIndex = FormManager.MainWindow.connectedHost.GetServerIndex(SelectedServer),
@@ -835,9 +834,11 @@ namespace MinecraftService.Client.Forms {
         }
 
         private void importableBackupWithPacksToolStripMenuItem_Click(object sender, EventArgs e) {
+            ExportImportManifestModel manifestModel = new() {
+                FileType = FileTypes.WorldBackup | FileTypes.ServerPacks,
+            };
             ExportImportFileModel model = new() {
-                FileType = FileTypeFlags.ServerPackage,
-                PackageFlags = PackageFlags.WorldPacks
+                Manifest = manifestModel
             };
             byte[] serializedBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(model));
             FormManager.TCPClient.SendData(new() {
@@ -848,9 +849,12 @@ namespace MinecraftService.Client.Forms {
         }
 
         private void fullServerPackageToolStripMenuItem_Click(object sender, EventArgs e) {
+            ExportImportManifestModel manifestModel = new() {
+                FileType = FileTypes.BedrockServer
+            };
+
             ExportImportFileModel model = new() {
-                FileType = FileTypeFlags.ServerPackage,
-                PackageFlags = PackageFlags.Full
+                Manifest = manifestModel
             };
             byte[] serializedBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(model));
             FormManager.TCPClient.SendData(new() {
@@ -861,9 +865,11 @@ namespace MinecraftService.Client.Forms {
         }
 
         private void serviceConfigFileToolStripMenuItem1_Click(object sender, EventArgs e) {
+            ExportImportManifestModel manifestModel = new() {
+                FileType = FileTypes.ServiceConfig,
+            };
             ExportImportFileModel model = new() {
-                FileType = FileTypeFlags.ServicePackage,
-                PackageFlags = PackageFlags.ConfigFile
+                Manifest = manifestModel
             };
             byte[] serializedBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(model));
             FormManager.TCPClient.SendData(new() {
@@ -874,23 +880,20 @@ namespace MinecraftService.Client.Forms {
         }
 
         private void serverPackageFileToolStripMenuItem_Click(object sender, EventArgs e) {
+
+        }
+
+        private void ImportableZipFileItemClicked(object sender, EventArgs e) {
             byte[] fileBytes = OpenPackageFile();
             if (fileBytes != null) {
-                ExportImportFileModel fileModel = new() {
-                    Data = fileBytes,
-                    FileType = FileTypeFlags.ServerPackage
-                };
-                byte[] serializedBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(fileModel));
+                ExportImportFileModel model = new(fileBytes);
+                byte[] serializedBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(model));
                 FormManager.TCPClient.SendData(new() {
                     Data = serializedBytes,
                     ServerIndex = 0xFF,
                     Type = MessageTypes.ImportFile
                 });
             }
-        }
-
-        private void serviceConfigFileToolStripMenuItem_Click(object sender, EventArgs e) {
-
         }
 
         private byte[] OpenPackageFile() {

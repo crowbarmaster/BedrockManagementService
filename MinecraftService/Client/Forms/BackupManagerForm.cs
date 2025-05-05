@@ -90,8 +90,8 @@ namespace MinecraftService.Client.Forms {
             saveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             if (saveFileDialog.ShowDialog() == DialogResult.OK) {
                 ExportImportFileModel exportModel = new();
-                exportModel.Filename = selectedBackup.Filename;
-                exportModel.FileType = FileTypeFlags.Backup;
+                exportModel.Manifest.Filename = selectedBackup.Filename;
+                exportModel.Manifest.FileType = FileTypes.WorldBackup;
                 byte[] dataBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(exportModel));
                 _callbackRecieved = false;
                 string[] newText = new string[4];
