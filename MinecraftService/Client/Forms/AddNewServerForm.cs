@@ -40,7 +40,7 @@ namespace MinecraftService.Client.Forms {
             IServerConfiguration server;
             foreach (KeyValuePair<MinecraftServerArch, string> kvp in MinecraftArchStrings) {
                 ServerCombinedPropModel serverCombinedPropModel = new();
-                server = ServiceConfigurator.PrepareNewServerConfig(kvp.Value, FormManager.processInfo, FormManager.Logger, FormManager.MainWindow.connectedHost);
+                server = FormManager.MainWindow.connectedHost.PrepareNewServerConfig(kvp.Value, FormManager.processInfo, FormManager.Logger);
                 server.InitializeDefaults();
                 serverCombinedPropModel.ServerPropList = server.GetAllProps();
                 serverCombinedPropModel.ServicePropList = server.GetSettingsList();

@@ -20,7 +20,7 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
             Property? archProp = propModel?.ServicePropList?.First(x => x.KeyName == ServerPropertyStrings[ServerPropertyKeys.MinecraftType]);
             MinecraftServerArch selectedArch = GetArchFromString(archProp.StringValue);
             configurator.VerifyServerArchInit(selectedArch);
-            IServerConfiguration newServer = ServiceConfigurator.PrepareNewServerConfig(selectedArch, processInfo, logger, serviceConfiguration);
+            IServerConfiguration newServer = serviceConfiguration.PrepareNewServerConfig(selectedArch, processInfo, logger);
             newServer.InitializeDefaults();
             newServer.SetAllSettings(propModel?.ServicePropList);
             newServer.SetAllProps(propModel?.ServerPropList);

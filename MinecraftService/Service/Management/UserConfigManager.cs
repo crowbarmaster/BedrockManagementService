@@ -66,7 +66,7 @@ namespace MinecraftService.Service.Management
                         if (!_serviceConfiguration.GetUpdater(selectedArch).IsInitialized()) {
                             _serviceConfiguration.GetUpdater(selectedArch).Initialize().Wait();
                         }
-                        serverInfo = ServiceConfigurator.PrepareNewServerConfig(selectedArch, _processInfo, _logger, _serviceConfiguration);
+                        serverInfo = _serviceConfiguration.PrepareNewServerConfig(selectedArch, _processInfo, _logger);
                     }
                     if (serverInfo.InitializeDefaults()) {
                         serverInfo.ProcessUserConfiguration(fileEntries);
