@@ -366,7 +366,7 @@ namespace MinecraftService.Client.Forms {
             if (clientSideServiceConfiguration == null) {
                 clientSideServiceConfiguration = ConfigManager.HostConnectList.First(host => host.GetHostName() == HostListBox.Text);
             }
-            DisableUI("Service is perparing a new server...");
+            DisableUI("Service is preparing a new server...");
             FormManager.TCPClient.SendData(new() { Type = MessageTypes.VersionListRequest });
         }
 
