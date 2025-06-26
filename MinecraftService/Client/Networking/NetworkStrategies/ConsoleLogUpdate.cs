@@ -15,7 +15,7 @@ namespace MinecraftService.Client.Networking.NetworkStrategies {
     public class ConsoleLogUpdate(MmsLogger logger) : INetworkMessage {
 
         public Task<bool> ProcessMessage(Message message) => Task.Run(() => {
-            string data = Encoding.UTF8.GetString(message.Data, 5, message.Data.Length - 5);
+            string data = Encoding.UTF8.GetString(message.Data);
             try {
                 string[] strings = data.Split("|?|");
                 for (int i = 0; i < strings.Length; i++) {

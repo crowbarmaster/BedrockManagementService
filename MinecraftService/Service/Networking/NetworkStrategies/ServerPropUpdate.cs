@@ -13,7 +13,7 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
     public class ServerPropUpdate(MmsLogger logger, UserConfigManager configurator, ServiceConfigurator serviceConfiguration, MmsService mineraftService) : IMessageParser {
 
         public Message ParseMessage(Message message) {
-            string stringData = Encoding.UTF8.GetString(message.Data, 5, message.Data.Length - 5);
+            string stringData = Encoding.UTF8.GetString(message.Data);
             List<Property> propList = JsonConvert.DeserializeObject<List<Property>>(stringData, SharedStringBase.GlobalJsonSerialierSettings);
             Property prop = propList.FirstOrDefault(p => p.KeyName == "AcceptedMojangLic");
             if (prop != null) {

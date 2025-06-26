@@ -15,7 +15,7 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
     public class PlayersUpdate(UserConfigManager configurator, ServiceConfigurator serviceConfiguration, MmsService service) : IMessageParser {
 
         public Message ParseMessage(Message message) {
-            string stringData = Encoding.UTF8.GetString(message.Data, 5, message.Data.Length - 5);
+            string stringData = Encoding.UTF8.GetString(message.Data);
             List<Player> fetchedPlayers = JsonConvert.DeserializeObject<List<Player>>(stringData, GlobalJsonSerialierSettings);
             foreach (Player player in fetchedPlayers) {
                 try {

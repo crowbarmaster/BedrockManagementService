@@ -11,7 +11,7 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
     public class ConsoleLogUpdate(MmsLogger logger, ServiceConfigurator serviceConfiguration, MmsService service) : IMessageParser {
 
         public Message ParseMessage(Message message) {
-            string stringData = Encoding.UTF8.GetString(message.Data, 5, message.Data.Length - 5);
+            string stringData = Encoding.UTF8.GetString(message.Data);
             StringBuilder srvString = new();
             string[] split = stringData.Split("|?|");
             for (int i = 0; i < split.Length; i++) {

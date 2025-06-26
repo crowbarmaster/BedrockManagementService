@@ -8,7 +8,7 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
     public class BackupRollback(MmsService service) : IMessageParser {
 
         public Message ParseMessage(Message message) {
-            string stringData = Encoding.UTF8.GetString(message.Data, 5, message.Data.Length - 5);
+            string stringData = Encoding.UTF8.GetString(message.Data);
             byte[] sendBytes = new byte[1];
 
             if (service.GetServerByIndex(message.ServerIndex).RollbackToBackup(stringData)) {

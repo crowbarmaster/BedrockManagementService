@@ -11,7 +11,7 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
 {
     public class StartCmdUpdate(UserConfigManager configurator, ServiceConfigurator serviceConfiguration) : IMessageParser {
         public Message ParseMessage(Message message) {
-            List<StartCmdEntry> entries = JsonConvert.DeserializeObject<List<StartCmdEntry>>(Encoding.UTF8.GetString(message.Data, 5, message.Data.Length - 5), SharedStringBase.GlobalJsonSerialierSettings);
+            List<StartCmdEntry> entries = JsonConvert.DeserializeObject<List<StartCmdEntry>>(Encoding.UTF8.GetString(message.Data), SharedStringBase.GlobalJsonSerialierSettings);
             serviceConfiguration.GetServerInfoByIndex(message.ServerIndex).SetStartCommands(entries);
             configurator.SaveServerConfiguration(serviceConfiguration.GetServerInfoByIndex(message.ServerIndex));
             return Message.EmptyUICallback;

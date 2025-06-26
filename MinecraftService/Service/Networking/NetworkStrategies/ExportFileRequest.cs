@@ -20,7 +20,7 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
     public class ExportFileRequest(UserConfigManager configurator, MmsService minecraftService, ServiceConfigurator configuration, MmsLogger logger) : IMessageParser {
 
         public Message ParseMessage(Message message) {
-            string jsonString = Encoding.UTF8.GetString(message.Data, 5, message.Data.Length - 5);
+            string jsonString = Encoding.UTF8.GetString(message.Data);
             ExportImportManifestModel requestManifest = JsonConvert.DeserializeObject<ExportImportManifestModel>(jsonString);
             if (requestManifest == null) {
                 return new();

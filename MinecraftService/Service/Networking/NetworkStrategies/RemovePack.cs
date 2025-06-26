@@ -14,7 +14,7 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
     public class RemovePack(ServiceConfigurator serviceConfiguration, MmsLogger logger) : IMessageParser {
 
         public Message ParseMessage(Message message) {
-            string stringData = Encoding.UTF8.GetString(message.Data, 5, message.Data.Length - 5);
+            string stringData = Encoding.UTF8.GetString(message.Data);
             string pathToWorldFolder = $@"{serviceConfiguration.GetServerInfoByIndex(message.ServerIndex).GetSettingsProp(ServerPropertyKeys.ServerPath)}\worlds\{serviceConfiguration.GetServerInfoByIndex(message.ServerIndex).GetProp(MmsDependServerPropKeys.LevelName)}";
             MinecraftKnownPacksClass knownPacks = new($@"{serviceConfiguration.GetServerInfoByIndex(message.ServerIndex).GetSettingsProp(ServerPropertyKeys.ServerPath)}\valid_known_packs.json", pathToWorldFolder);
             List<MinecraftPackContainer>? container = JsonConvert.DeserializeObject<List<MinecraftPackContainer>>(stringData, SharedStringBase.GlobalJsonSerialierSettings);

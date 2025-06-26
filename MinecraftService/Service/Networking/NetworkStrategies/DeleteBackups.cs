@@ -11,8 +11,8 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
     class DeleteBackups(MmsLogger logger, ServiceConfigurator service) : IMessageParser {
 
         public Message ParseMessage(Message message) {
-            string stringData = Encoding.UTF8.GetString(message.Data, 5, message.Data.Length - 5);
-            FileInfo file = new FileInfo(stringData);
+            string stringData = Encoding.UTF8.GetString(message.Data);
+            FileInfo file = new FileInfo(stringData);   
             try {
                 service.DeleteBackupForServer(message.ServerIndex, stringData);
                 logger.AppendLine($"Deleted backup {file.Name}.");
