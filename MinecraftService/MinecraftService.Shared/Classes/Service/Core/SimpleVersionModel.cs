@@ -6,12 +6,14 @@ namespace MinecraftService.Shared.Classes.Service.Core
     public class SimpleVersionModel : IEquatable<SimpleVersionModel>
     {
         public string Version { get; set; }
+        public List<Property> DefaultProps { get; set; }
         public bool IsBeta { get; set; }
 
-        public SimpleVersionModel(string version, bool isBeta)
+        public SimpleVersionModel(string version, bool isBeta, List<Property> props)
         {
             Version = version;
             IsBeta = isBeta;
+            DefaultProps = props;
         }
 
         public override string ToString()

@@ -221,7 +221,7 @@ namespace MinecraftService.Shared.Classes.Server.Updaters
             List<SimpleVersionModel> outList = new List<SimpleVersionModel>();
             foreach (JavaVersionHistoryModel ver in _versionLookupTable.Values)
             {
-                outList.Add(new SimpleVersionModel(ver.Version, ver.IsBeta));
+                outList.Add(new SimpleVersionModel(ver.Version, ver.IsBeta, GetVersionPropList(ver.Version)));
             }
             return outList;
         }

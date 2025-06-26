@@ -121,6 +121,9 @@ namespace MinecraftService.Shared.Classes.Server.Updaters
         public List<Property> GetVersionPropList(string version)
         {
             List<Property> outList = new List<Property>();
+            if (!_versionLookupTable.ContainsKey(version)) {
+                return outList;
+            }
             foreach (PropInfoEntry prop in _versionLookupTable[version].PropList)
             {
                 outList.Add(new Property(prop.Key, prop.Value));
@@ -226,7 +229,7 @@ namespace MinecraftService.Shared.Classes.Server.Updaters
             List<LegacyBedrockVersionModel> versionList = JsonConvert.DeserializeObject<List<LegacyBedrockVersionModel>>(content);
             foreach (var version in versionList)
             {
-                result.Add(new(version.Version, false));
+                result.Add(new(version.Version, false, GetVersionPropList(version.Version)));
             }
             return result;
         }

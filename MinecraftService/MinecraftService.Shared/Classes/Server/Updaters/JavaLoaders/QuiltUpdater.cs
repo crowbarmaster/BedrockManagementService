@@ -136,7 +136,7 @@ namespace MinecraftService.Shared.Classes.Server.Updaters.JavaLoaders
 
             foreach (var version in versionList)
             {
-                result.Add(new(version.Version, version.IsBeta));
+                result.Add(new(version.Version, version.IsBeta, GetVersionPropList(version.Version)));
             }
             return result;
         }
