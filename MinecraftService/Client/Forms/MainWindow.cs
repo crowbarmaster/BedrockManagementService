@@ -560,6 +560,14 @@ namespace MinecraftService.Client.Forms {
 
         public void VersionListArrived(Dictionary<MinecraftServerArch, SimpleVersionModel[]> verLists) {
             ServerBusy = false;
+            foreach(MinecraftServerArch arch in verLists.Keys) {
+                if (!connectedHost.DefaultServerPropsByArch.ContainsKey(arch)) {
+                    if (!verLists[arch].Any()) {
+                        FormManager.Logger.AppendLine($"VersionListArrived error: Version list was empty for selected arch: {arch}");
+                    }
+                    connectedHost.SetServerDefaultPropList(arch, verLists[arch][0].DefaultProps);
+                }
+            }
             using (_newServerForm = new(clientSideServiceConfiguration, connectedHost.GetServerList(), verLists)) {
                 if (_newServerForm.ShowDialog() == DialogResult.OK) {
                     byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_newServerForm.SelectedPropModel, Formatting.Indented, GlobalJsonSerialierSettings));
