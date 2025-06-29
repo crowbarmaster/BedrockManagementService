@@ -27,205 +27,202 @@ namespace MinecraftService.Client.Forms
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent()
-        {
-            this.srvNameBox = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.ipV4Box = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.ipV6Box = new System.Windows.Forms.TextBox();
-            this.editPropsBtn = new System.Windows.Forms.Button();
-            this.saveBtn = new System.Windows.Forms.Button();
-            this.label4 = new System.Windows.Forms.Label();
-            this.serverSettingsBtn = new System.Windows.Forms.Button();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.ServerTypeComboBox = new System.Windows.Forms.ComboBox();
-            this.VersionSelectComboBox = new System.Windows.Forms.ComboBox();
-            this.BetaVersionCheckBox = new System.Windows.Forms.CheckBox();
-            this.SuspendLayout();
+        private void InitializeComponent() {
+            srvNameBox = new System.Windows.Forms.TextBox();
+            label1 = new System.Windows.Forms.Label();
+            label2 = new System.Windows.Forms.Label();
+            ipV4Box = new System.Windows.Forms.TextBox();
+            label3 = new System.Windows.Forms.Label();
+            ipV6Box = new System.Windows.Forms.TextBox();
+            editPropsBtn = new System.Windows.Forms.Button();
+            saveBtn = new System.Windows.Forms.Button();
+            label4 = new System.Windows.Forms.Label();
+            serverSettingsBtn = new System.Windows.Forms.Button();
+            label5 = new System.Windows.Forms.Label();
+            label6 = new System.Windows.Forms.Label();
+            ServerTypeComboBox = new System.Windows.Forms.ComboBox();
+            VersionSelectComboBox = new System.Windows.Forms.ComboBox();
+            BetaVersionCheckBox = new System.Windows.Forms.CheckBox();
+            SuspendLayout();
             // 
             // srvNameBox
             // 
-            this.srvNameBox.Location = new System.Drawing.Point(124, 94);
-            this.srvNameBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.srvNameBox.Name = "srvNameBox";
-            this.srvNameBox.Size = new System.Drawing.Size(116, 23);
-            this.srvNameBox.TabIndex = 0;
+            srvNameBox.Location = new System.Drawing.Point(124, 94);
+            srvNameBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            srvNameBox.Name = "srvNameBox";
+            srvNameBox.Size = new System.Drawing.Size(116, 23);
+            srvNameBox.TabIndex = 0;
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(41, 97);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(75, 15);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "Server name:";
+            label1.AutoSize = true;
+            label1.Location = new System.Drawing.Point(41, 97);
+            label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            label1.Name = "label1";
+            label1.Size = new System.Drawing.Size(75, 15);
+            label1.TabIndex = 1;
+            label1.Text = "Server name:";
             // 
             // label2
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(56, 127);
-            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(60, 15);
-            this.label2.TabIndex = 3;
-            this.label2.Text = "IP v4 port:";
+            label2.AutoSize = true;
+            label2.Location = new System.Drawing.Point(56, 127);
+            label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            label2.Name = "label2";
+            label2.Size = new System.Drawing.Size(60, 15);
+            label2.TabIndex = 3;
+            label2.Text = "IP v4 port:";
             // 
             // ipV4Box
             // 
-            this.ipV4Box.Location = new System.Drawing.Point(124, 124);
-            this.ipV4Box.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.ipV4Box.Name = "ipV4Box";
-            this.ipV4Box.Size = new System.Drawing.Size(116, 23);
-            this.ipV4Box.TabIndex = 2;
+            ipV4Box.Location = new System.Drawing.Point(124, 124);
+            ipV4Box.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            ipV4Box.Name = "ipV4Box";
+            ipV4Box.Size = new System.Drawing.Size(116, 23);
+            ipV4Box.TabIndex = 2;
             // 
             // label3
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(56, 157);
-            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(60, 15);
-            this.label3.TabIndex = 5;
-            this.label3.Text = "IP v6 port:";
+            label3.AutoSize = true;
+            label3.Location = new System.Drawing.Point(56, 157);
+            label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            label3.Name = "label3";
+            label3.Size = new System.Drawing.Size(60, 15);
+            label3.TabIndex = 5;
+            label3.Text = "IP v6 port:";
             // 
             // ipV6Box
             // 
-            this.ipV6Box.Location = new System.Drawing.Point(124, 154);
-            this.ipV6Box.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.ipV6Box.Name = "ipV6Box";
-            this.ipV6Box.Size = new System.Drawing.Size(116, 23);
-            this.ipV6Box.TabIndex = 4;
+            ipV6Box.Location = new System.Drawing.Point(124, 154);
+            ipV6Box.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            ipV6Box.Name = "ipV6Box";
+            ipV6Box.Size = new System.Drawing.Size(116, 23);
+            ipV6Box.TabIndex = 4;
             // 
             // editPropsBtn
             // 
-            this.editPropsBtn.Location = new System.Drawing.Point(38, 237);
-            this.editPropsBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.editPropsBtn.Name = "editPropsBtn";
-            this.editPropsBtn.Size = new System.Drawing.Size(202, 27);
-            this.editPropsBtn.TabIndex = 6;
-            this.editPropsBtn.Text = "Edit server settings";
-            this.editPropsBtn.UseVisualStyleBackColor = true;
-            this.editPropsBtn.Click += new System.EventHandler(this.editPropsBtn_Click);
+            editPropsBtn.Location = new System.Drawing.Point(38, 237);
+            editPropsBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            editPropsBtn.Name = "editPropsBtn";
+            editPropsBtn.Size = new System.Drawing.Size(202, 27);
+            editPropsBtn.TabIndex = 6;
+            editPropsBtn.Text = "Edit server settings";
+            editPropsBtn.UseVisualStyleBackColor = true;
+            editPropsBtn.Click += editPropsBtn_Click;
             // 
             // saveBtn
             // 
-            this.saveBtn.Location = new System.Drawing.Point(124, 303);
-            this.saveBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.saveBtn.Name = "saveBtn";
-            this.saveBtn.Size = new System.Drawing.Size(117, 27);
-            this.saveBtn.TabIndex = 8;
-            this.saveBtn.Text = "Save Server";
-            this.saveBtn.UseVisualStyleBackColor = true;
-            this.saveBtn.Click += new System.EventHandler(this.saveBtn_Click);
+            saveBtn.Location = new System.Drawing.Point(124, 303);
+            saveBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            saveBtn.Name = "saveBtn";
+            saveBtn.Size = new System.Drawing.Size(117, 27);
+            saveBtn.TabIndex = 8;
+            saveBtn.Text = "Save Server";
+            saveBtn.UseVisualStyleBackColor = true;
+            saveBtn.Click += saveBtn_Click;
             // 
             // label4
             // 
-            this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.label4.Location = new System.Drawing.Point(35, 10);
-            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(201, 51);
-            this.label4.TabIndex = 8;
-            this.label4.Text = "Add a new server to the service. Note: Requires a Global restart to run new serve" +
-    "r!";
+            label4.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            label4.Location = new System.Drawing.Point(35, 10);
+            label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            label4.Name = "label4";
+            label4.Size = new System.Drawing.Size(201, 51);
+            label4.TabIndex = 8;
+            label4.Text = "Add a new server to the service. Note: Requires a Global restart to run new server!";
             // 
             // serverSettingsBtn
             // 
-            this.serverSettingsBtn.Location = new System.Drawing.Point(39, 270);
-            this.serverSettingsBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.serverSettingsBtn.Name = "serverSettingsBtn";
-            this.serverSettingsBtn.Size = new System.Drawing.Size(202, 27);
-            this.serverSettingsBtn.TabIndex = 7;
-            this.serverSettingsBtn.Text = "Edit Service settings for server";
-            this.serverSettingsBtn.UseVisualStyleBackColor = true;
-            this.serverSettingsBtn.Click += new System.EventHandler(this.serverSettingsBtn_Click);
+            serverSettingsBtn.Location = new System.Drawing.Point(39, 270);
+            serverSettingsBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            serverSettingsBtn.Name = "serverSettingsBtn";
+            serverSettingsBtn.Size = new System.Drawing.Size(202, 27);
+            serverSettingsBtn.TabIndex = 7;
+            serverSettingsBtn.Text = "Edit Service settings for server";
+            serverSettingsBtn.UseVisualStyleBackColor = true;
+            serverSettingsBtn.Click += serverSettingsBtn_Click;
             // 
             // label5
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(29, 207);
-            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(88, 15);
-            this.label5.TabIndex = 11;
-            this.label5.Text = "Deploy version:";
+            label5.AutoSize = true;
+            label5.Location = new System.Drawing.Point(29, 207);
+            label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            label5.Name = "label5";
+            label5.Size = new System.Drawing.Size(88, 15);
+            label5.TabIndex = 11;
+            label5.Text = "Deploy version:";
             // 
             // label6
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(49, 67);
-            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(68, 15);
-            this.label6.TabIndex = 12;
-            this.label6.Text = "Server type:";
+            label6.AutoSize = true;
+            label6.Location = new System.Drawing.Point(49, 67);
+            label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            label6.Name = "label6";
+            label6.Size = new System.Drawing.Size(68, 15);
+            label6.TabIndex = 12;
+            label6.Text = "Server type:";
             // 
             // ServerTypeComboBox
             // 
-            this.ServerTypeComboBox.FormattingEnabled = true;
-            this.ServerTypeComboBox.Location = new System.Drawing.Point(124, 64);
-            this.ServerTypeComboBox.Name = "ServerTypeComboBox";
-            this.ServerTypeComboBox.Size = new System.Drawing.Size(116, 23);
-            this.ServerTypeComboBox.TabIndex = 13;
-            this.ServerTypeComboBox.SelectedIndexChanged += new System.EventHandler(this.ServerTypeComboBox_SelectedIndexChanged);
+            ServerTypeComboBox.FormattingEnabled = true;
+            ServerTypeComboBox.Location = new System.Drawing.Point(124, 64);
+            ServerTypeComboBox.Name = "ServerTypeComboBox";
+            ServerTypeComboBox.Size = new System.Drawing.Size(116, 23);
+            ServerTypeComboBox.TabIndex = 13;
+            ServerTypeComboBox.SelectedIndexChanged += ServerTypeComboBox_SelectedIndexChanged;
             // 
             // VersionSelectComboBox
             // 
-            this.VersionSelectComboBox.FormattingEnabled = true;
-            this.VersionSelectComboBox.Location = new System.Drawing.Point(124, 204);
-            this.VersionSelectComboBox.Name = "VersionSelectComboBox";
-            this.VersionSelectComboBox.Size = new System.Drawing.Size(116, 23);
-            this.VersionSelectComboBox.TabIndex = 14;
-            this.VersionSelectComboBox.SelectedIndexChanged += new System.EventHandler(this.VersionSelectComboBox_SelectedIndexChanged);
+            VersionSelectComboBox.FormattingEnabled = true;
+            VersionSelectComboBox.Location = new System.Drawing.Point(124, 204);
+            VersionSelectComboBox.Name = "VersionSelectComboBox";
+            VersionSelectComboBox.Size = new System.Drawing.Size(116, 23);
+            VersionSelectComboBox.TabIndex = 14;
+            VersionSelectComboBox.SelectedIndexChanged += VersionSelectComboBox_SelectedIndexChanged;
             // 
             // BetaVersionCheckBox
             // 
-            this.BetaVersionCheckBox.AutoSize = true;
-            this.BetaVersionCheckBox.Location = new System.Drawing.Point(24, 181);
-            this.BetaVersionCheckBox.Name = "BetaVersionCheckBox";
-            this.BetaVersionCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.BetaVersionCheckBox.Size = new System.Drawing.Size(115, 19);
-            this.BetaVersionCheckBox.TabIndex = 15;
-            this.BetaVersionCheckBox.Text = ":Use beta version";
-            this.BetaVersionCheckBox.TextAlign = System.Drawing.ContentAlignment.TopRight;
-            this.BetaVersionCheckBox.UseVisualStyleBackColor = true;
-            this.BetaVersionCheckBox.CheckedChanged += new System.EventHandler(this.BetaVersionCheckBox_CheckedChanged);
+            BetaVersionCheckBox.AutoSize = true;
+            BetaVersionCheckBox.Location = new System.Drawing.Point(24, 181);
+            BetaVersionCheckBox.Name = "BetaVersionCheckBox";
+            BetaVersionCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            BetaVersionCheckBox.Size = new System.Drawing.Size(115, 19);
+            BetaVersionCheckBox.TabIndex = 15;
+            BetaVersionCheckBox.Text = ":Use beta version";
+            BetaVersionCheckBox.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            BetaVersionCheckBox.UseVisualStyleBackColor = true;
+            BetaVersionCheckBox.CheckedChanged += BetaVersionCheckBox_CheckedChanged;
             // 
             // AddNewServerForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(274, 341);
-            this.Controls.Add(this.BetaVersionCheckBox);
-            this.Controls.Add(this.VersionSelectComboBox);
-            this.Controls.Add(this.ServerTypeComboBox);
-            this.Controls.Add(this.label6);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.serverSettingsBtn);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.saveBtn);
-            this.Controls.Add(this.editPropsBtn);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.ipV6Box);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.ipV4Box);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.srvNameBox);
-            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.MaximizeBox = false;
-            this.MaximumSize = new System.Drawing.Size(290, 380);
-            this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(290, 380);
-            this.Name = "AddNewServerForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "AddNewServerForm";
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(274, 341);
+            Controls.Add(BetaVersionCheckBox);
+            Controls.Add(VersionSelectComboBox);
+            Controls.Add(ServerTypeComboBox);
+            Controls.Add(label6);
+            Controls.Add(label5);
+            Controls.Add(serverSettingsBtn);
+            Controls.Add(label4);
+            Controls.Add(saveBtn);
+            Controls.Add(editPropsBtn);
+            Controls.Add(label3);
+            Controls.Add(ipV6Box);
+            Controls.Add(label2);
+            Controls.Add(ipV4Box);
+            Controls.Add(label1);
+            Controls.Add(srvNameBox);
+            Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            MaximizeBox = false;
+            MaximumSize = new System.Drawing.Size(290, 380);
+            MinimizeBox = false;
+            MinimumSize = new System.Drawing.Size(290, 380);
+            Name = "AddNewServerForm";
+            StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            Text = "AddNewServerForm";
+            ResumeLayout(false);
+            PerformLayout();
 
         }
 
