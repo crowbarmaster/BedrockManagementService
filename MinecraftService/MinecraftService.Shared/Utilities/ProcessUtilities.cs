@@ -3,12 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
-namespace MinecraftService.Shared.Utilities
-{
+namespace MinecraftService.Shared.Utilities {
     public class RunningJavaProcessInfo {
         public int ProcessId { get; set; }
         public string ProcessName { get; set; }
@@ -42,7 +42,11 @@ namespace MinecraftService.Shared.Utilities
 
         public static bool MonitoredAppExists(int monitoredAppId) {
             try {
-                Process process = Process.GetProcessById(monitoredAppId);
+                List<Process> processes = new(Process.GetProcesses());
+                if(!processes.Any(x => x.Id == monitoredAppId)) {
+                    return false;
+                }
+                Process process = processes.First(x => x.Id == monitoredAppId);
                 if (process == null || process.HasExited) {
                     return false;
                 } else {
@@ -69,7 +73,7 @@ namespace MinecraftService.Shared.Utilities
             try {
                 List<RunningJavaProcessInfo> processList = GetJpsInfo().Result;
                 foreach (RunningJavaProcessInfo process in processList) {
-                    if (process.ProcessName.Contains($"MinecraftService_{serverName}")) {
+                    if (process.ProcessName.Contains($"MinecraftService.{serverName}")) {
                         Process jarProc = Process.GetProcessById(process.ProcessId);
                         if (jarProc != null) {
                             jarProc.Kill();
@@ -79,16 +83,16 @@ namespace MinecraftService.Shared.Utilities
             } catch { }
         }
 
-        public static int JarProcessExists(string serverName) {
+        public static bool JarProcessExists(string serverName) {
             try {
                 List<RunningJavaProcessInfo> processList = GetJpsInfo().Result;
                 foreach (RunningJavaProcessInfo process in processList) {
-                    if (process.ProcessName.Contains($"MinecraftService_{serverName}")) {
-                        return process.ProcessId;
+                    if (process.ProcessName.Contains(serverName)) {
+                        return true;
                     }
                 }
             } catch { }
-            return 0;
+            return false;
         }
 
         public static Task QuickLaunchJar(string jarPath) {
@@ -112,7 +116,7 @@ namespace MinecraftService.Shared.Utilities
                 while (!TryOpenFile($"{jarInfo.Directory.FullName}\\server.properties", out propFile)) {
                     Task.Delay(1000).Wait();
                     failCount++;
-                    if(failCount > 15) {
+                    if (failCount > 15) {
                         process.Kill();
                         process.Dispose();
                         return;
@@ -167,7 +171,7 @@ namespace MinecraftService.Shared.Utilities
         static bool TryOpenFile(string path, out Stream stream) {
             try {
                 FileStream fileStream = File.Open(path, FileMode.Open);
-                if(fileStream.Length != 0) {
+                if (fileStream.Length != 0) {
                     stream = fileStream;
                     return true;
 
@@ -188,10 +192,15 @@ namespace MinecraftService.Shared.Utilities
                 CreateNoWindow = true,
                 RedirectStandardOutput = true,
                 WorkingDirectory = GetServiceDirectory(ServiceDirectoryKeys.Jdk21BinPath),
-                FileName = @"Jps.exe",
+                FileName = @$"{GetServiceDirectory(ServiceDirectoryKeys.Jdk21BinPath)}\jps.exe",
                 Arguments = $@"-mv"
             };
-            Process process = Process.Start(processStartInfo);
+            Process process = null;
+            try {
+                process = Process.Start(processStartInfo);
+            } catch {
+                return [];
+            }
             List<RunningJavaProcessInfo> output = new();
             process.OutputDataReceived += (s, e) => {
                 if (!string.IsNullOrEmpty(e.Data)) {

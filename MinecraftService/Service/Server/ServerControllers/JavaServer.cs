@@ -72,7 +72,7 @@ namespace MinecraftService.Service.Server.ServerControllers
 
         public Task ServerStart() {
             return Task.Run(() => {
-                if (ProcessUtilities.JarProcessExists(GetServerName()) != 0) {
+                if (ProcessUtilities.JarProcessExists(GetServerName())) {
                     ProcessUtilities.KillJarProcess(GetServerName());
                     Task.Delay(500).Wait();
                 }
@@ -241,8 +241,8 @@ namespace MinecraftService.Service.Server.ServerControllers
         private Task ApplicationWatchdogMonitor() {
             return new Task(() => {
                 while (true) {
-                    int procId = _serverConfiguration.GetRunningPid();
-                    bool appExists = ProcessUtilities.MonitoredAppExists(procId);
+                    string exeName = _serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName).StringValue;
+                    bool appExists = ProcessUtilities.JarProcessExists(exeName);
                     if (!appExists && _currentServerStatus == ServerStatus.Started && !_watchdogCanceler.IsCancellationRequested) {
                         _serviceLogger.AppendLine($"Started application {_serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName)} was not found in running processes... Restarting.");
                         _currentServerStatus = ServerStatus.Stopped;
