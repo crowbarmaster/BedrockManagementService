@@ -38,7 +38,7 @@ namespace MinecraftService.Shared.Classes.Server.Configurations {
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.ServerExeName], $"MinecraftService.Dedicated Server.exe"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.MinecraftType], "Bedrock"));
             ServicePropList.Add(new Property(ServerPropertyStrings[ServerPropertyKeys.BackupPath], $@"{_servicePath}\ServerBackups"));
-            PlayerManager = _serviceConfiguration.GetProp(ServicePropertyKeys.GlobalizedPlayerDatabase).GetBoolValue() ? _serviceConfiguration.PlayerManager : new PlayerManager(GetProp(MmsDependServerPropKeys.ServerName).StringValue, GetProp(MmsDependServerPropKeys.PermLevel).StringValue);
+            PlayerManager = _serviceConfiguration.GetProp(ServicePropertyKeys.GlobalizedPlayerDatabase).GetBoolValue() ? _serviceConfiguration.PlayerManager : null;
             return true;
         }
 
@@ -77,6 +77,9 @@ namespace MinecraftService.Shared.Classes.Server.Configurations {
                         GetSettingsProp(ServerPropertyKeys.ServerPath).SetValue($@"{ServersPath}\{entry[1]}");
                         GetSettingsProp(ServerPropertyKeys.ServerExeName).SetValue($"MinecraftService.{entry[1]}.exe");
                         GetSettingsProp(ServerPropertyKeys.FileName).SetValue($@"{entry[1]}.conf");
+                        if (PlayerManager == null && !_serviceConfiguration.GetProp(ServicePropertyKeys.GlobalizedPlayerDatabase).GetBoolValue()) {
+                            PlayerManager = new PlayerManager(GetProp(MmsDependServerPropKeys.ServerName).StringValue, GetProp(MmsDependServerPropKeys.PermLevel).StringValue);
+                        }
                         break;
 
                     case "AddStartCmd":
@@ -92,7 +95,6 @@ namespace MinecraftService.Shared.Classes.Server.Configurations {
             PlayerManager.LoadPlayerDatabase();
             if (File.Exists(GetServerFilePath(ServerFileNameKeys.DeployedINI, this)) && GetSettingsProp(ServerPropertyKeys.AutoDeployUpdates).GetBoolValue()) {
                 SetSettingsProp(ServerPropertyKeys.ServerVersion, File.ReadAllText(GetServerFilePath(ServerFileNameKeys.DeployedINI, this)));
-
             }
         }
         
