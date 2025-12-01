@@ -2,9 +2,9 @@
 
 namespace MinecraftService.Shared.JsonModels.Minecraft {
     public class WhitelistEntryJsonModel {
-        public bool ignoresPlayerLimit { get; set; }
-        public string name { get; set; }
         public string xuid { get; set; }
+        public string name { get; set; }
+        public bool ignoresPlayerLimit { get; set; }
 
         public WhitelistEntryJsonModel(bool IgnoreLimits, string XUID, string username) {
             ignoresPlayerLimit = IgnoreLimits;

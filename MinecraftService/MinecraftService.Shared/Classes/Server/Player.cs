@@ -93,7 +93,7 @@ namespace MinecraftService.Shared.Classes.Server {
                 return $"{PlayerID},{Username},{FirstConnectedTime},{LastConnectedTime},{LastDisconnectTime}";
             }
             if (format == "Registered") {
-                return $"{PlayerID},{Username},{PermissionLevel},{Whitelisted},{IgnorePlayerLimits}";
+                return $"{PlayerID},{Username},{PermissionLevel},{Whitelisted},{IgnorePlayerLimits},{FirstConnectedTime},{LastConnectedTime},{LastDisconnectTime}";
             }
             return null;
         }
@@ -102,6 +102,7 @@ namespace MinecraftService.Shared.Classes.Server {
             if (dbString == null || (PlayerID != null && dbString[0] != PlayerID)) {
                 throw new ArgumentException("Input null or Player update attempted with incorrect xuid!");
             }
+            PlayerID = dbString[0];
             Username = dbString[1];
             if (!long.TryParse(dbString[2], out long first) || !long.TryParse(dbString[3], out long conn) || !long.TryParse(dbString[4], out long disconn)) {
                 throw new InvalidOperationException("Could not parse player times, check logs!");
@@ -116,13 +117,20 @@ namespace MinecraftService.Shared.Classes.Server {
             if (regString == null || (PlayerID != null && regString[0] != PlayerID)) {
                 throw new ArgumentException("Input null or Player update attempted with incorrect xuid!");
             }
+            PlayerID = regString[0];
             Username = regString[1];
             PermissionLevel = regString[2];
             if (!bool.TryParse(regString[3], out bool whiteList) || !bool.TryParse(regString[4], out bool ignoreLimits)) {
                 throw new InvalidOperationException("Could not parse registration bools, check configs!");
             }
+            if (!long.TryParse(regString[5], out long first) || !long.TryParse(regString[6], out long conn) || !long.TryParse(regString[7], out long disconn)) {
+                throw new InvalidOperationException("Could not parse player times, check logs!");
+            }
             Whitelisted = whiteList;
             IgnorePlayerLimits = ignoreLimits;
+            FirstConnectedTime = first;
+            LastConnectedTime = conn;
+            LastDisconnectTime = disconn;
             return this;
         }
 

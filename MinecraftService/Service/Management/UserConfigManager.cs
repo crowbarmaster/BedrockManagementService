@@ -193,8 +193,8 @@ namespace MinecraftService.Service.Management
                         permissionsFile.Contents.Add(new PermissionsEntryJsonModel(x.permLevel, x.xuid));
                     });
             }
-            permissionsFile.SaveToFile(permissionsFile.Contents);
-            whitelistFile.SaveToFile(whitelistFile.Contents);
+            permissionsFile.SaveToFile(permissionsFile.Contents, new Newtonsoft.Json.JsonSerializerSettings() { DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Include });
+            whitelistFile.SaveToFile(whitelistFile.Contents, new Newtonsoft.Json.JsonSerializerSettings() { DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Include });
         }
 
         private class BackupComparer : IComparer<BackupInfoModel> {

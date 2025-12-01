@@ -72,10 +72,10 @@ namespace MinecraftService.Shared.Classes.Server {
             List<string[]> playerDbEntries = MinecraftFileUtilities.FilterLinesFromPropFile(dbPath, ',');
             List<string[]> playerRegEntries = MinecraftFileUtilities.FilterLinesFromPropFile(regPath, ',');
             playerDbEntries.ForEach(x => {
-                new Player(DefaultPerm).UpdatePlayerFromDbStrings(x);
+                AddUpdatePlayer(new Player(DefaultPerm).UpdatePlayerFromDbStrings(x));
             });
             playerRegEntries.ForEach(x => {
-                new Player(DefaultPerm).UpdatePlayerFromDbStrings(x);
+                AddUpdatePlayer(new Player(DefaultPerm).UpdatePlayerFromRegStrings(x));
             });
         }
 
@@ -83,9 +83,9 @@ namespace MinecraftService.Shared.Classes.Server {
             TextWriter knownDbWriter = new StreamWriter(KnownDatabasePath);
             TextWriter regDbWriter = new StreamWriter(RegisteredDatabasePath);
             regDbWriter.WriteLine("# Registered player list");
-            regDbWriter.WriteLine("# Register player entries: PlayerEntry=xuid,username,permission,isWhitelisted,ignoreMaxPlayers");
-            regDbWriter.WriteLine("# Example: 1234111222333444,TestUser,visitor,false,false");
-            regDbWriter.WriteLine("");
+            regDbWriter.WriteLine("# Register player entries: PlayerEntry=xuid,username,permission,isWhitelisted,ignoreMaxPlayers,FirstConnectedTime,LastConnectedTime","LastDisconnectTime");
+            regDbWriter.WriteLine("# Example: 1234111222333444,TestUser,visitor,false,false,0,0,0");
+            regDbWriter.WriteLine();
 
             foreach (Player player in PlayerList) {
                 if (player.IsDefaultRegistration()) {

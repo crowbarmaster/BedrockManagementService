@@ -2,8 +2,8 @@
 
 namespace MinecraftService.Shared.JsonModels.Minecraft {
     public class PermissionsEntryJsonModel {
-        public string permission { get; set; }
         public string xuid { get; set; }
+        public string permission { get; set; }
 
         public PermissionsEntryJsonModel(string permission, string xuid) {
             this.permission = permission;
