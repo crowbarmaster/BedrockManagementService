@@ -173,7 +173,7 @@ namespace MinecraftService.Service.Networking
                     try {
                         SendData(Message.Heartbeat);
                         byte[] buffer = new byte[4];
-                        while (_client?.Client != null && _client.Client.Available != 0) // Recieve data from client.
+                        while (_client?.Client != null && _client.Client.Available != 0 && !_cancelTokenSource.IsCancellationRequested) // Recieve data from client.
                         {
                             byteCount = _stream.Read(buffer, 0, 4);
                             int expectedLen = BitConverter.ToInt32(buffer, 0);
