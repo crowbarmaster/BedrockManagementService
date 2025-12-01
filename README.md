@@ -49,7 +49,7 @@ BedrockService.Service install
 ```
 You should see a message stating the service installed successfully. By default, the service will install as "BedrockService" with automatic start. Many additional commandline arguments exist for TopShelf for custom control of the service installation, Please have a look at the documentation here: https://topshelf.readthedocs.io/en/latest/ for more information.
 
-Once the service is installed, the reccomended way to start, stop, or restart the service externally is to use the "net" command (Example: net start "BedrockService" in command prompt). Use the GUI Client to verify that the server(s) are running as intended.
+Once the service is installed, the recommended way to start, stop, or restart the service externally is to use the "net" command (Example: net start "BedrockService" in command prompt). Use the GUI Client to verify that the server(s) are running as intended.
 
 ## Service configuration files and directory layout
 

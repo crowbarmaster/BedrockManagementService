@@ -35,9 +35,14 @@ namespace MinecraftService.Client.Forms {
 
         public PlayerManagerForm(IServerConfiguration server) {
             InitializeComponent();
+            if (server == null) throw new ArgumentNullException(nameof(server));
             _server = server;
-            playersFound = _server.GetPlayerList();
+            playersFound = _server.GetPlayerList() ?? new List<Player>();
             gridView.Rows.Clear();
+
+            // Attach DataError handler
+            gridView.DataError += (s, e) => { e.ThrowException = false; };
+
             for (int i = 5; i < 8; i++) {
                 gridView.Columns[i].ReadOnly = true;
                 gridView.Columns[i].CellTemplate.Style.BackColor = System.Drawing.Color.FromArgb(225, 225, 225);

@@ -589,10 +589,27 @@ namespace MinecraftService.Client.Forms {
 
         public void RecievePlayerData(byte serverIndex, List<Player> playerList) {
             ServerBusy = false;
-            _uiWaitDialog.SetCallback(new(() => {
-                connectedHost.GetServerInfoByIndex(serverIndex).SetPlayerList(playerList);
-                PlayerManagerForm form = new(SelectedServer);
-                form.ShowDialog();
+
+            // Always close and dispose the wait dialog if it's open
+            if (_uiWaitDialog != null && _uiWaitDialog.Visible) {
+                _uiWaitDialog.Invoke((MethodInvoker)(() => {
+                    _uiWaitDialog.Close();
+                    _uiWaitDialog.Dispose();
+                }));
+            }
+
+            // Update the player list
+            connectedHost.GetServerInfoByIndex(serverIndex).SetPlayerList(playerList);
+
+            // Show the PlayerManagerForm on the UI thread
+            Invoke((MethodInvoker)(() => {
+                if (SelectedServer == null) {
+                    MessageBox.Show("No server is currently selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                using (var form = new PlayerManagerForm(SelectedServer)) {
+                    form.ShowDialog();
+                }
             }));
         }
 
