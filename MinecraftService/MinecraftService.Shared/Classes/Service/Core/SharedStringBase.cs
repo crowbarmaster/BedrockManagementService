@@ -151,7 +151,9 @@ namespace MinecraftService.Shared.Classes.Service.Core
             BdsVersionRegx,
             BdsPackage_Ver,
             BdsVersionJson,
+            BdsLatestIni,
             JdsVersionJson,
+            JdsLatestIni,
             PluginRepoJson,
             Jdk21DownloadLink
         }
@@ -232,6 +234,8 @@ namespace MinecraftService.Shared.Classes.Service.Core
             { MmsUrlKeys.BdsVersionRegx, @"(https://www.minecraft.net/bedrockdedicatedserver/bin-win/bedrock-server-)(.*)(\.zip)" },
             { MmsUrlKeys.BdsVersionJson, "https://raw.githubusercontent.com/crowbarmaster/BedrockManagementService/master/MMS_Files/bedrock_version_prop_manifest.json" },
             { MmsUrlKeys.JdsVersionJson, "https://raw.githubusercontent.com/crowbarmaster/BedrockManagementService/master/MMS_Files/java_version_prop_manifest.json" },
+            { MmsUrlKeys.BdsLatestIni, "https://raw.githubusercontent.com/crowbarmaster/BedrockManagementService/master/MMS_Files/bedrock_latest.ini" },
+            { MmsUrlKeys.JdsLatestIni, "https://raw.githubusercontent.com/crowbarmaster/BedrockManagementService/master/MMS_Files/java_latest.ini" },
             { MmsUrlKeys.Jdk21DownloadLink, "https://download.oracle.com/java/21/latest/jdk-21_windows-x64_bin.zip"}
         };
 
