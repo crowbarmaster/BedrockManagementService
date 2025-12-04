@@ -38,6 +38,8 @@ jobs:
              		return;
              	}
              }
+             $latestVerIniPath = 'MMS_Files\\java_latest.ini';
+             $latestRelease.id | Out-File $latestVerIniPath;
              $javaManifestReleasecontent = Invoke-WebRequest -UseBasicParsing -Headers $ConnectionHeaders -Uri $latestRelease.url;
              $javaManifestReleasecontentJson = $javaManifestReleasecontent | ConvertFrom-Json;
              $betaBool = $javaManifestReleasecontentJson.type -eq 'snapshot';
@@ -114,7 +116,7 @@ jobs:
           with:
             # The arguments for the `git add` command (see the paragraph below for more info)
             # Default: '.'
-            add: "['.\\MMS_Files\\java_version_prop_manifest.json']"
+            add: "['.\\MMS_Files\\java_version_prop_manifest.json', '.\\MMS_Files\\java_latest.ini']"
             
             # The name of the user that will be displayed as the author of the commit.
             # Default: depends on the default_author input
