@@ -39,6 +39,7 @@ jobs:
              	}
              }
              $latestVerIniPath = 'MMS_Files\\java_latest.ini';
+             $latestVerBetaIniPath = 'MMS_Files\\java_beta_latest.ini';
              $javaManifestJson.latest.release | Out-File $latestVerIniPath;
              $javaManifestReleasecontent = Invoke-WebRequest -UseBasicParsing -Headers $ConnectionHeaders -Uri $latestRelease.url;
              $javaManifestReleasecontentJson = $javaManifestReleasecontent | ConvertFrom-Json;
