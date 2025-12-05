@@ -41,6 +41,7 @@ jobs:
              $latestVerIniPath = 'MMS_Files\\java_latest.ini';
              $latestVerBetaIniPath = 'MMS_Files\\java_beta_latest.ini';
              $javaManifestJson.latest.release | Out-File $latestVerIniPath;
+             $javaManifestJson.latest.snapshot | Out-File $latestVerBetaIniPath;
              $javaManifestReleasecontent = Invoke-WebRequest -UseBasicParsing -Headers $ConnectionHeaders -Uri $latestRelease.url;
              $javaManifestReleasecontentJson = $javaManifestReleasecontent | ConvertFrom-Json;
              $betaBool = $javaManifestReleasecontentJson.type -eq 'snapshot';
