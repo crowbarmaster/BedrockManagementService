@@ -119,11 +119,11 @@ namespace MinecraftService.Shared.Classes.Server.Updaters {
 
                 _logger.AppendLine($"Latest Java release version found: \"{latestRelease.Version}\"");
                 File.WriteAllText(_iniFilePath, latestRelease.Version);
-                _serviceConfiguration.SetServerDefaultPropList(_serverArch, MinecraftFileUtilities.CreatePropListFromFile(GetServiceFilePath(MmsFileNameKeys.JavaStockProps_Ver, latestRelease.Version)));
+                _serviceConfiguration.SetServerDefaultPropList(_serverArch, GetDefaultVersionPropList());
             });
         }
 
-        private JavaVersionHistoryModel GetJavaVersionModel(string version) {
+        public JavaVersionHistoryModel GetJavaVersionModel(string version) {
             return _versionLookupTable[version];
         }
 
