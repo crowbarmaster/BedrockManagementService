@@ -33,14 +33,8 @@ namespace MinecraftService.Shared.Classes.Server.Updaters {
         public JavaUpdater() { }
 
         public Task Initialize() => Task.Run(() => {
-            UpdateVersionTable();
-            if (!File.Exists(_iniFilePath)) {
-                _logger.AppendLine("Version ini file missing, creating...");
-                File.Create(_iniFilePath).Close();
-                CheckLatestVersion().Wait();
-                _isInitialized = true;
-                return;
-            }
+            CheckLatestVersion().Wait();
+            _isInitialized = true;
         });
 
         private void LoadLocalManifestContent() {
@@ -79,7 +73,7 @@ namespace MinecraftService.Shared.Classes.Server.Updaters {
                     retryCount++;
                 }
             }
-            if (content != File.ReadAllText(_iniFilePath)) {
+            if (!File.Exists(_iniFilePath) || content != File.ReadAllText(_iniFilePath)) {
                 File.WriteAllText(_iniFilePath, content);
                 content = string.Empty;
                 retryCount = 1;
@@ -110,7 +104,6 @@ namespace MinecraftService.Shared.Classes.Server.Updaters {
 
         public virtual Task CheckLatestVersion() {
             return Task.Run(() => {
-                _logger.AppendLine("Fetching latest Java Release version manifest...");
                 UpdateVersionTable();
                 List<JavaVersionHistoryModel> versionList = [.. _versionLookupTable.Values];
                 versionList.Reverse();

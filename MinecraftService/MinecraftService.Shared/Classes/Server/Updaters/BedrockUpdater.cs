@@ -30,15 +30,8 @@ namespace MinecraftService.Shared.Classes.Server.Updaters {
         public BedrockUpdater() { }
 
         public Task Initialize() => Task.Run(() => {
-            if (!_isInitialized) {
-                UpdateManifestTable();
-                if (!File.Exists(GetServiceFilePath(MmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[_serverArch]))) {
-                    _logger.AppendLine("Bedrock version ini file missing, creating...");
-                    File.Create(GetServiceFilePath(MmsFileNameKeys.LatestVerIni_Name, MinecraftArchStrings[_serverArch])).Close();
-                    _isInitialized = true;
-                    return;
-                }
-            }
+            CheckLatestVersion().Wait();
+            _isInitialized = true;
         });
 
         private void LoadLocalManifestContent() {
@@ -80,7 +73,7 @@ namespace MinecraftService.Shared.Classes.Server.Updaters {
                     retryCount++;
                 }
             }
-            if (content != File.ReadAllText(latestVerFile)) {
+            if (!File.Exists(latestVerFile) || content != File.ReadAllText(latestVerFile)) {
                 File.WriteAllText(latestVerFile, content);
                 content = string.Empty;
                 retryCount = 1;
@@ -104,7 +97,6 @@ namespace MinecraftService.Shared.Classes.Server.Updaters {
                 }
                 LoadLocalManifestContent();
             }
-            _serviceConfiguration.SetServerDefaultPropList(_serverArch, GetDefaultVersionPropList());
         }
 
         public bool IsInitialized() => _isInitialized;
@@ -114,6 +106,7 @@ namespace MinecraftService.Shared.Classes.Server.Updaters {
                 string latestVerFile = GetServiceFilePath(MmsFileNameKeys.LatestVerIni_Name, _serverArch.ToString());
                 UpdateManifestTable();
                 _logger.AppendLine($"Latest version found: \"{File.ReadAllText(latestVerFile)}\"");
+                _serviceConfiguration.SetServerDefaultPropList(_serverArch, GetDefaultVersionPropList());
             });
         }
 
