@@ -42,9 +42,9 @@ namespace MinecraftService.Client.Forms {
         private bool _enableLogUpdating = false;
         private AddNewServerForm _newServerForm;
         private BackupManagerForm _backupManager;
-        private const int _connectTimeoutLimit = 3;
+        private const int _connectTimeoutLimit = 2;
         private readonly ProcessInfo _processInfo;
-        private readonly System.Timers.Timer _connectTimer = new(100.0);
+        private readonly System.Timers.Timer _connectTimer = new(2000.0);
         private ProgressDialog _uiWaitDialog;
         private System.Timers.Timer _uiWaitTimer = new(250);
         private readonly LogManager _logManager;
@@ -54,7 +54,6 @@ namespace MinecraftService.Client.Forms {
         public MainWindow(ProcessInfo processInfo, MmsLogger logger) {
             _processInfo = processInfo;
             ClientLogger = logger;
-            ClientLogger.Initialize();
             _logManager = new LogManager(ClientLogger);
             ConfigManager = new ConfigManager(ClientLogger);
             InitializeComponent();
@@ -71,21 +70,22 @@ namespace MinecraftService.Client.Forms {
             _localCommandHistory = new(FileUtilities.ReadLines(GetServiceFilePath(MmsFileNameKeys.ClientCommandHistory)));
         }
 
-        private void ConnectTimer_Elapsed(object sender, ElapsedEventArgs e) {
-            if (_connectTimer.Enabled && !FormManager.TCPClient.EstablishedLink && !_blockConnect) {
-                _connectTimer.Interval = 2000.0;
-                _blockConnect = true;
-                Invoke((MethodInvoker)delegate { FormManager.TCPClient.ConnectHost(ConfigManager.HostConnectList.FirstOrDefault(host => host.GetHostName() == (string)HostListBox.SelectedItem)); });
-                Thread.Sleep(1000);
+        public void ConnectedCallback() {
                 if (connectedHost != null && FormManager.TCPClient.EstablishedLink) {
                     ServerBusy = false;
                     _connectTimer.Enabled = false;
                     _connectTimer.Stop();
                     _connectTimer.Close();
-                    Invoke((MethodInvoker)delegate { RefreshAllCompenentStates(); });
                     RefreshServerBoxContents();
+                Invoke(() => { RefreshAllCompenentStates(); });
                     return;
                 }
+        }
+
+        private void ConnectTimer_Elapsed(object sender, ElapsedEventArgs e) {
+            if (_connectTimer.Enabled && !FormManager.TCPClient.EstablishedLink && !_blockConnect) {
+                _blockConnect = true;
+                Invoke((MethodInvoker)delegate { FormManager.TCPClient.ConnectHost(ConfigManager.HostConnectList.FirstOrDefault(host => host.GetHostName() == (string)HostListBox.SelectedItem)); });
                 _connectTimeout++;
                 _blockConnect = false;
                 if (_connectTimeout >= _connectTimeoutLimit) {
@@ -273,12 +273,10 @@ namespace MinecraftService.Client.Forms {
         }
 
         public void HeartbeatFailDisconnect() {
-            Disconn_Click(null, null);
             try {
+                DisconnectResetClient();
                 HostInfoLabel.Invoke((MethodInvoker)delegate { HostInfoLabel.Text = "Lost connection to host!"; });
                 ServerInfoBox.Invoke((MethodInvoker)delegate { ServerInfoBox.Text = "Lost connection to host!"; });
-                ServerBusy = false;
-                RefreshAllCompenentStates();
             } catch (InvalidOperationException) { }
 
             SelectedServer = null;
@@ -320,7 +318,8 @@ namespace MinecraftService.Client.Forms {
             HostInfoLabel.Text = $"Connecting to host {(string)HostListBox.SelectedItem}...";
             Connect.Enabled = false;
             _connectTimeout = 0;
-            _connectTimer.Interval = 100.0;
+            _connectTimer.Interval = 2000;
+            ConnectTimer_Elapsed(sender, null);
             _connectTimer.Start();
         }
 
@@ -398,17 +397,14 @@ namespace MinecraftService.Client.Forms {
             DisableUI("Gathering players registered to server...");
         }
 
-        private void Disconn_Click(object sender, EventArgs e) {
+        public void DisconnectResetClient() {
             _connectTimer.Stop();
             try {
+                _logManager.SetConnectedHost(null);
+                FormManager.MainWindow.Invoke((MethodInvoker)delegate {
                 if (SelectedServer != null && _backupManager != null) {
                     _backupManager.Close();
                     _backupManager.Dispose();
-                }
-                if (FormManager.TCPClient.Connected) {
-                    FormManager.TCPClient.SendData(Message.Empty(MessageTypes.Disconnect));
-                    Thread.Sleep(500);
-                    FormManager.TCPClient.CloseConnection();
                 }
                 SelectedServer = null;
                 connectedHost = null;
@@ -418,8 +414,13 @@ namespace MinecraftService.Client.Forms {
                     ServerSelectBox.SelectedIndex = -1;
                     ServerInfoBox.Text = "";
                     HostInfoLabel.Text = $"Select a host below:";
+                    RefreshAllCompenentStates();
                 });
             } catch (Exception) { }
+        }
+
+        private void Disconn_Click(object sender, EventArgs e) {
+            FormManager.TCPClient.SendData(new() { Type = MessageTypes.Disconnect });
         }
 
         private void SendCmd_Click(object sender, EventArgs e) {
@@ -436,7 +437,7 @@ namespace MinecraftService.Client.Forms {
 
             // send the command to the server
             if (cmdTextBox.Text.Length > 0 && connectedHost != null) {
-                byte[] msg = Encoding.UTF8.GetBytes(cmdTextBox.Text);
+                byte[] msg = Encoding.UTF8.GetBytes(cmdTextBox.Text.Replace("\n", ""));
                 FormManager.TCPClient.SendData(new() {
                     Data = msg,
                     ServerIndex = connectedHost.GetServerIndex(SelectedServer),
