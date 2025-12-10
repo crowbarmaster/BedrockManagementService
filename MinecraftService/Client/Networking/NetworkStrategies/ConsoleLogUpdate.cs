@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using MinecraftService.Client.Management;
@@ -10,32 +11,15 @@ using MinecraftService.Shared.Classes.Networking;
 using MinecraftService.Shared.Classes.Service.Core;
 using MinecraftService.Shared.Interfaces;
 using MinecraftService.Shared.SerializeModels;
+using Newtonsoft.Json;
 
 namespace MinecraftService.Client.Networking.NetworkStrategies {
     public class ConsoleLogUpdate(MmsLogger logger) : INetworkMessage {
-
         public Task<bool> ProcessMessage(Message message) => Task.Run(() => {
             string data = Encoding.UTF8.GetString(message.Data);
             try {
-                string[] strings = data.Split("|?|");
-                for (int i = 0; i < strings.Length; i++) {
-                    string[] srvSplit = strings[i].Split("|;|");
-                    string srvName = srvSplit[0];
-                    string srvText = srvSplit[1];
-                    int srvCurLen = int.Parse(srvSplit[2]);
-                    if (srvName != "Service") {
-                        IServerConfiguration bedrockServer = FormManager.MainWindow.connectedHost.GetServerInfoByName(srvName);
-                        int curCount = bedrockServer.GetLog().Count;
-                        if (curCount == srvCurLen) {
-                            bedrockServer.GetLog().Add(new LogEntry(srvText));
-                        }
-                    } else {
-                        int curCount = FormManager.MainWindow.connectedHost.GetLog().Count;
-                        if (curCount == srvCurLen) {
-                            FormManager.MainWindow.connectedHost.GetLog().Add(new LogEntry(srvText));
-                        }
-                    }
-                }
+                List<ConsoleLogUpdateCallback> callbacks = JsonConvert.DeserializeObject<List<ConsoleLogUpdateCallback>>(data);
+                FormManager.MainWindow.GetLogManager().ProcessIncomingLogData(callbacks);
             } catch (Exception e) {
                 logger.AppendLine($"Error updating logs: {e.Message}");
                 return false;

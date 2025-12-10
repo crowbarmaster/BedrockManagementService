@@ -47,9 +47,9 @@ namespace MinecraftService.Client.Forms {
             clientPage = new TabPage();
             clientLogBox = new TextBox();
             servicePage = new TabPage();
-            serviceTextbox = new TextBox();
+            ServiceLogbox = new TextBox();
             serverPage = new TabPage();
-            LogBox = new TextBox();
+            ServerLogBox = new TextBox();
             logPageControl = new TabControl();
             startStopBtnToolTip = new ToolTip(components);
             cmdTextBox = new RichTextBox();
@@ -322,7 +322,7 @@ namespace MinecraftService.Client.Forms {
             // servicePage
             // 
             servicePage.BackColor = System.Drawing.SystemColors.Control;
-            servicePage.Controls.Add(serviceTextbox);
+            servicePage.Controls.Add(ServiceLogbox);
             servicePage.Location = new System.Drawing.Point(4, 24);
             servicePage.Margin = new Padding(9, 13, 9, 13);
             servicePage.Name = "servicePage";
@@ -332,21 +332,21 @@ namespace MinecraftService.Client.Forms {
             // 
             // serviceTextbox
             // 
-            serviceTextbox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            serviceTextbox.Location = new System.Drawing.Point(0, 0);
-            serviceTextbox.Margin = new Padding(0);
-            serviceTextbox.Multiline = true;
-            serviceTextbox.Name = "serviceTextbox";
-            serviceTextbox.ReadOnly = true;
-            serviceTextbox.ScrollBars = ScrollBars.Both;
-            serviceTextbox.Size = new System.Drawing.Size(563, 372);
-            serviceTextbox.TabIndex = 5;
-            serviceTextbox.WordWrap = false;
+            ServiceLogbox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            ServiceLogbox.Location = new System.Drawing.Point(0, 0);
+            ServiceLogbox.Margin = new Padding(0);
+            ServiceLogbox.Multiline = true;
+            ServiceLogbox.Name = "serviceTextbox";
+            ServiceLogbox.ReadOnly = true;
+            ServiceLogbox.ScrollBars = ScrollBars.Both;
+            ServiceLogbox.Size = new System.Drawing.Size(563, 372);
+            ServiceLogbox.TabIndex = 5;
+            ServiceLogbox.WordWrap = false;
             // 
             // serverPage
             // 
             serverPage.BackColor = System.Drawing.SystemColors.Control;
-            serverPage.Controls.Add(LogBox);
+            serverPage.Controls.Add(ServerLogBox);
             serverPage.Location = new System.Drawing.Point(4, 24);
             serverPage.Margin = new Padding(9, 13, 9, 13);
             serverPage.Name = "serverPage";
@@ -356,16 +356,16 @@ namespace MinecraftService.Client.Forms {
             // 
             // LogBox
             // 
-            LogBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            LogBox.Location = new System.Drawing.Point(0, 0);
-            LogBox.Margin = new Padding(0);
-            LogBox.Multiline = true;
-            LogBox.Name = "LogBox";
-            LogBox.ReadOnly = true;
-            LogBox.ScrollBars = ScrollBars.Both;
-            LogBox.Size = new System.Drawing.Size(563, 372);
-            LogBox.TabIndex = 4;
-            LogBox.WordWrap = false;
+            ServerLogBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            ServerLogBox.Location = new System.Drawing.Point(0, 0);
+            ServerLogBox.Margin = new Padding(0);
+            ServerLogBox.Multiline = true;
+            ServerLogBox.Name = "LogBox";
+            ServerLogBox.ReadOnly = true;
+            ServerLogBox.ScrollBars = ScrollBars.Both;
+            ServerLogBox.Size = new System.Drawing.Size(563, 372);
+            ServerLogBox.TabIndex = 4;
+            ServerLogBox.WordWrap = false;
             // 
             // logPageControl
             // 
@@ -626,9 +626,9 @@ namespace MinecraftService.Client.Forms {
         private System.Windows.Forms.TabPage clientPage;
         public System.Windows.Forms.TextBox clientLogBox;
         private System.Windows.Forms.TabPage servicePage;
-        public System.Windows.Forms.TextBox serviceTextbox;
+        public System.Windows.Forms.TextBox ServiceLogbox;
         private System.Windows.Forms.TabPage serverPage;
-        public System.Windows.Forms.TextBox LogBox;
+        public System.Windows.Forms.TextBox ServerLogBox;
         private System.Windows.Forms.TabControl logPageControl;
         private System.Windows.Forms.ToolTip startStopBtnToolTip;
         private System.Windows.Forms.RichTextBox cmdTextBox;       

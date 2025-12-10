@@ -171,11 +171,13 @@ namespace MinecraftService.Client.Forms {
             Application.Run(FormManager.MainWindow);
         }
 
+        public LogManager GetLogManager() => _logManager;
+
         public void RefreshServerBoxContents() {
             Invoke((MethodInvoker)delegate {
                 Refresh();
                 HostInfoLabel.Text = $"Connected to host:";
-                if (_logManager.LogTask.Status != TaskStatus.Running) {
+                if (!_logManager.LogUpdateTimer.Enabled) {
                     _logManager.InitLogThread();
                 }
                 ServerSelectBox.Items.Clear();
@@ -194,7 +196,7 @@ namespace MinecraftService.Client.Forms {
                         });
                     } else {
                         SelectedServer = null;
-                        Invoke(() => UpdateServerLogBox(LogBox, ""));
+                        Invoke(() => UpdateServerLogBox(ServerLogBox, []));
                     }
                 }
                 return;
@@ -263,11 +265,11 @@ namespace MinecraftService.Client.Forms {
             }
         }
 
-        private string ProcessText(List<LogEntry> targetLog) {
+        private string[] ProcessText(List<LogEntry> targetLog) {
             if (FormManager.MainWindow.ConfigManager.DisplayTimestamps) {
-                return string.Join("\r\n", targetLog.Select(x => $"[{x.TimeStamp:G}] {x.Text}").ToList());
+                return targetLog.Select(x => $"[{x.TimeStamp:G}] {x.Text}").ToArray();
             }
-            return string.Join("\r\n", targetLog.Select(x => x.Text).ToList());
+            return targetLog.Select(x => x.Text).ToArray();
         }
 
         public void HeartbeatFailDisconnect() {
@@ -283,17 +285,17 @@ namespace MinecraftService.Client.Forms {
             connectedHost = null;
         }
 
-        public void UpdateServerLogBox(TextBox targetBox, string contents) {
+        public void UpdateServerLogBox(TextBox targetBox, string[] contents) {
             int curPos;
             if (contents.Length > 0) {
                 curPos = GetScrollPosition(targetBox);
-                targetBox.Text = contents;
+                targetBox.Lines = contents;
                 SetScrollPosition(targetBox, curPos);
                 if (_followTail) {
                     ScrollToEnd(targetBox);
                 }
             } else {
-                targetBox.Text = contents;
+                targetBox.Lines = [];
             }
         }
 
@@ -327,6 +329,7 @@ namespace MinecraftService.Client.Forms {
                 foreach (IServerConfiguration server in connectedHost.GetServerList()) {
                     if (ServerSelectBox.SelectedItem != null && ServerSelectBox.SelectedItem.ToString() == server.GetServerName()) {
                         SelectedServer = server;
+                        ServerLogBox.Lines = [];
                         FormManager.TCPClient.SendData(new() {
                             ServerIndex = connectedHost.GetServerIndex(server),
                             Type = MessageTypes.EnumBackups
@@ -409,12 +412,8 @@ namespace MinecraftService.Client.Forms {
                 }
                 SelectedServer = null;
                 connectedHost = null;
-                _logManager.SetConnectedHost(null);
-                FormManager.MainWindow.Invoke((MethodInvoker)delegate {
-                    RefreshAllCompenentStates();
-                    _logManager.ResetServerServiceLogCounts();
-                    LogBox.Text = "";
-                    serviceTextbox.Text = "";
+                    ServerLogBox.Lines = [];
+                    ServiceLogbox.Lines = [];
                     ServerSelectBox.Items.Clear();
                     ServerSelectBox.SelectedIndex = -1;
                     ServerInfoBox.Text = "";
@@ -615,9 +614,9 @@ namespace MinecraftService.Client.Forms {
 
         private void scrollLockChkBox_CheckedChanged(object sender, EventArgs e) {
             _followTail = scrollLockChkBox.Checked;
-            ScrollToEnd(LogBox);
+            ScrollToEnd(ServerLogBox);
             ScrollToEnd(clientLogBox);
-            ScrollToEnd(serviceTextbox);
+            ScrollToEnd(ServiceLogbox);
         }
 
         private void cmdTextBox_KeyPress(object sender, KeyPressEventArgs e) {
