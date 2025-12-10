@@ -108,6 +108,9 @@ namespace MinecraftService.Shared.Classes.Server.Configurations
             GetSettingsProp(ServerPropertyKeys.ServerPath).SetValue($@"{ServersPath}\{srvNameProp.StringValue}");
             GetSettingsProp(ServerPropertyKeys.ServerExeName).SetValue($"MinecraftService.{srvNameProp.StringValue}.jar");
             GetSettingsProp(ServerPropertyKeys.FileName).SetValue($@"{srvNameProp.StringValue}.conf");
+            if (PlayerManager == null && !_serviceConfiguration.GetProp(ServicePropertyKeys.GlobalizedPlayerDatabase).GetBoolValue()) {
+                PlayerManager = new PlayerManager(GetSettingsProp(ServerPropertyKeys.ServerName).StringValue, "visitor");
+            }
         }
 
         public bool IsPrimaryServer()

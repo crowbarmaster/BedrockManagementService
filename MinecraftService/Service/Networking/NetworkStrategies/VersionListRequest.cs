@@ -13,6 +13,7 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
     public class VersionListRequest(MmsLogger logger, ServiceConfigurator serviceConfiguration) : IMessageParser {
 
         public Message ParseMessage(Message message) {
+            logger.AppendLine("Client requested version list data...");
             Dictionary<MinecraftServerArch, SimpleVersionModel[]> resultDictionary = new();
             foreach (KeyValuePair<MinecraftServerArch, IUpdater> updaterKvp in serviceConfiguration.GetUpdaterTable()) {
                 if (!updaterKvp.Value.IsInitialized())

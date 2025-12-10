@@ -105,6 +105,9 @@ namespace MinecraftService.Shared.Classes.Server.Configurations {
             GetSettingsProp(ServerPropertyKeys.ServerPath).SetValue($@"{ServersPath}\{srvNameProp.StringValue}");
             GetSettingsProp(ServerPropertyKeys.ServerExeName).SetValue($"MinecraftService.{srvNameProp.StringValue}.exe");
             GetSettingsProp(ServerPropertyKeys.FileName).SetValue($@"{srvNameProp.StringValue}.conf");
+            if (PlayerManager == null && !_serviceConfiguration.GetProp(ServicePropertyKeys.GlobalizedPlayerDatabase).GetBoolValue()) {
+                PlayerManager = new PlayerManager(GetProp(MmsDependServerPropKeys.ServerName).StringValue, GetProp(MmsDependServerPropKeys.PermLevel).StringValue);
+            }
         }
 
         public bool IsPrimaryServer() {

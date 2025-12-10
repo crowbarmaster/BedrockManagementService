@@ -37,17 +37,6 @@ namespace MinecraftService.Client.Forms {
             _serviceConfiguration = serviceConfiguration;
             _serverConfigurations = serverConfigurations;
             InitializeComponent();
-            IServerConfiguration server;
-            foreach (KeyValuePair<MinecraftServerArch, string> kvp in MinecraftArchStrings) {
-                ServerCombinedPropModel serverCombinedPropModel = new();
-                server = FormManager.MainWindow.connectedHost.PrepareNewServerConfig(kvp.Value, FormManager.processInfo, FormManager.Logger);
-                server.InitializeDefaults();
-                serverCombinedPropModel.ServerPropList = server.GetAllProps();
-                serverCombinedPropModel.ServicePropList = server.GetSettingsList();
-                serverCombinedPropModel.VersionList = new List<SimpleVersionModel>(VersionLists[kvp.Key]);
-                _latestVersionLookup.Add(kvp.Key, serverCombinedPropModel.VersionList[0]);
-                LoadedConfigs.Add(server.GetServerArch(), serverCombinedPropModel);
-            }
             VersionSelectComboBox.Items.Clear();
             ServerTypeComboBox.Items.Clear();
             ServerTypeComboBox.Items.AddRange(MinecraftArchStrings.Values.ToArray());
@@ -117,17 +106,31 @@ namespace MinecraftService.Client.Forms {
 
         private void ServerTypeComboBox_SelectedIndexChanged(object sender, System.EventArgs e) {
             _typeChanging = true;
+            IServerConfiguration server;
+            if (!LoadedConfigs.Any()) {
+                foreach (KeyValuePair<MinecraftServerArch, string> kvp in MinecraftArchStrings) {
+                    ServerCombinedPropModel serverCombinedPropModel = new();
+                    server = FormManager.MainWindow.connectedHost.PrepareNewServerConfig(kvp.Value, FormManager.processInfo, FormManager.Logger);
+                    server.InitializeDefaults();
+                    serverCombinedPropModel.ServerPropList = server.GetAllProps();
+                    serverCombinedPropModel.ServicePropList = server.GetSettingsList();
+                    serverCombinedPropModel.VersionList = new List<SimpleVersionModel>(VersionLists[kvp.Key]);
+                    _latestVersionLookup.Add(kvp.Key, serverCombinedPropModel.VersionList[0]);
+                    LoadedConfigs.Add(server.GetServerArch(), serverCombinedPropModel);
+                }
+            }
+
             MinecraftServerArch selectedArch = GetArchFromString((string)ServerTypeComboBox.SelectedItem);
             SelectedPropModel = LoadedConfigs[selectedArch];
             VersionSelectComboBox.SelectedIndex = -1;
             VersionSelectComboBox.Items.Clear();
             VersionSelectComboBox.Items.AddRange(SelectedPropModel.VersionList.Where(x => x.IsBeta == BetaVersionCheckBox.Checked).ToArray());
-            ipV6Box.Enabled = selectedArch != MinecraftServerArch.Java;
             if (VersionSelectComboBox.Items.Count > 0) {
                 VersionSelectComboBox.SelectedIndex = 0;
             }
             _typeChanging = false;
             bool isBedrock = selectedArch == MinecraftServerArch.Bedrock;
+            ipV6Box.Enabled = isBedrock;
             BetaVersionCheckBox.Enabled = !isBedrock;
             BetaVersionCheckBox.Visible = !isBedrock;
         }
