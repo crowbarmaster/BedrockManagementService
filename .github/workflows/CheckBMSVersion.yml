@@ -78,7 +78,7 @@ jobs:
                        }
                    }
                    $latestVerIniPath = 'MMS_Files\\bedrock_latest.ini';
-                   $version | Out-File $latestVerIniPath;
+                   $version.Replace("\r\n", "") | Out-File $latestVerIniPath;
                    $zipArchive.Dispose();
                    $zipStream.Close();
                    $newListEntry = [BedrockInfo]@{
