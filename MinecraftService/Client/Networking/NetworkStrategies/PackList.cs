@@ -20,7 +20,7 @@ namespace MinecraftService.Client.Networking.NetworkStrategies {
             JArray jArray = JArray.Parse(data);
             foreach (JToken token in jArray)
                 temp.Add(token.ToObject<MinecraftPackContainer>());
-            Task.Run(() => FormManager.MainWindow.Invoke(() => FormManager.MainWindow.RecievePackData(serverIndex, temp)));
+            Task.Run(() => FormManager.MainWindow.Invoke(() => FormManager.MainWindow.ReceivePackData(serverIndex, temp)));
             return true;
         });
     }

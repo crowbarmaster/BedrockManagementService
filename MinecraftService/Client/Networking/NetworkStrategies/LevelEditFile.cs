@@ -16,7 +16,7 @@ namespace MinecraftService.Client.Networking.NetworkStrategies {
         public Task<bool> ProcessMessage(Message message) => Task.Run(() => {
             string pathToLevelDat = $@"{SharedStringBase.GetNewTempDirectory("LevelEdit")}\level.dat";
             File.WriteAllBytes(pathToLevelDat, message.Data);
-            FormManager.MainWindow.LevelDatRecieved(pathToLevelDat);
+            FormManager.MainWindow.LevelDatReceived(pathToLevelDat);
             return true;
         });
     }

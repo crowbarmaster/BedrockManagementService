@@ -71,15 +71,15 @@ namespace MinecraftService.Client.Forms {
         }
 
         public void ConnectedCallback() {
-                if (connectedHost != null && FormManager.TCPClient.EstablishedLink) {
-                    ServerBusy = false;
-                    _connectTimer.Enabled = false;
-                    _connectTimer.Stop();
-                    _connectTimer.Close();
-                    RefreshServerBoxContents();
+            if (connectedHost != null && FormManager.TCPClient.EstablishedLink) {
+                ServerBusy = false;
+                _connectTimer.Enabled = false;
+                _connectTimer.Stop();
+                _connectTimer.Close();
+                RefreshServerBoxContents();
                 Invoke(() => { RefreshAllCompenentStates(); });
-                    return;
-                }
+                return;
+            }
         }
 
         private void ConnectTimer_Elapsed(object sender, ElapsedEventArgs e) {
@@ -380,7 +380,7 @@ namespace MinecraftService.Client.Forms {
             }
             using (RemoveServerControl form = new()) {
                 if (form.ShowDialog() == DialogResult.OK) {
-                    FormManager.TCPClient.SendData(new Shared.Classes.Networking.Message { ServerIndex = connectedHost.GetServerIndex(SelectedServer), Type = MessageTypes.RemoveServer, Flag = form.SelectedFlag });
+                    FormManager.TCPClient.SendData(new Message(){Data = [], ServerIndex = connectedHost.GetServerIndex(SelectedServer), Type = MessageTypes.RemoveServer, Flag = form.SelectedFlag });
                     form.Close();
                     connectedHost.RemoveServerInfo(SelectedServer);
                 }
@@ -406,8 +406,8 @@ namespace MinecraftService.Client.Forms {
                     _backupManager.Close();
                     _backupManager.Dispose();
                 }
-                SelectedServer = null;
-                connectedHost = null;
+                    SelectedServer = null;
+                    connectedHost = null;
                     ServerLogBox.Lines = [];
                     ServiceLogbox.Lines = [];
                     ServerSelectBox.Items.Clear();
@@ -581,13 +581,13 @@ namespace MinecraftService.Client.Forms {
             }
         }
 
-        public void RecievePackData(byte serverIndex, List<Shared.PackParser.MinecraftPackContainer> incomingPacks) {
+        public void ReceivePackData(byte serverIndex, List<Shared.PackParser.MinecraftPackContainer> incomingPacks) {
             _incomingPacks = incomingPacks;
             _manPacksServer = serverIndex;
             ServerBusy = false;
         }
 
-        public void RecievePlayerData(byte serverIndex, List<Player> playerList) {
+        public void ReceivePlayerData(byte serverIndex, List<Player> playerList) {
             ServerBusy = false;
 
             // Always close and dispose the wait dialog if it's open
@@ -705,7 +705,7 @@ namespace MinecraftService.Client.Forms {
             DisableUI("Service is gathering level.dat...");
         }
 
-        public void LevelDatRecieved(string path) {
+        public void LevelDatReceived(string path) {
             using (Process nbtStudioProcess = new()) {
                 nbtStudioProcess.StartInfo = new ProcessStartInfo(ConfigManager.NBTStudioPath, path);
                 nbtStudioProcess.Start();
