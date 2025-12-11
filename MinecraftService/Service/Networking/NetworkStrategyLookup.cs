@@ -19,6 +19,7 @@ namespace MinecraftService.Service.Networking
             {
                 {MessageTypes.Connect, new Connect(serviceConfiguration) },
                 {MessageTypes.AddNewServer, new AddNewServer(logger, processInfo, configurator, serviceConfiguration, service) },
+                {MessageTypes.RemoveServer, new RemoveServer(configurator, serviceConfiguration, service) },
                 {MessageTypes.Command, new ServerCommand(service, logger) },
                 {MessageTypes.Restart, new ServerRestart(service) },
                 {MessageTypes.StartStop, new StartStopServer(service) },
