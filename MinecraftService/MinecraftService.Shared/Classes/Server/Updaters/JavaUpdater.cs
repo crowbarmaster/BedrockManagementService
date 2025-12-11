@@ -73,8 +73,8 @@ namespace MinecraftService.Shared.Classes.Server.Updaters {
                     retryCount++;
                 }
             }
-            if (!File.Exists(_iniFilePath) || content != File.ReadAllText(_iniFilePath)) {
-                File.WriteAllText(_iniFilePath, content);
+            if (!File.Exists(_iniFilePath) || content.Replace("\n", "") != File.ReadAllText(_iniFilePath)) {
+                File.WriteAllText(_iniFilePath, content.Replace("\n", ""));
                 content = string.Empty;
                 retryCount = 1;
                 _logger.AppendLine($"New {_serverArch} version was found! Fetching latest manifest file...");
@@ -111,7 +111,6 @@ namespace MinecraftService.Shared.Classes.Server.Updaters {
                 JavaVersionHistoryModel latestBeta = versionList.First(x => x.IsBeta);
 
                 _logger.AppendLine($"Latest Java release version found: \"{latestRelease.Version}\"");
-                File.WriteAllText(_iniFilePath, latestRelease.Version);
                 _serviceConfiguration.SetServerDefaultPropList(_serverArch, GetDefaultVersionPropList());
             });
         }
