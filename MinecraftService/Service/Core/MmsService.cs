@@ -94,9 +94,11 @@ namespace MinecraftService.Service.Core
 
         public ServiceStatusModel GetServiceStatus() {
             List<Player> serviceActivePlayers = new();
-            _loadedServers.ForEach(server => {
-                serviceActivePlayers.AddRange(server.GetServerStatus().ActivePlayerList);
-            });
+            if (_loadedServers.Any()) { 
+                _loadedServers.ForEach(server => {
+                    serviceActivePlayers.AddRange(server.GetServerStatus().ActivePlayerList);
+                });
+            }
             return new ServiceStatusModel {
                 ServiceStatus = _CurrentServiceStatus,
                 ServiceUptime = _upTime,
