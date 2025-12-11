@@ -10,12 +10,12 @@ using System.Text;
 
 namespace MinecraftService.Service.Networking.NetworkStrategies
 {
-    public class RemoveServer(UserConfigManager configurator, ServiceConfigurator serviceConfiguration, MmsService mineraftService) : IMessageParser {
+    public class RemoveServer(UserConfigManager configurator, ServiceConfigurator serviceConfiguration, MmsService minecraftService) : IMessageParser {
 
         public Message ParseMessage(Message message) {
-            mineraftService.GetServerByIndex(message.ServerIndex).ServerStop(true).Wait();
+            minecraftService.GetServerByIndex(message.ServerIndex).ServerStop(true).Wait();
             configurator.RemoveServerConfigs(serviceConfiguration.GetServerInfoByIndex(message.ServerIndex), message.Flag).Wait();
-            mineraftService.RemoveServerInfoByIndex(message.ServerIndex);
+            minecraftService.RemoveServerInfoByIndex(message.ServerIndex);
             byte[] serializeToBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(serviceConfiguration, Formatting.Indented, SharedStringBase.GlobalJsonSerialierSettings));
             return new(serializeToBytes, 0, MessageTypes.Connect);
         }
