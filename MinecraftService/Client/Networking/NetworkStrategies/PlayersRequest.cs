@@ -17,7 +17,7 @@ namespace MinecraftService.Client.Networking.NetworkStrategies {
         public Task<bool> ProcessMessage(Message message) => Task.Run(() => {
             string data = Encoding.UTF8.GetString(message.Data);
             List<Player> fetchedPlayers = JsonConvert.DeserializeObject<List<Player>>(data, SharedStringBase.GlobalJsonSerialierSettings);
-            FormManager.MainWindow.RecievePlayerData(message.ServerIndex, fetchedPlayers);
+            FormManager.MainWindow.ReceivePlayerData(message.ServerIndex, fetchedPlayers);
             return true;
         });
     }

@@ -25,24 +25,30 @@ namespace MinecraftService.Client.Forms {
                 PlayerToAdd =
                     new Player(xuidTextBox.Text, usernameTextBox.Text, curTime, curTime, curTime, whitelistedChkBox.Checked,
                     _serverConfiguration.GetServerArch() == SharedStringBase.MinecraftServerArch.Java ?
-                    GetJavaPermLevel(permissionComboBox.SelectedItem.ToString()) :
+                    TranslatePermLevel(permissionComboBox.SelectedItem.ToString()) :
                     permissionComboBox.SelectedItem.ToString(),
                     ignoreLimitChkBox.Checked);
                 DialogResult = DialogResult.OK;
             }
         }
 
-        private string GetJavaPermLevel(string permLevel) {
-            if (permLevel == "visitor") {
-                return "2";
+        private string TranslatePermLevel(string permLevel) {
+            switch (permLevel) {
+                case "visitor":
+                    return "2";
+                case "member":
+                    return "3";
+                case "operator":
+                    return "4";
+                case "2":
+                    return "visitor";
+                case "3":
+                    return "member";
+                case "4":
+                    return "operator";
+                default:
+                    return "";
             }
-            if (permLevel == "member") {
-                return "3";
-            }
-            if (permLevel == "op") {
-                return "4";
-            }
-            return "1";
         }
     }
 }

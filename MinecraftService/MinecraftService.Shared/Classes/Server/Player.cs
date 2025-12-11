@@ -113,6 +113,7 @@ namespace MinecraftService.Shared.Classes.Server {
             return this;
         }
 
+
         public Player UpdatePlayerFromRegStrings(string[] regString) {
             if (regString == null || (PlayerID != null && regString[0] != PlayerID)) {
                 throw new ArgumentException("Input null or Player update attempted with incorrect xuid!");
@@ -136,9 +137,15 @@ namespace MinecraftService.Shared.Classes.Server {
 
         public bool IsPlayerWhitelisted() => Whitelisted;
 
+        public void IsPlayerWhitelisted(bool value) => Whitelisted = value;
+
+        public void PlayerIgnoresLimit(bool value) => IgnorePlayerLimits = value;
+
         public bool PlayerIgnoresLimit() => IgnorePlayerLimits;
 
         public string GetPermissionLevel() => PermissionLevel;
+
+        public void SetPermissionLevel(string permLevel) => PermissionLevel = permLevel;
 
         public override bool Equals(object obj) {
             return obj is Player player &&
