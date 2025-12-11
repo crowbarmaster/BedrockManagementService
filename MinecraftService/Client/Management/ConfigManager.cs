@@ -52,6 +52,9 @@ namespace MinecraftService.Client.Management {
                     if (entrySplit[0] == "DisplayTimestamps") {
                         DisplayTimestamps = entrySplit[1].ToLower().Equals(bool.TrueString.ToLower());
                     }
+                    if (entrySplit[0] == "DebugNetworkOutput") {
+                        DebugNetworkOutput = entrySplit[1].ToLower().Equals(bool.TrueString.ToLower());
+                    }
                 }
             }
         }
@@ -82,6 +85,7 @@ namespace MinecraftService.Client.Management {
             fileContent.Append($"NBTStudioPath={NBTStudioPath}\n");
             fileContent.Append($"EnableScrollbarLockDefault={DefaultScrollLock}\n");
             fileContent.Append($"DisplayTimestamps={DisplayTimestamps}\n");
+            fileContent.Append($"DebugNetworkOutput={DebugNetworkOutput}\n");
             File.WriteAllText(ConfigFile, fileContent.ToString());
         }
     }
