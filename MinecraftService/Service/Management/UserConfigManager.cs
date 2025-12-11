@@ -75,7 +75,7 @@ namespace MinecraftService.Service.Management
                     _serviceConfiguration.AddNewServerInfo(serverInfo);
                     SaveServerConfiguration(serverInfo);
                 } catch (Exception ex) {
-                    _logger.AppendLine($"Error loading server configuration file: ${fileInfo.Name}");
+                    _logger.AppendLine($"Error loading server configuration file: {fileInfo.Name}");
                     _logger.AppendLine($"Exception: {ex.Message}");
                     continue;
                 }
