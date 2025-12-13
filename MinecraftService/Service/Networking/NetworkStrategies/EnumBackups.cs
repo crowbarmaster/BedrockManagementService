@@ -9,9 +9,12 @@ namespace MinecraftService.Service.Networking.NetworkStrategies
     public class EnumBackups(UserConfigManager configurator) : IMessageParser {
 
         public Message ParseMessage(Message message) {
-            string jsonString = JsonConvert.SerializeObject(configurator.EnumerateBackupsForServer(message.ServerIndex).Result, Formatting.Indented);
-            byte[] serializeToBytes = Encoding.UTF8.GetBytes(jsonString);
-            return new(serializeToBytes, 0, MessageTypes.EnumBackups);
+            try {
+                string jsonString = JsonConvert.SerializeObject(configurator.EnumerateBackupsForServer(message.ServerIndex).Result, Formatting.Indented);
+                byte[] serializeToBytes = Encoding.UTF8.GetBytes(jsonString);
+                return new(serializeToBytes, 0, MessageTypes.EnumBackups);
+            } catch { }
+            return Message.Empty();
         }
     }
 }
