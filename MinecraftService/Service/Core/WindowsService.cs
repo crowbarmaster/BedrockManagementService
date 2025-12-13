@@ -71,6 +71,21 @@ namespace MinecraftService.Service.Core {
             if (_host != null) {
                 Task.Run(() => {
                     _exitCode = _host.Run();
+                    switch (_exitCode) {
+                        case TopshelfExitCode.ServiceAlreadyRunning:
+                        case TopshelfExitCode.Ok:
+                            _logger.AppendLine("Service will now exit");
+                            Task.Delay(1000).Wait();
+                            Environment.Exit(0);
+                            break;
+                        case TopshelfExitCode.AbnormalExit:
+                        case TopshelfExitCode.SudoRequired:
+                        case TopshelfExitCode.ServiceControlRequestFailed:
+                            _logger.AppendLine("Service exiting with error!");
+                            Task.Delay(1000).Wait();
+                            Environment.Exit((int)_exitCode);
+                            break;
+                    }
                 });
             }
         }
