@@ -1,18 +1,9 @@
-﻿
-using MinecraftService.Service.Core.Interfaces;
-using MinecraftService.Service.Networking.Interfaces;
-using MinecraftService.Service.Server;
-using MinecraftService.Service.Server.Interfaces;
+﻿using MinecraftService.Service.Networking.Interfaces;
 using MinecraftService.Shared.Classes.Server;
 using MinecraftService.Shared.Classes.Server.Updaters;
-using MinecraftService.Shared.Classes.Service;
 using MinecraftService.Shared.Classes.Service.Configuration;
 using MinecraftService.Shared.Classes.Service.Core;
-using MinecraftService.Shared.JsonModels.Minecraft;
 using MinecraftService.Shared.SerializeModels;
-using NCrontab;
-using Newtonsoft.Json.Linq;
-using System.Timers;
 using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 
 namespace MinecraftService.Service.Core
@@ -96,7 +87,9 @@ namespace MinecraftService.Service.Core
             List<Player> serviceActivePlayers = new();
             if (_loadedServers.Any()) { 
                 _loadedServers.ForEach(server => {
-                    serviceActivePlayers.AddRange(server.GetServerStatus().ActivePlayerList);
+                    if (server.GetServerStatus() != null && server.GetServerStatus().ActivePlayerList != null && server.GetServerStatus().ActivePlayerList.Any()) {
+                        serviceActivePlayers.AddRange(server.GetServerStatus().ActivePlayerList);
+                    }
                 });
             }
             return new ServiceStatusModel {
