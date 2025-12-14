@@ -11,10 +11,12 @@ namespace MinecraftService.Client.Forms {
     public partial class ProgressDialog : Form {
         private readonly IProgress<ProgressModel> _progress;
         private Task _onCompletion;
-        private System.Timers.Timer _closeTimer = new System.Timers.Timer(1500);
+        private int _closeTimeout = 1500;
+        private System.Timers.Timer _closeTimer;
 
         public ProgressDialog(Task callbackAction) {
             InitializeComponent();
+            _closeTimer = new System.Timers.Timer(_closeTimeout);
             _onCompletion = callbackAction;
             progressBar.Minimum = 0;
             progressBar.Maximum = 100;
@@ -34,7 +36,8 @@ namespace MinecraftService.Client.Forms {
             return _progress;
         }
 
-        public void EndProgress(Task closingActions) {
+        public void EndProgress(Task closingActions, int closeTimeout = 1500) {
+            _closeTimeout = closeTimeout;
             _closeTimer.Elapsed += (s, e) => {
                 if (closingActions != null && closingActions.Status == TaskStatus.Created) {
                     closingActions.Start();

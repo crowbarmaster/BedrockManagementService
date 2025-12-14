@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -25,6 +26,7 @@ namespace MinecraftService.Client.Networking {
         private int _heartbeatFailTimeout;
         private const int _heartbeatFailTimeoutLimit = 2;
         private const int _heartbeatFireInterval = 300;
+        private double _desiredChunkSize = 24000;
         private readonly MmsLogger _logger;
         private readonly Dictionary<MessageTypes, INetworkMessage> _messageLookupContainer;
         private readonly System.Timers.Timer _heartbeatTimer;
@@ -54,6 +56,8 @@ namespace MinecraftService.Client.Networking {
             _netCancelSource = new CancellationTokenSource();
             try {
                 OpenedTcpClient = new TcpClient(addr, port);
+                OpenedTcpClient.Client.ReceiveBufferSize = 64000;
+                OpenedTcpClient.Client.ReceiveTimeout = 60000;
                 _logger.AppendLine("Service link established.");
                 stream = OpenedTcpClient.GetStream();
                 EstablishedLink = true;
@@ -105,11 +109,11 @@ namespace MinecraftService.Client.Networking {
                     int byteCount = stream.Read(buffer, 0, 4);
                     int expectedLen = BitConverter.ToInt32(buffer, 0);
                     int originalLen = expectedLen;
-                    buffer = new byte[expectedLen];
-                    if (expectedLen > 102400000) {
+                    if (expectedLen > _desiredChunkSize) {
                         buffer = DownloadLargeFile(expectedLen);
                     } else {
-                        byteCount = stream.Read(buffer, 0, expectedLen);
+                        buffer = new byte[expectedLen];
+                        byteCount = OpenedTcpClient.Client.Receive(buffer);
                     }
                     incomingMsg = new Message(buffer);
                     if (incomingMsg == Message.Empty()) {
@@ -139,35 +143,57 @@ namespace MinecraftService.Client.Networking {
         private byte[] DownloadLargeFile(int expectedLen) {
             int originalLen = expectedLen;
             int byteCount;
-            byte[] buffer = [];
+            using MemoryStream byteStore = new MemoryStream();
             if (_progressDialog == null || _progressDialog.IsDisposed) {
                 _progressDialog = new(null);
             }
             FormManager.MainWindow.Invoke(_progressDialog.Show);
             _enableRead = false;
             _progressDialog.GetDialogProgress().Report(new("Downloading large file from service...", 0.0));
-            double chunkCount = Math.Round(expectedLen / 1024000.00, 0, MidpointRounding.ToPositiveInfinity);
+            double chunkCount = Math.Round(expectedLen / _desiredChunkSize, 0, MidpointRounding.ToPositiveInfinity);
             double currentProgress = 0.0;
             do {
-                int recvCount = expectedLen >= 1024000 ? 1024000 : expectedLen;
-                byteCount = stream.Read(buffer, originalLen - expectedLen, recvCount);
-                _progressDialog.GetDialogProgress().Report(new($"Downloading large file from service, {(originalLen - expectedLen) / 1024} bytes recieved.", currentProgress));
-                expectedLen -= recvCount;
+                try {
+                    byte[] chunkBytes = new byte[(int)_desiredChunkSize];
+                    byteCount = OpenedTcpClient.Client.Receive(chunkBytes, SocketFlags.Partial);
+                    if (byteCount != _desiredChunkSize || byteCount != expectedLen) {
+                        _logger.AppendLine($"Error fetching large byte count!");
+                        _enableRead = true;
+                        return [];
+                    }
+                    byteStore.Write(chunkBytes);
+                } catch (ArgumentOutOfRangeException aoore) {
+                    _logger.AppendLine($"Large file attempt, but stream did not contain such a length. Probably mis-read packet. Exception: {aoore.Message}");
+                    break;
+                }
+                _progressDialog?.GetDialogProgress().Report(new($"Downloading large file from service, {(originalLen - expectedLen) / 1024} bytes recieved.", currentProgress));
+                expectedLen -= byteCount;
             } while (expectedLen > 0);
             _enableRead = true;
             _progressDialog.EndProgress(new(() => {
                 FormManager.MainWindow.Invoke(_progressDialog.Close);
                 FormManager.MainWindow.Invoke(_progressDialog.Dispose);
                 _progressDialog = null;
-            }));
-            return buffer;
+            }), 100);
+            return byteStore.ToArray();
         }
 
         public bool SendData(Message message) {
+            int sentCount = 0;
+            int finalChunkSize = (int)_desiredChunkSize;
             byte[] sendBtytes = message.GetMessageBytes();
             if (EstablishedLink) {
                 try {
-                    stream.Write(sendBtytes, 0, sendBtytes.Length);
+                    if (sendBtytes.Length > _desiredChunkSize) {
+                        do {
+                            if (sentCount + _desiredChunkSize > sendBtytes.Length) {
+                                finalChunkSize = sendBtytes.Length;
+                            }
+                            OpenedTcpClient.Client.Send(sendBtytes, finalChunkSize, SocketFlags.Partial);
+                        } while (sentCount != sendBtytes.Length);
+                    } else {
+                        stream.Write(sendBtytes, 0, sendBtytes.Length);
+                    }
                     stream.Flush();
                     _heartbeatFailTimeout = 0;
                     return true;
