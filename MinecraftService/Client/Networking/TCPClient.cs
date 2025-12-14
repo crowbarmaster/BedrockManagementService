@@ -18,7 +18,7 @@ namespace MinecraftService.Client.Networking {
         public string ClientName;
         public NetworkStream stream;
         public bool EstablishedLink;
-        public bool EnableRead;
+        public bool _enableRead;
         public List<MinecraftPackContainer> ReceivedPacks;
         public Task ClientReceiver;
         private CancellationTokenSource? _netCancelSource;
@@ -57,7 +57,7 @@ namespace MinecraftService.Client.Networking {
                 _logger.AppendLine("Service link established.");
                 stream = OpenedTcpClient.GetStream();
                 EstablishedLink = true;
-                EnableRead = true;
+                _enableRead = true;
                 _heartbeatTimer.Start();
                 ReceiveEvent(null, null);
             } catch (Exception e) {
@@ -90,17 +90,18 @@ namespace MinecraftService.Client.Networking {
                     OpenedTcpClient = null;
                 }
                 EstablishedLink = false;
-                EnableRead = false;
+                _enableRead = false;
                 _logger.AppendLine("Successfully disconnected from service.");
                 return;
             }
-            if (!EnableRead) {
+            if (!_enableRead) {
                 return;
             }
             Message incomingMsg = new();
             try {
                 byte[] buffer = new byte[4];
-                while (OpenedTcpClient.Client.Available > 0) {
+                if (OpenedTcpClient.Client.Available > 0) {
+                    _enableRead = false;
                     int byteCount = stream.Read(buffer, 0, 4);
                     int expectedLen = BitConverter.ToInt32(buffer, 0);
                     int originalLen = expectedLen;
@@ -112,7 +113,7 @@ namespace MinecraftService.Client.Networking {
                     }
                     incomingMsg = new Message(buffer);
                     if (incomingMsg == Message.Empty()) {
-                        continue;
+                        return;
                     }
                     if (incomingMsg.Type == MessageTypes.Disconnect) {
                         FormManager.MainWindow.DisconnectResetClient();
@@ -127,9 +128,11 @@ namespace MinecraftService.Client.Networking {
                             }
                         }
                     }
+                    _enableRead = true;
                 }
             } catch (Exception e) {
                 _logger.AppendLine($"TCPClient error! ServerIndex: {incomingMsg.ServerIndex} MsgType: {Enum.GetName(incomingMsg.Type)} Stacktrace: {e.Message}\n{e.StackTrace}");
+                _enableRead = true;
             }
         }
 
@@ -141,7 +144,7 @@ namespace MinecraftService.Client.Networking {
                 _progressDialog = new(null);
             }
             FormManager.MainWindow.Invoke(_progressDialog.Show);
-            EnableRead = false;
+            _enableRead = false;
             _progressDialog.GetDialogProgress().Report(new("Downloading large file from service...", 0.0));
             double chunkCount = Math.Round(expectedLen / 1024000.00, 0, MidpointRounding.ToPositiveInfinity);
             double currentProgress = 0.0;
@@ -151,7 +154,7 @@ namespace MinecraftService.Client.Networking {
                 _progressDialog.GetDialogProgress().Report(new($"Downloading large file from service, {(originalLen - expectedLen) / 1024} bytes recieved.", currentProgress));
                 expectedLen -= recvCount;
             } while (expectedLen > 0);
-            EnableRead = true;
+            _enableRead = true;
             _progressDialog.EndProgress(new(() => {
                 FormManager.MainWindow.Invoke(_progressDialog.Close);
                 FormManager.MainWindow.Invoke(_progressDialog.Dispose);
