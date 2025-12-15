@@ -20,10 +20,14 @@ namespace MinecraftService.Shared.Classes.Networking {
         }
 
         public Message(byte[] data) {
+            string dataString = "";
             try {
-                this = JsonConvert.DeserializeObject<Message>(Encoding.UTF8.GetString(data));
+                dataString = Encoding.UTF8.GetString(data);
+                this = JsonConvert.DeserializeObject<Message>(dataString);
+            } catch (JsonReaderException jre) {
+                throw new Exception($"Json failure: line {jre.LineNumber}, pos {jre.LinePosition}. Message: {jre.Message}\r\nData: {dataString}");
             } catch (Exception ex) {
-                throw new Exception("Error creating message from byte array!");
+                throw new Exception($"Error creating message from byte array: {ex.Message}");
             }
         }
 
