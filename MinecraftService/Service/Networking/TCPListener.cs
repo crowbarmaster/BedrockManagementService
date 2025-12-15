@@ -19,6 +19,7 @@ namespace MinecraftService.Service.Networking {
         private readonly ServiceConfigurator _serviceConfiguration;
         private readonly MmsLogger _logger;
         private int _heartbeatFailTimeout;
+        private int _desiredChunkSize = 1024;
         private readonly int _heartbeatFailTimeoutLimit = 2;
         private Dictionary<MessageTypes, IMessageParser>? _messageLookup;
         private readonly IPAddress _ipAddress = IPAddress.Parse("0.0.0.0");
@@ -30,12 +31,13 @@ namespace MinecraftService.Service.Networking {
         private bool _canClientConnect = true;
         private bool _serviceStarted = false;
         private bool _clientActive = false;
+        private bool _blockWrite = false;
 
         public TCPListener(ServiceConfigurator serviceConfiguration, MmsLogger logger, ProcessInfo processInfo) {
             _logger = logger;
             _serviceConfiguration = serviceConfiguration;
             _cancelTokenSource = new CancellationTokenSource();
-            ReceiveTimer = new(300);
+            ReceiveTimer = new(100);
             TcpTimer = new(500);
             TcpTimer.Elapsed += TcpTimer_Elapsed;
             ReceiveTimer.Elapsed += ReceiveTimer_Elapsed;
@@ -50,6 +52,7 @@ namespace MinecraftService.Service.Networking {
             try {
                 if (_canClientConnect && _inListener != null && _inListener.Pending() && _serviceStarted) {
                     _logger.AppendLine("MMS Client has connected to service.");
+                    _resettingListener = false;
                     _canClientConnect = false;
                     _lastMessageReceived = DateTime.Now;
                     _cancelTokenSource = new CancellationTokenSource();
@@ -83,8 +86,7 @@ namespace MinecraftService.Service.Networking {
             }
             try {
                 byte[] buffer = new byte[4];
-                if (_client?.Client != null && _client.Client.Available != 0 && !_cancelTokenSource.IsCancellationRequested) // Receive data from client.
-                {
+                if (_client?.Client != null && _client.Client.Available != 0 && !_cancelTokenSource.IsCancellationRequested) {
                     byteCount = _stream.Read(buffer, 0, 4);
                     int expectedLen = BitConverter.ToInt32(buffer, 0);
                     buffer = new byte[expectedLen];
@@ -133,29 +135,30 @@ namespace MinecraftService.Service.Networking {
         }
 
         public void Initialize() {
-            _inListener?.Stop();
-            ReceiveTimer.Stop();
-            TcpTimer.Stop();
-            _logger?.AppendLine("Resetting listener!");
-            _stream?.Close();
-            _stream?.Dispose();
-            _client?.Close();
-            _cancelTokenSource?.Cancel();
-            _clientActive = false;
-            _cancelTokenSource = new CancellationTokenSource();
-            _inListener = new TcpListener(_ipAddress, _serviceConfiguration.GetProp(ServicePropertyKeys.ClientPort).GetIntValue());
-            try {
+            if (!_resettingListener) { 
+                _inListener?.Stop();
+                ReceiveTimer.Stop();
+                TcpTimer.Stop();
+                _logger?.AppendLine("Resetting listener!");
+                _stream?.Close();
+                _stream?.Dispose();
+                _client?.Close();
+                _cancelTokenSource?.Cancel();
+                _clientActive = false;
+                _cancelTokenSource = new CancellationTokenSource();
+                _inListener = new TcpListener(_ipAddress, _serviceConfiguration.GetProp(ServicePropertyKeys.ClientPort).GetIntValue());
+                try {
 
-                while (_messageLookup == null) { Task.Delay(100).Wait(); }
-                _inListener.Start();
-                TcpTimer.Start();
-                ReceiveTimer.Start();
-            } catch (SocketException e) {
-                _logger.AppendLine($"Error! {e.Message}");
-                Thread.Sleep(2000);
-                Environment.Exit(1);
+                    while (_messageLookup == null) { Task.Delay(100).Wait(); }
+                    _inListener.Start();
+                    TcpTimer.Start();
+                    ReceiveTimer.Start();
+                } catch (SocketException e) {
+                    _logger.AppendLine($"Error! {e.Message}");
+                    Thread.Sleep(2000);
+                    Environment.Exit(1);
+                }
             }
-            _resettingListener = false;
             _canClientConnect = true;
         }
 
@@ -175,7 +178,6 @@ namespace MinecraftService.Service.Networking {
 
         private void SendData(Message message) {
             byte[] sendBytes = message.GetMessageBytes();
-
             if (_client != null && _clientActive && !_cancelTokenSource.IsCancellationRequested) {
                 try {
                     _stream.Write(sendBytes, 0, sendBytes.Length);
@@ -185,6 +187,7 @@ namespace MinecraftService.Service.Networking {
                     if (_cancelTokenSource.IsCancellationRequested) {
                         return;
                     }
+                    _blockWrite = false;
                     _logger.AppendLine("Error writing to network stream!");
                     _heartbeatFailTimeout++;
                     if (_heartbeatFailTimeout >= _heartbeatFailTimeoutLimit) {

@@ -111,6 +111,7 @@ namespace MinecraftService.Client.Networking {
                         ms.Write(DownloadLargeFile(expectedLen));
                     } else {
                         do {
+                            buffer = new byte[expectedLen];
                             byteCount = stream.Read(buffer, 0, expectedLen);
                             ms.Write(buffer, 0, byteCount);
                             expectedLen -= byteCount;
