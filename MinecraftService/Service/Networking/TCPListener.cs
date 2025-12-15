@@ -5,6 +5,7 @@ using MinecraftService.Shared.Classes.Service;
 using MinecraftService.Shared.Classes.Service.Configuration;
 using MinecraftService.Shared.Classes.Service.Core;
 using Newtonsoft.Json;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -87,7 +88,13 @@ namespace MinecraftService.Service.Networking {
                     byteCount = _stream.Read(buffer, 0, 4);
                     int expectedLen = BitConverter.ToInt32(buffer, 0);
                     buffer = new byte[expectedLen];
-                    byteCount = _stream.Read(buffer, 0, expectedLen);
+                    using MemoryStream ms = new MemoryStream();
+                    do {
+                        byteCount = _stream.Read(buffer, 0, expectedLen);
+                        ms.Write(buffer, 0, byteCount);
+                        expectedLen -= byteCount;
+                    } while (expectedLen > 0);
+                    buffer = ms.ToArray();
                     try {
                         incomingMsg = new Message(buffer);
                         _lastMessageReceived = DateTime.Now;

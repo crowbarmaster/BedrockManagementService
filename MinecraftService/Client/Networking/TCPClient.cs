@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -105,11 +106,17 @@ namespace MinecraftService.Client.Networking {
                     int expectedLen = BitConverter.ToInt32(buffer, 0);
                     int originalLen = expectedLen;
                     buffer = new byte[expectedLen];
-                    if (expectedLen > 102400000) {
-                        buffer = DownloadLargeFile(expectedLen);
+                    using MemoryStream ms = new MemoryStream();
+                    if (expectedLen > 10024000) {
+                        ms.Write(DownloadLargeFile(expectedLen));
                     } else {
-                        byteCount = stream.Read(buffer, 0, expectedLen);
+                        do {
+                            byteCount = stream.Read(buffer, 0, expectedLen);
+                            ms.Write(buffer, 0, byteCount);
+                            expectedLen -= byteCount;
+                        } while (expectedLen > 0);
                     }
+                    buffer = ms.ToArray();
                     incomingMsg = new Message(buffer);
                     if (incomingMsg == Message.Empty()) {
                         continue;
@@ -136,7 +143,7 @@ namespace MinecraftService.Client.Networking {
         private byte[] DownloadLargeFile(int expectedLen) {
             int originalLen = expectedLen;
             int byteCount;
-            byte[] buffer = [];
+            byte[] buffer = new byte[expectedLen];
             if (_progressDialog == null || _progressDialog.IsDisposed) {
                 _progressDialog = new(null);
             }
@@ -145,11 +152,12 @@ namespace MinecraftService.Client.Networking {
             _progressDialog.GetDialogProgress().Report(new("Downloading large file from service...", 0.0));
             double chunkCount = Math.Round(expectedLen / 1024000.00, 0, MidpointRounding.ToPositiveInfinity);
             double currentProgress = 0.0;
+            using MemoryStream ms = new MemoryStream();
             do {
-                int recvCount = expectedLen >= 1024000 ? 1024000 : expectedLen;
-                byteCount = stream.Read(buffer, originalLen - expectedLen, recvCount);
+                byteCount = stream.Read(buffer, 0, expectedLen);
                 _progressDialog.GetDialogProgress().Report(new($"Downloading large file from service, {(originalLen - expectedLen) / 1024} bytes recieved.", currentProgress));
-                expectedLen -= recvCount;
+                ms.Write(buffer, 0, byteCount);
+                expectedLen -= byteCount;
             } while (expectedLen > 0);
             EnableRead = true;
             _progressDialog.EndProgress(new(() => {
@@ -157,7 +165,7 @@ namespace MinecraftService.Client.Networking {
                 FormManager.MainWindow.Invoke(_progressDialog.Dispose);
                 _progressDialog = null;
             }));
-            return buffer;
+            return ms.ToArray();
         }
 
         public bool SendData(Message message) {
