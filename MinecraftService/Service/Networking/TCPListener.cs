@@ -19,7 +19,6 @@ namespace MinecraftService.Service.Networking {
         private readonly ServiceConfigurator _serviceConfiguration;
         private readonly MmsLogger _logger;
         private int _heartbeatFailTimeout;
-        private int _desiredChunkSize = 1024;
         private readonly int _heartbeatFailTimeoutLimit = 2;
         private Dictionary<MessageTypes, IMessageParser>? _messageLookup;
         private readonly IPAddress _ipAddress = IPAddress.Parse("0.0.0.0");
@@ -31,7 +30,6 @@ namespace MinecraftService.Service.Networking {
         private bool _canClientConnect = true;
         private bool _serviceStarted = false;
         private bool _clientActive = false;
-        private bool _blockWrite = false;
 
         public TCPListener(ServiceConfigurator serviceConfiguration, MmsLogger logger, ProcessInfo processInfo) {
             _logger = logger;
@@ -187,7 +185,6 @@ namespace MinecraftService.Service.Networking {
                     if (_cancelTokenSource.IsCancellationRequested) {
                         return;
                     }
-                    _blockWrite = false;
                     _logger.AppendLine("Error writing to network stream!");
                     _heartbeatFailTimeout++;
                     if (_heartbeatFailTimeout >= _heartbeatFailTimeoutLimit) {
