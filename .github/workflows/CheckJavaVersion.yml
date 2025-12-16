@@ -46,12 +46,9 @@ jobs:
              $javaManifestReleasecontentJson = $javaManifestReleasecontent | ConvertFrom-Json;
              $betaBool = $javaManifestReleasecontentJson.type -eq 'snapshot';
              $betaStatus = $betaBool ? 'true' : 'false';
-             $javaVer = $javaManifestReleasecontentJson.minimumLauncherVersion;
+             $javaVer = $javaManifestReleasecontentJson.javaVersion.majorVersion;
              $jdsVer = $javaManifestReleasecontentJson.id;
              $downloadUrl = $javaManifestReleasecontentJson.downloads.server.url;
-             if($javaManifestJson.latest.release -eq "1.21.11"){ # -- Hack -- Version 1.21.11 manifest reports minimum Java 21, but requests Java 25.
-                 $javaVer = 25;
-             }
              echo "javaVer=$javaVer" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
              echo "jdsVer=$jdsVer" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
              echo "isBeta=$betaStatus" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append;
