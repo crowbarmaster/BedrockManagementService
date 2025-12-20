@@ -40,7 +40,7 @@ namespace MinecraftService.Shared.Classes.Server.Updaters
         {
             try
             {
-                FileUtilities.CreateInexistantDirectory(_workingDirectory);
+                FileUtilities.CreateInexistentDirectory(_workingDirectory);
                 string zipPath = GetServiceFilePath(MmsFileNameKeys.BdsUpdatePackage_Ver, _packageVersion);
                 if (!File.Exists(zipPath))
                 {

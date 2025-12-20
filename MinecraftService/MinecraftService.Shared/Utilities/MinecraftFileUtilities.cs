@@ -120,7 +120,7 @@ namespace MinecraftService.Shared.Utilities
         }
 
         public static List<string[]> FilterLinesFromPropFile(string filePath, char delim = '=') {
-            FileUtilities.CreateInexistantFile(filePath);
+            FileUtilities.CreateInexistentFile(filePath);
             return File.ReadAllLines(filePath)
                     .Where(x => !x.StartsWith("#"))
                     .Where(x => !string.IsNullOrWhiteSpace(x))
@@ -141,7 +141,6 @@ namespace MinecraftService.Shared.Utilities
             });
             return output;
         }
-
 
         public static void CleanBedrockDirectory(IServerConfiguration server) {
             DirectoryInfo bedrockDir = new DirectoryInfo(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString());

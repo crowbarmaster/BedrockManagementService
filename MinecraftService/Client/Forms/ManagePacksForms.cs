@@ -110,7 +110,7 @@ namespace MinecraftService.Client.Forms {
         }
 
         private void SendPacks(object[] packList) {
-            FileUtilities.CreateInexistantDirectory($@"{_packExtractDir.FullName}\BuildZip");
+            FileUtilities.CreateInexistentDirectory($@"{_packExtractDir.FullName}\BuildZip");
             foreach (MinecraftPackContainer container in packList) {
                 try {
                     DirectoryInfo directoryInfo = new(container.PackContentLocation);

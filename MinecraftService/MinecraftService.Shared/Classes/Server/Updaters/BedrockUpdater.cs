@@ -154,17 +154,18 @@ namespace MinecraftService.Shared.Classes.Server.Updaters {
                     return;
                 }
                 string exeName = serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName).StringValue;
+                string serverPath = serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath).StringValue;
                 ProcessUtilities.KillProcessList(Process.GetProcessesByName(exeName.Substring(0, exeName.Length - 4)));
                 string version = versionOverride == "" ? serverConfiguration.GetServerVersion() : versionOverride;
                 FileInfo originalExeInfo = new(GetServerFilePath(ServerFileNameKeys.VanillaBedrock, serverConfiguration));
-                FileInfo mmsExeInfo = new($@"{serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath)}\{serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName)}");
+                FileInfo mmsExeInfo = new($@"{serverPath}\{serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerExeName)}");
                 try {
                     if (!mmsExeInfo.Directory.Exists) {
                         mmsExeInfo.Directory.Create();
                     }
                     MinecraftFileUtilities.CleanBedrockDirectory(serverConfiguration);
-                    if (!Directory.Exists(serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString()))
-                        Directory.CreateDirectory(serverConfiguration.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString());
+                    if (!Directory.Exists(serverPath))
+                        Directory.CreateDirectory(serverPath);
                     string filePath = GetServiceFilePath(MmsFileNameKeys.BdsUpdatePackage_Ver, version);
                     if (!File.Exists(filePath)) {
                         if (!FetchBuild(version).Result) {

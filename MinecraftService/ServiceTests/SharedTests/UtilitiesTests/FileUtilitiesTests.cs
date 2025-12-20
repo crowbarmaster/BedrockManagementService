@@ -14,7 +14,7 @@ namespace MMS_Tests.SharedTests.UtilitiesTests {
             if (Directory.Exists(@".\TestDir")) {
                 Directory.Delete(_testDir, true);
             }
-            FileUtilities.CreateInexistantDirectory(_testDir);
+            FileUtilities.CreateInexistentDirectory(_testDir);
             Assert.True(Directory.Exists(_testDir));
         }
 
@@ -23,21 +23,21 @@ namespace MMS_Tests.SharedTests.UtilitiesTests {
             if (File.Exists(_testFile)) {
                 File.Delete(_testFile);
             }
-            FileUtilities.CreateInexistantFile(_testFile);
+            FileUtilities.CreateInexistentFile(_testFile);
             Assert.True(File.Exists(_testFile));
         }
 
         [Fact]
         public void CreateInexistantDirectory_Does_Not_Modify_Existing() {
             Can_Create_Inexistant_File();
-            FileUtilities.CreateInexistantDirectory(_testDir);
+            FileUtilities.CreateInexistentDirectory(_testDir);
             Assert.True(File.Exists(_testFile));
         }
 
         [Fact]
         public void Can_Copy_Folder_Tree() {
-            FileUtilities.CreateInexistantDirectory(_testCopyDir);
-            FileUtilities.CreateInexistantFile(_testCopyFile);
+            FileUtilities.CreateInexistentDirectory(_testCopyDir);
+            FileUtilities.CreateInexistentFile(_testCopyFile);
             FileUtilities.CopyFolderTree(new(_testCopyDir), new(@".\CopyTestDir"));
             Assert.True(File.Exists(@$".\CopyTestDir{_testCopyFile.Substring(1)}"));
         }

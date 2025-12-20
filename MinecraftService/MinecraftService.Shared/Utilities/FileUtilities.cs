@@ -20,7 +20,7 @@ namespace MinecraftService.Shared.Utilities
             return rndNumber.ToString();
         }
 
-        public static void CreateInexistantFile(string filePath) {
+        public static void CreateInexistentFile(string filePath) {
             FileInfo fileInfo = new FileInfo(filePath);
             if (!Directory.Exists(fileInfo.Directory.FullName)) {
                 fileInfo.Directory.Create();
@@ -30,7 +30,7 @@ namespace MinecraftService.Shared.Utilities
             }
         }
 
-        public static void CreateInexistantDirectory(string DirectoryPath) {
+        public static void CreateInexistentDirectory(string DirectoryPath) {
             try {
                 Directory.CreateDirectory(DirectoryPath);
             } catch {
@@ -42,7 +42,7 @@ namespace MinecraftService.Shared.Utilities
             source.EnumerateFiles("*", SearchOption.AllDirectories)
                 .ToList().ForEach(x => {
                     FileInfo newFile = new(x.FullName.Replace(source.FullName, target.FullName));
-                    CreateInexistantDirectory(newFile.DirectoryName);
+                    CreateInexistentDirectory(newFile.DirectoryName);
                     x.CopyTo(newFile.FullName, true);
                 });
         }
@@ -110,21 +110,8 @@ namespace MinecraftService.Shared.Utilities
 
         public static void DeleteFilesFromDirectory(string source, bool removeSourceFolder, IProgress<ProgressModel> progress) => DeleteFilesFromDirectory(new DirectoryInfo(source), removeSourceFolder, progress);
 
-        public static void DeleteFilelist(string[] fileList, string serverPath) {
-            foreach (string file in fileList)
-                try {
-                    File.Delete($@"{serverPath}\{file}");
-                } catch { }
-            List<string> exesInPath = Directory.EnumerateFiles(serverPath, "*.exe", SearchOption.AllDirectories).ToList();
-            foreach (string exe in exesInPath)
-                File.Delete(exe);
-            foreach (string dir in Directory.GetDirectories(serverPath))
-                if (Directory.EnumerateFiles(dir, "*", SearchOption.AllDirectories).Count() == 0)
-                    Directory.Delete(dir, true);
-        }
-
         public static List<string> ReadLines(string path) {
-            CreateInexistantFile(path);
+            CreateInexistentFile(path);
             return File.ReadLines(path).ToList();
         }
     }

@@ -72,7 +72,7 @@ namespace MinecraftService.Shared.Utilities
                 if (string.IsNullOrEmpty(targetDirectory)) {
                     return;
                 }
-                FileUtilities.CreateInexistantFile(targetZipPath);
+                FileUtilities.CreateInexistentFile(targetZipPath);
                 using FileStream zipStream = File.Open(targetZipPath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
                 ZipArchive zipArchive = new(zipStream, ZipArchiveMode.Create);
                 DirectoryInfo dirInfo = new DirectoryInfo(targetDirectory);

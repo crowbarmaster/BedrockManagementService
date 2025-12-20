@@ -17,7 +17,7 @@ namespace MinecraftService.Shared.JsonModels.Minecraft {
         public KnownPacksJsonModel(MinecraftPackContainer container) {
             file_system = "RawPath";
             from_disk = true;
-            path = $@"development_{container.GetFixedManifestType()}_packs/{container.FolderName}";
+            path = $@"{container.GetFixedManifestType()}_packs/{container.FolderName}";
             uuid = container.JsonManifest.header.uuid;
             version = string.Join(".", container.JsonManifest.header.version);
         }
