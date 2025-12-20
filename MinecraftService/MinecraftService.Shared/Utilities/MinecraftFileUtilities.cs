@@ -146,8 +146,8 @@ namespace MinecraftService.Shared.Utilities
         public static void CleanBedrockDirectory(IServerConfiguration server) {
             DirectoryInfo bedrockDir = new DirectoryInfo(server.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString());
             Progress<ProgressModel> nullProgress = new();
-            FileUtilities.DeleteFilesFromDirectory($@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\worlds\{server.GetProp(MmsDependServerPropKeys.LevelName)}\resource_packs", true, nullProgress);
-            FileUtilities.DeleteFilesFromDirectory($@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\worlds\{server.GetProp(MmsDependServerPropKeys.LevelName)}\behavior_packs", true, nullProgress);
+            FileUtilities.DeleteFilesFromDirectory($@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\resource_packs", true, nullProgress);
+            FileUtilities.DeleteFilesFromDirectory($@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\behavior_packs", true, nullProgress);
             foreach (FileInfo file in bedrockDir.EnumerateFiles()) {
                 if (file.Extension.Equals(".exe") || file.Extension.Equals(".dll")) {
                     File.Delete(file.FullName);
