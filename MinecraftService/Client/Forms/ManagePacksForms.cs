@@ -74,7 +74,7 @@ namespace MinecraftService.Client.Forms {
                     Type = MessageTypes.RemovePack
                 });
             }
-            DialogResult = DialogResult.OK;
+            Close();
         }
 
         private void sendPacksBtn_Click(object sender, EventArgs e) {
@@ -121,13 +121,18 @@ namespace MinecraftService.Client.Forms {
                     _logger.AppendLine($"Error adding {container.FolderName} to pack zip.\r\nError message: {ex.Message}");
                 }
             }
-            ZipFile.CreateFromDirectory($@"{_packExtractDir.FullName}\BuildZip", $@"{_packExtractDir.FullName}\SendZip.zip");
+            try {
+                ZipFile.CreateFromDirectory($@"{_packExtractDir.FullName}\BuildZip", $@"{_packExtractDir.FullName}\SendZip.zip");
+            } catch (Exception e) {
+                _logger.AppendLine($"SendPacks: Error creating zip file: {e.Message}");
+                return;
+            }
             FormManager.TCPClient.SendData(new() {
                 Data = File.ReadAllBytes($@"{_packExtractDir.FullName}\SendZip.zip"),
                 ServerIndex = _serverIndex,
                 Type = MessageTypes.PackFile
             });
-            DialogResult = DialogResult.OK;
+            Close();
         }
 
         private void checkAllServerButton_Click(object sender, EventArgs e) {
