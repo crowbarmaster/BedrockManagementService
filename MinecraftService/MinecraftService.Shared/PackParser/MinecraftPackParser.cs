@@ -151,7 +151,7 @@ namespace MinecraftService.Shared.PackParser
                 }
                 if(FoundPacks.Any()) {
                     foreach (MinecraftPackContainer pack in FoundPacks) {
-                        if (pack.JsonManifest.dependencies.Any()) {
+                        if (pack.JsonManifest.dependencies != null && pack.JsonManifest.dependencies.Any()) {
                             foreach (PackManifestJsonModel.Dependency dependency in pack.JsonManifest.dependencies) {
                                 var foundDepend = FoundPacks.Where(x => x.JsonManifest.header.uuid == dependency.uuid).ToList();
                                 if (!foundDepend.Any()) {
