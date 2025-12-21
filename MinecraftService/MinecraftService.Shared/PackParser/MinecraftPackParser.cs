@@ -30,7 +30,7 @@ namespace MinecraftService.Shared.PackParser
         }
 
         public Task ProcessServerData(byte[] fileContents, Action onCompletion) => Task.Run(() => {
-            using (MemoryStream fileStream = new(fileContents, 5, fileContents.Length - 5)) {
+            using (MemoryStream fileStream = new(fileContents)) {
                 ZipUtilities.ExtractToDirectory(fileStream, PackExtractDirectory, _progress).Wait();
             }
             ParseDirectory(PackExtractDirectory, 0);
