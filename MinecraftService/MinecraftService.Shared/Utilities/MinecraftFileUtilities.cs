@@ -57,27 +57,6 @@ namespace MinecraftService.Shared.Utilities
             });
         }
 
-        public static bool UpdateKnownPackFile(string filePath, MinecraftPackContainer contentToAdd) {
-            KnownPacksFileModel fileModel = new(filePath);
-            if (fileModel.Contents.Where(x => x.uuid == contentToAdd.JsonManifest.header.uuid).Count() > 0) {
-                return false;
-            }
-            fileModel.Contents.Add(new KnownPacksJsonModel(contentToAdd));
-            fileModel.SaveToFile();
-            return true;
-        }
-
-        public static bool RemoveEntryFromKnownPacks(string filePath, MinecraftPackContainer contentToRemove) {
-            KnownPacksFileModel fileModel = new(filePath);
-            KnownPacksJsonModel modelToRemove = fileModel.Contents.Where(x => x.uuid == contentToRemove.JsonManifest.header.uuid).FirstOrDefault();
-            if (modelToRemove == null) {
-                return false;
-            }
-            fileModel.Contents.Remove(modelToRemove);
-            fileModel.SaveToFile();
-            return true;
-        }
-
         public static void WriteServerJsonFiles(IServerConfiguration server) {
             string permFilePath = $@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\permissions.json";
             string whitelistFilePath = $@"{server.GetSettingsProp(ServerPropertyKeys.ServerPath)}\whitelist.json";
