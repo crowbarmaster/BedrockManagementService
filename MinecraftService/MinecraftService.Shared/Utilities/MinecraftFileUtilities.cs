@@ -14,6 +14,34 @@ using static MinecraftService.Shared.Classes.Service.Core.SharedStringBase;
 namespace MinecraftService.Shared.Utilities
 {
     public class MinecraftFileUtilities {
+        public static void RemovePackFromServer(IServerConfiguration configuration, MinecraftPackContainer pack) {
+            string serverPath = configuration.GetSettingsProp(ServerPropertyKeys.ServerPath).ToString();
+            string levelname = configuration.GetProp(MmsDependServerPropKeys.LevelName).ToString();
+            string jsonPackPath = null;
+            string jsonWorldPackEnablerPath = null;
+            if (pack.ManifestType == "WorldPack") {
+                Directory.Delete($@"{serverPath}\worlds\{pack.FolderName}", true);
+            }
+            if (pack.ManifestType == "data") {
+                jsonPackPath = $@"{GetServerDirectory(ServerDirectoryKeys.BehaviorPacksDir_LevelName, serverPath, levelname)}\{pack.FolderName}";
+                jsonWorldPackEnablerPath = GetServerFilePath(ServerFileNameKeys.WorldBehaviorPacks, serverPath, levelname);
+                Directory.Delete(jsonPackPath, true);
+            }
+            if (pack.ManifestType == "resources") {
+                jsonPackPath = $@"{GetServerDirectory(ServerDirectoryKeys.ResourcePacksDir_LevelName, serverPath, levelname)}\{pack.FolderName}";
+                jsonWorldPackEnablerPath = GetServerFilePath(ServerFileNameKeys.WorldResourcePacks, serverPath, levelname);
+                Directory.Delete(jsonPackPath, true);
+            }
+            if (jsonWorldPackEnablerPath != null) {
+                WorldPackFileModel worldPackFile = new(jsonWorldPackEnablerPath);
+                List<WorldPackEntryJsonModel> worldPacks = worldPackFile.Contents;
+                WorldPackEntryJsonModel foundEntry = worldPacks.FirstOrDefault(x => x.pack_id.Equals(pack.JsonManifest.header.uuid));
+                if (foundEntry != null) {
+                    worldPacks.Remove(foundEntry);
+                    worldPackFile.SaveFile();
+                }
+            }
+        }
         public static bool UpdateWorldPackFile(string filePath, PackManifestJsonModel manifest) {
             WorldPackFileModel worldPackFile = new(filePath);
             var foundpack = worldPackFile.Contents.Where(x => x.pack_id == manifest.header.uuid).ToList();
