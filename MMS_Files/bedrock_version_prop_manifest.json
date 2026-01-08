@@ -19743,5 +19743,172 @@
         "Value": "disabled"
       }
     ]
+  },
+  {
+    "version": "1.21.132.1",
+    "winurl": "https://www.minecraft.net/bedrockdedicatedserver/bin-win/bedrock-server-1.21.132.1.zip",
+    "linurl": "https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-1.21.132.1.zip",
+    "proplist": [
+      {
+        "Key": "server-name",
+        "Value": "Dedicated Server"
+      },
+      {
+        "Key": "gamemode",
+        "Value": "survival"
+      },
+      {
+        "Key": "force-gamemode",
+        "Value": "false"
+      },
+      {
+        "Key": "difficulty",
+        "Value": "easy"
+      },
+      {
+        "Key": "allow-cheats",
+        "Value": "false"
+      },
+      {
+        "Key": "max-players",
+        "Value": "10"
+      },
+      {
+        "Key": "online-mode",
+        "Value": "true"
+      },
+      {
+        "Key": "allow-list",
+        "Value": "false"
+      },
+      {
+        "Key": "server-port",
+        "Value": "19132"
+      },
+      {
+        "Key": "server-portv6",
+        "Value": "19133"
+      },
+      {
+        "Key": "enable-lan-visibility",
+        "Value": "true"
+      },
+      {
+        "Key": "view-distance",
+        "Value": "32"
+      },
+      {
+        "Key": "tick-distance",
+        "Value": "4"
+      },
+      {
+        "Key": "player-idle-timeout",
+        "Value": "30"
+      },
+      {
+        "Key": "max-threads",
+        "Value": "8"
+      },
+      {
+        "Key": "level-name",
+        "Value": "Bedrock level"
+      },
+      {
+        "Key": "level-seed",
+        "Value": ""
+      },
+      {
+        "Key": "default-player-permission-level",
+        "Value": "member"
+      },
+      {
+        "Key": "texturepack-required",
+        "Value": "false"
+      },
+      {
+        "Key": "content-log-file-enabled",
+        "Value": "false"
+      },
+      {
+        "Key": "content-log-console-output-enabled",
+        "Value": "false"
+      },
+      {
+        "Key": "content-log-level",
+        "Value": "info"
+      },
+      {
+        "Key": "compression-threshold",
+        "Value": "1"
+      },
+      {
+        "Key": "compression-algorithm",
+        "Value": "zlib"
+      },
+      {
+        "Key": "server-authoritative-movement-strict",
+        "Value": "false"
+      },
+      {
+        "Key": "server-authoritative-dismount-strict",
+        "Value": "false"
+      },
+      {
+        "Key": "server-authoritative-entity-interactions-strict",
+        "Value": "false"
+      },
+      {
+        "Key": "player-position-acceptance-threshold",
+        "Value": "0.5"
+      },
+      {
+        "Key": "player-movement-action-direction-threshold",
+        "Value": "0.85"
+      },
+      {
+        "Key": "server-authoritative-block-breaking-pick-range-scalar",
+        "Value": "1.5"
+      },
+      {
+        "Key": "chat-restriction",
+        "Value": "None"
+      },
+      {
+        "Key": "disable-player-interaction",
+        "Value": "false"
+      },
+      {
+        "Key": "client-side-chunk-generation-enabled",
+        "Value": "true"
+      },
+      {
+        "Key": "block-network-ids-are-hashes",
+        "Value": "true"
+      },
+      {
+        "Key": "disable-persona",
+        "Value": "false"
+      },
+      {
+        "Key": "disable-custom-skins",
+        "Value": "false"
+      },
+      {
+        "Key": "server-build-radius-ratio",
+        "Value": "Disabled"
+      },
+      {
+        "Key": "allow-outbound-script-debugging",
+        "Value": "false"
+      },
+      {
+        "Key": "allow-inbound-script-debugging",
+        "Value": "false"
+      },
+      {
+        "Key": "script-debugger-auto-attach",
+        "Value": "disabled"
+      }
+    ]
   }
 ]
